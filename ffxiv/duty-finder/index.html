@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>임무 초성 사전 | 파판14 도구함</title>
+  <meta name="description" content="파이널판타지14 한국 서버 던전·토벌전·레이드 이름을 초성으로 찾아보세요. 공식 가이드의 정식 이름과 레벨을 확인할 수 있습니다." />
+  <meta name="theme-color" content="#0b1220" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:title" content="임무 초성 사전 | 파판14 도구함" />
+  <meta property="og:description" content="이 초성이 무슨 던전이지? 던전·토벌전·레이드의 정식 이름을 찾아보세요." />
+  <meta property="og:url" content="https://teo-park.github.io/ffxiv/duty-finder/" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="canonical" href="https://teo-park.github.io/ffxiv/duty-finder/" />
+  <link rel="icon" href="../favicon.svg?v=20260906-night" type="image/svg+xml" />
+  <link rel="stylesheet" href="../theme.css?v=20260906-tools" />
+  <link rel="stylesheet" href="styles.css?v=20260906-all-round" />
+  <script src="data.js?v=20260906-duty" defer></script>
+  <script src="search.js?v=20260906-duty" defer></script>
+  <script src="app.js?v=20260906-duty" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#dutySearch">임무 검색으로 바로가기</a>
+  <header class="site-header">
+    <a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg?v=20260906-night" alt="" />파판14 도구함</a>
+    <nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../msq-tracker/">메인퀘</a><a href="../pvp-series-calculator/">시리즈 작전표</a><a href="../duty-finder/" aria-current="page">임무 초성 사전</a></nav>
+    <span class="header-note">FFXIV · KR</span>
+  </header>
+  <aside class="service-notice" aria-label="무료 운영 안내"><strong>모든 도구 무료</strong><p>광고·후원·유료 기능 없이 운영하는 비영리 팬 도구입니다.</p></aside>
+  <main>
+    <div class="intro"><p class="eyebrow">DUTY FINDER / INITIAL SEARCH</p><h1>임무 초성 사전</h1><p>도와달라는 그 초성, 어떤 임무인지 찾아보세요.</p></div>
+    <section class="search-panel" aria-labelledby="searchTitle">
+      <h2 id="searchTitle">초성으로 임무 찾기</h2>
+      <div class="search-controls">
+        <div><label for="dutySearch">초성 또는 임무 이름</label><div class="search-box"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="dutySearch" type="search" autocomplete="off" spellcheck="false" placeholder="예: ㅅㅅㅌㅅ, 극ㅇㅍㄹㅌ" aria-describedby="searchHelp" disabled /><button id="clearSearch" type="button" aria-label="검색어 지우기" hidden>×</button></div></div>
+        <div><label for="categoryFilter">콘텐츠 종류</label><select id="categoryFilter" disabled><option value="">모든 종류</option></select></div>
+      </div>
+      <p id="searchHelp" class="help">이름 일부나 초성으로 검색해요. 한글과 초성을 섞어 써도 찾을 수 있어요.</p>
+      <div class="examples" aria-label="검색 예시"><span>이렇게 찾아보세요</span><button type="button" data-example="ㅅㅅㅌㅅ" disabled>ㅅㅅㅌㅅ</button><button type="button" data-example="ㅇㅍㄹㅌ" disabled>ㅇㅍㄹㅌ</button><button type="button" data-example="ㅂㅎㅁㅌ" disabled>ㅂㅎㅁㅌ</button></div>
+    </section>
+    <section class="results-panel" aria-labelledby="resultsTitle">
+      <div class="results-heading"><h2 id="resultsTitle">검색 결과</h2><p id="searchSummary" role="status" aria-live="polite">공식 가이드 목록을 불러오는 중…</p></div>
+      <div id="searchResults" class="results"></div>
+      <button id="showMore" class="show-more" type="button" hidden>검색 결과 더 보기 ↓</button>
+    </section>
+    <aside class="source-note"><p>결과에는 정식 임무 이름이 표시돼요. 공식 이름에 없는 별명이나 줄임말은 검색되지 않을 수 있어요.</p><p id="dataInfo"></p></aside>
+    <noscript><p class="error">임무를 검색하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-top"><span>임무 초성 사전 · FFXIV 한국 서버</span><a href="https://guide.ff14.co.kr/lodestone/db/duty" target="_blank" rel="noopener noreferrer">데이터 출처: 파이널판타지14 공식 가이드 ↗</a></div>
+    <div class="site-credits" aria-label="출처 및 권리 안내">
+      <p class="fan-notice">파판14 도구함은 무료·비영리로 운영하는 비공식 팬 제작 사이트입니다. SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p>
+      <p>임무 이름·레벨・분류: <a href="https://guide.ff14.co.kr/lodestone/db/duty" target="_blank" rel="noopener noreferrer">한국 공식 가이드 — 임무 ↗</a></p>
+      <p>글꼴: <a href="https://hangeul.naver.com/font/nanum" target="_blank" rel="noopener noreferrer">네이버 나눔스퀘어라운드 ↗</a> · <a href="../fonts/nanum-square-round/OFL.txt">글꼴 라이선스</a></p>
+      <p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>
+      <p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p>
+      <p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">파이널판타지14 저작물 이용 허락 조건 — 운영정책 10조 ↗</a></p>
+    </div>
+  </footer>
+</body>
+</html>
