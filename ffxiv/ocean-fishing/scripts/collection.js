@@ -4,6 +4,7 @@
   const key = value => name(value).normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
   const alwaysVisible = row => String(row.TimeFrameDay ?? '').trim() === '' && name(row.FishTranslated || row.Fish).startsWith('유령');
   function dependencies(row) {
+    if (Array.isArray(row.Dependencies)) return [...new Set(row.Dependencies.map(key))];
     const values = [];
     const html = row.Intuition || '';
     for (const match of html.matchAll(/src=["'][^"']*\/fish\/([^"']+)\.png["']/gi)) {

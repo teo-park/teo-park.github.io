@@ -213,8 +213,8 @@ test('route achievements intersect all three stops, respecting spectral time and
  assert.deepEqual(api.routeAchievements([...rows,row('Bloodbrine','Shark')],aliasStops).map(group=>group.id),['Shark']);
 });
 test('real route achievement groups are independent of catches and include only the three-stop intersection',()=>{
- const code=fs.readFileSync(require('node:path').join(__dirname,'../scripts/gFuncs.js'),'utf8');
- const configs=require('node:vm').runInNewContext(code.match(/var routeStopConfigs = \{[\s\S]*?\n\};/)[0]+'\nrouteStopConfigs;');
+ const voyages=require('../scripts/voyages.js');
+ const configs=Object.fromEntries(['indigo','ruby'].map(route=>[route,Array.from({length:route==='indigo'?12:9},(_,i)=>voyages.stops(route,i+1))]));
  for(const route of ['indigo','ruby']){
   const rows=load(route),catalog=new Set(rows.map(row=>row.Species).filter(Boolean));
   const actual=configs[route].map(stops=>api.routeAchievements(rows,stops));

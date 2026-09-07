@@ -2,6 +2,8 @@
 
 먼바다 낚시 시간표·수집 기록·낚시 전략을 확인하는 무료·비영리 팬 도구입니다. `ffxiv/ocean-fishing/` 아래 정적 파일로 배포합니다. 메인 포탈, 공통 메뉴, 사이트맵에 연결하지 않으며 모든 HTML에 `noindex, nofollow, noarchive`를 지정했습니다.
 
+화면·시간표·검색·필터·기록 관리가 자체 JavaScript와 CSS로 동작합니다. 현재 배포 파일에서 OceanFishing.Boats의 실행 코드, jQuery, DataTables, Bootstrap, Moment, 기존 사이트의 물고기군 도장 이미지를 제거했습니다. 게임·커뮤니티 **자료의 출처와 이용 조건은 프로그램과 별개**이며 아래에 명시합니다. 이전 커밋을 포함한 Git 이력을 지우는 작업은 아닙니다.
+
 ## 입장과 저장
 
 - 루트 `index.html`에서 비밀번호를 입력합니다. 근해·원양·도감의 직접 주소도 입장 화면을 거칩니다.
@@ -20,7 +22,7 @@
 - `전체 보기`, `도감 채우기`, `선상과제/업적`, `고득점` 중 목적을 고르면 관련 옵션만 나타납니다.
 - 잡은 물고기를 숨겨도 미획득 목표에 필요한 직감·생미끼 조건을 연쇄적으로 유지합니다. 일반 구간에서 이름이 `유령`으로 시작하는 물고기는 미끼 확인용으로 계속 표시합니다.
 - 선상과제/업적은 물고기군을 체크박스로 복수 선택합니다. 선택한 군은 이미 잡았어도 표시합니다. 항로 세 구간의 공통 물고기군은 `업적작 가능`으로 안내합니다. 환해류·날씨·목표 마릿수 조건은 별도로 충족해야 합니다.
-- 기본 표는 물고기·입질·권장 미끼를 표시합니다. 미끼 이름도 아이콘 옆에 표시합니다. `상세 정보`에서 미끼별 시간·점수·날씨 등을 펼칩니다.
+- 기본 표는 물고기·입질·권장 미끼를 표시합니다. 미끼·시간대·물고기군은 읽을 수 있는 이름으로 표시합니다. `상세 정보`에서 미끼별 시간·점수·날씨 등을 펼칩니다. 항로 전체의 조건을 계산한 뒤 구간별로 나누며, 추가 필터에서도 필요한 조건 물고기를 유지합니다.
 - 고득점은 모든 물고기의 기본·이중·삼중 점수를 보여줍니다. 현재 GP, 사용 가능 기술, GP 효율/한 번 점수 기준으로 가능한 기술을 추천합니다. 이중 400GP·삼중 700GP, 수량 범위의 낮은 값으로 비교하며 일반 한 마리를 제외한 추가 점수로 GP 효율을 계산합니다. 자료가 없는 기술은 추천하지 않습니다.
 - 추천은 목표 물고기를 낚는 데 성공한다는 전제입니다. 입질 확률, 직감·생미끼 준비 비용, 월척·보너스, GP 회복, 남은 시간과 구간 간 GP 배분은 계산하지 않습니다. 게임의 실제 날씨·직감 활성 여부를 읽지 않습니다.
 - 도감은 근해 140종·원양 119종을 해역별로 표시합니다. 이름·초성 검색, 미획득 필터, 검색 결과 해역 자동 펼침, 체크 후 실행 취소를 지원합니다. 장소별 행이 중복되는 어종이 있어 행 수와 고유 종수는 다를 수 있습니다.
@@ -32,28 +34,38 @@
 
 - [OceanFishing.Boats](https://oceanfishing.boats/about/) / [원본 저장소](https://github.com/netsua92/OceanFishing)
 - 기준 원본 커밋: `bbd67f90ed0285aa8e23d8f92f7f4d4c234441a2` (2026-09-07 확인)
-- 데이터·설명: Tyo'to Tayuun. 원본 개발: Xina Apella. 시간표: Donut Steel. 한국어 번역: 수리비용. 기타 제작진은 원본 About 참고.
+- 낚시 수치·조건: Tyo'to Tayuun 및 커뮤니티 기여자. 한국어 자료: 수리비용. 기타 데이터 제작진은 원본 About 참고. 원본 프로그램의 실행 코드나 UI를 현재 앱에 포함하지 않습니다.
 - 원양 자료 보완 범위·출처·남은 미확인 항목: [`fishdata/ruby-verification.json`](./fishdata/ruby-verification.json). 이름 없는 섬·사베니어 섬 관련 자료와 표기 수정을 포함합니다. 자료는 2026-09-07 기준 복사본이며 자동 갱신되지 않습니다.
 - Teamcraft ID 대응 자료: [아이템 이름·ID](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json/items.json). 영어 이름을 비교하여 259종 추출. MIT License, Copyright (c) 2017 Flavien Normand. [`licenses/Teamcraft-MIT.txt`](./licenses/Teamcraft-MIT.txt) 동봉.
+- 시간표 사실: [공개된 반복 규칙 설명](https://ffxiv.pf-n.co/ocean-fishing/about), [항로 구성](https://ffxiv.consolegameswiki.com/wiki/Ocean_Fishing). 자체 계산을 공개 시간표의 한 주기(12일·144회)와 대조했습니다. 테스트 fixture는 항로 번호·관측된 종수만 담고 있습니다.
 - 게임 자산: © SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.
 - 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum) / [OFL](../fonts/nanum-square-round/OFL.txt).
 
 SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다. 기재된 회사 명·제품명·시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.
 
-원본 저장소에서 별도 재사용 라이선스는 확인되지 않았습니다. 이 수정판은 원본과 제3자 자산에 새로운 이용 허락을 부여하지 않습니다. 원본 라이브러리의 저작권·라이선스 주석을 유지합니다. 디자인 변경이나 입장 화면이 재배포 허락을 대신하지 않습니다.
+원본 데이터의 별도 재배포 라이선스는 확인되지 않았습니다. 자체 프로그램으로 교체하거나 출처를 표시하는 것이 이 자료와 게임 이미지에 새로운 이용 허락을 부여하지는 않습니다. 화면 하단에는 게임 권리 표시와 **출처 및 라이선스** 링크를 두고, 자세한 내역은 [`sources/index.html`](./sources/index.html)에 모았습니다.
 
 ## 개발
 
 별도 빌드 없이 HTTP 정적 서버 또는 GitHub Pages에서 실행합니다. 입장 화면의 Web Crypto 사용을 위해 HTTPS 또는 localhost가 필요합니다. 로컬 ZIP 원본은 별도 폴더에서 유지하며 이 배포본으로 덮어쓰지 않습니다.
 
 - `scripts/entry.js`: 입장·잠금·직접 주소 처리
-- `css/journal.css`, `scripts/journal.js`: 독립 디자인, 기록 관리 창, 수집률 표시
+- `css/app.css`, `scripts/app.js`: 자체 화면, 항로·도감·검색·필터·기록 관리
+- `scripts/voyages.js`: KST 출항 일정, 반복 항로, 구간별 시간대·어종 판정
 - `scripts/collection.js`: 수집 상태·의존 관계·GP 추천
-- `scripts/collection-ui.js`: 항로의 체크·필터·점수 UI
-- `scripts/checklist-combined.js`: 전체 도감과 검색
+- `scripts/teamcraft-ids.js`: 데이터에서 추출한 Teamcraft ID 대응표
+- `tools/build-data.cjs`: 원본 CSV의 사실 값을 실행 불가능한 JSON으로 정규화. 수량 미확인 값은 추정하지 않으며 직감·생미끼 조건을 구조화합니다.
+- `tools/build-pages.cjs`: 자체 HTML 페이지와 출처 안내 생성
+- `data/fish.json`: 근해 140행·원양 120행, 총 259종. 같은 어종의 서로 다른 장소 기록을 보존합니다.
 
-저장소 루트에서 검증:
+브라우저에는 자체 스크립트 5개와 스타일시트 1개만 로드합니다. 실행 시 CDN·외부 API·원본 사이트를 호출하지 않습니다. 물고기 JSON과 게임 이미지, 공통 나눔 글꼴은 같은 사이트에서 읽습니다. 실시간 날씨는 조회하지 않습니다.
+
+이 폴더에서 개발 자료 생성 및 검증:
 
 ```sh
-node --test ffxiv/ocean-fishing/tests/*.test.cjs
+npm ci --ignore-scripts
+npm run build
+npm test
 ```
+
+Node.js 22 이상을 사용합니다. `jsdom`은 DOM 통합 테스트용 개발 의존성으로, 실제 페이지에서는 사용하지 않습니다. 테스트는 저장 키·원본/ZIP/Teamcraft 가져오기·내보내기·실행 취소·입장 상태·조건 물고기·GP 경계·전체 항로 주기와 자료 정규화를 검증합니다.

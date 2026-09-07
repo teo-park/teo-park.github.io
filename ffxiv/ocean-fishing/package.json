@@ -1,0 +1,13 @@
+{
+  "name": "ocean-fishing-journal",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Native ocean fishing planner and collection journal",
+  "scripts": {
+    "build": "node tools/build-data.cjs && node tools/build-pages.cjs",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}
