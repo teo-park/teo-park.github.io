@@ -10,8 +10,8 @@
     const name=id=>byId.get(id)?.name||'후보 없음';
     function ready(){try{return S.prepareImport(entries,minions);}catch{return null;}}
     function totals(){
-      const all=entries.flatMap(e=>e.results||[]),ids=ready();
-      $('scanTotal').textContent=`추가 후보 ${new Set(all.filter(r=>r.state==='match'&&!r.orderConflict).map(r=>r.id)).size}종 · 확인 필요 ${all.filter(r=>r.state==='review'||r.orderConflict).length}칸 · 제외 ${all.filter(r=>r.state==='skip').length}칸`;
+      const all=entries.flatMap(e=>e.results||[]),ids=ready(),inferred=all.filter(r=>r.state==='match'&&r.inferredByCount&&!r.manual).length;
+      $('scanTotal').textContent=`추가 후보 ${new Set(all.filter(r=>r.state==='match'&&!r.orderConflict).map(r=>r.id)).size}종${inferred?` · 순서 확정 ${inferred}칸`:''} · 확인 필요 ${all.filter(r=>r.state==='review'||r.orderConflict).length}칸 · 제외 ${all.filter(r=>r.state==='skip').length}칸`;
       $('scanApply').disabled=busy||!ids;
       $('scanApply').textContent=ids?`${ids.length}종 보유 기록에 추가`:'보유 기록에 추가';
     }
@@ -34,7 +34,7 @@
       const r=current()?.results?.[cell];$('scanCandidates').hidden=!r||editing;
       if(!r||editing)return;
       $('scanCellTitle').textContent=`${Math.floor(cell/5)+1}행 ${cell%5+1}열 · ${r.state==='skip'?'제외':name(r.id)}`;
-      $('scanCellHelp').textContent=r.orderConflict?'직접 고른 꼬친의 순서가 맞지 않아요. 이름을 수정하거나 게임 분류순 보정을 꺼 주세요.':r.manual&&r.state==='match'?'직접 확정한 꼬친입니다. 이 선택을 기준으로 다른 칸의 후보를 다시 좁힙니다.':r.state==='review'?'그림을 비교하고 맞는 꼬친을 선택하세요. 하나를 확정하면 다른 확인 필요 칸도 다시 보정해요.':r.usedOrder&&r.orderContext?`${name(r.orderContext.before)} → ${name(r.id)} → ${name(r.orderContext.after)} 순서에서 그림을 다시 비교한 후보예요.`:'선택한 칸의 꼬친을 바꾸거나 등록에서 제외할 수 있어요.';
+      $('scanCellHelp').textContent=r.orderConflict?'직접 고른 꼬친의 순서가 맞지 않아요. 이름을 수정하거나 게임 분류순 보정을 꺼 주세요.':r.manual&&r.state==='match'?'직접 확정한 꼬친입니다. 이 선택을 기준으로 다른 칸의 후보를 다시 좁힙니다.':r.state==='review'?'그림을 비교하고 맞는 꼬친을 선택하세요. 하나를 확정하면 다른 확인 필요 칸도 다시 보정해요.':r.inferredByCount&&r.orderContext?`${name(r.orderContext.before)} ~ ${name(r.orderContext.after)} 사이의 ${r.orderContext.count}칸과 목록의 ${r.orderContext.count}종이 일치해서, 이미지 비교 없이 순서로 확정했어요.`:r.usedOrder&&r.orderContext?`${name(r.orderContext.before)} → ${name(r.id)} → ${name(r.orderContext.after)} 순서에서 그림을 다시 비교한 후보예요.`:'선택한 칸의 꼬친을 바꾸거나 등록에서 제외할 수 있어요.';
       const query=$('scanCandidateSearch').value,range=r.candidateRange,all=$('scanSearchAll').checked;
       $('scanRangeHint').textContent=range?`${r.orderContext?.before?name(r.orderContext.before)+' 다음':'목록 시작'} ~ ${r.orderContext?.after?name(r.orderContext.after)+' 이전':'목록 끝'} · ${range.length}종 범위`:'그림이 비슷한 후보를 표시합니다.';
       $('scanSearchAll').closest('label').hidden=!range;
@@ -54,8 +54,8 @@
         $('scanOverlay').hidden=editing||!e.results;
         $('scanOverlay').innerHTML=e.results?Array.from({length:30},(_,i)=>{
           const r=e.results[i];if(!r)return '<span class="scan-unused">빈 칸</span>';
-          const label=r.orderConflict?'순서 확인':r.manual&&r.state==='match'?'확정':{match:'추가',review:'확인',skip:'제외'}[r.state];
-          return `<button type="button" class="scan-cell ${r.orderConflict?'review':r.state} ${i===cell?'selected':''}" data-scan-cell="${i}" aria-label="${Math.floor(i/5)+1}행 ${i%5+1}열 ${esc(name(r.id))} ${label}" aria-pressed="${i===cell}" ${busy?'disabled':''}><b>${['추가','확정'].includes(label)?'✓ ':label==='확인'?'? ':''}${label}</b><span>${esc(r.state==='skip'?'등록 제외':name(r.id))}</span></button>`;
+          const label=r.orderConflict?'순서 확인':r.manual&&r.state==='match'?'확정':r.inferredByCount&&r.state==='match'?'순서':{match:'추가',review:'확인',skip:'제외'}[r.state];
+          return `<button type="button" class="scan-cell ${r.orderConflict?'review':r.state} ${i===cell?'selected':''}" data-scan-cell="${i}" aria-label="${Math.floor(i/5)+1}행 ${i%5+1}열 ${esc(name(r.id))} ${label==='순서'?'순서로 확정':label}" aria-pressed="${i===cell}" ${busy?'disabled':''}><b>${['추가','확정','순서'].includes(label)?'✓ ':label==='확인'?'? ':''}${label}</b><span>${esc(r.state==='skip'?'등록 제외':name(r.id))}</span></button>`;
         }).join(''):'';
         $('scanCropHelp').textContent=editing?'빈 칸을 포함한 5열 × 6행 영역을 드래그하세요. 페이지 번호·검색 버튼은 제외해요.':'칸을 누르면 후보 목록에서 인식한 이름을 확인·수정할 수 있어요.';
         $('scanEditCrop').textContent=editing?'영역 조정 중':'아이콘 영역 조정';
@@ -84,8 +84,8 @@
         const results=await S.refine(imagePixels(),e.crop,references,e.results,{minions,useOrder:e.useOrder,cancelled:()=>token!==version});
         if(token!==version)return;
         e.results=results;
-        const remaining=results.filter(r=>r.state==='review'||r.orderConflict).length;
-        status(e.useOrder?`후보 보정 완료 · 확인 필요 ${remaining}칸. 직접 확정한 꼬친과 제외한 칸은 유지했어요.`:'순서 보정을 껐어요. 직접 고른 값은 유지하고 나머지는 그림 비교 후보로 되돌렸어요.');
+        const remaining=results.filter(r=>r.state==='review'||r.orderConflict).length,inferred=results.filter(r=>r.inferredByCount).length;
+        status(e.useOrder?`후보 보정 완료${inferred?` · 순서 확정 ${inferred}칸`:''} · 확인 필요 ${remaining}칸. 직접 확정한 꼬친과 제외한 칸은 유지했어요.`:'순서 보정을 껐어요. 직접 고른 값은 유지하고 나머지는 그림 비교 후보로 되돌렸어요.');
       }catch(error){if(token===version)status(error.message);}
       finally{if(token===version){busy=false;render();}}
     }
@@ -123,7 +123,7 @@
       entries.push(...chosen.map((file,i)=>({file,count:30,useOrder:true,reviewed:false,results:null,key:first+i})));
       await select(first);
     }
-    function choose(id){const e=current(),r=e?.results?.[cell];if(!r||busy||!byId.has(id))return;r.id=id;r.state='match';r.manual=true;r.usedOrder=false;delete r.orderContext;delete r.candidateRange;delete r.orderConflict;e.reviewed=false;$('scanCandidateSearch').value='';$('scanSearchAll').checked=false;render();refine();}
+    function choose(id){const e=current(),r=e?.results?.[cell];if(!r||busy||!byId.has(id))return;r.id=id;r.state='match';r.manual=true;r.usedOrder=false;delete r.inferredByCount;delete r.orderContext;delete r.candidateRange;delete r.orderConflict;e.reviewed=false;$('scanCandidateSearch').value='';$('scanSearchAll').checked=false;render();refine();}
     function changeCrop(rect){const e=current();if(!e||busy)return;e.crop=rect;e.results=null;e.reviewed=false;editing=true;render();}
     const point=event=>{const r=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))};};
     canvas.addEventListener('pointerdown',event=>{if(!editing||busy||!bitmap)return;drag={start:point(event),before:{...current().crop}};canvas.setPointerCapture(event.pointerId);});

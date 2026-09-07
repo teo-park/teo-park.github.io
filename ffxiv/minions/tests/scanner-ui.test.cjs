@@ -78,3 +78,23 @@ test('closing during candidate refinement retains the manual selection and ignor
   assert.equal(a.d.querySelectorAll('.scan-cell').length,30);
   assert.ok(a.$('[data-scan-cell="0"]').textContent.includes(a.minions[0].name));assert.match(a.$('[data-scan-cell="0"]').textContent,/확정/);
 });
+
+test('confirming the last endpoint fills three cells by count, explains the inference, and can be undone by changing the endpoint',async t=>{
+  const a=app({analyze:async()=>[2,100,101,102,6].map((n,index)=>({index,id:a.minions[n].id,state:index===0?'match':'review',score:0,candidates:[{id:a.minions[n].id,score:0}]}))});
+  t.after(()=>a.dom.window.close());a.$('#openScan').click();await a.upload();
+  a.$('[data-scan-cell="4"]').click();a.$('#scanCandidateList button').click();await settle(a);
+  for(let index=1;index<=3;index++){
+    assert.equal(a.$(`[data-scan-cell="${index}"] span`).textContent,a.minions[index+2].name);
+    assert.match(a.$(`[data-scan-cell="${index}"]`).getAttribute('aria-label'),/순서로 확정/);
+  }
+  assert.match(a.$('#scanTotal').textContent,/순서 확정 3칸 · 확인 필요 0칸/);
+  assert.match(a.$('#scanStatus').textContent,/순서 확정 3칸/);assert.equal(a.$('#scanReviewed').disabled,false);
+  a.$('[data-scan-cell="1"]').click();assert.match(a.$('#scanCellHelp').textContent,/3칸과 목록의 3종이 일치.*이미지 비교 없이/);
+  a.change('#scanUseOrder',false);await settle(a);assert.equal(a.d.querySelectorAll('.scan-cell.review').length,3);
+  assert.match(a.$('[data-scan-cell="4"]').textContent,/확정/);
+  a.change('#scanUseOrder',true);await settle(a);assert.equal(a.d.querySelectorAll('.scan-cell.review').length,0);
+  a.$('[data-scan-cell="4"]').click();a.$('#scanCandidateSearch').value=a.minions[7].name;
+  a.$('#scanCandidateSearch').dispatchEvent(new a.w.Event('input'));a.$(`#scanCandidateList [data-scan-id="${a.minions[7].id}"]`).click();await settle(a);
+  assert.equal(a.d.querySelectorAll('.scan-cell.review').length,3);assert.equal(a.$('#scanApply').disabled,true);
+  assert.ok(!a.$('#scanTotal').textContent.includes('순서 확정'));
+});

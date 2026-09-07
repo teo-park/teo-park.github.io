@@ -1,4 +1,4 @@
-/* Icon matching runs locally. Screenshot positions never imply missing minions. */
+/* Local icon matching, with exact game-order gaps filled between known minions. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.MinionScanner=api;})(typeof globalThis==='object'?globalThis:this,function(){
   'use strict';
   const SIZE=16;
@@ -65,6 +65,20 @@
     }
     for(let pass=0;pass<results.length;pass++){
       let promoted=false;
+      const known=results.filter(r=>r.state==='match');
+      for(let i=1;i<known.length;i++){
+        const before=known[i-1],after=known[i],lower=order.get(before.id),upper=order.get(after.id);
+        const between=results.slice(before.index+1,after.index),count=after.index-before.index-1;
+        // Equal catalog and physical slot counts leave exactly one ordered assignment.
+        // Excluded slots still occupy a position, but remain excluded from import.
+        if(before.orderConflict||after.orderConflict||!count||upper-lower-1!==count||between.length!==count||!between.every((r,j)=>r.index===before.index+j+1))continue;
+        for(const [j,r] of between.entries()){
+          if(r.manual||r.state!=='review')continue;
+          r.id=ordered[lower+j+1].id;r.state='match';r.score=null;
+          r.candidates=[{id:r.id,score:null}];r.candidateRange=[r.id];
+          r.usedOrder=true;r.inferredByCount=true;r.orderContext={before:before.id,after:after.id,count};promoted=true;
+        }
+      }
       for(const r of results){
         if(r.state!=='review'||r.manual)continue;
         const before=results.slice(0,r.index).filter(a=>a.state==='match').at(-1),after=results.slice(r.index+1).find(a=>a.state==='match');
