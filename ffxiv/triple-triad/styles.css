@@ -62,10 +62,11 @@ progress::-webkit-progress-bar { background: #3a415b; } progress::-webkit-progre
 .list-heading p, .list-heading h2 { margin: 0; font-size: 14px; }
 .list-heading > span { color: var(--ff-muted); font-size: 11px; }
 .card-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.collect-card { position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--ff-line); border-radius: 7px; background: #111d30; }
+.collect-card { display: flex; flex-direction: column; position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--ff-line); border-radius: 7px; background: #111d30; }
 .collect-card.selected { border-color: var(--triad); box-shadow: 0 0 0 1px #c4b4f333; }
 .collect-card.is-owned { background: #192936; }
 .card-open { width: 100%; text-align: left; display: block; padding: 12px 11px 9px; border: 0; border-radius: 0; background: none; }
+.card-grid .card-open { flex: 1; }
 .card-open:hover { background: #25304a; }
 .card-topline { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 10px; color: var(--ff-muted); }
 .stars { color: var(--ff-gold); letter-spacing: 1px; white-space: nowrap; font-size: 10px; }
@@ -152,8 +153,12 @@ dialog form { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 @media (max-width: 1150px) { .catalog-layout { display: block; } .catalog-layout > .card-detail { display: none; } .deck-layout { grid-template-columns: 300px minmax(0, 1fr); gap: 18px; } .recommended-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 950px) { .triad-main { width: calc(100% - 32px); } .card-detail { top: 145px; max-height: calc(100vh - 165px); } .progress-strip { gap: 24px; flex-wrap: wrap; } .progress-main { min-width: 40%; } .progress-strip > button { margin-left: 0; } }
 @media (max-width: 760px) { .masthead { align-items: flex-start; flex-direction: column; gap: 12px; padding: 26px 0 21px; } .masthead > a { font-size: 12px; } .progress-strip { padding: 18px; gap: 20px; } .progress-main { flex: 1 1 100%; max-width: none; } .progress-strip > div > strong { font-size: 19px; } .progress-strip > button { margin-left: auto; padding: 8px; font-size: 12px; } .catalog-layout { display: block; margin-top: 18px; } .catalog-layout > .card-detail { display: none; } .card-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; } .card-visual { flex-direction: column; gap: 5px; min-height: 149px; } .filter-panel { padding: 15px; } .deck-layout { grid-template-columns: 1fr; } .deck-controls { padding: 20px; } .rule-options { grid-template-columns: repeat(3, minmax(0, 1fr)); } .deck-controls > .wide { max-width: 400px; } .recommended-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-@media (max-width: 570px) { .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .card-visual { gap: 5px; flex-direction: column; padding: 8px 0; min-height: 149px; } .card-art { width: 53px; height: 68px; } .card-open { padding: 10px 8px 8px; } .card-name { font-size: 12px; } .card-topline { flex-wrap: wrap; min-height: 29px; gap: 3px; } .card-topline .stars { font-size: 9px; letter-spacing: 0; } .collect-check { padding: 9px 8px; gap: 6px; font-size: 11px; } .collect-check input { width: 16px; height: 16px; } .filters { gap: 10px; } .filters label { min-width: 100px; } .filters > button { width: 100%; } .search-wrap input { font-size: 14px; } .view-tabs { gap: 23px; } .view-tabs span { display: none; } .view-tabs button { font-size: 16px; } .list-heading > span { font-size: 10px; } .rule-options { grid-template-columns: 1fr 1fr; } .recommended-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } .deck-result { padding: 15px; } }
-@media (max-width: 360px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .progress-strip { gap: 14px; } .progress-strip > button { width: 100%; } }
+@media (max-width: 570px) { .card-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; } .card-visual { gap: 5px; flex-direction: column; padding: 8px 0; min-height: 149px; } .card-art { width: 53px; height: 68px; } .card-open { padding: 10px 4px 8px; } .card-name { font-size: 12px; } .card-topline { flex-wrap: wrap; min-height: 29px; gap: 3px; } .card-topline .stars { font-size: 9px; letter-spacing: 0; } .collect-check { flex-direction: column; padding: 8px 3px; gap: 4px; font-size: 11px; text-align: center; } .collect-check input { width: 16px; height: 16px; } .filters { gap: 10px; } .filters label { min-width: 100px; } .filters > button { width: 100%; } .search-wrap input { font-size: 14px; } .view-tabs { gap: 23px; } .view-tabs span { display: none; } .view-tabs button { font-size: 16px; } .list-heading > span { font-size: 10px; } .rule-options { grid-template-columns: 1fr 1fr; } .recommended-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } .deck-result { padding: 15px; } }
+@media (max-width: 570px) {
+  .card-grid .card-art { max-width: 100%; }
+  .card-grid .stat-cross { max-width: 100%; height: auto; aspect-ratio: 51 / 54; flex-basis: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); align-items: center; line-height: 1.1; }
+}
+@media (max-width: 360px) { .progress-strip { gap: 14px; } .progress-strip > button { width: 100%; } }
 
 /* Screenshot registration stays local and requires a review of each page. */
 .scan-dialog { width: min(1100px, calc(100% - 24px)); max-height: 94dvh; padding: 24px; }

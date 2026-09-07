@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>메인퀘 어디쯤? | 파판14 주요 퀘스트 진행률</title>
+  <title>메인 퀘스트 진행률 · 파판14 도구함</title>
   <meta name="description" content="파이널판타지14 한국 공식 가이드의 주요 퀘스트를 검색하고 전체 이야기와 현재 확장팩의 퀘스트 개수 기준 진행률을 확인하세요." />
   <meta name="theme-color" content="#0b1220" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ko_KR" />
-  <meta property="og:site_name" content="메인퀘 어디쯤?" />
-  <meta property="og:title" content="메인퀘 어디쯤? | 파판14 주요 퀘스트 진행률" />
+  <meta property="og:site_name" content="메인 퀘스트 진행률" />
+  <meta property="og:title" content="메인 퀘스트 진행률 · 파판14 도구함" />
   <meta property="og:description" content="지금 하는 메인 퀘스트를 찾아 전체·확장팩별 진행률을 확인하세요. 신생부터 황금까지, 후속 패치 이야기 포함." />
   <meta property="og:url" content="https://teo-park.github.io/ffxiv/msq-tracker/" />
   <meta name="twitter:card" content="summary" />
@@ -25,15 +25,15 @@
   <a class="skip-link" href="#questSearch">퀘스트 검색으로 바로가기</a>
   <header class="site-header">
     <a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg?v=20260906-night" alt="" />파판14 도구함</a>
-    <nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../msq-tracker/" aria-current="page">메인퀘</a><a href="../pvp-series-calculator/">시리즈 작전표</a><a href="../duty-finder/">임무 초성 사전</a><a href="../triple-triad/">카드 수첩</a></nav>
+    <nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../msq-tracker/" aria-current="page">메인퀘</a><a href="../pvp-series-calculator/">PvP 시리즈 계산기</a><a href="../duty-finder/">임무 초성 사전</a><a href="../triple-triad/">카드 수첩</a></nav>
     <span class="header-note">FFXIV · KR</span>
   </header>
   <aside class="service-notice" aria-label="무료 운영 안내"><strong>모든 도구 무료</strong><p>광고·후원·유료 기능 없이 운영하는 비영리 팬 도구입니다.</p></aside>
   <main>
     <div class="intro">
-      <p class="eyebrow">MAIN SCENARIO / JOURNEY TRACKER</p>
-      <h1>내 모험은 <em>어디쯤?</em></h1>
-      <p>지금 하는 메인 퀘스트로, 전체 이야기와 확장팩의 진행률을 확인하세요.</p>
+      <p class="eyebrow">MAIN SCENARIO / PROGRESS</p>
+      <h1>메인 퀘스트 진행률</h1>
+      <p>현재 퀘스트를 기준으로 전체·확장팩별 진행률을 확인하세요.</p>
     </div>
     <div class="workspace">
       <section class="search-panel" aria-labelledby="searchTitle">
@@ -50,8 +50,8 @@
         <p class="spoiler-note">초성 표시를 끄면 퀘스트 이름이 그대로 보여요.<br />공식 가이드 링크에서는 이름과 상세 내용이 표시돼요.</p>
       </section>
       <section class="progress-panel" aria-labelledby="progressTitle">
-        <div class="panel-heading"><span class="step">02</span><h2 id="progressTitle">내 이야기 진행률</h2><span class="count-badge">퀘스트 개수 기준</span></div>
-        <div id="emptyState" class="empty-state"><span class="empty-symbol" aria-hidden="true">◇</span><h3>지금의 퀘스트를 찾아주세요</h3><p>게임 화면의 주요 퀘스트 안내에 나온<br />이름을 검색하고 선택하면 시작해요.</p><div class="empty-route" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i><b></b><i></i></div></div>
+        <div class="panel-heading"><span class="step">02</span><h2 id="progressTitle">퀘스트 진행률</h2><span class="count-badge">퀘스트 개수 기준</span></div>
+        <div id="emptyState" class="empty-state"><span class="empty-symbol" aria-hidden="true">◇</span><h3>퀘스트 선택</h3><p>현재 진행 중인 주요 퀘스트를 검색하고 선택하세요.</p><div class="empty-route" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i><b></b><i></i></div></div>
         <div id="selectedState" hidden>
           <div class="current-quest"><p id="selectedMeta" class="eyebrow"></p><h3 id="selectedName"></h3><a id="questLink" target="_blank" rel="noopener noreferrer">공식 가이드에서 보기 ↗</a></div>
           <fieldset class="status-control"><legend>이 퀘스트를</legend><label><input type="radio" name="questStatus" value="current" checked /><span>진행 중이에요</span></label><label><input type="radio" name="questStatus" value="completed" /><span>완료했어요</span></label></fieldset>
@@ -66,7 +66,7 @@
       </section>
     </div>
     <section class="journey" aria-labelledby="journeyTitle">
-      <div class="section-heading"><div><p class="eyebrow">YOUR JOURNEY</p><h2 id="journeyTitle">확장팩별 여정</h2></div><p>각 확장팩의 후속 패치 이야기 포함</p></div>
+      <div class="section-heading"><div><p class="eyebrow">EXPANSION PROGRESS</p><h2 id="journeyTitle">확장팩별 진행률</h2></div><p>각 확장팩의 후속 패치 퀘스트 포함</p></div>
       <div id="expansionJourney" class="journey-grid"></div>
     </section>
     <details class="method"><summary>진행률은 어떻게 계산하나요?</summary><div>
@@ -80,7 +80,7 @@
     <noscript><p class="error">검색과 진행률 계산을 사용하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
   </main>
   <footer class="site-footer">
-    <div class="footer-top"><span>메인퀘 어디쯤? · FFXIV 한국 서버</span><a href="https://guide.ff14.co.kr/lodestone/db/quest" target="_blank" rel="noopener noreferrer">데이터 출처: 파이널판타지14 공식 가이드 ↗</a></div>
+    <div class="footer-top"><span>메인 퀘스트 진행률 · FFXIV 한국 서버</span><a href="https://guide.ff14.co.kr/lodestone/db/quest" target="_blank" rel="noopener noreferrer">데이터 출처: 파이널판타지14 공식 가이드 ↗</a></div>
     <div class="site-credits" aria-label="출처 및 권리 안내">
       <p class="fan-notice">파판14 도구함은 무료·비영리로 운영하는 비공식 팬 제작 사이트입니다. SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p>
       <p>퀘스트 이름·레벨·분류・선행 관계: <a href="https://guide.ff14.co.kr/lodestone/db/quest" target="_blank" rel="noopener noreferrer">한국 공식 가이드 — 주요 퀘스트 ↗</a></p>

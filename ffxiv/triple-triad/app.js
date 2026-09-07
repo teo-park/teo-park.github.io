@@ -64,13 +64,16 @@
     filtered = data.cards.filter(c => T.matches(c, q) && (state === 'all' || owned.has(c.id) === (state === 'owned')) && (source === 'all' || c.sources.some(s => s.group === source)) && (rarity === 'all' || c.stars === Number(rarity)) && (type === 'all' || c.typeId === Number(type)));
     const sort = $('sortFilter').value;
     filtered.sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name, 'ko') : sort === 'stars' ? b.stars - a.stars : sort === 'newest' ? b.patch.localeCompare(a.patch, undefined, {numeric: true}) : 0) || Number(a.ex) - Number(b.ex) || a.order - b.order);
-    const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)); page = Math.min(Math.max(1, page), pages);
+    const gamePages = sort === 'number' && !q.trim() && [state, source, rarity, type].every(value => value === 'all');
+    const groups = gamePages ? [filtered.filter(c => !c.ex), filtered.filter(c => c.ex)] : [filtered];
+    const pageSets = groups.flatMap((cards, group) => Array.from({length: Math.ceil(cards.length / PAGE_SIZE)}, (_, index) => ({cards: cards.slice(index * PAGE_SIZE, (index + 1) * PAGE_SIZE), label: gamePages ? `${group ? 'EX' : '일반'} ${index + 1} / ${Math.ceil(cards.length / PAGE_SIZE)}` : ''})));
+    const pages = Math.max(1, pageSets.length); page = Math.min(Math.max(1, page), pages);
     if (!filtered.some(c => c.id === selectedId) && !$('detailDialog').open) selectedId = filtered[0]?.id;
-    $('cardGrid').innerHTML = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map(tile).join('');
+    $('cardGrid').innerHTML = (pageSets[page - 1]?.cards || []).map(tile).join('');
     $('emptyResults').hidden = filtered.length > 0;
     $('resultCount').textContent = `${filtered.length}장 표시 · 이 중 ${filtered.filter(c => owned.has(c.id)).length}장 수집`;
     $('clearSearch').hidden = !q;
-    $('pagination').innerHTML = filtered.length > PAGE_SIZE ? `<button data-page="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="이전 페이지">← 이전</button><span>${page} / ${pages}</span><button data-page="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="다음 페이지">다음 →</button>` : '';
+    $('pagination').innerHTML = pages > 1 ? `<button data-page="${page - 1}" ${page === 1 ? 'disabled' : ''} aria-label="이전 페이지">← 이전</button><span>${pageSets[page - 1]?.label || `${page} / ${pages}`}</span><button data-page="${page + 1}" ${page === pages ? 'disabled' : ''} aria-label="다음 페이지">다음 →</button>` : '';
     renderDetail();
   }
   function invalidateDeck(message = '규칙이나 수집 목록이 바뀌었어요. 다시 추천하면 현재 상태를 반영해요.') {

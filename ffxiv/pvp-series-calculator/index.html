@@ -11,19 +11,19 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:site_name" content="파판14 도구함" />
-    <meta property="og:title" content="파판14 PvP 시리즈 경험치 계산기 | 시리즈 작전표" />
+    <meta property="og:title" content="PvP 시리즈 계산기 · 파판14 도구함" />
     <meta
       property="og:description"
       content="목표 시리즈 레벨까지 남은 경험치와 크컨·기공전·전장의 예상 판수, 마감일까지 필요한 하루 플레이량을 계산해 보세요."
     />
     <meta property="og:url" content="https://teo-park.github.io/ffxiv/pvp-series-calculator/" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="파판14 PvP 시리즈 경험치 계산기 | 시리즈 작전표" />
+    <meta name="twitter:title" content="PvP 시리즈 계산기 · 파판14 도구함" />
     <meta
       name="twitter:description"
       content="목표 시리즈 레벨까지 남은 경험치와 콘텐츠별 예상 판수, 하루 플레이량을 계산해 보세요."
     />
-    <title>파판14 PvP 시리즈 경험치 계산기 | 시리즈 작전표</title>
+    <title>PvP 시리즈 계산기 · 파판14 도구함</title>
     <link rel="canonical" href="https://teo-park.github.io/ffxiv/pvp-series-calculator/" />
     <link rel="icon" href="../favicon.svg?v=20260906-night" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css?v=20260906-all-round" />
@@ -32,7 +32,7 @@
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "시리즈 작전표",
+        "name": "PvP 시리즈 계산기",
         "url": "https://teo-park.github.io/ffxiv/pvp-series-calculator/",
         "description": "파이널판타지14 PvP 시리즈의 목표 레벨까지 필요한 경험치와 콘텐츠별 예상 판수를 계산하는 웹 도구",
         "applicationCategory": "GameApplication",
@@ -52,7 +52,7 @@
 
     <header class="site-header">
     <a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg?v=20260906-night" alt="" />파판14 도구함</a>
-    <nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../msq-tracker/">메인퀘</a><a href="../pvp-series-calculator/" aria-current="page">시리즈 작전표</a><a href="../duty-finder/">임무 초성 사전</a><a href="../triple-triad/">카드 수첩</a></nav>
+    <nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../msq-tracker/">메인퀘</a><a href="../pvp-series-calculator/" aria-current="page">PvP 시리즈 계산기</a><a href="../duty-finder/">임무 초성 사전</a><a href="../triple-triad/">카드 수첩</a></nav>
     <span class="header-note">FFXIV · KR</span>
   </header>
   <aside class="service-notice" aria-label="무료 운영 안내"><strong>모든 도구 무료</strong><p>광고·후원·유료 기능 없이 운영하는 비영리 팬 도구입니다.</p></aside>
@@ -60,11 +60,10 @@
     <main>
       <section class="intro" aria-labelledby="introTitle">
         <div class="intro-copy">
-          <p class="eyebrow"><span aria-hidden="true"></span> PLAN YOUR PVP SERIES</p>
-          <h1 id="introTitle">시리즈 목표까지, <em>몇 판?</em></h1>
+          <p class="eyebrow"><span aria-hidden="true"></span> PVP SERIES / CALCULATOR</p>
+          <h1 id="introTitle">PvP 시리즈 계산기</h1>
           <p>
-            현재 시리즈 레벨과 경험치를 입력하면 목표까지 남은 양을 계산하고,<br class="desktop-only" />
-            크컨·기공전·전장 중 무엇을 얼마나 하면 되는지 바로 보여드려요.
+            목표 레벨까지 필요한 경험치와 콘텐츠별 예상 판수를 계산하세요.
           </p>
         </div>
 
@@ -74,7 +73,7 @@
         <div class="section-heading">
           <div>
             <p>01 / SET THE TARGET</p>
-            <h2 id="plannerTitle">지금 위치와 목표를 알려주세요</h2>
+            <h2 id="plannerTitle">현재 진행도와 목표</h2>
           </div>
           <p>입력값은 서버로 전송하지 않고 이 브라우저에만 저장해요.</p>
         </div>
@@ -292,23 +291,23 @@
         <div class="section-heading">
           <div>
             <p>04 / HOW TO READ</p>
-            <h2 id="guideTitle">숫자를 이렇게 읽어주세요</h2>
+            <h2 id="guideTitle">계산 기준</h2>
           </div>
         </div>
         <div class="guide-grid">
           <article>
             <span>01</span>
-            <h3>예상치는 가운데 값이에요</h3>
+            <h3>예상 판수 기준</h3>
             <p>크컨과 기공전은 승률 50%, 전장은 세 순위가 같은 비율로 나온다고 가정합니다.</p>
           </article>
           <article>
             <span>02</span>
-            <h3>범위는 양 끝을 보여줘요</h3>
+            <h3>최소·최대 판수</h3>
             <p>가장 많은 경험치를 받을 때와 가장 적게 받을 때를 함께 보여줘 결과의 폭을 알 수 있어요.</p>
           </article>
           <article>
             <span>03</span>
-            <h3>모든 판수는 올림해요</h3>
+            <h3>판수 올림 처리</h3>
             <p>마지막 경험치가 조금만 남아도 한 판은 온전히 해야 하므로 부족하지 않게 계산합니다.</p>
           </article>
         </div>
@@ -351,7 +350,7 @@
     <footer class="site-footer">
     <div class="footer-top"><a class="brand footer-brand" href="./">
         <img class="brand-emblem" src="../favicon.svg?v=20260906-night" alt="" />
-        <span>시리즈 작전표</span>
+        <span>PvP 시리즈 계산기</span>
       </a>
       <p>계산 결과는 선택한 가정에 따른 예상치입니다.</p>
       <a href="#top">맨 위로 ↑</a></div>

@@ -4,27 +4,27 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>꼬마친구 수첩 · 파판14 도구함</title>
   <meta name="description" content="파이널판타지14 꼬마친구 수집 체크. 아이콘으로 빠르게 보유 목록을 등록하고 한국어·초성 검색과 획득처별 필터로 다음 꼬친을 찾아보세요.">
-  <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="꼬마친구 수첩 · 파판14 도구함"><meta property="og:description" content="작은 친구들을 모으는 기록. 아이콘 수집 체크와 꼬마친구 획득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/minions/">
+  <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="꼬마친구 수첩 · 파판14 도구함"><meta property="og:description" content="꼬마친구 수집 체크와 획득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/minions/">
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/minions/"><link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260907-1">
-  <script defer src="./data.js?v=20260907-1"></script><script defer src="./engine.js?v=20260907-1"></script><script defer src="./app.js?v=20260907-1"></script>
+  <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260907-grid30">
+  <script defer src="./data.js?v=20260907-1"></script><script defer src="./engine.js?v=20260907-1"></script><script defer src="./app.js?v=20260907-grid30"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">꼬마친구 목록으로 바로가기</a>
   <header class="site-header"><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../triple-triad/">카드 수첩</a><a href="./" aria-current="page">꼬마친구 수첩</a></nav><span class="header-note">FFXIV · KR</span></header>
   <main id="main" class="minion-main">
-    <div class="masthead"><div><p class="eyebrow">MINIONS / COLLECTION</p><h1>작은 친구들, 하나씩.</h1><p>아이콘을 눌러 보유한 꼬마친구를 체크하세요.</p></div><button id="openRecords" class="quiet" disabled>수집 기록 관리</button></div>
+    <div class="masthead"><div><p class="eyebrow">MINIONS / COLLECTION</p><h1>꼬마친구 수첩</h1><p>아이콘을 눌러 보유한 꼬마친구를 체크하세요.</p></div><button id="openRecords" class="quiet" disabled>수집 기록 관리</button></div>
     <p class="fatal" id="fatal" role="alert" hidden></p><p id="loading" role="status">꼬마친구를 불러오고 있어요.</p>
     <noscript><p>수첩을 사용하려면 JavaScript를 켜 주세요.</p></noscript>
     <div id="appContent" hidden>
-      <section class="progress-strip" aria-label="수집 현황"><div class="progress-count"><span>함께하는 꼬마친구</span><div><strong id="ownedCount">0</strong><span id="totalCount"></span></div></div><div class="progress-meter"><div><span id="remainingCount"></span><b id="ownedPercent">0%</b></div><progress id="collectionProgress" value="0" max="1" aria-label="전체 목록 수집률"></progress><small>전체 공개 목록 기준 · 체크는 이 브라우저에 저장돼요.</small></div><div class="progress-caption"><span class="free-mark">무료 · 비영리</span><small>광고·후원·유료 기능 없음</small></div></section>
+      <section class="progress-strip" aria-label="수집 현황"><div class="progress-count"><span>보유한 꼬마친구</span><div><strong id="ownedCount">0</strong><span id="totalCount"></span></div></div><div class="progress-meter"><div><span id="remainingCount"></span><b id="ownedPercent">0%</b></div><progress id="collectionProgress" value="0" max="1" aria-label="전체 목록 수집률"></progress><small>전체 공개 목록 기준 · 체크는 이 브라우저에 저장돼요.</small></div><div class="progress-caption"><span class="free-mark">무료 · 비영리</span><small>광고·후원·유료 기능 없음</small></div></section>
       <section class="filters" aria-label="꼬마친구 검색과 필터">
         <div class="search-row"><label for="search">이름·초성·획득처 검색</label><div class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="뚱냥이, ㄸㄴㅇ, 집사 수행…" autocomplete="off"><button id="clearSearch" aria-label="검색어 지우기" class="quiet">지우기</button></div></div>
         <div class="filter-row"><label>수집 상태<select id="status"><option value="all">전체</option><option value="unowned">미수집</option><option value="owned">보유</option></select></label><label>획득처<select id="source"><option value="all">모든 획득처</option></select></label><label>확장팩<select id="expansion"><option value="all">모든 확장팩</option><option value="2">신생 에오르제아</option><option value="3">창천의 이슈가르드</option><option value="4">홍련의 해방자</option><option value="5">칠흑의 반역자</option><option value="6">효월의 종언</option><option value="7">황금의 유산</option></select></label><label>정렬<select id="sort"><option value="game">게임 분류순</option><option value="name">이름순</option><option value="newest">최신 패치순</option><option value="oldest">오래된 패치순</option></select></label><button id="resetFilters" class="quiet">초기화</button></div>
         <div class="check-filters"><label><input id="tradeable" type="checkbox"> 거래 가능만</label><label><input id="excludeSpecial" type="checkbox"> 유료·이벤트 외 획득처 있음</label></div>
       </section>
       <section class="catalog" aria-label="꼬마친구 목록">
-        <div class="list-heading"><div><h2>꼬마친구 수첩</h2><span id="resultCount" role="status"></span></div><label class="page-size">한 번에<select id="pageSize"><option value="48">48종</option><option value="96" selected>96종</option><option value="all">전체</option></select></label></div>
+        <div class="list-heading"><div><h2>꼬마친구 목록</h2><span id="resultCount" role="status"></span></div><span class="page-size">5열 × 6행 · 페이지당 30종</span></div>
         <div class="quick-tools"><p>아이콘 = 보유 체크 · 획득처 = 자세히 보기</p><div><button id="markPage" class="quiet">이 페이지 모두 보유</button><button id="refreshResults" hidden>체크 반영해 목록 정리</button></div></div>
         <div id="minionGrid" class="minion-grid"></div>
         <div id="emptyResults" class="empty-state" hidden><strong>조건에 맞는 꼬마친구가 없어요.</strong><p>검색어나 필터를 바꿔 보세요.</p><button id="emptyReset">전체 목록 보기</button></div>

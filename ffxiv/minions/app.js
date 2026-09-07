@@ -4,7 +4,8 @@
   const $=id=>document.getElementById(id),D=window.MINION_DATA,E=window.MinionCollection;
   const storageKey='teo-ffxiv.minions.collection.v1';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let owned=new Set(),filtered=[],page=1,pageSize=96,pageItems=[],activeDetail=null,history=[];
+  const pageSize=30;
+  let owned=new Set(),filtered=[],page=1,pageItems=[],activeDetail=null,history=[];
   const byId=new Map((D?.minions||[]).map(m=>[m.id,m]));
   const knownCount=ids=>[...ids].filter(id=>byId.has(id)).length;
   function read(){const raw=localStorage.getItem(storageKey);return raw===null?new Set():E.parseBackup(raw);}
@@ -12,7 +13,7 @@
   function updateCounts(){
     const count=knownCount(owned),pct=(count/D.count*100).toFixed(1);
     $('ownedCount').textContent=count;$('totalCount').textContent=`/ ${D.count}종`;
-    $('ownedPercent').textContent=pct+'%';$('remainingCount').textContent=`아직 만나지 못한 친구 ${D.count-count}종`;
+    $('ownedPercent').textContent=pct+'%';$('remainingCount').textContent=`미수집 ${D.count-count}종`;
     $('collectionProgress').value=count;$('collectionProgress').max=D.count;
     $('collectionProgress').setAttribute('aria-label',`꼬마친구 ${count} / ${D.count}종 수집`);
     $('recordCount').textContent=`보유 ${count}종`+(owned.size>count?` · 현재 목록 외 ${owned.size-count}개 ID도 보존 중`:'');
@@ -68,7 +69,6 @@
     $('clearSearch').addEventListener('click',()=>{$('search').value='';refilter();$('search').focus();});
     for(const id of ['status','source','expansion','sort','tradeable','excludeSpecial'])$(id).addEventListener('change',refilter);
     $('resetFilters').addEventListener('click',reset);$('emptyReset').addEventListener('click',reset);$('refreshResults').addEventListener('click',refilter);
-    $('pageSize').addEventListener('change',()=>{pageSize=$('pageSize').value==='all'?D.count:+$('pageSize').value;page=1;renderList();});
     document.addEventListener('click',event=>{
       const collect=event.target.closest('[data-collect]');if(collect){toggle(+collect.dataset.collect);return;}
       const info=event.target.closest('[data-detail]');if(info)detail(byId.get(+info.dataset.detail));

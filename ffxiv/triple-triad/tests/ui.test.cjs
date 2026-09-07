@@ -120,6 +120,27 @@ test('rule limits, unavailable rule feedback and target deck work through contro
   assert.match(a.$('#deckResult').textContent, /미수집 5장/);
 });
 
+test('default pages follow game order in groups of 30 and keep EX cards on a separate page', t => {
+  const a=app();t.after(()=>a.dom.window.close());
+  const cards=[...a.w.TRIPLE_TRIAD_DATA.cards].sort((a,b)=>Number(a.ex)-Number(b.ex)||a.order-b.order);
+  const groups=[cards.filter(c=>!c.ex),cards.filter(c=>c.ex)],seen=[];
+  for(const [group,entries] of groups.entries()){
+    const count=Math.ceil(entries.length/30);
+    for(let page=1;page<=count;page++){
+      const ids=[...a.w.document.querySelectorAll('#cardGrid [data-open]')].map(e=>+e.dataset.open);
+      assert.deepEqual(ids,entries.slice((page-1)*30,page*30).map(c=>c.id));seen.push(...ids);
+      assert.equal(a.$('#pagination span').textContent,`${group?'EX':'일반'} ${page} / ${count}`);
+      const next=a.$('#pagination [aria-label="다음 페이지"]');
+      assert.equal(next.disabled,group===1&&page===count);
+      if(!next.disabled)next.click();
+    }
+  }
+  assert.deepEqual(seen,cards.map(c=>c.id));
+  a.change('#sortFilter','name');
+  assert.equal(a.w.document.querySelectorAll('#cardGrid .collect-card').length,30);
+  assert.equal(a.$('#pagination span').textContent,`1 / ${Math.ceil(cards.length/30)}`);
+});
+
 test('screenshot import merges by default and replaces only the reviewed pages when requested', t => {
   const a = app({ids: [1, 31, 999999]}); t.after(() => a.dom.window.close());
   const result = a.scanApply({ownedIds: [2], seenIds: [1, 2], replacePages: false});

@@ -40,22 +40,38 @@ test('rapid icon checks persist without moving tiles; undo restores just the las
     ui.$('#undo').click();assert.equal(ui.$('#ownedCount').textContent,'0');
   }finally{ui.close();}
 });
+
+test('30-item pages retain game order without omissions or duplicates through the final page',()=>{
+  const ui=open();try{
+    const expected=E.sort(D.minions,'game').map(m=>m.id),seen=[];
+    for(let page=1;page<=Math.ceil(expected.length/30);page++){
+      const ids=[...ui.d.querySelectorAll('.collect-button')].map(e=>+e.dataset.collect);
+      assert.deepEqual(ids,expected.slice((page-1)*30,page*30));seen.push(...ids);
+      const next=ui.$('#pagination [aria-label="다음 페이지"]');
+      assert.equal(next.disabled,page===Math.ceil(expected.length/30));
+      if(!next.disabled)next.click();
+    }
+    assert.deepEqual(seen,expected);
+    ui.$('#pagination [data-page="1"]').click();
+    assert.equal(+ui.$('.collect-button').dataset.collect,expected[0]);
+  }finally{ui.close();}
+});
 test('unowned filter keeps checked tiles until explicitly refreshed, and page bulk action is scoped',()=>{
   const ui=open();try{
-    ui.change('#pageSize','48');ui.change('#status','unowned');const id=+ui.$('.collect-button').dataset.collect;
+    ui.change('#status','unowned');const id=+ui.$('.collect-button').dataset.collect;
     ui.$('.collect-button').click();assert.ok(ui.$(`[data-id="${id}"]`));assert.equal(ui.$('#refreshResults').hidden,false);
     ui.$('#refreshResults').click();assert.equal(ui.$(`[data-id="${id}"]`),null);
     const visible=[...ui.d.querySelectorAll('.collect-button')].map(e=>+e.dataset.collect);
-    ui.$('#markPage').click();const saved=E.parseBackup(ui.storage.getItem(KEY));assert.equal(saved.size,49);for(const id of visible)assert.ok(saved.has(id));
+    ui.$('#markPage').click();const saved=E.parseBackup(ui.storage.getItem(KEY));assert.equal(saved.size,31);for(const id of visible)assert.ok(saved.has(id));
     ui.$('#undo').click();assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([id]));
   }finally{ui.close();}
 });
-test('search includes the last composing consonant and can show all minions',()=>{
+test('search includes the last composing consonant; resetting filters restores the first 30 minions',()=>{
   const ui=open();try{
     const el=ui.$('#search');el.dispatchEvent(new ui.w.CompositionEvent('compositionstart',{bubbles:true}));
     ui.change('#search','ㄸㄴㅇ','input');assert.match(ui.$('#minionGrid').textContent,/뚱냥이/);assert.equal(ui.d.querySelectorAll('.minion-tile').length,1);
-    ui.$('#clearSearch').click();ui.change('#pageSize','all');assert.equal(ui.d.querySelectorAll('.minion-tile').length,D.count);assert.equal(ui.$('#pagination').hidden,true);
-    ui.change('#search','ㄸㄴㅇ','input');ui.change('#source','Venture');ui.change('#tradeable',true);ui.$('#resetFilters').click();assert.equal(ui.$('#search').value,'');assert.equal(ui.$('#source').value,'all');assert.equal(ui.$('#tradeable').checked,false);assert.equal(ui.d.querySelectorAll('.minion-tile').length,D.count);
+    ui.$('#clearSearch').click();assert.equal(ui.d.querySelectorAll('.minion-tile').length,30);assert.equal(ui.$('#pagination').hidden,false);
+    ui.change('#search','ㄸㄴㅇ','input');ui.change('#source','Venture');ui.change('#tradeable',true);ui.$('#resetFilters').click();assert.equal(ui.$('#search').value,'');assert.equal(ui.$('#source').value,'all');assert.equal(ui.$('#tradeable').checked,false);assert.equal(ui.d.querySelectorAll('.minion-tile').length,30);
   }finally{ui.close();}
 });
 test('detail dialog and grid share collection status and show every acquisition route',()=>{
