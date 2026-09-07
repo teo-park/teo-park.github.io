@@ -74,7 +74,7 @@ test('caught prerequisites and ghost baits survive collection and additional fil
     for(const name of ['Little Leviathan','Gladius','Ghoul Barracuda','Sothis',"Heaven's Key","Navigator's Print"])assert.ok(ids().has(f(name).id),name);
     ui.$('[data-zone="0-spectral"] [data-zone-option="fabled"]').click();
     for(const name of ['Sothis',"Heaven's Key","Navigator's Print"])assert.ok(ids().has(f(name).id),name);
-    ui.$('[data-stop="1"]').click();ui.$('#showDetails').click();
+    ui.$('[data-stop="1"]').click();
     ui.input('[data-zone="1-regular"] [data-zone-option="bait"]','PlumpWorm','change');
     for(const name of ['Little Leviathan','Gladius','Ghoul Barracuda'])assert.ok(ids().has(f(name).id),name);
     const voyage=V.at('indigo',first);
