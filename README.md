@@ -6,6 +6,7 @@
 - [메인퀘 어디쯤?](https://teo-park.github.io/ffxiv/msq-tracker/)
 - [시리즈 작전표](https://teo-park.github.io/ffxiv/pvp-series-calculator/)
 - [임무 초성 사전](https://teo-park.github.io/ffxiv/duty-finder/)
+- [트리플 트라이어드 수첩](https://teo-park.github.io/ffxiv/triple-triad/) — 카드 수집·획득처·규칙별 덱 추천
 
 파판14 관련 파일만 `ffxiv/`에 관리합니다. 데이터 출처·권리 안내와 개발 방법은 [도구함 README](./ffxiv/README.md)를 참고하세요.
 

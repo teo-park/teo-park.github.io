@@ -1,0 +1,9 @@
+{
+  "name": "teo-ffxiv-triple-triad",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "update-data": "node scripts/update-data.mjs"
+  },
+  "devDependencies": { "jsdom": "26.1.0" }
+}
