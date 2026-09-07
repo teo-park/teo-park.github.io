@@ -2,7 +2,7 @@
   'use strict';
   const name = value => String(value || '').replace(/^(?:[MITF]!)+/, '').trim();
   const key = value => name(value).normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
-  const alwaysVisible = row => String(row.TimeFrameDay ?? '').trim() === '' && name(row.FishTranslated || row.Fish).startsWith('유령');
+  const alwaysVisible = row => String(row.TimeFrameDay ?? '').trim() === '' && (row.spectralTrigger === true || /^(유령|환해)/.test(name(row.FishTranslated || row.Fish)));
   function dependencies(row) {
     if (Array.isArray(row.Dependencies)) return [...new Set(row.Dependencies.map(key))];
     const values = [];

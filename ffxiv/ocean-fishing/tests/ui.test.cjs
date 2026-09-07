@@ -82,6 +82,29 @@ test('caught prerequisites and ghost baits survive collection and additional fil
     assert.deepEqual(ui.errors,[]);
   }finally{ui.close();}
 });
+
+test('ruby spectral triggers stay visible with caught, mission, fabled and bait filters',async()=>{
+  const allCaught=Object.fromEntries(payload.fish.filter(f=>f.route==='ruby').map(f=>[C.name(f.Fish),true]));
+  const ui=await open('ruby',memory({[storageKey]:JSON.stringify({indigo:{},ruby:allCaught})}));
+  try{
+    const targets=payload.fish.filter(f=>['환해 놀래기','환해 구렁이','환해 골설어'].includes(f.FishTranslated));assert.equal(targets.length,3);
+    const voyages=Array.from({length:12},(_,i)=>V.at('ruby',first+i*7200000)),seen=new Set();
+    const river=voyages.find(v=>v.stops.some(stop=>stop.stop==='One River'));assert.ok(river);
+    ui.$('#scheduleToggle').click();
+    for(const voyage of [voyages[0],river]){
+      ui.$(`[data-voyage="${voyage.start}"]`).click();
+      const check=()=>{for(const fish of targets.filter(f=>voyage.stops.some(stop=>stop.stop===f.Stop))){const row=ui.$(`[data-fish-id="${fish.id}"]`);assert.ok(row,fish.FishTranslated);assert.match(row.textContent,/항상 표시/);assert.match(row.textContent,/크릴/);seen.add(fish.id);}};
+      ui.$('[name=purpose][value=collection]').click();check();ui.$('[name=purpose][value=mission]').click();if(!ui.$('[name=species]').checked)ui.$('[name=species]').click();check();
+      for(let stop=0;stop<3;stop++){
+        ui.$(`[data-stop="${stop}"]`).click();
+        const fabled=ui.$(`[data-zone="${stop}-regular"] [data-zone-option="fabled"]`);if(!fabled.checked)fabled.click();
+        ui.input(`[data-zone="${stop}-regular"] [data-zone-option="bait"]`,'PlumpWorm','change');check();
+      }
+    }
+    assert.equal(seen.size,3);
+    assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
 test('legacy names, pasted imports, file imports, downloads and Teamcraft share persistent records',async()=>{
   const storage=memory({[storageKey]:JSON.stringify({indigo:{'Galadion Chovy|legacy|bait':true},ruby:{}})});
   const ui=await open('checklist',storage);

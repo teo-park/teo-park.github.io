@@ -6,14 +6,14 @@
   <meta name="description" content="파이널판타지14 꼬마친구 수집 체크. 아이콘으로 빠르게 보유 목록을 등록하고 한국어·초성 검색과 획득처별 필터로 다음 꼬친을 찾아보세요.">
   <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="꼬마친구 수첩 · 파판14 도구함"><meta property="og:description" content="꼬마친구 수집 체크와 획득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/minions/">
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/minions/"><link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260907-grid30">
-  <script defer src="./data.js?v=20260907-1"></script><script defer src="./engine.js?v=20260907-1"></script><script defer src="./app.js?v=20260907-grid30"></script>
+  <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260908-scan1"><link rel="stylesheet" href="./scanner.css?v=20260908-1">
+  <script defer src="./data.js?v=20260907-1"></script><script defer src="./engine.js?v=20260907-1"></script><script defer src="./scanner.js?v=20260908-1"></script><script defer src="./scanner-ui.js?v=20260908-1"></script><script defer src="./app.js?v=20260908-scan1"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">꼬마친구 목록으로 바로가기</a>
   <header class="site-header"><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../triple-triad/">카드 수첩</a><a href="./" aria-current="page">꼬마친구 수첩</a></nav><span class="header-note">FFXIV · KR</span></header>
   <main id="main" class="minion-main">
-    <div class="masthead"><div><p class="eyebrow">MINIONS / COLLECTION</p><h1>꼬마친구 수첩</h1><p>아이콘을 눌러 보유한 꼬마친구를 체크하세요.</p></div><button id="openRecords" class="quiet" disabled>수집 기록 관리</button></div>
+    <div class="masthead"><div><p class="eyebrow">MINIONS / COLLECTION</p><h1>꼬마친구 수첩</h1><p>아이콘을 눌러 보유한 꼬마친구를 체크하세요.</p></div><div class="masthead-actions"><button id="openScan" disabled>캡처로 등록 <span>시험 기능</span></button><button id="openRecords" class="quiet" disabled>수집 기록 관리</button></div></div>
     <p class="fatal" id="fatal" role="alert" hidden></p><p id="loading" role="status">꼬마친구를 불러오고 있어요.</p>
     <noscript><p>수첩을 사용하려면 JavaScript를 켜 주세요.</p></noscript>
     <div id="appContent" hidden>
@@ -35,6 +35,24 @@
   </main>
   <dialog id="detailDialog" aria-labelledby="detailTitle"><div class="dialog-top"><span>꼬마친구 획득 안내</span><button id="closeDetail" class="quiet" aria-label="획득처 닫기">닫기 ×</button></div><div id="detailBody"></div></dialog>
   <dialog id="recordsDialog" aria-labelledby="recordsTitle"><div class="dialog-top"><h2 id="recordsTitle">수집 기록 관리</h2><button id="closeRecords" class="quiet" aria-label="수집 기록 관리 닫기">닫기 ×</button></div><p>다른 기기로 옮기거나 브라우저 데이터를 지우기 전에 백업해 주세요. 가져오기는 기존 보유 기록에 추가합니다.</p><p id="recordCount"></p><div class="record-actions"><button id="exportRecords" class="primary">백업 파일 내보내기</button><button id="importRecords">백업 파일 가져오기</button><input id="importFile" type="file" accept=".json,application/json" hidden></div><p id="recordMessage" role="status"></p></dialog>
+  <dialog id="scanDialog" class="scan-dialog" aria-labelledby="scanTitle">
+    <div class="dialog-top"><div><h2 id="scanTitle">캡처로 꼬마친구 등록 <span class="scan-beta">시험 기능</span></h2></div><button id="closeScan" class="quiet" aria-label="캡처 등록 닫기">닫기 ×</button></div>
+    <p class="scan-intro">게임의 5열 × 6행 아이콘 목록을 추가하세요. 그림과 게임 분류순으로 꼬친을 찾습니다. 페이지 번호는 입력하지 않아도 돼요.</p>
+    <div class="scan-upload"><button id="scanAddImages" type="button">캡처 이미지 추가</button><input id="scanFiles" type="file" multiple accept="image/png,image/jpeg,image/webp,image/bmp" hidden><span>이 창에서 <kbd>Ctrl</kbd> + <kbd>V</kbd>로 붙여넣기 · 여러 장 가능</span></div>
+    <p class="scan-note">이미지는 이 브라우저에서만 처리합니다. 캡처에 없는 꼬친은 미수집으로 판단하지 않으며, 기존 보유 기록에 추가만 합니다.</p>
+    <p id="scanStatus" role="status" aria-live="polite">캡처를 추가하면 인식을 시작해요.</p>
+    <div id="scanFileList" class="scan-file-list" aria-label="추가한 캡처"></div>
+    <section id="scanWorkspace" hidden>
+      <div class="scan-controls"><label>아이콘 수 <input id="scanCount" type="number" min="1" max="30" value="30"></label><label><input id="scanUseOrder" type="checkbox" checked> 게임 분류순으로 후보 보정</label><button id="scanRemove" type="button" class="quiet">이 캡처 삭제</button></div>
+      <p class="scan-note">마지막 페이지는 실제 아이콘 수를 입력하세요. 즐겨찾기·검색 등으로 순서가 달라진 화면은 순서 보정을 꺼 주세요.</p>
+      <div class="scan-layout">
+        <div class="scan-preview"><div class="scan-stage"><canvas id="scanCanvas" aria-label="캡처의 아이콘 영역"></canvas><div id="scanOverlay" class="scan-overlay"></div></div><p id="scanCropHelp"></p><div class="scan-crop-actions"><button id="scanEditCrop" type="button">아이콘 영역 조정</button><button id="scanFullImage" type="button" hidden>이미지 전체</button><button id="scanAnalyze" type="button">다시 인식</button></div></div>
+        <section id="scanCandidates" class="scan-candidates" aria-labelledby="scanCellTitle" hidden><h3 id="scanCellTitle"></h3><p id="scanCellHelp"></p><div class="scan-cell-actions"><button id="scanSkipCell" type="button">이 칸 제외</button><button id="scanNextReview" type="button">다음 확인 필요 칸</button></div><label for="scanCandidateSearch">후보 이름·초성 검색</label><input id="scanCandidateSearch" type="search" placeholder="아래 후보에 없으면 직접 검색" autocomplete="off"><div id="scanCandidateList" class="scan-candidate-list"></div></section>
+      </div>
+      <label class="scan-reviewed"><input id="scanReviewed" type="checkbox"> 이 캡처의 꼬친 이름과 제외할 칸을 확인했어요.</label>
+    </section>
+    <div class="scan-apply"><strong id="scanTotal"></strong><button id="scanApply" type="button" class="primary" disabled>보유 기록에 추가</button></div>
+  </dialog>
   <aside id="notice" class="notice" hidden><span id="noticeText" role="status" aria-live="polite"></span><button id="undo" hidden>실행 취소</button><button id="closeNotice" class="quiet" aria-label="알림 닫기">×</button></aside>
   <footer class="site-footer"><div class="footer-top"><span>꼬마친구 수첩 · 무료·비영리 팬 도구</span><a href="../">도구 목록으로 ↗</a></div><div class="site-credits"><p class="fan-notice">SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p><p>명칭·게임 정보: <a href="https://guide.ff14.co.kr/lodestone/db/item?category2=7&amp;category3=85" target="_blank" rel="noopener noreferrer">한국 공식 가이드 — 꼬마 친구</a> · <a href="https://guide.ff14.co.kr/lodestone/playguide/view/162" target="_blank" rel="noopener noreferrer">공식 꼬마친구 안내</a></p><p>목록·획득처: <a href="https://ffxivcollect.com/minions" target="_blank" rel="noopener noreferrer">FFXIV Collect</a> · <a href="./README.md">데이터 출처와 이용 안내</a> · <a href="../triple-triad/licenses/ffxiv-collect-MIT.txt">Collect 라이선스</a></p><p>글꼴: <a href="https://hangeul.naver.com/font/nanum" target="_blank" rel="noopener noreferrer">네이버 나눔스퀘어라운드</a> · <a href="../fonts/nanum-square-round/OFL.txt">글꼴 라이선스</a></p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p><p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">한국 저작물 이용 허락 조건</a></p></div></footer>
 </body></html>

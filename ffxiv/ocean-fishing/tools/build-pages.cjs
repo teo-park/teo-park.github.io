@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path');
-const root=path.resolve(__dirname,'..'),version='20260907-native6';
+const root=path.resolve(__dirname,'..'),version='20260908-native7';
 const routes={indigo:'근해 수첩',ruby:'원양 수첩',checklist:'물고기 도감'};
 const copyright='<p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>';
 function header(page){return `<header class="journal-header"><a class="journal-brand" href="../indigo/"><img src="../img/journal-mark.svg" alt=""><span><strong>항해일지</strong><small>OCEAN FISHING JOURNAL</small></span></a><nav aria-label="낚시 메뉴">${Object.entries(routes).map(([id,title])=>`<a href="../${id}/" ${id===page?'aria-current="page"':''}>${title}</a>`).join('')}</nav>${page!=='sources'?'<div class="header-actions"><button id="openRecords" type="button">기록 관리</button><button class="text-button" type="button" data-lock-journal>잠그기</button></div>':''}</header>`;}

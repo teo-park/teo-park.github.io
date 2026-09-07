@@ -112,5 +112,13 @@
     $('source').insertAdjacentHTML('beforeend',D.types.map(([id,name])=>`<option value="${esc(id)}">${esc(name)}</option>`).join('')+'<option value="unknown">획득처 확인 중</option>');
     $('dataNote').innerHTML=`${esc(D.updatedAt)} 기준 · 공개 목록 ${D.count}종 · 한국어 이름 ${D.count}종 · 획득 경로 ${D.sourceCount}개. 목록과 획득처는 글로벌 자료를 포함하며 한국 서버의 현재 획득 가능 수를 뜻하지 않아요. <a href="./README.md">출처·데이터 범위</a>`;
     events();refilter();$('appContent').hidden=false;$('loading').hidden=true;$('openRecords').disabled=false;
+    window.MinionScanUI?.mount({minions:D.minions,apply(ids){
+      if(!Array.isArray(ids)||!ids.length||ids.some(id=>!Number.isInteger(id)||!byId.has(id)))return {ok:false,error:'인식한 꼬친 ID를 확인할 수 없어요. 기존 기록은 그대로입니다.'};
+      try{
+        const latest=read(),unique=[...new Set(ids)],added=unique.filter(id=>!latest.has(id)).length,message=`캡처에서 ${added}종을 보유 기록에 추가했어요. 기존 기록도 유지됩니다.`;
+        if(!saveChanges(unique.map(id=>[id,true]),message))return {ok:false,error:'저장하지 못해 캡처 등록을 적용하지 않았어요.'};
+        return {ok:true,message};
+      }catch{return {ok:false,error:'기존 기록을 읽지 못해 캡처 등록을 적용하지 않았어요.'};}
+    }});
   }catch(error){$('loading').hidden=true;$('fatal').textContent=error.message;$('fatal').hidden=false;}
 })();

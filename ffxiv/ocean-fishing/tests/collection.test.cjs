@@ -162,10 +162,10 @@ test('Teamcraft export includes caught fish across routes once, preserves storag
  const saved=value;
  for(const completed of [null,{},[+a,'bad']]){assert.throws(()=>api.importCaught(storage,JSON.stringify({completed}),map));assert.equal(value,saved);}
 });
-test('all caught regular ghost fish retain their bait information on both routes',()=>{
- for(const [route,count]of [['indigo',7],['ruby',3]]){
+test('all caught regular ghost and spectral fish retain their bait information on both routes',()=>{
+ for(const [route,count]of [['indigo',7],['ruby',6]]){
   const rows=load(route),catalog=api.createCatalog(rows);
-  const expected=rows.filter(row=>row.TimeFrameDay===''&&row.FishTranslated.startsWith('유령'));
+  const expected=rows.filter(row=>row.TimeFrameDay===''&&/^(유령|환해)/.test(row.FishTranslated));
   const visible=api.plan(rows,catalog,()=>true,true);
   assert.equal(expected.length,count);
   assert.deepEqual(visible.map(row=>row.Fish),expected.map(row=>row.Fish));
@@ -174,6 +174,9 @@ test('all caught regular ghost fish retain their bait information on both routes
  assert.equal(api.alwaysVisible({FishTranslated:'유령나비어',TimeFrameDay:''}),true);
  assert.equal(api.alwaysVisible({FishTranslated:'유령 물고기',TimeFrameDay:'Yes'}),false);
  assert.equal(api.alwaysVisible({FishTranslated:'일반 물고기',TimeFrameDay:''}),false);
+ assert.equal(api.alwaysVisible({FishTranslated:'환해 놀래기',TimeFrameDay:''}),true);
+ assert.equal(api.alwaysVisible({FishTranslated:'환해 골설어',TimeFrameDay:'Yes'}),false);
+ assert.equal(api.alwaysVisible({FishTranslated:'이름 변경된 유도어',TimeFrameDay:'',spectralTrigger:true}),true);
 });
 test('recommendations across the real catalog respect GP, skill availability and unknown data',()=>{
  for(const route of ['indigo','ruby']){

@@ -8,10 +8,11 @@ function open(storage=memory()){
   Object.defineProperty(w,'localStorage',{value:storage});w.HTMLElement.prototype.scrollIntoView=function(){};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
+  let scanApply;w.MinionScanUI={mount:({apply})=>{scanApply=apply;}};
   for(const file of ['data.js','engine.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
   const $=selector=>d.querySelector(selector),change=(selector,value,event='change')=>{const el=$(selector);if(el.type==='checkbox')el.checked=value;else el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
   assert.equal($('#appContent').hidden,false);
-  return{w,d,$,change,storage,downloads,close:()=>w.close()};
+  return{w,d,$,change,storage,downloads,scanApply,close:()=>w.close()};
 }
 test('catalog covers all Korean names, valid source links, unique IDs and explicit unknown sources',()=>{
   assert.equal(D.count,D.minions.length);assert.equal(new Set(D.minions.map(m=>m.id)).size,D.count);assert.ok(D.count>500);assert.ok(D.officialCount>500);
@@ -102,4 +103,21 @@ test('other-tab edits update tiles and are preserved by subsequent checks',()=>{
     ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:KEY}));assert.equal(ui.$('#ownedCount').textContent,'1');
     ui.$('.collect-button').click();assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([first,other]));
   }finally{ui.close();}
+});
+
+test('screenshot registration only adds known IDs, preserves previous and future IDs, and supports undo',()=>{
+  const first=D.minions[0].id,second=D.minions[31].id,third=D.minions[70].id,storage=memory({[KEY]:E.backup(new Set([first,99999]))}),ui=open(storage);
+  try{
+    storage.setItem(KEY,E.backup(new Set([first,third,99999])));
+    assert.equal(ui.scanApply([first,second,second]).ok,true);
+    assert.deepEqual(E.parseBackup(storage.getItem(KEY)),new Set([first,second,third,99999]));
+    ui.$('#undo').click();assert.deepEqual(E.parseBackup(storage.getItem(KEY)),new Set([first,third,99999]));
+    for(const bad of [[],[99999],[String(first)],null])assert.equal(ui.scanApply(bad).ok,false);
+  }finally{ui.close();}
+});
+
+test('screenshot storage failures do not report success or replace existing records',()=>{
+  const storage=memory({[KEY]:E.backup(new Set([D.minions[0].id]))}),ui=open(storage);
+  try{const old=storage.getItem(KEY);storage.setItem=()=>{throw Error('quota');};assert.equal(ui.scanApply([D.minions[1].id]).ok,false);assert.equal(storage.getItem(KEY),old);assert.equal(ui.$('#ownedCount').textContent,'1');}finally{ui.close();}
+  const bad=open(memory({[KEY]:'{broken'}));try{assert.equal(bad.scanApply([D.minions[0].id]).ok,false);assert.equal(bad.storage.getItem(KEY),'{broken');}finally{bad.close();}
 });
