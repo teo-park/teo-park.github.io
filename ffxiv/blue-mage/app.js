@@ -117,6 +117,14 @@
     const places=E.groupByLocation(D.spells);$('location').insertAdjacentHTML('beforeend',places.map(g=>`<option value="${esc(g.key)}">${esc(g.name)}${g.level?' · Lv.'+g.level:''}</option>`).join(''));
     $('aspect').insertAdjacentHTML('beforeend',[...new Set(D.spells.map(s=>s.aspect))].map(a=>`<option value="${esc(a)}">${esc(a==='없음'?'무속성':a)}</option>`).join(''));
     $('dataNote').innerHTML=`${esc(D.updatedAt)} 기준 · 청마법 ${D.count}종 · 습득 경로 ${D.sourceCount}개. 한국어 게임 명칭과 공개 습득처 자료를 사용합니다. <a href="./README.md">데이터 범위·출처</a>`;
-    events();refilter();$('loading').hidden=true;$('appContent').hidden=false;$('openRecords').disabled=false;
+    events();refilter();
+    window.BlueMageScanUI?.mount({spells:D.spells,apply:ids=>{
+      if(!Array.isArray(ids)||!ids.length||ids.some(id=>!Number.isSafeInteger(id)||!byId.has(id)))return {ok:false,error:'수첩에 없는 번호가 포함되어 있어요.'};
+      try{const latest=read(),unique=[...new Set(ids)],added=unique.filter(id=>!latest.has(id)).length,message=`캡처에서 ${added}종을 습득 기록에 추가했어요.`;
+        if(!save(unique.map(id=>[id,true]),message))return {ok:false,error:'저장하지 못해 등록을 적용하지 않았어요.'};
+        $('recordMessage').textContent=message;previewNumbers();refilter();return {ok:true,message};
+      }catch{return {ok:false,error:'기존 기록을 읽지 못해 등록하지 않았어요.'};}
+    }});
+    $('loading').hidden=true;$('appContent').hidden=false;$('openRecords').disabled=false;
   }catch(e){$('loading').hidden=true;$('fatal').textContent=e.message;$('fatal').hidden=false;}
 })();

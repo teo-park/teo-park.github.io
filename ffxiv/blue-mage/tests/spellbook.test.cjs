@@ -9,10 +9,11 @@ function open(storage=memory()){
   Object.defineProperty(w,'localStorage',{value:storage});w.HTMLElement.prototype.scrollIntoView=function(){};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
+  let scanApply;w.BlueMageScanUI={mount:({apply})=>{scanApply=apply;}};
   for(const file of ['data.js','engine.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
   const $=s=>d.querySelector(s),all=s=>[...d.querySelectorAll(s)],change=(s,value,event='change')=>{const el=$(s);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
   assert.equal($('#appContent').hidden,false);
-  return {w,d,$,all,change,storage,downloads,close:()=>w.close()};
+  return {w,d,$,all,change,storage,downloads,scanApply,close:()=>w.close()};
 }
 test('catalog has every numbered Korean spell and preserves separate Collect and game IDs',()=>{
   assert.equal(D.count,124);assert.deepEqual(D.spells.map(s=>s.id),Array.from({length:124},(_,i)=>i+1));
@@ -88,4 +89,7 @@ test('storage failures and malformed stored data never discard previous records'
 });
 test('other-tab edits are reflected and subsequent changes read fresh state',()=>{
   const ui=open();try{ui.$('[data-collect="1"]').click();ui.storage.setItem(KEY,E.backup(new Set([1,80])));ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:KEY}));assert.equal(ui.$('#learnedCount').textContent,'2');assert.equal(ui.$('#undo').hidden,true);ui.storage.setItem(KEY,E.backup(new Set([1,80,90])));ui.$('[data-collect="2"]').click();assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([1,2,80,90]));}finally{ui.close();}
+});
+test('capture registration merges fresh records, keeps missing and future IDs, and supports undo',()=>{
+  const ui=open(memory({[KEY]:E.backup(new Set([51,99999]))}));try{ui.storage.setItem(KEY,E.backup(new Set([51,80,99999])));assert.equal(ui.scanApply([49,50,49]).ok,true);assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([49,50,51,80,99999]));assert.match(ui.$('#recordMessage').textContent,/2종/);ui.$('#undo').click();assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([51,80,99999]));const before=ui.storage.getItem(KEY);for(const ids of [[],null,[99999],['49']])assert.equal(ui.scanApply(ids).ok,false);assert.equal(ui.storage.getItem(KEY),before);}finally{ui.close();}
 });
