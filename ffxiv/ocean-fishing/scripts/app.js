@@ -289,7 +289,7 @@
       $('scheduleToggle').addEventListener('click',()=>{expanded=!expanded;renderSchedule();});
       $('moreVoyages').addEventListener('click',()=>{scheduleCount=Math.min(144,scheduleCount+12);refreshVoyages();renderSchedule();});
       $('hideCompleted').addEventListener('change',event=>{hideCompleted=event.target.checked;write('ocean:hide-completed-routes',String(hideCompleted));renderSchedule();});
-      $('scheduleRows').addEventListener('click',event=>{const button=event.target.closest('[data-voyage]');if(!button)return;selected=voyages.find(v=>v.start===Number(button.dataset.voyage));activeStop=0;renderSchedule();renderFishing();});
+      $('scheduleRows').addEventListener('click',event=>{const button=event.target.closest('tr')?.querySelector('[data-voyage]');if(!button)return;selected=voyages.find(v=>v.start===Number(button.dataset.voyage));activeStop=0;renderSchedule();renderFishing();});
       $('returnFirst').addEventListener('click',()=>{selected=voyages[0];activeStop=0;renderSchedule();renderFishing();});
       $('stopTabs').addEventListener('click',event=>{const button=event.target.closest('[data-stop]');if(!button)return;activeStop=Number(button.dataset.stop);renderFishing();$('stopTab'+activeStop).focus();});
       $('stopTabs').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();activeStop=event.key==='Home'?0:event.key==='End'?2:(activeStop+(event.key==='ArrowRight'?1:2))%3;renderFishing();$('stopTab'+activeStop).focus();});
