@@ -10,6 +10,7 @@
 - [시리즈 작전표](https://teo-park.github.io/ffxiv/pvp-series-calculator/) — PvP 시리즈 목표 경험치·예상 판수·하루 목표 계산 ([앱 안내](./pvp-series-calculator/README.md))
 - [임무 초성 사전](https://teo-park.github.io/ffxiv/duty-finder/) — 던전·토벌전·레이드 등 공식 임무의 한글·초성 검색 ([앱 안내](./duty-finder/README.md))
 - [트리플 트라이어드 수첩](https://teo-park.github.io/ffxiv/triple-triad/) — 카드 수집 체크·획득처·규칙별 보유 카드 덱 추천 ([데이터와 추천 안내](./triple-triad/README.md))
+- [꼬마친구 수첩](https://teo-park.github.io/ffxiv/minions/) — 아이콘으로 빠른 보유 체크·초성 검색·획득처·확장팩 필터 ([데이터와 이용 안내](./minions/README.md))
 
 ## 출처 및 권리 안내
 
@@ -39,7 +40,8 @@ GitHub Pages의 원본은 `main` 브랜치의 `/ (root)`입니다. 실제 도구
 ├── msq-tracker/
 ├── pvp-series-calculator/
 ├── duty-finder/
-└── triple-triad/
+├── triple-triad/
+└── minions/
 ```
 
 검증: `node --test msq-tracker/tests/progress.test.cjs`
@@ -49,6 +51,8 @@ GitHub Pages의 원본은 `main` 브랜치의 `/ (root)`입니다. 실제 도구
 임무 초성 사전 검증: `node --test duty-finder/tests/duty-finder.test.cjs`
 
 카드 수첩 검증: `cd triple-triad` 후 `npm ci --ignore-scripts` 및 `npm test` (정적 배포에는 설치·빌드 불필요)
+
+꼬마친구 수첩 검증: `cd minions` 후 `npm ci --ignore-scripts` 및 `npm test`
 
 공통 색상·상단 메뉴·하단 영역은 `theme.css`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
 

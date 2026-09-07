@@ -27,6 +27,8 @@
 .tool-link.pvp { --card-accent: var(--ff-gold); background: linear-gradient(145deg, #292a36, #151d2d 70%); }
 .tool-link.duty { --card-accent: #9bddce; background: linear-gradient(145deg, #1d333b, #121e2f 70%); }
 .tool-link.triad { --card-accent: #c4b4f3; background: linear-gradient(145deg, #2a2942, #151d2d 70%); }
+.tool-link.minions { --card-accent: #acd6ba; background: linear-gradient(145deg, #1f3833, #141f2e 70%); }
+.site-nav { gap: 18px; }
 .tool-topline { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 24px; }
 .tool-topline span { color: var(--card-accent); font: 12px var(--ff-sans); letter-spacing: .14em; }
 .tool-topline b { color: #8298b5; font: 28px var(--ff-sans); }
