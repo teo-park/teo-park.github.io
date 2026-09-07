@@ -59,7 +59,39 @@
     storage.setItem('caughtFishLS-combined', JSON.stringify(state));
     return state;
   }
-  const api = { name, key, dependencies, createCatalog, plan, read, caught, setCaught };
+  function parseImport(text) {
+    const data = JSON.parse(String(text).replace(/^\uFEFF/, ''));
+    const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+    if (!object(data) || !['indigo', 'ruby'].some(route => Object.hasOwn(data, route))) throw new Error('체크리스트 JSON 형식이 아니에요.');
+    const result = { indigo: {}, ruby: {} };
+    for (const route of ['indigo', 'ruby']) {
+      if (!Object.hasOwn(data, route)) continue;
+      if (!object(data[route])) throw new Error('항로별 기록 형식이 올바르지 않아요.');
+      for (const [fish, value] of Object.entries(data[route])) {
+        if (typeof value !== 'boolean' || !key(fish.split('|')[0]) || fish.length > 1000 || ['__proto__', 'prototype', 'constructor'].includes(fish)) throw new Error('물고기 체크 기록 형식이 올바르지 않아요.');
+        result[route][fish] = value;
+      }
+    }
+    return result;
+  }
+  function importCaught(storage, text) {
+    const incoming = parseImport(text);
+    const state = read(storage);
+    let imported = 0;
+    for (const route of ['indigo', 'ruby']) {
+      const seen = new Set();
+      for (const [fish, value] of Object.entries(incoming[route])) {
+        if (!value) continue;
+        // Original exports use both fish names and fish|location|time|bait keys.
+        state[route][fish] = true;
+        const id = key(fish.split('|')[0]);
+        if (!seen.has(id)) { seen.add(id); imported++; }
+      }
+    }
+    storage.setItem('caughtFishLS-combined', JSON.stringify(state));
+    return { state, imported };
+  }
+  const api = { name, key, dependencies, createCatalog, plan, read, caught, setCaught, parseImport, importCaught };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OceanCollection = api;
 })(typeof window === 'undefined' ? globalThis : window);

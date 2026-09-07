@@ -34,6 +34,39 @@
     if (typeof convertTime === 'function' && catalog.size) convertTime(false);
   }
   document.addEventListener('DOMContentLoaded', () => {
+    const fileInput = document.getElementById('importCollectionFile');
+    const importButton = document.getElementById('importCollection');
+    const transferStatus = document.getElementById('collectionTransferStatus');
+    importButton.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      importButton.disabled = true;
+      try {
+        if (file.size > 2 * 1024 * 1024) throw new Error('파일이 너무 커요. 체크리스트 JSON 파일을 선택해 주세요.');
+        const result = api.importCaught(localStorage, await file.text());
+        state = result.state;
+        refresh();
+        transferStatus.textContent = `${result.imported}종의 잡은 기록을 합쳤어요. 근해·원양 모두 반영했고 기존 기록도 유지했어요.`;
+      } catch (error) {
+        transferStatus.textContent = `가져오지 못했어요. ${error instanceof SyntaxError ? '올바른 JSON 파일을 선택해 주세요.' : error.message}`;
+      } finally {
+        fileInput.value = '';
+        importButton.disabled = false;
+      }
+    });
+    document.getElementById('exportCollection').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(api.read(localStorage), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'checklist-export.json';
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      transferStatus.textContent = '근해·원양 기록을 JSON 파일로 내보냈어요.';
+    });
     const toggle = document.getElementById('hideCaughtFish');
     toggle.checked = hide;
     toggle.addEventListener('change', () => {

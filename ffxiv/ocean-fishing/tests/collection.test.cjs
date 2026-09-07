@@ -26,3 +26,25 @@ test('stored flags survive reload; unchecking clears old entry keys without touc
  api.setCaught(storage,'indigo','Gladius',true);
  assert.equal(api.caught(api.read(storage),'indigo','T!Gladius'),true);
 });
+test('original export merges both routes, handles entry keys, and preserves existing catches',()=>{
+ let value=JSON.stringify({indigo:{Gladius:false,Existing:true},ruby:{Saved:true}});
+ const storage={getItem:()=>value,setItem:(k,v)=>value=v};
+ const text=JSON.stringify({indigo:{'Gladius|갈라디온 만||||krill||':true,'Gladius|southern|||yes|krill||':false,Existing:false},ruby:{'Dusk Shark|sirensong||||krill||':true}});
+ const result=api.importCaught(storage,'\uFEFF'+text);
+ assert.equal(result.imported,2);
+ const state=api.read(storage);
+ for(const [route,fish]of [['indigo','Gladius'],['indigo','Existing'],['ruby','Dusk Shark'],['ruby','Saved']])assert.equal(api.caught(state,route,fish),true);
+ api.setCaught(storage,'indigo','Gladius',false);
+ assert.equal(api.caught(api.read(storage),'indigo','Gladius'),false);
+ const backup=value;
+ value='{}';api.importCaught(storage,backup);
+ assert.equal(api.caught(api.read(storage),'ruby','Dusk Shark'),true);
+ assert.equal(api.caught(api.read(storage),'indigo','Gladius'),false);
+});
+test('invalid imports leave saved progress unchanged',()=>{
+ let value=JSON.stringify({indigo:{Gladius:true},ruby:{}});const original=value;
+ const storage={getItem:()=>value,setItem:(k,v)=>value=v};
+ for(const text of ['null','[]','{}','broken','{"ruby":[]}','{"indigo":{"Gladius":"true"}}','{"ruby":{"__proto__":true}}']){
+  assert.throws(()=>api.importCaught(storage,text));assert.equal(value,original);
+ }
+});

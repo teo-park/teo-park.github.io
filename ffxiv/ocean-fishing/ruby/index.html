@@ -46,9 +46,9 @@
     <script src="../scripts/rubyoceancalculator.js?v=21" type="text/javascript" defer></script>
     <script src="../scripts/table-a11y.js?v=4" type="text/javascript" defer></script>
     <title>Ocean Fishing Tracker | Ruby</title>
-<link rel="stylesheet" href="../css/compact.css?v=20260907" />
-<script src="../scripts/collection.js?v=20260907" defer></script>
-<script src="../scripts/collection-ui.js?v=20260907" defer></script>
+<link rel="stylesheet" href="../css/compact.css?v=20260907-transfer" />
+<script src="../scripts/collection.js?v=20260907-transfer" defer></script>
+<script src="../scripts/collection-ui.js?v=20260907-transfer" defer></script>
 </head>
 
 <body>
@@ -58,7 +58,7 @@
                 <main>
         <div class="container-xxl">
             <div class="alert alert-info">This update is a work in progress. Data is being adjusted as more is collected.</div>
-            <div class="collection-toolbar"><label><input id="hideCaughtFish" type="checkbox" checked>잡은 물고기 숨기기</label><span id="collectionStatus" role="status" aria-live="polite">데이터를 불러오는 중…</span><small>직감·생미끼 조건에 필요한 물고기는 잡았어도 남겨요. 목록에서 잡음 체크를 해제할 수 있어요.</small></div><div class="bg-body-tertiary p-5 rounded">
+            <div class="collection-toolbar"><label><input id="hideCaughtFish" type="checkbox" checked>잡은 물고기 숨기기</label><span id="collectionStatus" role="status" aria-live="polite">데이터를 불러오는 중…</span><div class="collection-transfer"><button id="importCollection" type="button" class="btn btn-outline-primary">기록 가져오기</button><button id="exportCollection" type="button" class="btn btn-outline-secondary">기록 내보내기</button><input id="importCollectionFile" type="file" accept=".json,application/json" hidden></div><p id="collectionTransferStatus" role="status" aria-live="polite"></p><small>직감·생미끼 조건에 필요한 물고기는 잡았어도 남겨요. 목록에서 잡음 체크를 해제할 수 있어요.</small><small><a href="https://oceanfishing.boats/checklist/" target="_blank" rel="noopener noreferrer">원본 체크리스트</a>에서 Export한 JSON 파일을 가져오면 기존 기록과 합쳐요. 파일은 서버로 전송하지 않아요.</small></div><div class="bg-body-tertiary p-5 rounded">
                 <div class="row">
 
                     <div class="col-sm-6"><h1 data-localize="rubyroute">Ruby Route</h1></div>
