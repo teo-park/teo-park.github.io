@@ -29,3 +29,27 @@ test('unreviewed, uncertain and unknown IDs are rejected, excluded cells omitted
   assert.deepEqual(S.prepareImport([entry,entry],minions),[id]);
   for(const entries of [[],[{...entry,reviewed:false}],[{reviewed:true,results:[{state:'review',id}]}],[{reviewed:true,results:[{state:'match',id:999999}]}],[{reviewed:true,results:[{state:'skip'}]}]])assert.throws(()=>S.prepareImport(entries,minions));
 });
+
+test('a minion missing from the initial shortlist is rechecked between recognized neighbors',()=>{
+  const antelope=minions.find(m=>m.name==='꼬마 영양'),imp=minions.find(m=>m.name==='아기 임프'),coeurl=minions.find(m=>m.name==='꼬마 커얼'),wrong=minions.find(m=>m.name==='테미스 인형');
+  const results=[{index:0,id:antelope.id,state:'match',candidates:[{id:antelope.id,score:.77}]},{index:1,id:wrong.id,state:'review',candidates:[{id:wrong.id,score:.67}]},{index:2,id:coeurl.id,state:'match',candidates:[{id:coeurl.id,score:.81}]}];
+  let calls=0;
+  S.applyOrder(results,minions,(index,ids)=>{calls++;assert.equal(index,1);assert.deepEqual(ids,[imp.id]);return [{id:imp.id,score:.785}];});
+  assert.equal(calls,1);assert.equal(results[1].id,imp.id);assert.equal(results[1].state,'match');assert.deepEqual(results[1].orderContext,{before:antelope.id,after:coeurl.id});
+  assert.ok(results[1].candidates.some(c=>c.id===imp.id));
+});
+
+test('a unique order gap still needs matching pixels; uncertain color variants stay unconfirmed',()=>{
+  const list=[{id:1,order:1},{id:2,order:2},{id:3,order:3},{id:4,order:4}];
+  const entries=()=>[{index:0,id:1,state:'match',candidates:[{id:1,score:.9}]},{index:1,id:4,state:'review',candidates:[{id:4,score:.6}]},{index:2,id:3,state:'match',candidates:[{id:3,score:.9}]}];
+  const weak=entries();S.applyOrder(weak,list,()=>[{id:2,score:.2}]);assert.equal(weak[1].state,'review');assert.equal(weak[1].id,4);
+  const ambiguous=entries();ambiguous[2]={index:2,id:4,state:'match',candidates:[{id:4,score:.9}]};
+  S.applyOrder(ambiguous,list,()=>[{id:2,score:.82},{id:3,score:.81}]);assert.equal(ambiguous[1].state,'review');
+  const noEnd=entries().slice(0,2);S.applyOrder(noEnd,list,()=>{assert.fail('One neighbor cannot bound a recheck');});assert.equal(noEnd[1].state,'review');
+});
+
+test('refining a single bounded reference is supported without making a blank cell a match',()=>{
+  const image={width:200,height:240,data:new Uint8ClampedArray(200*240*4).fill(100)};
+  const result=S.matchCell(image,{x:0,y:0,w:1,h:1},0,S.references(data).slice(0,1));
+  assert.equal(result.candidates.length,1);assert.equal(result.state,'review');assert.equal(result.score,0);
+});

@@ -44,11 +44,11 @@
       for(const candidate of candidates)candidate.score=Math.max(candidate.score,similarity(v.vector,candidate.ref.vector));
     }
     candidates.sort((a,b)=>b.score-a.score);
-    const best=candidates[0],gap=best.score-candidates[1].score;
+    const best=candidates[0],gap=best.score-(candidates[1]?.score??0);
     return {index,id:best.id,state:(best.score>=.78&&gap>=.055)||(best.score>=.72&&gap>=.12)?'match':'review',score:best.score,candidates:candidates.map(({id,score})=>({id,score}))};
   }
-  function applyOrder(results,minions){
-    const order=new Map([...minions].sort((a,b)=>a.order-b.order||a.id-b.id).map((m,i)=>[m.id,i]));
+  function applyOrder(results,minions,rescore=null){
+    const ordered=[...minions].sort((a,b)=>a.order-b.order||a.id-b.id),order=new Map(ordered.map((m,i)=>[m.id,i]));
     // Confident picture matches are anchors. Never move an anchor to force a sequence.
     const anchors=results.filter(r=>r.state==='match');
     for(let i=1;i<anchors.length;i++)if(order.get(anchors[i].id)<=order.get(anchors[i-1].id)){
@@ -58,11 +58,20 @@
       if(r.state==='match'||r.orderConflict)continue;
       const before=results.slice(0,r.index).filter(a=>a.state==='match').at(-1),after=results.slice(r.index+1).find(a=>a.state==='match');
       if(!before&&!after)continue;
-      const choices=r.candidates.filter(c=>order.get(c.id)>(before?order.get(before.id):-1)&&order.get(c.id)<(after?order.get(after.id):Infinity));
+      const lower=before?order.get(before.id):-1,upper=after?order.get(after.id):ordered.length;
+      // Recheck the complete bounded catalog: the correct icon can miss the global
+      // coarse shortlist and only become recognizable when alignment is refined.
+      if(before&&after&&rescore&&upper>lower+1){
+        const allowed=ordered.slice(lower+1,upper).map(m=>m.id),allowedIds=new Set(allowed);
+        const checked=rescore(r.index,allowed).filter(c=>allowedIds.has(c.id)&&Number.isFinite(c.score));
+        const merged=new Map(r.candidates.map(c=>[c.id,c]));for(const c of checked)merged.set(c.id,c);
+        r.candidates=[...merged.values()].sort((a,b)=>b.score-a.score);
+      }
+      const choices=r.candidates.filter(c=>order.get(c.id)>lower&&order.get(c.id)<upper);
       if(!choices.length)continue;
       const best=choices[0];
       if(before&&after&&best.score>=.68&&(!choices[1]||best.score-choices[1].score>=.07)){
-        r.id=best.id;r.score=best.score;r.state='match';r.usedOrder=true;
+        r.id=best.id;r.score=best.score;r.state='match';r.usedOrder=true;r.orderContext={before:before.id,after:after.id};
       }
     }
     const used=new Map();for(const r of results){if(used.has(r.id)){r.state='review';used.get(r.id).state='review';}else used.set(r.id,r);}
@@ -78,7 +87,13 @@
       results.push(matchCell(image,rect,index,refs));onProgress(index+1,count);
       await new Promise(resolve=>setTimeout(resolve,0));
     }
-    return useOrder?applyOrder(results,minions):results;
+    if(cancelled())throw Error('인식을 취소했어요.');
+    if(!useOrder)return results;
+    const byId=new Map(refs.map(ref=>[ref.id,ref]));
+    return applyOrder(results,minions,(index,ids)=>{
+      const subset=ids.map(id=>byId.get(id)).filter(Boolean);
+      return subset.length?matchCell(image,rect,index,subset).candidates:[];
+    });
   }
   function prepareImport(entries,minions){
     const valid=new Set(minions.map(m=>m.id)),ids=new Set();

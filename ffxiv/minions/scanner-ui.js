@@ -34,7 +34,7 @@
       const r=current()?.results?.[cell];$('scanCandidates').hidden=!r||editing;
       if(!r||editing)return;
       $('scanCellTitle').textContent=`${Math.floor(cell/5)+1}행 ${cell%5+1}열 · ${r.state==='skip'?'제외':name(r.id)}`;
-      $('scanCellHelp').textContent=r.state==='review'?'그림을 비교하고 맞는 꼬친을 선택하세요. 목록에서 직접 검색할 수도 있어요.':r.usedOrder?'앞뒤 꼬친의 게임 분류순을 함께 확인한 후보예요.':'선택한 칸의 꼬친을 바꾸거나 등록에서 제외할 수 있어요.';
+      $('scanCellHelp').textContent=r.state==='review'?'그림을 비교하고 맞는 꼬친을 선택하세요. 목록에서 직접 검색할 수도 있어요.':r.usedOrder&&r.orderContext?`${name(r.orderContext.before)} → ${name(r.id)} → ${name(r.orderContext.after)} 순서에서 그림을 다시 비교한 후보예요.`:r.usedOrder?'앞뒤 꼬친의 게임 분류순을 함께 확인한 후보예요.':'선택한 칸의 꼬친을 바꾸거나 등록에서 제외할 수 있어요.';
       const query=$('scanCandidateSearch').value;
       const options=query.trim()?minions.filter(m=>window.MinionCollection.matches(m,query)).slice(0,30):r.candidates.map(c=>byId.get(c.id)).filter(Boolean);
       $('scanCandidateList').innerHTML=options.map(m=>`<button type="button" data-scan-id="${m.id}" aria-pressed="${r.state==='match'&&r.id===m.id}" ${busy?'disabled':''}><img src="${esc(m.icon)}" alt="" width="40" height="40"><span>${esc(m.name)}</span>${r.id===m.id?'<b>현재 후보</b>':''}</button>`).join('')||'<p>검색 결과가 없어요.</p>';
@@ -103,7 +103,7 @@
       entries.push(...chosen.map((file,i)=>({file,count:30,useOrder:true,reviewed:false,results:null,key:first+i})));
       await select(first);
     }
-    function choose(id){const e=current(),r=e?.results?.[cell];if(!r||busy||!byId.has(id))return;r.id=id;r.state='match';r.manual=true;e.reviewed=false;render();}
+    function choose(id){const e=current(),r=e?.results?.[cell];if(!r||busy||!byId.has(id))return;r.id=id;r.state='match';r.manual=true;r.usedOrder=false;delete r.orderContext;e.reviewed=false;render();}
     function changeCrop(rect){const e=current();if(!e||busy)return;e.crop=rect;e.results=null;e.reviewed=false;editing=true;render();}
     const point=event=>{const r=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))};};
     canvas.addEventListener('pointerdown',event=>{if(!editing||busy||!bitmap)return;drag={start:point(event),before:{...current().crop}};canvas.setPointerCapture(event.pointerId);});
