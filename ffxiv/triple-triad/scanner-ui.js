@@ -5,7 +5,7 @@
     const S = window.TriadScanner, $ = id => document.getElementById(id), pages = S.pagesFor(cards);
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const canvas = $('scanCanvas'), context = canvas.getContext('2d');
-    let entries = [], selected = 0, bitmap = null, dragStart = null, dragCrop = null, previewVersion = 0, runVersion = 0, busy = false;
+    let entries = [], selected = 0, bitmap = null, dragStart = null, dragCrop = null, previewVersion = 0, runVersion = 0, busy = false, pasteNumber = 0;
     const current = () => entries[selected];
     const status = text => { $('scanStatus').textContent = text; };
     const getPage = entry => pages.find(page => page.key === entry.pageKey);
@@ -120,14 +120,31 @@
       for(const entry of entries){entry.crop={...crop};entry.results=null;entry.reviewed=false;entry.error='';}
       status('같은 비율의 카드 영역을 모든 캡처에 적용했어요. 전체 인식을 눌러 주세요.');renderReview();
     });
-    $('scanFiles').addEventListener('change',async event=>{
-      const files=[...event.target.files];event.target.value='';if(!files.length)return;
-      if(files.length>30||files.some(f=>!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>20*1024*1024)||files.reduce((sum,f)=>sum+f.size,0)>200*1024*1024){status('PNG·JPG·WebP를 최대 30장, 파일당 20MB·합계 200MB 이하로 선택해 주세요.');return;}
-      runVersion++; files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
-      entries=files.map((file,index)=>({file,pageKey:pages[index]?.key||'',crop:null,results:null,reviewed:false,error:''}));
+    async function addFiles(files, pasted=false) {
+      if(!files.length)return;
+      if(busy){status('인식이 끝난 뒤 캡처를 다시 추가해 주세요.');return;}
+      const totalSize=[...entries.map(e=>e.file),...files].reduce((sum,f)=>sum+f.size,0);
+      if(entries.length+files.length>30||files.some(f=>!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>20*1024*1024)||totalSize>200*1024*1024){status('PNG·JPG·WebP를 최대 30장, 파일당 20MB·합계 200MB 이하로 추가해 주세요. 기존 캡처는 유지했어요.');return;}
+      const firstAdded=entries.length, usedPages=new Set(entries.map(e=>e.pageKey));
+      if(!pasted)files.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+      for(let file of files){
+        if(pasted){const ext={'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[file.type];file=new File([file],`붙여넣은 캡처 ${String(++pasteNumber).padStart(2,'0')}.${ext}`,{type:file.type});}
+        const pageKey=pages.find(p=>!usedPages.has(p.key))?.key||'';usedPages.add(pageKey);
+        entries.push({file,pageKey,crop:null,results:null,reviewed:false,error:''});
+      }
       $('scanWorkspace').hidden=false;$('scanApplyPanel').hidden=false;
-      status(`${files.length}장을 선택했어요. 첫 캡처의 5×6 카드 영역을 확인하고, 같은 위치라면 모든 캡처에 적용하세요.`);
-      await select(0);
+      status(`${files.length}장을 ${pasted?'붙여넣었어요':'추가했어요'}. 총 ${entries.length}장 · 새 캡처의 페이지 번호와 5×6 카드 영역을 확인해 주세요.`);
+      await select(firstAdded);
+    }
+    $('scanFiles').addEventListener('change',event=>{
+      const files=[...event.target.files];event.target.value='';void addFiles(files);
+    });
+    document.addEventListener('paste',event=>{
+      if(!$('scanDialog').open||!event.clipboardData)return;
+      let files=Array.from(event.clipboardData.items||[]).filter(item=>item.kind==='file'&&item.type.startsWith('image/')).map(item=>item.getAsFile()).filter(Boolean);
+      if(!files.length)files=Array.from(event.clipboardData.files||[]).filter(file=>file.type.startsWith('image/'));
+      if(!files.length)return;
+      event.preventDefault();void addFiles(files,true);
     });
     $('scanPage').innerHTML='<option value="">페이지 선택</option>'+pages.map(p=>`<option value="${p.key}">${esc(p.label)}</option>`).join('');
     $('scanPage').addEventListener('change',()=>{current().pageKey=$('scanPage').value;current().results=null;current().reviewed=false;current().error='';renderReview();});
@@ -174,6 +191,6 @@
     });
     $('scanOpen').addEventListener('click',()=>{if(!$('scanDialog').open)$('scanDialog').showModal();});
     $('scanClose').addEventListener('click',()=>$('scanDialog').close());
-    $('scanDialog').addEventListener('close',()=>{runVersion++;previewVersion++;busy=false;dragStart=null;bitmap?.close();bitmap=null;entries=[];canvas.width=canvas.height=0;$('scanWorkspace').hidden=true;$('scanApplyPanel').hidden=true;$('scanFiles').disabled=false;status('① 캡처 선택 → ② 카드 영역 지정 → ③ 인식·검토 → ④ 저장');});
+    $('scanDialog').addEventListener('close',()=>{runVersion++;previewVersion++;busy=false;pasteNumber=0;dragStart=null;bitmap?.close();bitmap=null;entries=[];canvas.width=canvas.height=0;$('scanWorkspace').hidden=true;$('scanApplyPanel').hidden=true;$('scanFiles').disabled=false;status('① 캡처 선택·붙여넣기 → ② 카드 영역 지정 → ③ 인식·검토 → ④ 저장');});
   }
 })();

@@ -35,6 +35,12 @@ function scanner(t, cardCount = 60) {
     $(id).dispatchEvent(new w.Event('change', {bubbles: true}));
   };
   return {w, $, change, applied: () => applied,
+    paste(files, {target = $('scanDialog'), fallback = false} = {}) {
+      const event = new w.Event('paste', {bubbles: true, cancelable: true});
+      Object.defineProperty(event, 'clipboardData', {value: {items: fallback ? [] : files.map(file => ({kind: 'file', type: file.type, getAsFile: () => file})), files}});
+      target.dispatchEvent(event);
+      return event;
+    },
     async choose(names) {
       Object.defineProperty($('scanFiles'), 'files', {configurable: true, value: names.map(name => new w.File(['image'], name, {type: 'image/png'}))});
       $('scanFiles').dispatchEvent(new w.Event('change', {bubbles: true}));
@@ -110,6 +116,67 @@ test('closing during analysis discards pending results without applying a collec
   a.$('scanOpen').click();
   await a.choose(['page-1.png']);
   await a.analyze();
+  a.change('scanReviewed', true);
+  assert.equal(a.$('scanApply').disabled, false);
+});
+
+test('pasted images append in order without losing edited results, reviews or selected page numbers', async t => {
+  const a = scanner(t, 90);
+  await a.choose(['first.png']);
+  a.change('scanPage', 'normal:2');
+  await a.analyze();
+  a.$('scanReviewGrid').querySelector('button').click();
+  a.change('scanReviewed', true);
+  const image = new a.w.File(['image'], 'image.png', {type: 'image/png'});
+  assert.equal(a.paste([image]).defaultPrevented, true);
+  await until(() => a.$('scanFileName').textContent === '붙여넣은 캡처 01.png');
+  assert.equal(a.$('scanFileList').children.length, 2);
+  assert.equal(a.$('scanPage').value, 'normal:1');
+  a.paste([image], {fallback: true});
+  await until(() => a.$('scanFileName').textContent === '붙여넣은 캡처 02.png');
+  assert.equal(a.$('scanFileList').children.length, 3);
+  assert.equal(a.$('scanPage').value, 'normal:3');
+  a.$('scanFileList').querySelector('button').click();
+  await until(() => a.$('scanFileName').textContent === 'first.png');
+  assert.equal(a.$('scanReviewed').checked, true);
+  assert.match(a.$('scanPageSummary').textContent, /보유 14장/);
+  await a.choose(['additional.png']);
+  assert.equal(a.$('scanFileList').children.length, 4);
+  assert.match(a.$('scanFileList').querySelector('button').textContent, /검토 완료/);
+});
+
+test('paste can start an empty collection; text and closed-dialog paste remain native', async t => {
+  const a = scanner(t);
+  const image = new a.w.File(['image'], 'image.png', {type: 'image/png'});
+  a.$('scanClose').click();
+  assert.equal(a.paste([image], {target: a.w.document}).defaultPrevented, false);
+  assert.equal(a.$('scanWorkspace').hidden, true);
+  a.$('scanOpen').click();
+  assert.equal(a.paste([], {target: a.$('scanExpected')}).defaultPrevented, false);
+  a.paste([image], {target: a.$('scanExpected')});
+  await until(() => a.$('scanCanvas').width === 256);
+  assert.equal(a.$('scanWorkspace').hidden, false);
+  assert.equal(a.$('scanFileList').children.length, 1);
+  await a.analyze();
+  a.change('scanReviewed', true);
+  a.$('scanApply').click();
+  assert.equal(a.applied().ownedIds.length, 15);
+});
+
+test('invalid, excessive or busy pastes do not alter existing captures', async t => {
+  const a = scanner(t);
+  await a.choose(['first.png']);
+  const image = new a.w.File(['image'], 'image.png', {type: 'image/png'});
+  for (const files of [Array(30).fill(image), [new a.w.File(['image'], 'image.gif', {type: 'image/gif'})]]) {
+    a.paste(files);
+    assert.equal(a.$('scanFileList').children.length, 1);
+    assert.match(a.$('scanStatus').textContent, /기존 캡처는 유지/);
+  }
+  a.$('scanAnalyze').click();
+  a.paste([image]);
+  assert.match(a.$('scanStatus').textContent, /인식이 끝난 뒤/);
+  await until(() => !a.$('scanAnalyze').disabled);
+  assert.equal(a.$('scanFileList').children.length, 1);
   a.change('scanReviewed', true);
   assert.equal(a.$('scanApply').disabled, false);
 });
