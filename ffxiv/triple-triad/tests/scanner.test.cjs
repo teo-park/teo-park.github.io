@@ -55,3 +55,22 @@ test('blank and unreadable cells need review; unused final-page positions are no
   assert.ok(S.validateRect({x: 0, y: 0, w: .2, h: .2}, 200, 240));
   assert.ok(S.validateRect({x: 0, y: 0, w: 1, h: .5}, 200, 240));
 });
+
+test('a calibrated question mark survives an offset and a bright selection border without marking artwork missing', () => {
+  const width=200,height=240,data=new Uint8ClampedArray(width*height*4);
+  let seed=12345;
+  for(let i=0;i<data.length;i+=4){seed=(seed*1664525+1013904223)>>>0;data[i]=seed&255;data[i+1]=(seed>>>8)&255;data[i+2]=(seed>>>16)&255;data[i+3]=255;}
+  const image={width,height,data},rect={x:0,y:0,w:1,h:1};
+  function question(index,shift,highlight){
+    const x0=index%5*40,y0=Math.floor(index/5)*40;
+    const paint=(x,y,v)=>{const i=((y0+y)*width+x0+x)*4;data[i]=data[i+1]=data[i+2]=v;};
+    for(let y=0;y<40;y++)for(let x=0;x<40;x++)paint(x,y,highlight&&(x<5||x>34||y<5||y>34)?240:45);
+    const glyph=['01110','10001','00010','00100','00100','00000','00100'];
+    glyph.forEach((row,y)=>[...row].forEach((pixel,x)=>{if(pixel==='1')for(let dy=0;dy<3;dy++)for(let dx=0;dx<3;dx++)paint(12+x*3+dx+shift,9+y*3+dy,220);}));
+  }
+  question(0,0,false);question(11,4,true);
+  const reference=S.makeReference(image,rect,0);
+  const results=S.analyze(image,rect,30,reference);
+  assert.deepEqual(results.filter(r=>r.state==='missing').map(r=>r.index),[0,11]);
+  assert.equal(results.filter(r=>r.state==='owned').length,28);
+});

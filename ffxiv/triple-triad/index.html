@@ -14,11 +14,11 @@
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/triple-triad/" />
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../theme.css?v=20260907-triad" />
-  <link rel="stylesheet" href="./styles.css?v=20260907-scan2" />
+  <link rel="stylesheet" href="./styles.css?v=20260907-overlay1" />
   <script src="./data.js?v=20260907-2" defer></script>
   <script src="./engine.js?v=20260907-2" defer></script>
-  <script src="./scanner.js?v=20260907-scan2" defer></script>
-  <script src="./scanner-ui.js?v=20260907-paste1" defer></script>
+  <script src="./scanner.js?v=20260907-overlay1" defer></script>
+  <script src="./scanner-ui.js?v=20260907-overlay1" defer></script>
   <script src="./app.js?v=20260907-scan2" defer></script>
 </head>
 <body>
@@ -64,19 +64,19 @@
   <dialog id="detailDialog" aria-label="카드 상세"><form method="dialog"><button class="dialog-close" aria-label="카드 상세 닫기">닫기 ×</button></form><div id="dialogBody"></div></dialog>
   <dialog id="scanDialog" class="scan-dialog" aria-labelledby="scanTitle">
     <div class="scan-heading"><div><p class="eyebrow">SCREENSHOT IMPORT</p><h2 id="scanTitle">게임 캡처로 수집 등록</h2></div><button id="scanClose" class="quiet" aria-label="캡처 등록 닫기">닫기 ×</button></div>
-    <p class="muted">5열×6행의 <strong>전체 카드 목록</strong>을 캡처해 주세요. 물음표 칸을 구분해 수집 상태를 읽어요. 캡처는 서버로 전송하지 않습니다.</p>
+    <p class="muted">5열×6행의 <strong>전체 카드 목록</strong>을 캡처해 주세요. 카드 칸만 잘라낸 이미지도 읽고, <strong>캡처 위에서 바로 체크를 바꿀 수 있어요.</strong> 캡처는 서버로 전송하지 않습니다.</p>
     <div class="scan-upload"><label class="file-button primary-file">캡처 파일 추가<input id="scanFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple /></label><p><strong>이 창에서 Ctrl+V로 캡처 붙여넣기</strong> · Mac은 ⌘V<br />PNG·JPG·WebP · 합계 최대 30장<br /><span class="muted">붙여넣은 캡처는 목록 끝에 추가해요. 새 캡처에는 비어 있는 페이지 번호를 임시 지정해요.</span></p></div>
     <p id="scanStatus" class="scan-status" role="status">① 캡처 선택·붙여넣기 → ② 카드 영역 지정 → ③ 인식·검토 → ④ 저장</p>
     <div id="scanWorkspace" class="scan-workspace" hidden>
       <aside class="scan-file-pane"><h3>캡처 목록</h3><div id="scanFileList" class="scan-file-list"></div></aside>
       <section class="scan-review-pane" aria-label="현재 캡처 검토">
         <div class="scan-page-controls"><label>이 캡처의 게임 페이지<select id="scanPage"></select></label><span id="scanFileName" class="small muted"></span></div>
-        <p class="small muted">첫 카드의 왼쪽 위부터 30번째 칸의 오른쪽 아래까지 드래그하세요. 페이지 번호·합계는 제외하고, 마지막 페이지의 빈 공간은 포함해요.</p>
-        <div class="scan-canvas-wrap"><canvas id="scanCanvas" aria-label="카드 영역을 드래그로 지정하는 캡처 미리보기"></canvas></div>
-        <details class="scan-crop-fields"><summary>영역을 숫자로 조정하기</summary><div><label>왼쪽 (%)<input id="scanCropX" type="number" min="0" max="99" step="0.1" /></label><label>위쪽 (%)<input id="scanCropY" type="number" min="0" max="99" step="0.1" /></label><label>너비 (%)<input id="scanCropW" type="number" min="1" max="100" step="0.1" /></label><label>높이 (%)<input id="scanCropH" type="number" min="1" max="100" step="0.1" /></label></div></details>
-        <div class="button-row scan-actions"><button id="scanCopyCrop">이 영역을 모든 캡처에 적용</button><button id="scanAnalyze" class="primary">전체 인식</button></div>
+        <p id="scanModeHelp" class="small muted">카드 칸의 위치를 확인한 뒤 전체 인식을 눌러 주세요.</p>
+        <div class="button-row scan-actions"><button id="scanAnalyze" class="primary">전체 인식</button><button id="scanEditCrop" disabled>영역 다시 지정</button><button id="scanPickMissing" disabled aria-pressed="false">물음표 한 칸으로 인식 보정</button></div>
         <p id="scanPageSummary" class="scan-page-summary" role="status"></p>
-        <div id="scanReviewGrid" class="scan-review-grid" aria-label="인식한 카드별 수집 상태"></div>
+        <p id="scanCalibrationHint" class="scan-calibration-hint" role="status" hidden>캡처에서 물음표가 보이는 미수집 칸 하나를 눌러 주세요. 그 모양을 기준으로 미검토 캡처를 다시 인식하며, 직접 수정한 칸은 유지해요.</p>
+        <div class="scan-canvas-wrap"><div id="scanCanvasStage" class="scan-canvas-stage"><canvas id="scanCanvas" aria-label="카드 영역을 드래그로 지정하는 캡처 미리보기"></canvas><div id="scanReviewGrid" class="scan-review-grid" aria-label="캡처 위에서 수집 상태 변경" hidden></div></div></div>
+        <div id="scanCropControls"><details class="scan-crop-fields"><summary>영역을 숫자로 조정하기</summary><div><label>왼쪽 (%)<input id="scanCropX" type="number" min="0" max="99" step="0.1" /></label><label>위쪽 (%)<input id="scanCropY" type="number" min="0" max="99" step="0.1" /></label><label>너비 (%)<input id="scanCropW" type="number" min="1" max="100" step="0.1" /></label><label>높이 (%)<input id="scanCropH" type="number" min="1" max="100" step="0.1" /></label></div></details><div class="button-row scan-actions"><button id="scanUseFullImage">이미지 전체를 카드 영역으로</button><button id="scanCopyCrop">이 영역을 모든 캡처에 적용</button></div></div>
         <div class="scan-review-actions"><label class="scan-reviewed"><input type="checkbox" id="scanReviewed" disabled /> 이 페이지 번호와 보유·미수집 칸을 확인했어요</label><button id="scanNext" disabled>다음 캡처 →</button></div>
       </section>
     </div>

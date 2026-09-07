@@ -6,7 +6,9 @@
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const canvas = $('scanCanvas'), context = canvas.getContext('2d');
     let entries = [], selected = 0, bitmap = null, dragStart = null, dragCrop = null, previewVersion = 0, runVersion = 0, busy = false, pasteNumber = 0;
+    let pickingMissing = false, missingReference = null;
     const current = () => entries[selected];
+    const editing = () => !current()?.results || !!current().editCrop;
     const status = text => { $('scanStatus').textContent = text; };
     const getPage = entry => pages.find(page => page.key === entry.pageKey);
     const counts = entry => Object.fromEntries(['owned', 'missing', 'uncertain'].map(state => [state, entry.results?.filter(r => r.state === state).length || 0]));
@@ -27,7 +29,15 @@
     }
     function draw() {
       if (!bitmap || !current()?.crop) return;
-      const {x,y,w,h} = current().crop, W = canvas.width, H = canvas.height;
+      const {x,y,w,h} = current().crop;
+      if(!editing()){
+        const scale=Math.min(1,1400/Math.max(w*bitmap.width,h*bitmap.height));
+        canvas.width=Math.round(w*bitmap.width*scale);canvas.height=Math.round(h*bitmap.height*scale);
+        context.drawImage(bitmap,x*bitmap.width,y*bitmap.height,w*bitmap.width,h*bitmap.height,0,0,canvas.width,canvas.height);
+        return;
+      }
+      canvas.width=bitmap.width;canvas.height=bitmap.height;
+      const W=canvas.width,H=canvas.height;
       context.clearRect(0,0,W,H); context.drawImage(bitmap,0,0,W,H);
       context.fillStyle = '#03081499';
       context.fillRect(0,0,W,y*H); context.fillRect(0,(y+h)*H,W,(1-y-h)*H);
@@ -65,19 +75,32 @@
       const entry=current(); if(!entry)return;
       const page=getPage(entry), count=counts(entry);
       $('scanPage').value=entry.pageKey||''; $('scanFileName').textContent=entry.file.name;
-      $('scanPageSummary').textContent=entry.error || (entry.results ? `보유 ${count.owned}장 · 미수집 ${count.missing}장${count.uncertain ? ` · 확인 필요 ${count.uncertain}칸` : ''} — 칸을 누르면 상태를 바꿀 수 있어요.` : '영역을 확인한 뒤 전체 인식을 눌러 주세요.');
+      $('scanPageSummary').textContent=entry.error || (entry.results ? `보유 ${count.owned}장 · 미수집 ${count.missing}장${count.uncertain ? ` · 확인 필요 ${count.uncertain}칸` : ''} — 캡처의 칸을 누르면 바로 바뀌어요.` : '영역을 확인한 뒤 전체 인식을 눌러 주세요.');
       $('scanReviewGrid').innerHTML=entry.results&&page ? entry.results.map((result,index) => {
-        const card=page.cards[index], label={owned:'보유',missing:'미수집',uncertain:'확인 필요'}[result.state];
-        return `<button class="scan-cell ${result.state}" data-scan-cell="${index}" aria-label="${esc(card.number+' '+card.name+' · '+label+' · 눌러서 변경')}"><span>${esc(card.number)}</span><strong>${esc(card.name)}</strong><b>${label}${result.manual ? ' · 수정' : ''}</b></button>`;
+        const card=page.cards[index], label={owned:'수집',missing:'미수집',uncertain:'확인 필요'}[result.state];
+        return `<button class="scan-cell ${result.state}" data-scan-cell="${index}" type="button" role="checkbox" aria-checked="${result.state==='uncertain'?'mixed':result.state==='owned'}" aria-label="${esc(card.number+' '+card.name+' · '+label+' · 눌러서 변경')}" title="${esc(card.number+' '+card.name+(result.manual?' · 직접 수정':''))}" ${busy?'disabled':''}><span>${esc(card.number)}</span><b>${result.state==='owned'?'✓ ':result.state==='uncertain'?'? ':''}${label}</b>${result.manual?'<i aria-hidden="true">●</i>':''}</button>`;
       }).join('') : '';
+      $('scanReviewGrid').hidden=editing()||!bitmap;
+      $('scanCanvasStage').classList.toggle('is-review',!editing());
+      $('scanCanvasStage').classList.toggle('picking-missing',pickingMissing);
+      $('scanCalibrationHint').hidden=!pickingMissing;
+      $('scanCropControls').hidden=!editing();
+      $('scanModeHelp').textContent=editing()?'5×6 카드 칸만 들어오도록 드래그하세요. 카드만 잘라낸 캡처는 아래의 ‘이미지 전체’를 누르면 돼요.':'원본 카드 위의 체크를 눌러 수집·미수집을 바꿔요. 위치를 조정하려면 ‘영역 다시 지정’을 눌러 주세요.';
+      $('scanEditCrop').textContent=editing()?'보정 화면으로':'영역 다시 지정';
+      $('scanEditCrop').disabled=busy||!entry.results||!bitmap;
+      $('scanPickMissing').disabled=busy||editing()||!bitmap;
+      $('scanPickMissing').setAttribute('aria-pressed',String(pickingMissing));
+      $('scanPickMissing').textContent=pickingMissing?'물음표 선택 취소':'물음표 한 칸으로 인식 보정';
+      $('scanUseFullImage').disabled=busy||!bitmap;
       $('scanReviewed').checked=!!entry.reviewed; $('scanReviewed').disabled=busy||!entry.results||!!count.uncertain;
-      $('scanAnalyze').disabled=busy; $('scanCopyCrop').disabled=busy||!entry.crop;
+      $('scanAnalyze').disabled=busy||!bitmap; $('scanCopyCrop').disabled=busy||!entry.crop||!bitmap;
       $('scanPage').disabled=busy; $('scanFiles').disabled=busy;
       $('scanNext').disabled=busy||selected>=entries.length-1;
-      fileList(); updateTotal();
+      draw(); fileList(); updateTotal();
     }
     async function select(index) {
       selected=index; const entry=current(), version=++previewVersion;
+      pickingMissing=false;dragStart=null;bitmap?.close();bitmap=null;canvas.width=canvas.height=0;
       renderReview();
       try {
         const image=await openImage(entry.file);
@@ -89,13 +112,13 @@
     }
     function changeCrop(crop) {
       const entry=current(); if(!entry||busy)return;
-      entry.crop=crop; entry.results=null; entry.reviewed=false; entry.error=''; cropFields(); draw(); renderReview();
+      entry.crop=crop; entry.results=null; entry.reviewed=false; entry.editCrop=true; entry.error=''; pickingMissing=false; cropFields(); renderReview();
     }
     function point(event) {
       const rect=canvas.getBoundingClientRect();
       return {x:Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width)),y:Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height))};
     }
-    canvas.addEventListener('pointerdown',event=>{if(busy||!bitmap)return;dragStart=point(event);dragCrop={...current().crop};canvas.setPointerCapture(event.pointerId);});
+    canvas.addEventListener('pointerdown',event=>{if(busy||!bitmap||!editing())return;dragStart=point(event);dragCrop={...current().crop};canvas.setPointerCapture(event.pointerId);});
     canvas.addEventListener('pointermove',event=>{
       if(!dragStart)return;const end=point(event);
       current().crop={x:Math.min(dragStart.x,end.x),y:Math.min(dragStart.y,end.y),w:Math.abs(end.x-dragStart.x),h:Math.abs(end.y-dragStart.y)};draw();
@@ -120,6 +143,13 @@
       for(const entry of entries){entry.crop={...crop};entry.results=null;entry.reviewed=false;entry.error='';}
       status('같은 비율의 카드 영역을 모든 캡처에 적용했어요. 전체 인식을 눌러 주세요.');renderReview();
     });
+    $('scanUseFullImage').addEventListener('click',()=>{
+      if(busy||!bitmap)return;
+      const crop={x:0,y:0,w:1,h:1},error=S.validateRect(crop,bitmap.width,bitmap.height);
+      if(error){status(error);return;}changeCrop(crop);
+    });
+    $('scanEditCrop').addEventListener('click',()=>{if(busy||!current()?.results)return;current().editCrop=!current().editCrop;pickingMissing=false;renderReview();});
+    $('scanPickMissing').addEventListener('click',()=>{if(busy||editing()||!bitmap)return;pickingMissing=!pickingMissing;renderReview();});
     async function addFiles(files, pasted=false) {
       if(!files.length)return;
       if(busy){status('인식이 끝난 뒤 캡처를 다시 추가해 주세요.');return;}
@@ -147,39 +177,54 @@
       event.preventDefault();void addFiles(files,true);
     });
     $('scanPage').innerHTML='<option value="">페이지 선택</option>'+pages.map(p=>`<option value="${p.key}">${esc(p.label)}</option>`).join('');
-    $('scanPage').addEventListener('change',()=>{current().pageKey=$('scanPage').value;current().results=null;current().reviewed=false;current().error='';renderReview();});
+    $('scanPage').addEventListener('change',()=>{current().pageKey=$('scanPage').value;current().results=null;current().reviewed=false;current().error='';pickingMissing=false;renderReview();});
     $('scanFileList').addEventListener('click',event=>{const button=event.target.closest('[data-scan-file]');if(button&&!busy)select(Number(button.dataset.scanFile));});
     $('scanNext').addEventListener('click',async()=>{if(busy||selected>=entries.length-1)return;await select(selected+1);$('scanPage').scrollIntoView({block:'start',behavior:'smooth'});});
     $('scanReviewGrid').addEventListener('click',event=>{
       const button=event.target.closest('[data-scan-cell]');if(!button||busy)return;
-      const index=Number(button.dataset.scanCell),result=current().results[index];result.state=result.state==='owned'?'missing':'owned';result.manual=true;current().reviewed=false;renderReview();
+      const index=Number(button.dataset.scanCell),result=current().results[index];
+      if(pickingMissing){
+        try{
+          missingReference=S.makeReference(samplePixels(bitmap,current().crop),{x:0,y:0,w:1,h:1},index);
+          result.state='missing';result.manual=true;current().reviewed=false;pickingMissing=false;
+          void analyzeAll(true);
+        }catch(error){status(error.message);}
+        return;
+      }
+      result.state=result.state==='owned'?'missing':'owned';result.manual=true;current().reviewed=false;renderReview();
       $('scanReviewGrid').querySelector(`[data-scan-cell="${index}"]`)?.focus({preventScroll:true});
     });
     $('scanReviewed').addEventListener('change',()=>{current().reviewed=$('scanReviewed').checked;fileList();updateTotal();});
     $('scanExpected').addEventListener('input',updateTotal);
     document.querySelectorAll('[name="scanMode"]').forEach(el=>el.addEventListener('change',updateTotal));
-    $('scanAnalyze').addEventListener('click',async()=>{
+    function samplePixels(image,crop) {
+      const cw=crop.w*image.width,ch=crop.h*image.height,scale=Math.min(1,1400/Math.max(cw,ch));
+      const work=document.createElement('canvas');work.width=Math.round(cw*scale);work.height=Math.round(ch*scale);
+      const ctx=work.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,crop.x*image.width,crop.y*image.height,cw,ch,0,0,work.width,work.height);
+      const pixels=ctx.getImageData(0,0,work.width,work.height);work.width=work.height=0;return pixels;
+    }
+    async function analyzeAll(recheck=false) {
+      if(busy)return;
       const version=++runVersion;busy=true;renderReview();
       for(let index=0;index<entries.length;index++){
         if(version!==runVersion)return;
-        const entry=entries[index];if(entry.results)continue;
+        const entry=entries[index];if(entry.results&&(!recheck||entry.reviewed))continue;
         status(`${index+1}/${entries.length} 캡처 인식 중…`);await new Promise(resolve=>setTimeout(resolve,0));
         let image;
         try {
           const page=getPage(entry);if(!page)throw Error('게임 페이지 번호를 지정해 주세요.');
           image=await openImage(entry.file);entry.width=image.width;entry.height=image.height;entry.crop ||= defaultCrop(image.width,image.height);
+          if(version!==runVersion)return;
           const error=S.validateRect(entry.crop,image.width,image.height);if(error)throw Error(error);
-          const crop=entry.crop,cw=crop.w*image.width,ch=crop.h*image.height,scale=Math.min(1,1400/Math.max(cw,ch));
-          const work=document.createElement('canvas');work.width=Math.round(cw*scale);work.height=Math.round(ch*scale);
-          const ctx=work.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,crop.x*image.width,crop.y*image.height,cw,ch,0,0,work.width,work.height);
-          entry.results=S.analyze(ctx.getImageData(0,0,work.width,work.height),{x:0,y:0,w:1,h:1},page.cards.length);entry.reviewed=false;entry.error='';
-          work.width=work.height=0;
+          const previous=entry.results;
+          entry.results=S.analyze(samplePixels(image,entry.crop),{x:0,y:0,w:1,h:1},page.cards.length,missingReference).map((result,i)=>previous?.[i]?.manual?previous[i]:result);entry.reviewed=false;entry.editCrop=false;entry.error='';
         } catch(error){entry.error=error.message;entry.results=null;} finally{image?.close();}
         renderReview();
       }
       if(version!==runVersion)return;
-      busy=false;status('인식했어요. 각 캡처의 게임 페이지 번호와 결과를 확인하세요. 확인 필요 칸은 직접 지정해야 저장할 수 있어요.');renderReview();
-    });
+      busy=false;status(recheck?'선택한 물음표로 미검토 캡처를 다시 인식했어요. 직접 수정한 칸과 검토 완료 페이지는 유지했어요.':'인식했어요. 캡처의 카드 위에서 체크를 수정하고 페이지별 확인을 눌러 주세요.');renderReview();
+    }
+    $('scanAnalyze').addEventListener('click',()=>{void analyzeAll();});
     $('scanApply').addEventListener('click',()=>{
       try{
         if(busy)return;
@@ -191,6 +236,6 @@
     });
     $('scanOpen').addEventListener('click',()=>{if(!$('scanDialog').open)$('scanDialog').showModal();});
     $('scanClose').addEventListener('click',()=>$('scanDialog').close());
-    $('scanDialog').addEventListener('close',()=>{runVersion++;previewVersion++;busy=false;pasteNumber=0;dragStart=null;bitmap?.close();bitmap=null;entries=[];canvas.width=canvas.height=0;$('scanWorkspace').hidden=true;$('scanApplyPanel').hidden=true;$('scanFiles').disabled=false;status('① 캡처 선택·붙여넣기 → ② 카드 영역 지정 → ③ 인식·검토 → ④ 저장');});
+    $('scanDialog').addEventListener('close',()=>{runVersion++;previewVersion++;busy=false;pasteNumber=0;dragStart=null;pickingMissing=false;missingReference=null;bitmap?.close();bitmap=null;entries=[];canvas.width=canvas.height=0;$('scanWorkspace').hidden=true;$('scanApplyPanel').hidden=true;$('scanFiles').disabled=false;status('① 캡처 선택·붙여넣기 → ② 카드 영역 지정 → ③ 인식·검토 → ④ 저장');});
   }
 })();

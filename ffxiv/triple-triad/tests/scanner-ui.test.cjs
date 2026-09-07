@@ -180,3 +180,54 @@ test('invalid, excessive or busy pastes do not alter existing captures', async t
   a.change('scanReviewed', true);
   assert.equal(a.$('scanApply').disabled, false);
 });
+
+test('review checkboxes sit on the cropped canvas and crop mode does not change saved review choices', async t => {
+  const a = scanner(t);
+  await a.choose(['first.png']);
+  a.$('scanUseFullImage').click();
+  await a.analyze();
+  const grid = a.$('scanReviewGrid');
+  assert.equal(grid.parentElement, a.$('scanCanvas').parentElement);
+  assert.equal(grid.hidden, false);
+  assert.equal(a.$('scanCropControls').hidden, true);
+  assert.equal(grid.querySelectorAll('[role="checkbox"]').length, 30);
+  assert.equal(grid.querySelector('button').getAttribute('aria-checked'), 'true');
+  grid.querySelector('button').click();
+  assert.equal(grid.querySelector('button').getAttribute('aria-checked'), 'false');
+  a.change('scanReviewed', true);
+  a.$('scanEditCrop').click();
+  assert.equal(grid.hidden, true);
+  assert.equal(a.$('scanCropControls').hidden, false);
+  a.$('scanEditCrop').click();
+  assert.equal(grid.hidden, false);
+  assert.equal(a.$('scanReviewed').checked, true);
+  assert.equal(grid.querySelector('button').getAttribute('aria-checked'), 'false');
+});
+
+test('learning a question-mark reference rechecks unreviewed pages but preserves manual corrections', async t => {
+  const a = scanner(t);
+  await a.choose(['first.png', 'second.png']);
+  await a.analyze();
+  a.$('scanReviewGrid').querySelector('button').click();
+  a.change('scanReviewed', true);
+  a.$('scanNext').click();
+  await until(() => !a.$('scanPickMissing').disabled);
+  a.$('scanReviewGrid').querySelector('button').click();
+  const reference = {test: 'selected question mark'}, calls = [];
+  a.w.TriadScanner.makeReference = () => reference;
+  a.w.TriadScanner.analyze = (pixels, rect, count, ref) => {
+    calls.push(ref);
+    return Array.from({length: count}, (_, index) => ({index, state: 'owned'}));
+  };
+  a.$('scanPickMissing').click();
+  assert.equal(a.$('scanCalibrationHint').hidden, false);
+  a.$('scanReviewGrid').querySelector('[data-scan-cell="1"]').click();
+  await until(() => !a.$('scanAnalyze').disabled);
+  assert.deepEqual(calls, [reference]);
+  assert.equal(a.$('scanCalibrationHint').hidden, true);
+  assert.equal(a.$('scanReviewed').checked, false);
+  assert.match(a.$('scanPageSummary').textContent, /보유 28장 · 미수집 2장/);
+  a.change('scanReviewed', true);
+  a.$('scanApply').click();
+  assert.equal(a.applied().ownedIds.length, 42);
+});
