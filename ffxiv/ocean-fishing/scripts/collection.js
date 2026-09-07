@@ -2,6 +2,7 @@
   'use strict';
   const name = value => String(value || '').replace(/^(?:[MITF]!)+/, '').trim();
   const key = value => name(value).normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+  const alwaysVisible = row => String(row.TimeFrameDay ?? '').trim() === '' && name(row.FishTranslated || row.Fish).startsWith('유령');
   function dependencies(row) {
     const values = [];
     const html = row.Intuition || '';
@@ -23,11 +24,30 @@
     }
     return entries;
   }
-  function plan(rows, catalog, caught, hideCaught) {
+  function haulScore(row, mode) {
+    const raw = Array.isArray(row[mode]) ? row[mode][0] : row[mode];
+    const counts = String(raw || (mode === 'DH' ? '3 - 4' : '5 - 7')).match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+    const points = Number(row.Points) || 0;
+    return { min: points * (counts[0] || 0), max: points * (counts.at(-1) || 0) };
+  }
+  function plan(rows, catalog, caught, hideCaught, species = '', scoreMode = '') {
+    const scoring = ['DH', 'TH'].includes(scoreMode);
+    const scoreTargets = new Set();
+    if (scoring) {
+      // Rank each regular/spectral zone separately, using the minimum haul score.
+      for (const spectral of [false, true]) {
+        const candidates = rows.filter(row => !!row.TimeFrameDay === spectral && haulScore(row, scoreMode).min > 0)
+          .sort((a, b) => haulScore(b, scoreMode).min - haulScore(a, scoreMode).min);
+        const threshold = candidates.length ? haulScore(candidates[Math.min(2, candidates.length - 1)], scoreMode).min : Infinity;
+        for (const row of candidates) if (haulScore(row, scoreMode).min >= threshold) scoreTargets.add(key(row.Fish));
+      }
+    }
+    const focused = !!species || scoring;
+    const matchesGroup = row => scoring ? scoreTargets.has(key(row.Fish)) : row.Species === species;
     const reasons = new Map();
     for (const target of rows) {
       const targetId = key(target.Fish);
-      if (caught(target.Fish)) continue;
+      if (focused ? !matchesGroup(target) : caught(target.Fish)) continue;
       const visited = new Set([targetId]);
       function walk(id) {
         for (const dep of catalog.get(id)?.dependencies || []) {
@@ -40,8 +60,8 @@
       }
       walk(targetId);
     }
-    return rows.filter(row => !hideCaught || !caught(row.Fish) || reasons.has(key(row.Fish))).map(row => ({
-      ...row, LocalCaught: caught(row.Fish), LocalRequiredBy: [...(reasons.get(key(row.Fish)) || [])]
+    return rows.filter(row => alwaysVisible(row) || reasons.has(key(row.Fish)) || (focused ? matchesGroup(row) : !hideCaught || !caught(row.Fish))).map(row => ({
+      ...row, LocalScore: scoring && matchesGroup(row) ? haulScore(row, scoreMode) : null, LocalGroupMatch: !!species && matchesGroup(row), LocalGroupDependency: focused && !matchesGroup(row) && reasons.has(key(row.Fish)), LocalAlwaysVisible: alwaysVisible(row), LocalCaught: caught(row.Fish), LocalRequiredBy: [...(reasons.get(key(row.Fish)) || [])]
     }));
   }
   function read(storage) {
@@ -91,7 +111,7 @@
     storage.setItem('caughtFishLS-combined', JSON.stringify(state));
     return { state, imported };
   }
-  const api = { name, key, dependencies, createCatalog, plan, read, caught, setCaught, parseImport, importCaught };
+  const api = { name, key, alwaysVisible, haulScore, dependencies, createCatalog, plan, read, caught, setCaught, parseImport, importCaught };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OceanCollection = api;
 })(typeof window === 'undefined' ? globalThis : window);

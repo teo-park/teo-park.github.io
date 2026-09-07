@@ -836,7 +836,7 @@ function applyFabledFocusState(id, checked) {
 	$("#fff" + id + "spec").prop("checked", !!checked);
 
 	$("[id^=desttable" + id + "] .fabled").each(function () {
-		if (checked && !$(this).closest("tr").find(".condition-fish").length) {
+		if (checked && !$(this).closest("tr").find(".condition-fish, .always-visible-fish, .group-target-fish, .score-target-fish").length) {
 			$(this).closest("tr").hide();
 			$(this).closest("table").removeClass("table-striped");
 		} else {
