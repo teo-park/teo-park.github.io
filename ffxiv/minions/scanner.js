@@ -49,33 +49,69 @@
   }
   function applyOrder(results,minions,rescore=null){
     const ordered=[...minions].sort((a,b)=>a.order-b.order||a.id-b.id),order=new Map(ordered.map((m,i)=>[m.id,i]));
-    // Confident picture matches are anchors. Never move an anchor to force a sequence.
+    const manual=results.filter(r=>r.manual&&r.state==='match'),cache=new Map();
+    for(const r of results){
+      r.original||=snapshot(r);delete r.orderConflict;
+      if(r.manual||r.state==='skip')continue;
+      const before=manual.filter(a=>a.index<r.index).at(-1),after=manual.find(a=>a.index>r.index);
+      // A manual selection takes precedence over automatic picture matches.
+      if((before&&order.get(r.id)<=order.get(before.id))||(after&&order.get(r.id)>=order.get(after.id)))r.state='review';
+    }
     const anchors=results.filter(r=>r.state==='match');
     for(let i=1;i<anchors.length;i++)if(order.get(anchors[i].id)<=order.get(anchors[i-1].id)){
-      anchors[i].state=anchors[i-1].state='review';anchors[i].orderConflict=anchors[i-1].orderConflict=true;
-    }
-    for(const r of results){
-      if(r.state==='match'||r.orderConflict)continue;
-      const before=results.slice(0,r.index).filter(a=>a.state==='match').at(-1),after=results.slice(r.index+1).find(a=>a.state==='match');
-      if(!before&&!after)continue;
-      const lower=before?order.get(before.id):-1,upper=after?order.get(after.id):ordered.length;
-      // Recheck the complete bounded catalog: the correct icon can miss the global
-      // coarse shortlist and only become recognizable when alignment is refined.
-      if(before&&after&&rescore&&upper>lower+1){
-        const allowed=ordered.slice(lower+1,upper).map(m=>m.id),allowedIds=new Set(allowed);
-        const checked=rescore(r.index,allowed).filter(c=>allowedIds.has(c.id)&&Number.isFinite(c.score));
-        const merged=new Map(r.candidates.map(c=>[c.id,c]));for(const c of checked)merged.set(c.id,c);
-        r.candidates=[...merged.values()].sort((a,b)=>b.score-a.score);
-      }
-      const choices=r.candidates.filter(c=>order.get(c.id)>lower&&order.get(c.id)<upper);
-      if(!choices.length)continue;
-      const best=choices[0];
-      if(before&&after&&best.score>=.68&&(!choices[1]||best.score-choices[1].score>=.07)){
-        r.id=best.id;r.score=best.score;r.state='match';r.usedOrder=true;r.orderContext={before:before.id,after:after.id};
+      for(const r of [anchors[i-1],anchors[i]]){
+        if(r.manual)r.orderConflict=true;else r.state='review';
       }
     }
-    const used=new Map();for(const r of results){if(used.has(r.id)){r.state='review';used.get(r.id).state='review';}else used.set(r.id,r);}
+    for(let pass=0;pass<results.length;pass++){
+      let promoted=false;
+      for(const r of results){
+        if(r.state!=='review'||r.manual)continue;
+        const before=results.slice(0,r.index).filter(a=>a.state==='match').at(-1),after=results.slice(r.index+1).find(a=>a.state==='match');
+        if(!before&&!after)continue;
+        const lower=before?order.get(before.id):-1,upper=after?order.get(after.id):ordered.length;
+        const allowed=upper>lower?ordered.slice(lower+1,upper).map(m=>m.id):[],allowedIds=new Set(allowed);
+        r.candidateRange=allowed;r.orderContext={before:before?.id??null,after:after?.id??null};
+        let choices=r.candidates.filter(c=>allowedIds.has(c.id));
+        if(before&&after&&rescore&&allowed.length&&!before.orderConflict&&!after.orderConflict){
+          const key=`${r.index}:${lower}:${upper}`;
+          if(!cache.has(key))cache.set(key,rescore(r.index,allowed).filter(c=>allowedIds.has(c.id)&&Number.isFinite(c.score)));
+          choices=cache.get(key);
+        }
+        r.candidates=[...choices].sort((a,b)=>b.score-a.score);
+        const best=r.candidates[0];r.id=best?.id??null;r.score=best?.score??0;
+        if(best&&before&&after&&!before.orderConflict&&!after.orderConflict&&best.score>=.68&&(!r.candidates[1]||best.score-r.candidates[1].score>=.07)){
+          r.state='match';r.usedOrder=true;promoted=true;
+        }
+      }
+      if(!promoted)break;
+    }
+    const used=new Map();for(const r of results.filter(r=>r.state==='match')){
+      if(used.has(r.id))for(const duplicate of [r,used.get(r.id)]){if(duplicate.manual)duplicate.orderConflict=true;else duplicate.state='review';}
+      else used.set(r.id,r);
+    }
     return results;
+  }
+  function snapshot(r){return {id:r.id,state:r.state,score:r.score,candidates:r.candidates.map(c=>({...c}))};}
+  async function refine(image,rect,refs,results,{minions=[],useOrder=true,cancelled=()=>false}={}){
+    if(!image||image.data?.length!==image.width*image.height*4)throw Error('이미지 픽셀을 읽을 수 없어요.');
+    const error=validateRect(rect,image.width,image.height);if(error)throw Error(error);
+    // Start from picture evidence each time so replacing/removing an anchor also
+    // removes deductions based on its previous value. Manual choices never reset.
+    const next=results.map(r=>{
+      const original=r.original||snapshot(r),base=r.manual||r.state==='skip'?snapshot(r):original;
+      return {index:r.index,...base,candidates:base.candidates.map(c=>({...c})),original,manual:r.manual||r.state==='skip'};
+    });
+    await new Promise(resolve=>setTimeout(resolve,0));
+    if(cancelled())throw Error('후보 보정을 취소했어요.');
+    if(!useOrder)return next;
+    const byId=new Map(refs.map(ref=>[ref.id,ref]));
+    const result=applyOrder(next,minions,(index,ids)=>{
+      const subset=ids.map(id=>byId.get(id)).filter(Boolean);
+      return subset.length?matchCell(image,rect,index,subset).candidates:[];
+    });
+    if(cancelled())throw Error('후보 보정을 취소했어요.');
+    return result;
   }
   async function analyze(image,rect,refs,{count=30,minions=[],useOrder=true,onProgress=()=>{},cancelled=()=>false}={}){
     if(!image||image.data?.length!==image.width*image.height*4)throw Error('이미지 픽셀을 읽을 수 없어요.');
@@ -89,17 +125,14 @@
     }
     if(cancelled())throw Error('인식을 취소했어요.');
     if(!useOrder)return results;
-    const byId=new Map(refs.map(ref=>[ref.id,ref]));
-    return applyOrder(results,minions,(index,ids)=>{
-      const subset=ids.map(id=>byId.get(id)).filter(Boolean);
-      return subset.length?matchCell(image,rect,index,subset).candidates:[];
-    });
+    return refine(image,rect,refs,results,{minions,useOrder,cancelled});
   }
   function prepareImport(entries,minions){
     const valid=new Set(minions.map(m=>m.id)),ids=new Set();
     if(!entries.length)throw Error('캡처를 먼저 추가해 주세요.');
     for(const entry of entries){
       if(!entry.results?.length||!entry.reviewed)throw Error('모든 캡처의 인식 결과를 확인해 주세요.');
+      if(entry.results.some(r=>r.orderConflict))throw Error('직접 선택한 꼬친의 순서가 맞지 않아요. 이름 또는 순서 보정을 확인해 주세요.');
       for(const result of entry.results){
         if(result.state==='skip')continue;
         if(result.state!=='match'||!valid.has(result.id))throw Error('확인 필요 칸을 수정하거나 제외해 주세요.');
@@ -109,5 +142,5 @@
     if(!ids.size)throw Error('추가할 꼬마친구가 없어요.');
     return [...ids];
   }
-  return {SIZE,pixels,normalize,similarity,references,validateRect,defaultCrop,matchCell,applyOrder,analyze,prepareImport};
+  return {SIZE,pixels,normalize,similarity,references,validateRect,defaultCrop,matchCell,applyOrder,refine,analyze,prepareImport};
 });

@@ -11,7 +11,7 @@
     function ready(){try{return S.prepareImport(entries,minions);}catch{return null;}}
     function totals(){
       const all=entries.flatMap(e=>e.results||[]),ids=ready();
-      $('scanTotal').textContent=`추가 후보 ${new Set(all.filter(r=>r.state==='match').map(r=>r.id)).size}종 · 확인 필요 ${all.filter(r=>r.state==='review').length}칸 · 제외 ${all.filter(r=>r.state==='skip').length}칸`;
+      $('scanTotal').textContent=`추가 후보 ${new Set(all.filter(r=>r.state==='match'&&!r.orderConflict).map(r=>r.id)).size}종 · 확인 필요 ${all.filter(r=>r.state==='review'||r.orderConflict).length}칸 · 제외 ${all.filter(r=>r.state==='skip').length}칸`;
       $('scanApply').disabled=busy||!ids;
       $('scanApply').textContent=ids?`${ids.length}종 보유 기록에 추가`:'보유 기록에 추가';
     }
@@ -34,11 +34,15 @@
       const r=current()?.results?.[cell];$('scanCandidates').hidden=!r||editing;
       if(!r||editing)return;
       $('scanCellTitle').textContent=`${Math.floor(cell/5)+1}행 ${cell%5+1}열 · ${r.state==='skip'?'제외':name(r.id)}`;
-      $('scanCellHelp').textContent=r.state==='review'?'그림을 비교하고 맞는 꼬친을 선택하세요. 목록에서 직접 검색할 수도 있어요.':r.usedOrder&&r.orderContext?`${name(r.orderContext.before)} → ${name(r.id)} → ${name(r.orderContext.after)} 순서에서 그림을 다시 비교한 후보예요.`:r.usedOrder?'앞뒤 꼬친의 게임 분류순을 함께 확인한 후보예요.':'선택한 칸의 꼬친을 바꾸거나 등록에서 제외할 수 있어요.';
-      const query=$('scanCandidateSearch').value;
-      const options=query.trim()?minions.filter(m=>window.MinionCollection.matches(m,query)).slice(0,30):r.candidates.map(c=>byId.get(c.id)).filter(Boolean);
+      $('scanCellHelp').textContent=r.orderConflict?'직접 고른 꼬친의 순서가 맞지 않아요. 이름을 수정하거나 게임 분류순 보정을 꺼 주세요.':r.manual&&r.state==='match'?'직접 확정한 꼬친입니다. 이 선택을 기준으로 다른 칸의 후보를 다시 좁힙니다.':r.state==='review'?'그림을 비교하고 맞는 꼬친을 선택하세요. 하나를 확정하면 다른 확인 필요 칸도 다시 보정해요.':r.usedOrder&&r.orderContext?`${name(r.orderContext.before)} → ${name(r.id)} → ${name(r.orderContext.after)} 순서에서 그림을 다시 비교한 후보예요.`:'선택한 칸의 꼬친을 바꾸거나 등록에서 제외할 수 있어요.';
+      const query=$('scanCandidateSearch').value,range=r.candidateRange,all=$('scanSearchAll').checked;
+      $('scanRangeHint').textContent=range?`${r.orderContext?.before?name(r.orderContext.before)+' 다음':'목록 시작'} ~ ${r.orderContext?.after?name(r.orderContext.after)+' 이전':'목록 끝'} · ${range.length}종 범위`:'그림이 비슷한 후보를 표시합니다.';
+      $('scanSearchAll').closest('label').hidden=!range;
+      const pool=range&&!all?minions.filter(m=>range.includes(m.id)):minions;
+      let options=query.trim()?pool.filter(m=>window.MinionCollection.matches(m,query)).slice(0,30):all?pool.slice(0,30):r.candidates.map(c=>byId.get(c.id)).filter(m=>m&&(!range||range.includes(m.id)));
+      if(!query.trim()&&!all&&r.manual&&byId.has(r.id))options=[byId.get(r.id),...options.filter(m=>m.id!==r.id)];
       $('scanCandidateList').innerHTML=options.map(m=>`<button type="button" data-scan-id="${m.id}" aria-pressed="${r.state==='match'&&r.id===m.id}" ${busy?'disabled':''}><img src="${esc(m.icon)}" alt="" width="40" height="40"><span>${esc(m.name)}</span>${r.id===m.id?'<b>현재 후보</b>':''}</button>`).join('')||'<p>검색 결과가 없어요.</p>';
-      $('scanSkipCell').disabled=busy;$('scanNextReview').disabled=busy||!current().results.some(r=>r.state==='review');
+      $('scanSkipCell').disabled=busy;$('scanNextReview').disabled=busy||!current().results.some(r=>r.state==='review'||r.orderConflict);
     }
     function render(){
       const e=current();
@@ -46,12 +50,12 @@
       $('scanFileList').innerHTML=entries.map((entry,i)=>`<button type="button" data-scan-file="${i}" aria-pressed="${i===selected}" ${busy?'disabled':''}>${i+1}. ${esc(entry.file.name)} <span>${entry.reviewed?'✓ 확인 완료':entry.results?'검토 중':'인식 전'}</span></button>`).join('');
       if(e){
         $('scanCount').value=e.count;$('scanUseOrder').checked=e.useOrder;
-        $('scanReviewed').checked=!!e.reviewed;$('scanReviewed').disabled=busy||!e.results||e.results.some(r=>r.state==='review')||editing;
+        $('scanReviewed').checked=!!e.reviewed;$('scanReviewed').disabled=busy||!e.results||e.results.some(r=>r.state==='review'||r.orderConflict)||editing;
         $('scanOverlay').hidden=editing||!e.results;
         $('scanOverlay').innerHTML=e.results?Array.from({length:30},(_,i)=>{
           const r=e.results[i];if(!r)return '<span class="scan-unused">빈 칸</span>';
-          const label={match:'추가',review:'확인',skip:'제외'}[r.state];
-          return `<button type="button" class="scan-cell ${r.state} ${i===cell?'selected':''}" data-scan-cell="${i}" aria-label="${Math.floor(i/5)+1}행 ${i%5+1}열 ${esc(name(r.id))} ${label}" aria-pressed="${i===cell}" ${busy?'disabled':''}><b>${label==='추가'?'✓ ':label==='확인'?'? ':''}${label}</b><span>${esc(r.state==='skip'?'등록 제외':name(r.id))}</span></button>`;
+          const label=r.orderConflict?'순서 확인':r.manual&&r.state==='match'?'확정':{match:'추가',review:'확인',skip:'제외'}[r.state];
+          return `<button type="button" class="scan-cell ${r.orderConflict?'review':r.state} ${i===cell?'selected':''}" data-scan-cell="${i}" aria-label="${Math.floor(i/5)+1}행 ${i%5+1}열 ${esc(name(r.id))} ${label}" aria-pressed="${i===cell}" ${busy?'disabled':''}><b>${['추가','확정'].includes(label)?'✓ ':label==='확인'?'? ':''}${label}</b><span>${esc(r.state==='skip'?'등록 제외':name(r.id))}</span></button>`;
         }).join(''):'';
         $('scanCropHelp').textContent=editing?'빈 칸을 포함한 5열 × 6행 영역을 드래그하세요. 페이지 번호·검색 버튼은 제외해요.':'칸을 누르면 후보 목록에서 인식한 이름을 확인·수정할 수 있어요.';
         $('scanEditCrop').textContent=editing?'영역 조정 중':'아이콘 영역 조정';
@@ -67,15 +71,31 @@
       const res=await fetch('./scan-icons.json?v=20260908-1');if(!res.ok)throw Error('아이콘 비교 자료를 불러오지 못했어요. 다시 인식을 눌러 주세요.');
       refs=S.references(await res.json());return refs;
     }
+    function imagePixels(){
+      const scratch=document.createElement('canvas');scratch.width=bitmap.width;scratch.height=bitmap.height;
+      const context=scratch.getContext('2d',{willReadFrequently:true});context.drawImage(bitmap,0,0);
+      return context.getImageData(0,0,scratch.width,scratch.height);
+    }
+    async function refine(){
+      const e=current();if(!e?.results||!bitmap||busy)return;
+      const token=++version;busy=true;e.reviewed=false;render();status('확정한 선택을 기준으로 다른 칸의 후보를 다시 비교하고 있어요.');
+      try{
+        const references=await referenceData();if(token!==version)return;
+        const results=await S.refine(imagePixels(),e.crop,references,e.results,{minions,useOrder:e.useOrder,cancelled:()=>token!==version});
+        if(token!==version)return;
+        e.results=results;
+        const remaining=results.filter(r=>r.state==='review'||r.orderConflict).length;
+        status(e.useOrder?`후보 보정 완료 · 확인 필요 ${remaining}칸. 직접 확정한 꼬친과 제외한 칸은 유지했어요.`:'순서 보정을 껐어요. 직접 고른 값은 유지하고 나머지는 그림 비교 후보로 되돌렸어요.');
+      }catch(error){if(token===version)status(error.message);}
+      finally{if(token===version){busy=false;render();}}
+    }
     async function analyze(){
       const e=current();if(!e||!bitmap||busy)return;
       const error=S.validateRect(e.crop,bitmap.width,bitmap.height);if(error){status(error);return;}
       const token=++version;busy=true;e.results=null;e.reviewed=false;render();status('아이콘 비교 자료를 준비하고 있어요.');
       try{
         const references=await referenceData();if(token!==version)return;
-        const scratch=document.createElement('canvas');scratch.width=bitmap.width;scratch.height=bitmap.height;
-        const context=scratch.getContext('2d',{willReadFrequently:true});context.drawImage(bitmap,0,0);
-        const results=await S.analyze(context.getImageData(0,0,scratch.width,scratch.height),e.crop,references,{count:e.count,minions,useOrder:e.useOrder,cancelled:()=>token!==version,onProgress:(n,total)=>status(`${n} / ${total}칸 인식 중…`)});
+        const results=await S.analyze(imagePixels(),e.crop,references,{count:e.count,minions,useOrder:e.useOrder,cancelled:()=>token!==version,onProgress:(n,total)=>status(`${n} / ${total}칸 인식 중…`)});
         if(token!==version)return;
         e.results=results;cell=Math.max(0,results.findIndex(r=>r.state==='review'));editing=false;
         status(`인식 완료 · ${results.filter(r=>r.state==='review').length}칸 확인 필요. 이름을 확인한 뒤 아래 확인란을 체크하세요.`);
@@ -83,7 +103,7 @@
       finally{if(token===version){busy=false;render();}}
     }
     async function select(index){
-      const token=++version;busy=true;selected=index;cell=0;bitmap?.close();bitmap=null;editing=false;$('scanCandidateSearch').value='';render();
+      const token=++version;busy=true;selected=index;cell=0;bitmap?.close();bitmap=null;editing=false;$('scanCandidateSearch').value='';$('scanSearchAll').checked=false;render();
       try{
         let image=await createImageBitmap(current().file);
         if(image.width<100||image.height<100||image.width*image.height>32000000){image.close();throw Error('이미지는 100×100 이상, 3,200만 화소 이하로 선택해 주세요.');}
@@ -103,7 +123,7 @@
       entries.push(...chosen.map((file,i)=>({file,count:30,useOrder:true,reviewed:false,results:null,key:first+i})));
       await select(first);
     }
-    function choose(id){const e=current(),r=e?.results?.[cell];if(!r||busy||!byId.has(id))return;r.id=id;r.state='match';r.manual=true;r.usedOrder=false;delete r.orderContext;e.reviewed=false;render();}
+    function choose(id){const e=current(),r=e?.results?.[cell];if(!r||busy||!byId.has(id))return;r.id=id;r.state='match';r.manual=true;r.usedOrder=false;delete r.orderContext;delete r.candidateRange;delete r.orderConflict;e.reviewed=false;$('scanCandidateSearch').value='';$('scanSearchAll').checked=false;render();refine();}
     function changeCrop(rect){const e=current();if(!e||busy)return;e.crop=rect;e.results=null;e.reviewed=false;editing=true;render();}
     const point=event=>{const r=canvas.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))};};
     canvas.addEventListener('pointerdown',event=>{if(!editing||busy||!bitmap)return;drag={start:point(event),before:{...current().crop}};canvas.setPointerCapture(event.pointerId);});
@@ -121,17 +141,18 @@
       if(images.length){event.preventDefault();add(images);}
     });
     $('scanFileList').addEventListener('click',event=>{const b=event.target.closest('[data-scan-file]');if(b&&!busy)select(+b.dataset.scanFile);});
-    $('scanOverlay').addEventListener('click',event=>{const b=event.target.closest('[data-scan-cell]');if(!b||busy)return;cell=+b.dataset.scanCell;$('scanCandidateSearch').value='';render();});
+    $('scanOverlay').addEventListener('click',event=>{const b=event.target.closest('[data-scan-cell]');if(!b||busy)return;cell=+b.dataset.scanCell;$('scanCandidateSearch').value='';$('scanSearchAll').checked=false;render();});
     $('scanCandidateList').addEventListener('click',event=>{const b=event.target.closest('[data-scan-id]');if(b)choose(+b.dataset.scanId);});
     $('scanCandidateSearch').addEventListener('input',candidates);
-    $('scanSkipCell').addEventListener('click',()=>{const e=current(),r=e?.results?.[cell];if(!r||busy)return;r.state='skip';e.reviewed=false;render();});
-    $('scanNextReview').addEventListener('click',()=>{const results=current()?.results||[];cell=results.findIndex((r,i)=>i>cell&&r.state==='review');if(cell<0)cell=results.findIndex(r=>r.state==='review');$('scanCandidateSearch').value='';render();});
+    $('scanSearchAll').addEventListener('change',candidates);
+    $('scanSkipCell').addEventListener('click',()=>{const e=current(),r=e?.results?.[cell];if(!r||busy)return;r.state='skip';r.manual=true;delete r.orderConflict;e.reviewed=false;render();refine();});
+    $('scanNextReview').addEventListener('click',()=>{const results=current()?.results||[];cell=results.findIndex((r,i)=>i>cell&&(r.state==='review'||r.orderConflict));if(cell<0)cell=results.findIndex(r=>r.state==='review'||r.orderConflict);$('scanCandidateSearch').value='';$('scanSearchAll').checked=false;render();});
     $('scanReviewed').addEventListener('change',event=>{if(current())current().reviewed=event.target.checked;render();});
     $('scanAnalyze').addEventListener('click',analyze);
     $('scanEditCrop').addEventListener('click',()=>{editing=true;current().reviewed=false;render();});
     $('scanFullImage').addEventListener('click',()=>changeCrop({x:0,y:0,w:1,h:1}));
     $('scanCount').addEventListener('change',event=>{current().count=+event.target.value;current().results=null;current().reviewed=false;render();analyze();});
-    $('scanUseOrder').addEventListener('change',event=>{current().useOrder=event.target.checked;current().results=null;current().reviewed=false;render();analyze();});
+    $('scanUseOrder').addEventListener('change',event=>{current().useOrder=event.target.checked;current().reviewed=false;render();if(current().results)refine();else analyze();});
     $('scanRemove').addEventListener('click',()=>{if(busy)return;entries.splice(selected,1);bitmap?.close();bitmap=null;if(entries.length)select(Math.min(selected,entries.length-1));else{selected=0;render();status('캡처를 추가해 주세요.');}});
     $('scanApply').addEventListener('click',()=>{
       if(busy)return;

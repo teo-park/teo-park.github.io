@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="꼬마친구 수첩 · 파판14 도구함"><meta property="og:description" content="꼬마친구 수집 체크와 획득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/minions/">
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/minions/"><link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260908-scan1"><link rel="stylesheet" href="./scanner.css?v=20260908-1">
-  <script defer src="./data.js?v=20260907-1"></script><script defer src="./engine.js?v=20260907-1"></script><script defer src="./scanner.js?v=20260908-2"></script><script defer src="./scanner-ui.js?v=20260908-2"></script><script defer src="./app.js?v=20260908-scan1"></script>
+  <script defer src="./data.js?v=20260907-1"></script><script defer src="./engine.js?v=20260907-1"></script><script defer src="./scanner.js?v=20260908-3"></script><script defer src="./scanner-ui.js?v=20260908-3"></script><script defer src="./app.js?v=20260908-scan1"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">꼬마친구 목록으로 바로가기</a>
@@ -47,7 +47,7 @@
       <p class="scan-note">마지막 페이지는 실제 아이콘 수를 입력하세요. 즐겨찾기·검색 등으로 순서가 달라진 화면은 순서 보정을 꺼 주세요.</p>
       <div class="scan-layout">
         <div class="scan-preview"><div class="scan-stage"><canvas id="scanCanvas" aria-label="캡처의 아이콘 영역"></canvas><div id="scanOverlay" class="scan-overlay"></div></div><p id="scanCropHelp"></p><div class="scan-crop-actions"><button id="scanEditCrop" type="button">아이콘 영역 조정</button><button id="scanFullImage" type="button" hidden>이미지 전체</button><button id="scanAnalyze" type="button">다시 인식</button></div></div>
-        <section id="scanCandidates" class="scan-candidates" aria-labelledby="scanCellTitle" hidden><h3 id="scanCellTitle"></h3><p id="scanCellHelp"></p><div class="scan-cell-actions"><button id="scanSkipCell" type="button">이 칸 제외</button><button id="scanNextReview" type="button">다음 확인 필요 칸</button></div><label for="scanCandidateSearch">후보 이름·초성 검색</label><input id="scanCandidateSearch" type="search" placeholder="아래 후보에 없으면 직접 검색" autocomplete="off"><div id="scanCandidateList" class="scan-candidate-list"></div></section>
+        <section id="scanCandidates" class="scan-candidates" aria-labelledby="scanCellTitle" hidden><h3 id="scanCellTitle"></h3><p id="scanCellHelp"></p><div class="scan-cell-actions"><button id="scanSkipCell" type="button">이 칸 제외</button><button id="scanNextReview" type="button">다음 확인 필요 칸</button></div><label for="scanCandidateSearch">후보 이름·초성 검색</label><input id="scanCandidateSearch" type="search" placeholder="아래 후보에 없으면 직접 검색" autocomplete="off"><p id="scanRangeHint"></p><label><input id="scanSearchAll" type="checkbox"> 전체 목록에서 찾기</label><div id="scanCandidateList" class="scan-candidate-list"></div></section>
       </div>
       <label class="scan-reviewed"><input id="scanReviewed" type="checkbox"> 이 캡처의 꼬친 이름과 제외할 칸을 확인했어요.</label>
     </section>
