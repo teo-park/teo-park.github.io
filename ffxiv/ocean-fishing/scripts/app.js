@@ -150,9 +150,16 @@
     if(following) selected=voyages[0];
   }
   function voyageFish(v) { return routeFish.filter(f=>v.stops.some((_,i)=>V.available(f,v,i))); }
-  function legendaryNames(rows) {
-    const unique=[...new Map(rows.filter(f=>f.legendary).map(f=>[f.id,f])).values()];
+  function fishNames(rows) {
+    const unique=[...new Map(rows.map(f=>[f.id,f])).values()];
     return unique.map(f=>f.FishTranslated+(caught(f)?' (수집완료)':'')).join(' · ');
+  }
+  function legendaryNames(rows) { return fishNames(rows.filter(f=>f.legendary)); }
+  function starterBait(rows) {
+    const triggers=rows.filter(f=>f.spectralTrigger);
+    if(!triggers.length)return '';
+    const baits=[...new Set(triggers.map(baitText))].join(' / ');
+    return `<span class="stop-starter" title="${esc(triggers.map(f=>f.FishTranslated).join(' · '))}를 노리는 시작 미끼"><span>환해류 유도</span><b>${esc(baits)}</b></span>`;
   }
   function achievement(v) {
     const groups=C.routeAchievements(routeFish,v.stops);
@@ -197,8 +204,8 @@
     $('selectedStops').textContent=selected.stops.map(stop=>stop.name).join(' → ');
     $('returnFirst').hidden=selected.start===voyages[0].start;
     $('stopTabs').innerHTML=selected.stops.map((stop,i)=>{
-      const legends=legendaryNames(routeFish.filter(f=>V.available(f,selected,i)));
-      return `<button role="tab" id="stopTab${i}" aria-controls="stopPanel${i}" aria-selected="${i===activeStop}" tabindex="${i===activeStop?0:-1}" data-stop="${i}"><small>0${i+1} / STOP</small><span class="stop-location"><strong>${esc(stop.name)}</strong>${period(stop.time)}</span>${legends?`<span class="stop-legendary">전설어 · ${esc(legends)}</span>`:''}</button>`;
+      const available=routeFish.filter(f=>V.available(f,selected,i)), legends=legendaryNames(available), big=fishNames(available.filter(f=>f.bigFish));
+      return `<button role="tab" id="stopTab${i}" aria-controls="stopPanel${i}" aria-selected="${i===activeStop}" tabindex="${i===activeStop?0:-1}" data-stop="${i}"><small>0${i+1} / STOP</small><span class="stop-location"><strong>${esc(stop.name)}</strong>${period(stop.time)}</span>${starterBait(available)}${big?`<span class="stop-big-fish">터주 · ${esc(big)}</span>`:''}${legends?`<span class="stop-legendary">전설어 · ${esc(legends)}</span>`:''}</button>`;
     }).join('');
     $('fishPanels').innerHTML=selected.stops.map((stop,i)=>`<section role="tabpanel" id="stopPanel${i}" aria-labelledby="stopTab${i}" ${i!==activeStop?'hidden':''}>${[false,true].map(spectral=>{
       const id=`${i}-${spectral?'spectral':'regular'}`, options=zoneOptions.get(id)||{}, visible=plannedFish.filter(f=>V.available(f,selected,i)&&f.spectral===spectral);
@@ -291,7 +298,7 @@
   }
   async function start() {
     try {
-      const response=await fetch('../data/fish.json');if(!response.ok)throw Error('자료 응답 '+response.status);
+      const response=await fetch('../data/fish.json?v='+encodeURIComponent(document.body.dataset.version));if(!response.ok)throw Error('자료 응답 '+response.status);
       const payload=await response.json();if(payload.version!==1||!Array.isArray(payload.fish)||payload.fish.length!==260)throw Error('자료 형식 오류');
       fish=payload.fish;names=new Map(fish.map(f=>[C.key(f.Fish),f.FishTranslated]));state=checkState();loadPreferences();
       if(!isChecklist){refreshVoyages();renderOptions();}

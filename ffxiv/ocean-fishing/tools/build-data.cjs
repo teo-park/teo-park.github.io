@@ -34,7 +34,10 @@ function normalize(row, route, index) {
   });
   const record = {...row, Fish:name, StopTranslated:stops[row.Stop] || row.StopTranslated,
     id:itemIds.get(route + ':' + collection.key(name)), route, entryId:route + '-' + index,
-    spectral:!!row.TimeFrameDay, legendary:/(?:^|!)F!/.test(row.Fish),
+    spectral:!!row.TimeFrameDay,
+    legendary:!!row.TimeFrameDay && Number(row.Stars)===5 && intuitionFish.length>0,
+    bigFish:!row.TimeFrameDay && Number(row.Stars)===4 && intuitionFish.length>0,
+    spectralTrigger:!row.TimeFrameDay && (/^Spectral /.test(name) || name==='Spectresaur'),
     Dependencies:collection.dependencies(row), intuition:{seconds, fish:intuitionFish}, baits, weather,
     Intuition:intuitionFish.length ? intuitionFish.map(f => `${f.name} × ${f.count}`).join(' + ') : '',
     image:'img/fish/' + name.replaceAll("'", '_') + '.png'};

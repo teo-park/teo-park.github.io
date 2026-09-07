@@ -29,7 +29,7 @@ async function open(page,storage=memory(),failData=false) {
       Object.defineProperty(w,'localStorage',{value:storage});
       w.sessionStorage.setItem('ocean:journal-entry:v1','open-20260908');
       w.Date.now=()=>first-60000;w.scrollTo=()=>{};
-      w.fetch=async url=>{assert.equal(url,'../data/fish.json');return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(payload))};};
+      w.fetch=async url=>{assert.equal(url,'../data/fish.json?v='+w.document.body.dataset.version);return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(payload))};};
       w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
       w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
       w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};

@@ -61,6 +61,8 @@
       "entryId": "indigo-0",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -179,6 +181,8 @@
       "entryId": "indigo-1",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -297,6 +301,8 @@
       "entryId": "indigo-2",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -415,6 +421,8 @@
       "entryId": "indigo-3",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -533,6 +541,8 @@
       "entryId": "indigo-4",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -651,6 +661,8 @@
       "entryId": "indigo-5",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -769,6 +781,8 @@
       "entryId": "indigo-6",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -887,6 +901,8 @@
       "entryId": "indigo-7",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1005,6 +1021,8 @@
       "entryId": "indigo-8",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1123,6 +1141,8 @@
       "entryId": "indigo-9",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "galadionchovy"
       ],
@@ -1230,6 +1250,8 @@
       "entryId": "indigo-10",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1329,6 +1351,8 @@
       "entryId": "indigo-11",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1428,6 +1452,8 @@
       "entryId": "indigo-12",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1527,6 +1553,8 @@
       "entryId": "indigo-13",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1626,6 +1654,8 @@
       "entryId": "indigo-14",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1725,6 +1755,8 @@
       "entryId": "indigo-15",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1806,6 +1838,8 @@
       "entryId": "indigo-16",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1887,6 +1921,8 @@
       "entryId": "indigo-17",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -1968,6 +2004,8 @@
       "entryId": "indigo-18",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2049,6 +2087,8 @@
       "entryId": "indigo-19",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "heavenskey",
         "navigatorsprint"
@@ -2136,6 +2176,8 @@
       "entryId": "indigo-20",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2254,6 +2296,8 @@
       "entryId": "indigo-21",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2372,6 +2416,8 @@
       "entryId": "indigo-22",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2490,6 +2536,8 @@
       "entryId": "indigo-23",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2608,6 +2656,8 @@
       "entryId": "indigo-24",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2726,6 +2776,8 @@
       "entryId": "indigo-25",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "ghoulbarracuda"
       ],
@@ -2852,6 +2904,8 @@
       "entryId": "indigo-26",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -2970,6 +3024,8 @@
       "entryId": "indigo-27",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "ghoulbarracuda"
       ],
@@ -3072,6 +3128,8 @@
       "entryId": "indigo-28",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -3190,6 +3248,8 @@
       "entryId": "indigo-29",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "gladius"
       ],
@@ -3297,6 +3357,8 @@
       "entryId": "indigo-30",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -3378,6 +3440,8 @@
       "entryId": "indigo-31",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "hiaetherlouse"
       ],
@@ -3455,6 +3519,8 @@
       "entryId": "indigo-32",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "hiaetherlouse"
       ],
@@ -3562,6 +3628,8 @@
       "entryId": "indigo-33",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -3661,6 +3729,8 @@
       "entryId": "indigo-34",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -3760,6 +3830,8 @@
       "entryId": "indigo-35",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -3859,6 +3931,8 @@
       "entryId": "indigo-36",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "hiaetherlouse"
       ],
@@ -3936,6 +4010,8 @@
       "entryId": "indigo-37",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -4017,6 +4093,8 @@
       "entryId": "indigo-38",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "hiaetherlouse"
       ],
@@ -4094,6 +4172,8 @@
       "entryId": "indigo-39",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "greatgrandmarlin"
       ],
@@ -4176,6 +4256,8 @@
       "entryId": "indigo-40",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -4294,6 +4376,8 @@
       "entryId": "indigo-41",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -4412,6 +4496,8 @@
       "entryId": "indigo-42",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "tosseddagger"
       ],
@@ -4538,6 +4624,8 @@
       "entryId": "indigo-43",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -4656,6 +4744,8 @@
       "entryId": "indigo-44",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -4774,6 +4864,8 @@
       "entryId": "indigo-45",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -4892,6 +4984,8 @@
       "entryId": "indigo-46",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5010,6 +5104,8 @@
       "entryId": "indigo-47",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "tosseddagger"
       ],
@@ -5112,6 +5208,8 @@
       "entryId": "indigo-48",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5230,6 +5328,8 @@
       "entryId": "indigo-49",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "elderdinichthys"
       ],
@@ -5337,6 +5437,8 @@
       "entryId": "indigo-50",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5436,6 +5538,8 @@
       "entryId": "indigo-51",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5535,6 +5639,8 @@
       "entryId": "indigo-52",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5616,6 +5722,8 @@
       "entryId": "indigo-53",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5715,6 +5823,8 @@
       "entryId": "indigo-54",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5796,6 +5906,8 @@
       "entryId": "indigo-55",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5895,6 +6007,8 @@
       "entryId": "indigo-56",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -5994,6 +6108,8 @@
       "entryId": "indigo-57",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6075,6 +6191,8 @@
       "entryId": "indigo-58",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6156,6 +6274,8 @@
       "entryId": "indigo-59",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "gugrusaurus"
       ],
@@ -6238,6 +6358,8 @@
       "entryId": "indigo-60",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6356,6 +6478,8 @@
       "entryId": "indigo-61",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6474,6 +6598,8 @@
       "entryId": "indigo-62",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6592,6 +6718,8 @@
       "entryId": "indigo-63",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6710,6 +6838,8 @@
       "entryId": "indigo-64",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6828,6 +6958,8 @@
       "entryId": "indigo-65",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -6946,6 +7078,8 @@
       "entryId": "indigo-66",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7064,6 +7198,8 @@
       "entryId": "indigo-67",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7182,6 +7318,8 @@
       "entryId": "indigo-68",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7300,6 +7438,8 @@
       "entryId": "indigo-69",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "crimsonmonkfish"
       ],
@@ -7407,6 +7547,8 @@
       "entryId": "indigo-70",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7506,6 +7648,8 @@
       "entryId": "indigo-71",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7593,6 +7737,8 @@
       "entryId": "indigo-72",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7692,6 +7838,8 @@
       "entryId": "indigo-73",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7791,6 +7939,8 @@
       "entryId": "indigo-74",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7872,6 +8022,8 @@
       "entryId": "indigo-75",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -7953,6 +8105,8 @@
       "entryId": "indigo-76",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8052,6 +8206,8 @@
       "entryId": "indigo-77",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8151,6 +8307,8 @@
       "entryId": "indigo-78",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8232,6 +8390,8 @@
       "entryId": "indigo-79",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "deepseaeel",
         "silencer"
@@ -8319,6 +8479,8 @@
       "entryId": "indigo-80",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8437,6 +8599,8 @@
       "entryId": "indigo-81",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8555,6 +8719,8 @@
       "entryId": "indigo-82",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8673,6 +8839,8 @@
       "entryId": "indigo-83",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8791,6 +8959,8 @@
       "entryId": "indigo-84",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -8909,6 +9079,8 @@
       "entryId": "indigo-85",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9027,6 +9199,8 @@
       "entryId": "indigo-86",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9145,6 +9319,8 @@
       "entryId": "indigo-87",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9263,6 +9439,8 @@
       "entryId": "indigo-88",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9381,6 +9559,8 @@
       "entryId": "indigo-89",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "metallicboxfish"
       ],
@@ -9488,6 +9668,8 @@
       "entryId": "indigo-90",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9587,6 +9769,8 @@
       "entryId": "indigo-91",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9686,6 +9870,8 @@
       "entryId": "indigo-92",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9785,6 +9971,8 @@
       "entryId": "indigo-93",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9884,6 +10072,8 @@
       "entryId": "indigo-94",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -9971,6 +10161,8 @@
       "entryId": "indigo-95",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10070,6 +10262,8 @@
       "entryId": "indigo-96",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10157,6 +10351,8 @@
       "entryId": "indigo-97",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10238,6 +10434,8 @@
       "entryId": "indigo-98",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10319,6 +10517,8 @@
       "entryId": "indigo-99",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "jetbornemanta",
         "mistbeardscup"
@@ -10406,6 +10606,8 @@
       "entryId": "indigo-100",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10524,6 +10726,8 @@
       "entryId": "indigo-101",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10642,6 +10846,8 @@
       "entryId": "indigo-102",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10760,6 +10966,8 @@
       "entryId": "indigo-103",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10878,6 +11086,8 @@
       "entryId": "indigo-104",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -10996,6 +11206,8 @@
       "entryId": "indigo-105",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11114,6 +11326,8 @@
       "entryId": "indigo-106",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11232,6 +11446,8 @@
       "entryId": "indigo-107",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11350,6 +11566,8 @@
       "entryId": "indigo-108",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11468,6 +11686,8 @@
       "entryId": "indigo-109",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "sunkenmask"
       ],
@@ -11575,6 +11795,8 @@
       "entryId": "indigo-110",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11668,6 +11890,8 @@
       "entryId": "indigo-111",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11761,6 +11985,8 @@
       "entryId": "indigo-112",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11842,6 +12068,8 @@
       "entryId": "indigo-113",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -11941,6 +12169,8 @@
       "entryId": "indigo-114",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12040,6 +12270,8 @@
       "entryId": "indigo-115",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12121,6 +12353,8 @@
       "entryId": "indigo-116",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12220,6 +12454,8 @@
       "entryId": "indigo-117",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12319,6 +12555,8 @@
       "entryId": "indigo-118",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12400,6 +12638,8 @@
       "entryId": "indigo-119",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "beatificvision"
       ],
@@ -12482,6 +12722,8 @@
       "entryId": "indigo-120",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12600,6 +12842,8 @@
       "entryId": "indigo-121",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12718,6 +12962,8 @@
       "entryId": "indigo-122",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12836,6 +13082,8 @@
       "entryId": "indigo-123",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -12954,6 +13202,8 @@
       "entryId": "indigo-124",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13072,6 +13322,8 @@
       "entryId": "indigo-125",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13190,6 +13442,8 @@
       "entryId": "indigo-126",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13308,6 +13562,8 @@
       "entryId": "indigo-127",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13426,6 +13682,8 @@
       "entryId": "indigo-128",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13544,6 +13802,8 @@
       "entryId": "indigo-129",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "rothlytkelp"
       ],
@@ -13651,6 +13911,8 @@
       "entryId": "indigo-130",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13744,6 +14006,8 @@
       "entryId": "indigo-131",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "rothlytmussel"
       ],
@@ -13845,6 +14109,8 @@
       "entryId": "indigo-132",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -13938,6 +14204,8 @@
       "entryId": "indigo-133",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "rothlytmussel"
       ],
@@ -14039,6 +14307,8 @@
       "entryId": "indigo-134",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -14120,6 +14390,8 @@
       "entryId": "indigo-135",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "rothlytmussel"
       ],
@@ -14197,6 +14469,8 @@
       "entryId": "indigo-136",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "rothlytmussel"
       ],
@@ -14286,6 +14560,8 @@
       "entryId": "indigo-137",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -14379,6 +14655,8 @@
       "entryId": "indigo-138",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -14459,7 +14737,9 @@
       "route": "indigo",
       "entryId": "indigo-139",
       "spectral": true,
-      "legendary": false,
+      "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "trollfish",
         "rothlytmussel"
@@ -14546,6 +14826,8 @@
       "entryId": "ruby-0",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -14667,6 +14949,8 @@
       "entryId": "ruby-1",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -14788,6 +15072,8 @@
       "entryId": "ruby-2",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -14909,6 +15195,8 @@
       "entryId": "ruby-3",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15030,6 +15318,8 @@
       "entryId": "ruby-4",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15151,6 +15441,8 @@
       "entryId": "ruby-5",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15272,6 +15564,8 @@
       "entryId": "ruby-6",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15393,6 +15687,8 @@
       "entryId": "ruby-7",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15514,6 +15810,8 @@
       "entryId": "ruby-8",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15635,6 +15933,8 @@
       "entryId": "ruby-9",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "poetspipe"
       ],
@@ -15745,6 +16045,8 @@
       "entryId": "ruby-10",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15847,6 +16149,8 @@
       "entryId": "ruby-11",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -15949,6 +16253,8 @@
       "entryId": "ruby-12",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16039,6 +16345,8 @@
       "entryId": "ruby-13",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16141,6 +16449,8 @@
       "entryId": "ruby-14",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16231,6 +16541,8 @@
       "entryId": "ruby-15",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16321,6 +16633,8 @@
       "entryId": "ruby-16",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16411,6 +16725,8 @@
       "entryId": "ruby-17",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16495,6 +16811,8 @@
       "entryId": "ruby-18",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16579,6 +16897,8 @@
       "entryId": "ruby-19",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "sunkencoelacanth"
       ],
@@ -16664,6 +16984,8 @@
       "entryId": "ruby-20",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "leopardprawn"
       ],
@@ -16793,6 +17115,8 @@
       "entryId": "ruby-21",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -16914,6 +17238,8 @@
       "entryId": "ruby-22",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -17035,6 +17361,8 @@
       "entryId": "ruby-23",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -17156,6 +17484,8 @@
       "entryId": "ruby-24",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -17277,6 +17607,8 @@
       "entryId": "ruby-25",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -17398,6 +17730,8 @@
       "entryId": "ruby-26",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "leopardprawn"
       ],
@@ -17527,6 +17861,8 @@
       "entryId": "ruby-27",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "leopardprawn"
       ],
@@ -17632,6 +17968,8 @@
       "entryId": "ruby-28",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -17753,6 +18091,8 @@
       "entryId": "ruby-29",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "silentshark"
       ],
@@ -17863,6 +18203,8 @@
       "entryId": "ruby-30",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "snappingkoban"
       ],
@@ -17967,6 +18309,8 @@
       "entryId": "ruby-31",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18063,6 +18407,8 @@
       "entryId": "ruby-32",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18147,6 +18493,8 @@
       "entryId": "ruby-33",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18243,6 +18591,8 @@
       "entryId": "ruby-34",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18327,6 +18677,8 @@
       "entryId": "ruby-35",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18423,6 +18775,8 @@
       "entryId": "ruby-36",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18519,6 +18873,8 @@
       "entryId": "ruby-37",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18603,6 +18959,8 @@
       "entryId": "ruby-38",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18686,7 +19044,9 @@
       "route": "ruby",
       "entryId": "ruby-39",
       "spectral": true,
-      "legendary": false,
+      "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "shoshitsuki",
         "snappingkoban"
@@ -18773,6 +19133,8 @@
       "entryId": "ruby-40",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -18898,6 +19260,8 @@
       "entryId": "ruby-41",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19023,6 +19387,8 @@
       "entryId": "ruby-42",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19148,6 +19514,8 @@
       "entryId": "ruby-43",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19273,6 +19641,8 @@
       "entryId": "ruby-44",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19398,6 +19768,8 @@
       "entryId": "ruby-45",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19523,6 +19895,8 @@
       "entryId": "ruby-46",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19648,6 +20022,8 @@
       "entryId": "ruby-47",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19773,6 +20149,8 @@
       "entryId": "ruby-48",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -19898,6 +20276,8 @@
       "entryId": "ruby-49",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "crimsonkelp"
       ],
@@ -20012,6 +20392,8 @@
       "entryId": "ruby-50",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20114,6 +20496,8 @@
       "entryId": "ruby-51",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20216,6 +20600,8 @@
       "entryId": "ruby-52",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20300,6 +20686,8 @@
       "entryId": "ruby-53",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20402,6 +20790,8 @@
       "entryId": "ruby-54",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20504,6 +20894,8 @@
       "entryId": "ruby-55",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20588,6 +20980,8 @@
       "entryId": "ruby-56",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20672,6 +21066,8 @@
       "entryId": "ruby-57",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20756,6 +21152,8 @@
       "entryId": "ruby-58",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -20858,6 +21256,8 @@
       "entryId": "ruby-59",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "fleetingsquid",
         "flyingsquid"
@@ -20948,6 +21348,8 @@
       "entryId": "ruby-60",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21069,6 +21471,8 @@
       "entryId": "ruby-61",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21190,6 +21594,8 @@
       "entryId": "ruby-62",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21311,6 +21717,8 @@
       "entryId": "ruby-63",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21432,6 +21840,8 @@
       "entryId": "ruby-64",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21553,6 +21963,8 @@
       "entryId": "ruby-65",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21674,6 +22086,8 @@
       "entryId": "ruby-66",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21795,6 +22209,8 @@
       "entryId": "ruby-67",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -21916,6 +22332,8 @@
       "entryId": "ruby-68",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22037,6 +22455,8 @@
       "entryId": "ruby-69",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "catchingcarp"
       ],
@@ -22147,6 +22567,8 @@
       "entryId": "ruby-70",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22249,6 +22671,8 @@
       "entryId": "ruby-71",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22351,6 +22775,8 @@
       "entryId": "ruby-72",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22453,6 +22879,8 @@
       "entryId": "ruby-73",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22555,6 +22983,8 @@
       "entryId": "ruby-74",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22657,6 +23087,8 @@
       "entryId": "ruby-75",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22741,6 +23173,8 @@
       "entryId": "ruby-76",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22825,6 +23259,8 @@
       "entryId": "ruby-77",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22909,6 +23345,8 @@
       "entryId": "ruby-78",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -22993,6 +23431,8 @@
       "entryId": "ruby-79",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "yanxiangoby",
         "gensuishrimp"
@@ -23083,6 +23523,8 @@
       "entryId": "ruby-80",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23198,6 +23640,8 @@
       "entryId": "ruby-81",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23313,6 +23757,8 @@
       "entryId": "ruby-82",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23428,6 +23874,8 @@
       "entryId": "ruby-83",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23543,6 +23991,8 @@
       "entryId": "ruby-84",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23658,6 +24108,8 @@
       "entryId": "ruby-85",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23773,6 +24225,8 @@
       "entryId": "ruby-86",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -23888,6 +24342,8 @@
       "entryId": "ruby-87",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24003,6 +24459,8 @@
       "entryId": "ruby-88",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24118,6 +24576,8 @@
       "entryId": "ruby-89",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "rhotanodahlia"
       ],
@@ -24228,6 +24688,8 @@
       "entryId": "ruby-90",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24306,6 +24768,8 @@
       "entryId": "ruby-91",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24396,6 +24860,8 @@
       "entryId": "ruby-92",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24486,6 +24952,8 @@
       "entryId": "ruby-93",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24564,6 +25032,8 @@
       "entryId": "ruby-94",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24654,6 +25124,8 @@
       "entryId": "ruby-95",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "captainspen",
         "cieldalaesroosterfish"
@@ -24753,6 +25225,8 @@
       "entryId": "ruby-96",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "captainspen"
       ],
@@ -24833,6 +25307,8 @@
       "entryId": "ruby-97",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "captainspen"
       ],
@@ -24913,6 +25389,8 @@
       "entryId": "ruby-98",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -24991,6 +25469,8 @@
       "entryId": "ruby-99",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "cieldalaesroosterfish"
       ],
@@ -25076,6 +25556,8 @@
       "entryId": "ruby-100",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25191,6 +25673,8 @@
       "entryId": "ruby-101",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25306,6 +25790,8 @@
       "entryId": "ruby-102",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25421,6 +25907,8 @@
       "entryId": "ruby-103",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25536,6 +26024,8 @@
       "entryId": "ruby-104",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25651,6 +26141,8 @@
       "entryId": "ruby-105",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25766,6 +26258,8 @@
       "entryId": "ruby-106",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25881,6 +26375,8 @@
       "entryId": "ruby-107",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -25996,6 +26492,8 @@
       "entryId": "ruby-108",
       "spectral": false,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": true,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26111,6 +26609,8 @@
       "entryId": "ruby-109",
       "spectral": false,
       "legendary": false,
+      "bigFish": true,
+      "spectralTrigger": false,
       "Dependencies": [
         "redmantis"
       ],
@@ -26221,6 +26721,8 @@
       "entryId": "ruby-110",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26317,6 +26819,8 @@
       "entryId": "ruby-111",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26413,6 +26917,8 @@
       "entryId": "ruby-112",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26503,6 +27009,8 @@
       "entryId": "ruby-113",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26581,6 +27089,8 @@
       "entryId": "ruby-114",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26677,6 +27187,8 @@
       "entryId": "ruby-115",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26755,6 +27267,8 @@
       "entryId": "ruby-116",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26851,6 +27365,8 @@
       "entryId": "ruby-117",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -26941,6 +27457,8 @@
       "entryId": "ruby-118",
       "spectral": true,
       "legendary": false,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [],
       "intuition": {
         "seconds": null,
@@ -27019,6 +27537,8 @@
       "entryId": "ruby-119",
       "spectral": true,
       "legendary": true,
+      "bigFish": false,
+      "spectralTrigger": false,
       "Dependencies": [
         "satrapsaurus"
       ],

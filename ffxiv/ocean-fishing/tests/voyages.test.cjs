@@ -33,6 +33,12 @@ test('each voyage retains the same available species and 7.5 Ruby locations',()=
 test('normalized data preserves IDs, dependencies, missing quantities and game images without HTML',()=>{
  const fs=require('node:fs'),path=require('node:path');
  assert.equal(data.length,260);assert.equal(new Set(data.map(f=>f.id)).size,259);
+ for(const flag of ['legendary','bigFish','spectralTrigger']){
+  assert.equal(data.filter(f=>f[flag]).length,13,flag);
+  for(const stop of new Set(data.map(f=>f.Stop)))assert.equal(data.filter(f=>f.Stop===stop&&f[flag]).length,1,flag+' at '+stop);
+ }
+ for(const name of ['Placodus','Glass Dragon'])assert.equal(data.find(f=>f.Fish===name).legendary,true,name);
+ for(const name of ['Spectresaur','Spectral Wrasse','Spectral Snake Eel','Spectral Kotsu Zetsu'])assert.equal(data.find(f=>f.Fish===name).spectralTrigger,true,name);
  const catalog=C.createCatalog(data);
  for(const f of data){
   assert.ok(f.id>0);assert.ok(fs.existsSync(path.join(__dirname,'..',f.image)));
