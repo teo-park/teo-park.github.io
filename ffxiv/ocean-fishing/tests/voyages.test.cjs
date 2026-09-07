@@ -11,11 +11,14 @@ test('both native schedulers match a full 12-day rotation, including midnight sk
   assert.deepEqual(Array.from({length:144},(_,i)=>V.at(route,first+(i-144)*V.INTERVAL).number),actual);
  }
 });
-test('registration remains the first visible voyage through 14:59, then advances at 15:00',()=>{
+test('the last departure remains visible for one hour even after registration closes',()=>{
  const start=Date.parse(fixture.firstDeparture);
  for(const route of ['indigo','ruby']){
-  for(const offset of [0,1,14*60000,15*60000-1])assert.equal(V.upcoming(route,start+offset)[0].start,start);
-  assert.equal(V.upcoming(route,start+15*60000)[0].start,start+V.INTERVAL);
+  for(const offset of [0,1,14*60000,15*60000,30*60000,60*60000]){
+   const recent=V.upcoming(route,start+offset)[0];
+   assert.equal(recent.start,start);assert.equal(recent.close,start+15*60000);
+  }
+  assert.equal(V.upcoming(route,start+60*60000+1)[0].start,start+V.INTERVAL);
   assert.equal(V.upcoming(route,start-1)[0].start,start);
  }
 });

@@ -29,7 +29,8 @@
   function upcoming(route, now=Date.now(), count=12) {
     const origin=REFERENCE_DAY+HOUR;
     let first=origin+Math.floor((now-origin)/INTERVAL)*INTERVAL;
-    if(now>=first+15*60000) first+=INTERVAL;
+    // Keep the last departure available while its passengers are still fishing.
+    if(now>first+HOUR) first+=INTERVAL;
     return Array.from({length:Math.max(0,Math.min(144,count))},(_,i)=>at(route,first+i*INTERVAL));
   }
   function available(fish, voyage, stopIndex) {

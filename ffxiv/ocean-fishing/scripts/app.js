@@ -66,6 +66,19 @@
     if(f.BaitAny==='Yes') return '기본 미끼 3종 모두 가능';
     return (/^M!/.test(f.BestBait)?'생미끼 · ':'') + (f.BestBaitTranslated || C.name(f.BestBait) || '미끼 미확인');
   }
+  function baitSummary(rows) {
+    if(!rows.length)return '';
+    const baits=new Map(), basics=['ragworm','krill','plumpworm'];
+    let any=false;
+    for(const f of rows) {
+      if(f.BaitAny==='Yes'){any=true;continue;}
+      const id=C.key(f.BestBait), mooch=/^M!/.test(f.BestBait);
+      baits.set((mooch?'mooch:':'bait:')+id,{id,mooch,text:baitText(f)});
+    }
+    const items=[...baits.values()].sort((a,b)=>Number(a.mooch)-Number(b.mooch)||(basics.includes(a.id)?basics.indexOf(a.id):3)-(basics.includes(b.id)?basics.indexOf(b.id):3)||a.text.localeCompare(b.text,'ko'));
+    if(any&&!basics.some(id=>baits.has('bait:'+id)))items.unshift({text:'바위털갯지렁이 / 크릴 / 굵은지렁이 중 하나'});
+    return `<div class="zone-baits"><span class="zone-baits-label">권장 미끼</span><div class="zone-bait-list">${items.map(b=>`<span class="bait-chip ${b.mooch?'bait-chip-mooch':''}">${esc(b.text)}</span>`).join('')}</div><span class="zone-baits-note">표시된 물고기 기준</span></div>`;
+  }
   function conditions(f) {
     const out=[];
     if(f.intuition.fish.length) out.push(`<span class="condition-label">직감${f.intuition.seconds?' '+f.intuition.seconds+'초':''}</span> ${f.intuition.fish.map(dep=>`${esc(label(dep.name))} × ${dep.count}`).join(' + ')}`);
@@ -137,13 +150,17 @@
     if(following) selected=voyages[0];
   }
   function voyageFish(v) { return routeFish.filter(f=>v.stops.some((_,i)=>V.available(f,v,i))); }
+  function legendaryNames(rows) {
+    const unique=[...new Map(rows.filter(f=>f.legendary).map(f=>[f.id,f])).values()];
+    return unique.map(f=>f.FishTranslated+(caught(f)?' (수집완료)':'')).join(' · ');
+  }
   function achievement(v) {
     const groups=C.routeAchievements(routeFish,v.stops);
     return groups.length?`<span class="route-achievement">업적작 가능 (${groups.map(g=>esc(g.label)+(g.requiresSpectral?'*':'')).join(' · ')})</span>`:'';
   }
   function countdown(v) {
     const now=Date.now();
-    if(now>=v.close) return '접수 마감';
+    if(now>=v.close) return `접수 마감 · ${Math.floor((now-v.start)/60000)}분 전 출항`;
     if(now>=v.start) return `접수 중 · ${Math.ceil((v.close-now)/60000)}분 남음`;
     const mins=Math.ceil((v.start-now)/60000); return mins<60?`${mins}분 후`:`${Math.floor(mins/60)}시간${mins%60?' '+mins%60+'분':''} 후`;
   }
@@ -155,7 +172,7 @@
     $('scheduleRows').innerHTML=voyages.map((v,i)=>{
       const remaining=total(voyageFish(v))-count(voyageFish(v));
       const hide=i>0&&(!expanded || (hideCompleted&&purpose==='collection'&&remaining===0));
-      return `<tr ${hide?'hidden':''} class="${v.start===selected.start?'selected':''}"><td><button type="button" data-voyage="${v.start}" aria-pressed="${v.start===selected.start}">${time(v.start)}</button></td><td><span class="departure-countdown">${countdown(v)}</span></td><td>${esc(v.stops[2].name)} ${period(v.stops[2].time)}${achievement(v)}</td><td>${remaining}종</td><td>${esc([...new Set(voyageFish(v).filter(f=>f.legendary).map(f=>f.FishTranslated))].join(' · ') || '—')}</td></tr>`;
+      return `<tr ${hide?'hidden':''} class="${v.start===selected.start?'selected':''}"><td><button type="button" data-voyage="${v.start}" aria-pressed="${v.start===selected.start}">${time(v.start)}</button></td><td><span class="departure-countdown">${countdown(v)}</span></td><td>${esc(v.stops[2].name)} ${period(v.stops[2].time)}${achievement(v)}</td><td>${remaining}종</td><td>${esc(legendaryNames(voyageFish(v)) || '—')}</td></tr>`;
     }).join('');
     if(focused)document.querySelector(`[data-voyage="${focused}"]`)?.focus({preventScroll:true});
   }
@@ -179,10 +196,13 @@
     $('selectedTime').textContent=time(selected.start)+' 출항';
     $('selectedStops').textContent=selected.stops.map(stop=>stop.name).join(' → ');
     $('returnFirst').hidden=selected.start===voyages[0].start;
-    $('stopTabs').innerHTML=selected.stops.map((stop,i)=>`<button role="tab" id="stopTab${i}" aria-controls="stopPanel${i}" aria-selected="${i===activeStop}" tabindex="${i===activeStop?0:-1}" data-stop="${i}"><small>0${i+1} / STOP</small><strong>${esc(stop.name)}</strong>${period(stop.time)}</button>`).join('');
+    $('stopTabs').innerHTML=selected.stops.map((stop,i)=>{
+      const legends=legendaryNames(routeFish.filter(f=>V.available(f,selected,i)));
+      return `<button role="tab" id="stopTab${i}" aria-controls="stopPanel${i}" aria-selected="${i===activeStop}" tabindex="${i===activeStop?0:-1}" data-stop="${i}"><small>0${i+1} / STOP</small><span class="stop-location"><strong>${esc(stop.name)}</strong>${period(stop.time)}</span>${legends?`<span class="stop-legendary">전설어 · ${esc(legends)}</span>`:''}</button>`;
+    }).join('');
     $('fishPanels').innerHTML=selected.stops.map((stop,i)=>`<section role="tabpanel" id="stopPanel${i}" aria-labelledby="stopTab${i}" ${i!==activeStop?'hidden':''}>${[false,true].map(spectral=>{
       const id=`${i}-${spectral?'spectral':'regular'}`, options=zoneOptions.get(id)||{}, visible=plannedFish.filter(f=>V.available(f,selected,i)&&f.spectral===spectral);
-      return `<section class="fishing-zone ${spectral?'spectral':''}" data-zone="${id}"><header><h2>${spectral?'환해류':'일반 구간'} <small>${visible.length}종</small></h2><label class="subtle-option"><input type="checkbox" data-zone-option="fabled" ${options.fabled?'checked':''}> 전설어 조건 중심</label></header><div class="zone-tools"><label>정렬 <select data-zone-option="sort"><option value="order">도감 순서</option><option value="name" ${options.sort==='name'?'selected':''}>이름</option><option value="points" ${options.sort==='points'?'selected':''}>기본 점수 높은 순</option><option value="triple" ${options.sort==='triple'?'selected':''}>삼중 점수 높은 순</option></select></label><label>미끼 <select data-zone-option="bait"><option value="">모든 미끼</option>${[['Ragworm','바위털갯지렁이'],['Krill','크릴'],['PlumpWorm','굵은지렁이'],['VersatileLure','만능 루어'],['Special','특수 미끼'],['Mooch','생미끼']].map(([value,label])=>`<option value="${value}" ${options.bait===value?'selected':''}>${label}</option>`).join('')}</select></label></div>${purpose==='score'?'<p class="score-explanation">추가 점수 = 여러 마리 점수 − 일반 한 마리 점수. 이중 400 GP · 삼중 700 GP. 직감·생미끼 준비 비용, GP 회복, 월척·항해 보너스는 계산에 포함하지 않아요.</p>':''}${table(visible,'fish-'+id,options)}</section>`;
+      return `<section class="fishing-zone ${spectral?'spectral':''}" data-zone="${id}"><header><h2>${spectral?'환해류':'일반 구간'} <small>${visible.length}종</small></h2><label class="subtle-option"><input type="checkbox" data-zone-option="fabled" ${options.fabled?'checked':''}> 전설어 조건 중심</label></header>${baitSummary(visible)}<div class="zone-tools"><label>정렬 <select data-zone-option="sort"><option value="order">도감 순서</option><option value="name" ${options.sort==='name'?'selected':''}>이름</option><option value="points" ${options.sort==='points'?'selected':''}>기본 점수 높은 순</option><option value="triple" ${options.sort==='triple'?'selected':''}>삼중 점수 높은 순</option></select></label><label>미끼 <select data-zone-option="bait"><option value="">모든 미끼</option>${[['Ragworm','바위털갯지렁이'],['Krill','크릴'],['PlumpWorm','굵은지렁이'],['VersatileLure','만능 루어'],['Special','특수 미끼'],['Mooch','생미끼']].map(([value,label])=>`<option value="${value}" ${options.bait===value?'selected':''}>${label}</option>`).join('')}</select></label></div>${purpose==='score'?'<p class="score-explanation">추가 점수 = 여러 마리 점수 − 일반 한 마리 점수. 이중 400 GP · 삼중 700 GP. 직감·생미끼 준비 비용, GP 회복, 월척·항해 보너스는 계산에 포함하지 않아요.</p>':''}${table(visible,'fish-'+id,options)}</section>`;
     }).join('')}</section>`).join('');
     if(focusZone&&focusOption)document.querySelector(`[data-zone="${focusZone}"] [data-zone-option="${focusOption}"]`)?.focus({preventScroll:true});
   }
