@@ -1,0 +1,153 @@
+/*!
+ * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
+ * Copyright 2011-2024 The Bootstrap Authors
+ * Licensed under the Creative Commons Attribution 3.0 Unported License.
+ */
+
+(() => {
+  'use strict'
+
+  const getStoredTheme = () => localStorage.getItem('theme')
+  const setStoredTheme = theme => localStorage.setItem('theme', theme)
+  const getStoredTimeFormat = () => localStorage.getItem('time-format')
+  const setStoredTimeFormat = format => localStorage.setItem('time-format', format)
+
+  const getPreferredTheme = () => {
+    const storedTheme = getStoredTheme()
+    if (storedTheme) {
+      return storedTheme
+    }
+
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+
+  const getPreferredTimeFormat = () => {
+    const storedFormat = getStoredTimeFormat()
+    return storedFormat === '12' ? '12' : '24'
+  }
+
+  // Expose helpers for page scripts that format times.
+  window.getPreferredTimeFormat = getPreferredTimeFormat
+  window.use12HourTime = () => getPreferredTimeFormat() === '12'
+
+  const setTheme = theme => {
+    if (theme === 'auto') {
+      document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
+    } else {
+      document.documentElement.setAttribute('data-bs-theme', theme)
+    }
+  }
+
+  setTheme(getPreferredTheme())
+
+  const showActiveTheme = (theme, focus = false) => {
+    const themeSwitcher = document.querySelector('#bd-theme')
+
+    if (!themeSwitcher) {
+      return
+    }
+
+    const themeSwitcherText = document.querySelector('#bd-theme-text')
+    const activeThemeIcon = document.querySelector('#bd-theme .theme-icon-active use')
+    const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
+    const svgOfActiveBtn = btnToActive.querySelector('svg use').getAttribute('href')
+
+    document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
+      element.classList.remove('active')
+      element.setAttribute('aria-pressed', 'false')
+    })
+
+    btnToActive.classList.add('active')
+    btnToActive.setAttribute('aria-pressed', 'true')
+    activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+    const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
+    themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
+
+    if (focus) {
+      themeSwitcher.focus()
+    }
+  }
+
+  const emitTimeFormatChanged = format => {
+    document.dispatchEvent(new CustomEvent('timeFormatChanged', {
+      detail: {
+        format,
+        use12Hour: format === '12'
+      }
+    }))
+  }
+
+  const showActiveTimeFormat = (format, focus = false) => {
+    const toggle = document.querySelector('#time-format-toggle')
+    if (!toggle) {
+      return
+    }
+
+    const label = document.querySelector('#time-format-label')
+    if (label) {
+      label.textContent = format === '12' ? '12H' : '24H'
+    }
+
+    toggle.setAttribute(
+      'aria-label',
+      format === '12' ? 'Toggle time format (12-hour)' : 'Toggle time format (24-hour)'
+    )
+
+    if (focus) {
+      toggle.focus()
+    }
+  }
+
+  const bindTimeFormatToggle = () => {
+    const toggle = document.querySelector('#time-format-toggle')
+    if (!toggle) {
+      return false
+    }
+
+    if (toggle.dataset.boundTimeFormat !== 'true') {
+      toggle.addEventListener('click', () => {
+        const nextFormat = getPreferredTimeFormat() === '24' ? '12' : '24'
+        setStoredTimeFormat(nextFormat)
+        showActiveTimeFormat(nextFormat, true)
+        emitTimeFormatChanged(nextFormat)
+      })
+      toggle.dataset.boundTimeFormat = 'true'
+    }
+
+    showActiveTimeFormat(getPreferredTimeFormat())
+    return true
+  }
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const storedTheme = getStoredTheme()
+    if (storedTheme !== 'light' && storedTheme !== 'dark') {
+      setTheme(getPreferredTheme())
+    }
+  })
+
+  window.addEventListener('DOMContentLoaded', () => {
+    showActiveTheme(getPreferredTheme())
+    bindTimeFormatToggle()
+
+    document.addEventListener('click', (e) => {
+      const toggle = e.target.closest('[data-bs-theme-value]')
+      if (!toggle) return
+      const theme = toggle.getAttribute('data-bs-theme-value')
+      setStoredTheme(theme)
+      setTheme(theme)
+      showActiveTheme(theme, true)
+    })
+  })
+
+  const observer = new MutationObserver(() => {
+    bindTimeFormatToggle()
+
+    if (document.querySelector('#bd-theme')) {
+      showActiveTheme(getPreferredTheme())
+      if (document.querySelector('#time-format-toggle')) {
+        observer.disconnect()
+      }
+    }
+  })
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+})()

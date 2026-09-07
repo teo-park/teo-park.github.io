@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko" data-bs-theme="auto">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Schedule for upcoming ocean fishing voyages on the Indigo Route.">
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="author" content="Xina with data from Tyo'to Tayuun">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Common styles -->
+    <link href="../css/navbar-static.css?v=2" rel="stylesheet">
+    <link href="../assets/dist/css/bootstrap.min.css?v=11" rel="stylesheet">
+    <link href="../css/styles.css?v=14" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="../css/datatables.min.css?v=2" rel="stylesheet">
+    <link href="../css/dataTables.bootstrap5.min.css?v=2" rel="stylesheet">
+
+    <style>
+        #pageContent { opacity: 0; transition: opacity 0.4s ease; }
+        body.content-ready #pageContent { opacity: 1; }
+    </style>
+
+    <!-- Common scripts -->
+    <script src="../scripts/jquery-3.7.1.min.js?v=2" type="text/javascript" defer></script>
+    <script src="../assets/js/cookie.js?v=2" defer></script>
+    <script src="../assets/js/color-modes.js?v=3"></script>
+    <script src="../scripts/contentReady.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/localeUtil.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/headerandfooter.js?v=8" type="text/javascript" defer></script>
+    <script src="../assets/dist/js/bootstrap.bundle.min.js?v=2"></script>
+
+    <!-- Page-specific scripts -->
+    <script src="../scripts/popper.min.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/cleanSheetData.js?v=16" type="text/javascript" defer></script>
+    <script src="../scripts/moment.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/localize.js?v=15" type="text/javascript" defer></script>
+    <script src="../scripts/gFuncs.js?v=24" type="text/javascript" defer></script>
+    <script src="../scripts/getSheetData.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/datatables.min.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/dataTables.bootstrap5.min.js?v=2" type="text/javascript" defer></script>
+    <script src="../scripts/displayStops.js?v=12" type="text/javascript" defer></script>
+    <script src="../scripts/indigo.js?v=16" type="text/javascript" defer></script>
+    <script src="../scripts/indigooceancalculator.js?v=21" type="text/javascript" defer></script>
+    <script src="../scripts/table-a11y.js?v=4" type="text/javascript" defer></script>
+
+    <title>Ocean Fishing Tracker | Indigo</title>
+<link rel="stylesheet" href="../css/compact.css?v=20260907" />
+<script src="../scripts/collection.js?v=20260907" defer></script>
+<script src="../scripts/collection-ui.js?v=20260907" defer></script>
+</head>
+
+<body>
+        <div id="pageContent">
+                <nav class="local-nav"><strong>먼바다 낚시 · 개인용</strong><a href="../indigo/">근해 항로</a><a href="../ruby/">원양 항로</a></nav>
+            <div id="header"></div>
+
+                <main class="container-xxl">
+        <div class="collection-toolbar"><label><input id="hideCaughtFish" type="checkbox" checked>잡은 물고기 숨기기</label><span id="collectionStatus" role="status" aria-live="polite">데이터를 불러오는 중…</span><small>직감·생미끼 조건에 필요한 물고기는 잡았어도 남겨요. 목록에서 잡음 체크를 해제할 수 있어요.</small></div><div class="bg-body-tertiary p-5 rounded">
+            <div class="row">                
+                <div class="col-sm-6"><h1 data-localize="indigoroute">Indigo Route</h1></div>
+                <div class="col-sm-6 d-flex flex-wrap justify-content-sm-end gap-3 align-items-center"><!--<button id="caughttoggle"  type="button" class="btn btn-outline-primary">Toggle Caught Filter</button>--><button id="boatscheduletoggle"  type="button" class="btn btn-outline-primary" aria-controls="boatSchedule" aria-expanded="true" data-localize="table.toggleschedule">Toggle Schedule</button><button id="hideCompletedRoutesToggle" type="button" class="btn btn-outline-primary" aria-pressed="false" data-localize="schedule.hidecompletedroutes">Hide completed routes</button></div>
+            </div>
+            <div class="row">
+                <table id="boatSchedule" ><div id="throbber" class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div></table><div id="boatScheduleEmptyState" class="alert alert-secondary mt-3 d-none" data-localize="schedule.noupcominguncaught">No upcoming routes contain uncaught fish</div>
+            </div>
+        </div>
+        <br>
+        <div class="bg-body-tertiary rounded">
+            <div id="myTabRow" class="row">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item col text-center" role="presentation">
+                        <button class="destBtn nav-link active" id="dest1-tab" data-bs-toggle="tab"
+                            data-bs-target="#dest1-tab-pane" type="button" role="tab" aria-controls="dest1-tab-pane"
+                            aria-selected="true">
+                            <p id="dest1Label" class="destLabel">Stop 1</p>
+                        </button>
+                    </li>
+                    <li class="nav-item col text-center" role="presentation">
+                        <button class="destBtn nav-link" id="dest2-tab" data-bs-toggle="tab" data-bs-target="#dest2-tab-pane"
+                            type="button" role="tab" aria-controls="dest2-tab-pane" aria-selected="false">
+                            <p id="dest2Label" class="destLabel">Stop 2</p>
+                        </button>
+                    </li>
+                    <li class="nav-item col text-center" role="presentation">
+                        <button class="destBtn nav-link" id="dest3-tab" data-bs-toggle="tab" data-bs-target="#dest3-tab-pane"
+                            type="button" role="tab" aria-controls="dest3-tab-pane" aria-selected="false">
+                            <p id="dest3Label" class="destLabel">Stop 3</p>
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="dest1-tab-pane" role="tabpanel"
+                        aria-labelledby="dest1-tab" tabindex="0">
+                        <div id="Toggles1reg">
+                            <div class="row">
+                                <div class="col-md-2"><h5 class="headingforfishtable" data-localize="table.normalzone">Normal Zone</h5></div>
+                                <div class="col-md-8">
+                            <p class="d-inline-flex gap-1 padding-toggles">
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="3"data-localize="bait.ragworm"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="4" data-localize="bait.krill"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="5"  data-localize="bait.plumpworm">Plump Worm</button>
+                                <button type="button" id="moochBaitToggle1reg" class="btn btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="6" data-localize="bait.mooch">Mooch</button>
+                                <button type="button" class="btn btn-bait-primary toggle-vis" data-bs-toggle="button"
+                                    aria-pressed="false" data-column="7" data-localize="bait.versatilelure">Versatile Lure</button>
+                            </p></div>
+                                
+                            <div class="col-md-2"><div class="form-check form-switch fabledCheck">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fff1">
+                                <label class="form-check-label" for="fff1" data-localize="table.fff">Fabled Fish Focus</label>
+                            </div></div></div>
+
+                            <!-- Toggle Bait: <a class="toggle-vis" data-column="3">Ragworm</a> - <a class="toggle-vis" data-column="4">Krill</a> - <a class="toggle-vis" data-column="5">Plump Worm</a> -<a id="moochBaitToggle1reg" class="toggle-vis" data-column="6">Mooch</a> - <a class="toggle-vis" data-column="7">Versatile Lure</a> -->
+                        </div>
+                        <div id="desttable1regContainer">
+                            <table id="desttable1reg" class="table-striped table table-hover"></table>
+                        </div>
+
+                        <hr>
+                        <div id="Toggles1spec">
+                            <div class="row">
+                                <div class="col-md-2"><h5 class="headingforfishtable" data-localize="table.spectralcurrent">Spectral Current</h5></div>
+                                <div class="col-md-8">
+                            <p class="d-inline-flex gap-1 padding-toggles">
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="3"data-localize="bait.ragworm"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="4" data-localize="bait.krill"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="5"  data-localize="bait.plumpworm">Plump Worm</button>
+                                <button type="button" id="moochBaitToggle1spec" class="btn btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-localize="bait.mooch" data-column="6">Mooch</button>
+                                <button type="button" id="specialBaitToggle1spec"
+                                    class="btn btn-bait-primary toggle-vis" data-bs-toggle="button" aria-pressed="true"
+                                    data-column="7">Special Bait</button>
+                                <button type="button" class="btn btn-bait-primary toggle-vis" data-bs-toggle="button"
+                                    aria-pressed="false" data-localize="bait.versatilelure" data-column="8">Versatile Lure</button>
+                            </p></div>
+                                
+                            <div class="col-md-2"><div class="form-check form-switch fabledCheck">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fff1spec">
+                                <label class="form-check-label" for="fff1spec" data-localize="table.fff"></label>
+                            </div></div></div>
+                            <!--Toggle Bait: <a class="toggle-vis" data-column="3">Ragworm</a> - <a class="toggle-vis" data-column="4">Krill</a> - <a class="toggle-vis" data-column="5">Plump Worm</a> - <a id="moochBaitToggle1spec" class="toggle-vis" data-column="6">Mooch</a> - <a id="specialBaitToggle1spec" class="toggle-vis" data-column="7">Special Bait</a> - <a class="toggle-vis" data-column="8">Versatile Lure</a>-->
+                        </div>
+                        <div id="desttable1specContainer">
+                            <table id="desttable1spec" class="table-striped table table-hover"></table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="dest2-tab-pane" role="tabpanel" aria-labelledby="dest2-tab"
+                        tabindex="0">
+
+                        <div id="Toggles2reg">
+                            <div class="row">
+                                <div class="col-md-2"><h5 class="headingforfishtable" data-localize="table.normalzone">Normal Zone</h5></div>
+                                <div class="col-md-8">
+                            <p class="d-inline-flex gap-1 padding-toggles">
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="3"data-localize="bait.ragworm"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="4" data-localize="bait.krill"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="5"  data-localize="bait.plumpworm">Plump Worm</button>
+                                <button type="button" id="moochBaitToggle2reg" class="btn btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="6" data-localize="bait.mooch">Mooch</button>
+                                <button type="button" class="btn btn-bait-primary toggle-vis" data-bs-toggle="button"
+                                    aria-pressed="false" data-column="7" data-localize="bait.versatilelure">Versatile Lure</button>
+                            </p></div>
+                                
+                            <div class="col-md-2"><div class="form-check form-switch fabledCheck">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fff2">
+                                <label class="form-check-label" for="fff2" data-localize="table.fff">Fabled Fish Focus</label>
+                            </div></div></div>
+                        </div>
+                        <div id="desttable2regContainer">
+                            <table id="desttable2reg" class="table-striped table table-hover"></table>
+                        </div>
+                        <hr>
+                        <div id="Toggles2spec">
+                            <div class="row">
+                                <div class="col-md-2"><h5 class="headingforfishtable" data-localize="table.spectralcurrent">Spectral Current</h5></div>
+                                <div class="col-md-8">
+                            <p class="d-inline-flex gap-1 padding-toggles">
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="3"data-localize="bait.ragworm"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="4" data-localize="bait.krill"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="5"  data-localize="bait.plumpworm">Plump Worm</button>
+                                <button type="button" id="moochBaitToggle2spec" class="btn btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="6" data-localize="bait.mooch">Mooch</button>
+                                <button type="button" id="specialBaitToggle2spec"
+                                    class="btn btn-bait-primary toggle-vis" data-bs-toggle="button" aria-pressed="true"
+                                    data-column="7">Special Bait</button>
+                                <button type="button" class="btn btn-bait-primary toggle-vis" data-bs-toggle="button"
+                                    aria-pressed="false" data-column="8" data-localize="bait.versatilelure">Versatile Lure</button>
+                            </p></div>
+                                
+                            <div class="col-md-2"><div class="form-check form-switch fabledCheck">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fff2spec">
+                                <label class="form-check-label" for="fff2spec" data-localize="table.fff">Fabled Fish Focus</label>
+                            </div></div></div>
+                        </div>
+                        <div id="desttable2specContainer">
+                            <table id="desttable2spec" class="table-striped table table-hover"></table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="dest3-tab-pane" role="tabpanel" aria-labelledby="dest3-tab"
+                        tabindex="0">
+                        <div id="Toggles3reg">
+                            <div class="row">
+                                <div class="col-md-2"><h5 class="headingforfishtable" data-localize="table.normalzone">Normal Zone</h5></div>
+                                <div class="col-md-8">
+                            <p class="d-inline-flex gap-1 padding-toggles">
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="3"data-localize="bait.ragworm"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="4" data-localize="bait.krill"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="5"  data-localize="bait.plumpworm">Plump Worm</button>
+                                <button type="button" id="moochBaitToggle3reg" class="btn btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="6" data-localize="bait.mooch">Mooch</button>
+                                <button type="button" class="btn btn-bait-primary toggle-vis" data-bs-toggle="button"
+                                    aria-pressed="false" data-column="7" data-localize="bait.versatilelure">Versatile Lure</button>
+                            </p></div>
+                                
+                            <div class="col-md-2"><div class="form-check form-switch fabledCheck">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fff3">
+                                <label class="form-check-label" for="fff3" data-localize="table.fff">Fabled Fish Focus</label>
+                            </div></div></div>
+                        </div>
+                        <div id="desttable3regContainer">
+                            <table id="desttable3reg" class="table-striped table table-hover"></table>
+                        </div>
+                        <hr>
+                        <div id="Toggles3spec">
+                            <div class="row">
+                                <div class="col-md-2"><h5 class="headingforfishtable" data-localize="table.spectralcurrent">Spectral Current</h5></div>
+                                <div class="col-md-8">
+                            <p class="d-inline-flex gap-1 padding-toggles">
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="3" data-localize="bait.ragworm"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="4" data-localize="bait.krill"></button>
+                                <button type="button" class="btn active btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" data-column="5" data-localize="bait.plumpworm">Plump Worm</button>
+                                <button type="button" id="moochBaitToggle3spec" class="btn btn-bait-primary toggle-vis"
+                                    data-bs-toggle="button" aria-pressed="true" data-column="6" data-localize="bait.mooch">Mooch</button>
+                                <button type="button" id="specialBaitToggle3spec"
+                                    class="btn btn-bait-primary toggle-vis" data-bs-toggle="button" aria-pressed="true"
+                                    data-column="7">Special Bait</button>
+                                <button type="button" class="btn btn-bait-primary toggle-vis" data-bs-toggle="button"
+                                    aria-pressed="false" data-column="8" data-localize="bait.versatilelure">Versatile Lure</button>
+                            </p></div>
+                                
+                            <div class="col-md-2"><div class="form-check form-switch fabledCheck">
+                                <input class="form-check-input" type="checkbox" role="switch" id="fff3spec">
+                                <label class="form-check-label" for="fff3spec" data-localize="table.fff">Fabled Fish Focus</label>
+                            </div></div></div>
+                        </div>
+                        <div id="desttable3specContainer">
+                            <table id="desttable3spec" class="table-striped table table-hover"></table>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        </main>
+
+        <footer class="local-footer">개인용 수정판 · 데이터: Tyo'to Tayuun / 원본 개발: Xina Apella · 시간표: Donut Steel · 한국어: 수리비용<br><a href="https://oceanfishing.boats/about/" target="_blank" rel="noopener noreferrer">원본 및 제작진</a> · <a href="https://github.com/netsua92/OceanFishing" target="_blank" rel="noopener noreferrer">원본 코드</a><br>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden"></span>
+            </div>
+            <p class="text-muted"></p>
+        </div>
+    </div>
+
+    <script>
+        // Hide loading overlay and show content when everything is ready
+        if (typeof ContentReady !== "undefined") {
+            ContentReady.onReady(function () {
+                var overlay = document.getElementById("loadingOverlay");
+                if (overlay) {
+                    overlay.classList.add("hidden");
+                }
+                document.body.classList.add("content-ready");
+            });
+        } else {
+            // Fallback if ContentReady isn't available
+            document.addEventListener("DOMContentLoaded", function () {
+                setTimeout(function () {
+                    document.body.classList.add("content-ready");
+                    var overlay = document.getElementById("loadingOverlay");
+                    if (overlay) {
+                        overlay.classList.add("hidden");
+                    }
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+
+</html>

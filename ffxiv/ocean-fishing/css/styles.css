@@ -1,0 +1,572 @@
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Loading overlay for data-heavy pages (ruby/indigo) */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #212529;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#loadingOverlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+td {
+  vertical-align:middle;
+}
+
+.importanthide{
+  display:none !important;
+}
+
+colgroup {
+  display: none;
+}
+pre{
+  background-color: var(--bs-myBlueGrey);
+  border-radius: 5px;
+}
+
+.fullWidth {
+  width:100%;
+}
+.routetableOpObj {
+  margin-left:5px;
+  margin-top:2.5px;
+  margin-bottom:2.5px;
+}
+
+.nav-tabs .nav-link{
+  border: var(--bs-nav-tabs-border-width) solid var(--bs-border-color);
+}
+.achievementGraphic {
+  max-width:1180px;
+}
+
+#boatscheduletoggle {
+  width:250px;
+  display:block;
+  float:right;
+}
+.headingforfishtable{
+
+  padding-left: 15px;
+  padding-top: 15px;
+}
+
+.achievementSelector img {
+  max-height:50px;
+  width:auto;
+  /*float:left;*/
+}
+
+.achievementSelector {
+  margin-top:5px;
+  margin-bottom:10px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  /*height:105px;*/
+}
+
+.achievementDesc {
+margin-bottom:20px;
+}
+
+.achievementTitle{
+margin:10px;
+}
+
+.activeRow { 
+  background-color: var(--bs-myBlueGrey);
+}
+.stopsRow > td:first-child{
+  padding-left:1em;
+}
+
+.stopsRow {
+  cursor: pointer;
+}
+
+.contentMax {
+  padding-top:5px;
+  width:max-content;
+}
+
+.fullPadding{
+  padding:15px;
+}
+
+.massivePre{
+  padding-top: 20px;
+}
+
+.preInside {
+  display:inline-block;
+  margin-bottom: 0px;
+}
+.fi{margin-right: 5px;
+}
+.infographic {
+  width:95%;
+  margin-top:5px;
+  margin-bottom:10px;
+}
+body>footer {
+  position: sticky;
+  top: 100vh;
+}
+
+.form-control,.form-select {
+  display:inline-block !important;
+  width:auto !important;
+  vertical-align: middle;
+}
+
+.centerAlign {
+  text-align:center;
+}
+.smallbait {
+  width: 50px;
+}
+
+.left {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+.apkallu {
+  z-index:-5;
+  position:relative;
+}
+
+.notCatchable {
+  opacity:.25;
+}
+
+.caughtRow {
+  --bs-table-bg: #274d20;
+}
+
+.caughtFish {
+  width: 35px;
+  height: 50px;
+  accent-color: #274d20;
+}
+
+.caughtFish:hover {
+  accent-color: #487940;
+}
+
+.iconMedium {
+  width:75px;
+}
+
+.iconSmall {
+  width: 50px;
+}
+
+.iconSmaller {
+  width: 35px;
+}
+
+.iconMini {
+  width: 20px;
+  margin-bottom: 4px;
+}
+
+.iconSmallest {
+  width: 25px;
+}
+
+.minibait {
+  width: 20px;
+  margin-bottom: 4px;
+  margin-left: 5px;
+}
+
+.padding-toggles {
+  padding: 15px 15px 0px 15px;
+  margin-bottom: 0px;
+}
+
+.fabledCheck {
+  float: right;
+  margin-top: 25px;
+  padding-right: 15px;
+}
+
+.destBtn {
+  width:100%;
+}
+
+#myTabRow{
+  --bs-gutter-x: 0rem;
+}
+
+.bitebadge {
+  font-size:1em;
+  margin-top:0px;
+  margin-bottom:10px;
+  font-family:Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  width: 36.8px;
+}
+
+.speciesbadge {
+  padding: 9px;
+  background-color: var(--species-badge);
+}
+
+.timebadge {
+  background-color: var(--time-badge);
+  margin: 5px;
+  padding: 5px;
+  margin-left:-5px;
+}
+
+.destLabel {
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+}
+
+.min50 {
+  min-width:50px;
+}
+
+.desttextrt{
+  vertical-align:middle;
+  margin-right:5px;
+}
+
+.schedule-tooltip {
+  --bs-tooltip-bg: #ffffff;
+  --bs-tooltip-color: #1f2937;
+  --bs-tooltip-opacity: 1;
+  --bs-tooltip-max-width: 340px;
+}
+
+.schedule-tooltip .tooltip-inner {
+  text-align: left;
+  border: 1px solid rgba(31, 41, 55, 0.15);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  line-height: 1.45;
+}
+
+.schedule-tooltip .timebadge {
+  background-color: #2f3440;
+  border: 1px solid rgba(230, 223, 181, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  margin: 0 4px;
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+
+.schedule-tooltip .scheduleTooltipIcon {
+  width: 20px;
+  filter: drop-shadow(0 1px 1px rgba(17, 24, 39, 0.45));
+}
+
+.schedule-tooltip .tooltip-inner br {
+  content: "";
+  display: block;
+  margin: 4px 0;
+}
+
+.row,
+.row>* {
+  margin-right: 0px !important;
+  padding-right: 0px !important;
+}
+
+table.dataTable td.dt-type-numeric {
+  text-align: center !important;
+}
+
+.callout {
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  color: var(--bd-callout-color, inherit);
+  background-color: #355c73;
+  border-left: 0.25rem solid #6d9ab4;
+}
+
+.tyoto {
+  position: relative;
+  width: 100%;
+  margin-bottom: -10em;
+  padding-top: 2em;
+}
+
+@media (max-width: 1400px) {
+  .tyoto {
+    margin-bottom: -9em;
+  }
+}
+
+@media (max-width: 1200px) {
+  .tyoto {
+    margin-bottom: -7.5em;
+  }
+}
+
+@media (max-width: 992px) {
+  .tyoto {
+    margin-bottom: -6.5em;
+  }
+}
+
+#boatSchedule,
+[id*="desttable"] {
+  width: 100% !important;
+  clear:both;
+}
+
+.iconSocial {
+  padding: 5px;
+}
+
+.svgColor {
+  display: inline-block;
+  position: relative;
+  padding-left: 5px;
+}
+
+p .svgColor {
+  top: 0.35em;
+  vertical-align: sub;
+}
+
+.cardLink {
+  text-decoration: none !important;
+}
+
+
+.bd-placeholder-img {
+  font-size: 1.125rem;
+  text-anchor: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .bd-placeholder-img-lg {
+    font-size: 3.5rem;
+  }
+}
+
+
+.b-example-divider {
+  width: 100%;
+  height: 3rem;
+  background-color: rgba(0, 0, 0, .1);
+  border: solid rgba(0, 0, 0, .15);
+  border-width: 1px 0;
+  box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+}
+
+.b-example-vr {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 100vh;
+}
+
+.bi {
+  vertical-align: -.125em;
+  fill: currentColor;
+}
+
+.nav-scroller {
+  position: relative;
+  z-index: 2;
+  height: 2.75rem;
+  overflow-y: hidden;
+}
+
+.nav-scroller .nav {
+  display: flex;
+  flex-wrap: nowrap;
+  padding-bottom: 1rem;
+  margin-top: -1px;
+  overflow-x: auto;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-bd-primary {
+  --bd-violet-bg: #7c99aa;
+  --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+  --bs-btn-font-weight: 600;
+  --bs-btn-color: var(--bs-white);
+  --bs-btn-bg: var(--bd-violet-bg);
+  --bs-btn-border-color: var(--bd-violet-bg);
+  --bs-btn-hover-color: var(--bs-white);
+  --bs-btn-hover-bg: #6d9ab4;
+  --bs-btn-hover-border-color: #6d9ab4;
+  --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+  --bs-btn-active-color: var(--bs-btn-hover-color);
+  --bs-btn-active-bg: #87b6d2;
+  --bs-btn-active-border-color: #6d9ab4;
+}
+
+.btn-bait-primary {
+  --bd-violet-bg: #828d94;
+  --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+  --bs-btn-font-weight: 600;
+  --bs-btn-color: var(--bs-white);
+  --bs-btn-bg: var(--bd-violet-bg);
+  --bs-btn-border-color: var(--bd-violet-bg);
+  --bs-btn-hover-color: var(--bs-white);
+  --bs-btn-hover-bg: #6d9ab4;
+  --bs-btn-hover-border-color: #6d9ab4;
+  --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+  --bs-btn-active-color: var(--bs-btn-hover-color);
+  --bs-btn-active-bg: #51a2d1;
+  --bs-btn-active-border-color: #6d9ab4;
+}
+
+.bd-mode-toggle {
+  z-index: 1500;
+}
+
+@media (min-width: 1600px) {
+  .bd-mode-toggle {
+    position: fixed;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+}
+
+.bd-mode-toggle .dropdown-menu .active .bi {
+  display: block !important;
+}
+
+/* Accessibility: replacing box-shadow focus indicators with high-contrast outline */
+*:focus-visible {
+  outline: 2px solid aqua !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
+
+[data-bs-theme="light"] *:focus-visible {
+  outline-color: #0066cc !important;
+}
+
+/* Light theme overrides */
+[data-bs-theme="light"] {
+  --bs-body-bg: #f8f9fa;
+}
+
+[data-bs-theme="light"] .callout {
+  background-color: #d6e8f5;
+  border-left-color: #4a8db8;
+  color: #1a2a3a;
+}
+
+[data-bs-theme="light"] .btn-bd-primary {
+  --bd-violet-bg: #4a7a94;
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--bd-violet-bg);
+  --bs-btn-border-color: var(--bd-violet-bg);
+  --bs-btn-hover-bg: #3a6a84;
+  --bs-btn-hover-border-color: #3a6a84;
+  --bs-btn-active-bg: #2d5a74;
+  --bs-btn-active-border-color: #3a6a84;
+}
+
+[data-bs-theme="light"] .btn-bait-primary {
+  --bd-violet-bg: #5a6a74;
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--bd-violet-bg);
+  --bs-btn-border-color: var(--bd-violet-bg);
+  --bs-btn-hover-bg: #4a5a64;
+  --bs-btn-hover-border-color: #4a5a64;
+  --bs-btn-active-bg: #3a4a54;
+  --bs-btn-active-border-color: #4a5a64;
+}
+
+[data-bs-theme="light"] .caughtRow {
+  --bs-table-bg: #c8e6c0;
+}
+
+[data-bs-theme="light"] .caughtFish {
+  accent-color: #4a8b40;
+}
+
+[data-bs-theme="light"] .caughtFish:hover {
+  accent-color: #3a7a30;
+}
+
+[data-bs-theme="light"] #loadingOverlay {
+  background: #f8f9fa;
+}
+
+[data-bs-theme="light"] .navbar-dark {
+  --bs-navbar-color: rgba(0, 0, 0, 0.7);
+  --bs-navbar-hover-color: rgba(0, 0, 0, 0.9);
+  --bs-navbar-active-color: #000;
+  background-color: #e9ecef !important;
+}
+
+[data-bs-theme="light"] .navbar-dark .navbar-brand img {
+  filter: none;
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+[data-bs-theme="light"] .navbar-dark .nav-link:hover,
+[data-bs-theme="light"] .navbar-dark .nav-link.active {
+  color: #000;
+}
+
+[data-bs-theme="light"] .navbar-toggler {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+[data-bs-theme="light"] .navbar-toggler-icon {
+  filter: invert(1);
+}
+
+[data-bs-theme="light"] .b-example-divider {
+  background-color: rgba(0, 0, 0, .05);
+  border-color: rgba(0, 0, 0, .1);
+  box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .05), inset 0 .125em .5em rgba(0, 0, 0, .1);
+}
+
+[data-bs-theme="light"] .svgColor svg {
+  fill: #212529;
+}
+
+[data-bs-theme="light"] .destLabel .timebadge {
+  margin-left: 0;
+}
+
+[data-bs-theme="light"] #boatSchedule > tbody > tr.stopsRow:nth-of-type(odd):not(.activeRow) {
+  background-color: #e9ecef;
+}
+
+[data-bs-theme="light"] #boatSchedule > tbody > tr.stopsRow:nth-of-type(odd):not(.activeRow) > td {
+  background-color: #e9ecef;
+}
