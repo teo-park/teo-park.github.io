@@ -543,7 +543,7 @@ function styleRow(row, id, type) {
 			addStars(row.Stars) +
 			'<br/><img src="../img/Intuition.png" class="iconMini" alt="Intuition"> ' +
 			row.Intuition +
-			"</div>" + 
+			"</div>" +
 			"<div class='contentMax d-block d-lg-none'><img src='../img/Intuition.png' class='iconMini' alt='Intuition'> " + row.Intuition +
 			"</div></div>";
 	} else if (row.Fish.substring(0, 2) == "F!") {
@@ -562,7 +562,7 @@ function styleRow(row, id, type) {
 			addStars(row.Stars) +
 			'<br/><img src="../img/Intuition.png" class="iconMini" alt="Intuition"> ' +
 			row.Intuition +
-			"</div>" + 
+			"</div>" +
 			"<div class='contentMax d-block d-lg-none'><img src='../img/Intuition.png' class='iconMini' alt='Intuition'> " + row.Intuition +
 			"</div></div>";
 	} else if (row.Fish.substring(0, 2) == "T!") {
@@ -930,7 +930,7 @@ function makeStopTable(tempDataSet, type, id, time, route) {
 		}
 
 		if (temprow.ClearSkies === undefined || temprow.ClearSkies === null) {
-    		temprow.ClearSkies = "";
+		temprow.ClearSkies = "";
 		}
 		newtempDataSet.push(temprow);
 	});

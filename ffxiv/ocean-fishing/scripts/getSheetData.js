@@ -3,7 +3,7 @@ const getSheetData = ({ sheetID, sheetName, query, callback }) => {
     const url = `${base}&sheet=${encodeURIComponent(
       sheetName
     )}&tq=${encodeURIComponent(query)}`;
-  
+
    fetch(url)
   .then((res) => res.text())
   .then((response) => callback(responseToObjects(response)))
@@ -11,7 +11,7 @@ const getSheetData = ({ sheetID, sheetName, query, callback }) => {
     console.error("getSheetData failed:", err, { sheetName, url });
     callback([]); // or trigger a user-facing error state
   });
-  
+
     function responseToObjects(res) {
       // credit to Laurence Svekis https://www.udemy.com/course/sheet-data-ajax/
       const jsData = JSON.parse(res.substring(47).slice(0, -2));
