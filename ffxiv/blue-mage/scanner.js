@@ -19,6 +19,39 @@
     if(width/height>=1.035&&width/height<=1.3)return {x:0,y:0,w:1,h:1};
     const w=.948,h=Math.min(.85,w*width*8/9/height);return {x:.052,y:Math.min(.085,1-h),w,h};
   }
+  function detectPage(image,rect,pageCount=8){
+    // The game shows all eight numbered tabs in order. Require a complete,
+    // evenly spaced row and one gold selection frame; never guess from icons.
+    if(!image||image.data?.length!==image.width*image.height*4||!Number.isInteger(pageCount)||pageCount<2||pageCount>8)return null;
+    rect||=defaultCrop(image.width,image.height);
+    const scale=image.width/304,top=Math.floor(Math.min(rect?.y*image.height||0,image.height*.15)),right=Math.floor(image.width*.8);
+    if(top<8*scale||right<40)return null;
+    const luminances=[];for(let y=0;y<top;y++)for(let x=0;x<right;x++){const i=(y*image.width+x)*4;luminances.push(image.data[i]*.299+image.data[i+1]*.587+image.data[i+2]*.114);}
+    luminances.sort((a,b)=>a-b);const threshold=Math.max(45,luminances[Math.floor(luminances.length*.98)]*.7),columns=Array.from({length:right},()=>[]);
+    const gold=[];
+    for(let y=0;y<top;y++)for(let x=0;x<right;x++){
+      const i=(y*image.width+x)*4,r=image.data[i],g=image.data[i+1],b=image.data[i+2],hi=Math.max(r,g,b),lo=Math.min(r,g,b),luma=r*.299+g*.587+b*.114;
+      if(luma>threshold&&hi-lo<hi*.28)columns[x].push(y);
+      if(r>65&&r-g>Math.max(7,g*.07)&&g-b>Math.max(12,g*.13))gold.push({x,y});
+    }
+    const groups=[];let current=null;const gap=Math.max(1,Math.round(scale*.7));
+    for(let x=0;x<right;x++)if(columns[x].length){if(!current||x-current.right>gap+1){current={left:x,right:x,ys:[]};groups.push(current);}current.right=x;current.ys.push(...columns[x]);}
+    const digits=groups.filter(g=>g.ys.length>=5*scale*scale&&g.right-g.left+1>=2*scale&&g.right-g.left+1<=16*scale).map(g=>({...g,cx:(g.left+g.right)/2,top:Math.min(...g.ys),bottom:Math.max(...g.ys)}));
+    if(digits.length!==pageCount)return null;
+    const steps=digits.slice(1).map((g,i)=>g.cx-digits[i].cx),step=[...steps].sort((a,b)=>a-b)[Math.floor(steps.length/2)];
+    if(step<17*scale||step>35*scale||steps.some(d=>Math.abs(d-step)>step*.2))return null;
+    const baseline=digits.map(d=>(d.top+d.bottom)/2).sort((a,b)=>a-b)[Math.floor(pageCount/2)];
+    if(digits.some(d=>d.bottom-d.top+1<4*scale||d.bottom-d.top+1>15*scale||Math.abs((d.top+d.bottom)/2-baseline)>3*scale))return null;
+    const candidates=digits.map((d,index)=>{
+      const points=gold.filter(p=>Math.abs(p.x-d.cx)<step*.49&&p.y>=d.top-7*scale&&p.y<=d.bottom+6*scale);
+      const left=points.filter(p=>p.x<d.cx-step*.25).length,right=points.filter(p=>p.x>d.cx+step*.25).length,above=points.filter(p=>p.y<d.top).length;
+      const framed=points.length>=18*scale*scale&&left>=2*scale*scale&&right>=2*scale*scale&&above>=3*scale*scale;
+      return {page:index+1,score:points.length/(scale*scale),framed};
+    });
+    const selected=candidates.filter(c=>c.framed);if(selected.length!==1)return null;
+    const best=selected[0],other=Math.max(0,...candidates.filter(c=>c!==best).map(c=>c.score));
+    return best.score>=other*2.5?{page:best.page,method:'selected-tab'}:null;
+  }
   function validateRect(rect,width,height){
     if(!rect||![rect.x,rect.y,rect.w,rect.h].every(Number.isFinite)||rect.x<0||rect.y<0||rect.w<=0||rect.h<=0||rect.x+rect.w>1.001||rect.y+rect.h>1.001)return '아이콘 영역이 이미지 안에 들어오도록 지정해 주세요.';
     const w=rect.w*width/4,h=rect.h*height/4;if(Math.min(w,h)<24)return '한 칸이 24픽셀 이상인 캡처를 사용해 주세요.';
@@ -49,5 +82,5 @@
     }
     if(!ids.size)throw Error('추가할 습득 기록이 없어요.');return [...ids];
   }
-  return {SIZE,sample,defaultCrop,validateRect,classifyCell,analyze,pagesFor,prepareImport};
+  return {SIZE,sample,defaultCrop,detectPage,validateRect,classifyCell,analyze,pagesFor,prepareImport};
 });

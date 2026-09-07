@@ -1,12 +1,13 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{JSDOM}=require('jsdom'),S=require('../scanner.js');
 const read=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8'),tick=()=>new Promise(r=>setTimeout(r,1));
 async function settle(a){for(let i=0;i<100;i++){await tick();if(!a.$('#scanAddImages').disabled)return;}throw Error('Scanner did not finish');}
-function app({applyResult={ok:true},analyze,decodeError=false}={}){
+function app({applyResult={ok:true},analyze,detectPage,decodeError=false}={}){
   const dom=new JSDOM(read('index.html'),{url:'https://example.test/ffxiv/blue-mage/',runScripts:'outside-only'}),w=dom.window,d=w.document,$=s=>d.querySelector(s),calls=[];
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
   w.HTMLCanvasElement.prototype.getContext=()=>({drawImage(){},fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},getImageData(){return {width:304,height:325,data:new Uint8ClampedArray(304*325*4)};}});
   w.createImageBitmap=async()=>{if(decodeError)throw Error('깨진 이미지');return {width:304,height:325,close(){}};};
   w.eval(read('data.js'));w.BlueMageScanner={...S,analyze:analyze||(async(image,rect,{count})=>Array.from({length:count},(_,index)=>({index,state:index===0?'review':[2,5].includes(index)?'missing':'learned'})))};
+  if(detectPage)w.BlueMageScanner.detectPage=detectPage;
   w.eval(read('scanner-ui.js'));w.BlueMageScanUI.mount({spells:w.BLUE_MAGE_DATA.spells,apply:ids=>{calls.push(ids);return applyResult;}});
   const change=(s,value)=>{const e=$(s);if(e.type==='checkbox')e.checked=value;else e.value=value;e.dispatchEvent(new w.Event('change',{bubbles:true}));};
   const upload=async()=>{Object.defineProperty($('#scanFiles'),'files',{configurable:true,value:[new w.File(['fake'],'capture.png',{type:'image/png'})]});$('#scanFiles').dispatchEvent(new w.Event('change'));await settle({$});};
@@ -34,4 +35,14 @@ test('failed writes preserve the reviewed capture and decode failures remain rem
 });
 test('closing cancels analysis and late results cannot enable registration',async t=>{
   let finish;const a=app({analyze:()=>new Promise(r=>{finish=r;})});t.after(()=>a.dom.window.close());a.$('#openScan').click();const upload=a.upload();for(let i=0;i<20&&!finish;i++)await tick();assert.ok(finish);a.$('#closeScan').click();finish(Array.from({length:16},(_,index)=>({index,state:'learned'})));await upload;a.$('#openScan').click();assert.equal(a.d.querySelectorAll('.scan-cell').length,0);assert.equal(a.$('#scanApply').disabled,true);
+});
+test('automatic page selection remaps labels, still requires review, and manual overrides survive reopening',async t=>{
+  let attempts=0;const a=app({detectPage:()=>{attempts++;return {page:4};}});t.after(()=>a.dom.window.close());a.$('#openScan').click();await a.upload();assert.equal(a.$('#scanPage').value,'4');assert.match(a.$('#scanPageHelp').textContent,/4페이지를 자동/);assert.match(a.$('[data-scan-cell="0"]').textContent,/No.49/);assert.equal(a.$('#scanApply').disabled,true);
+  a.change('#scanPage','3');assert.doesNotMatch(a.$('#scanPageHelp').textContent,/자동/);a.$('[data-scan-file="0"]').click();await settle(a);assert.equal(a.$('#scanPage').value,'3');assert.equal(attempts,1);a.$('#scanAnalyze').click();await settle(a);assert.equal(a.$('#scanPage').value,'3');assert.equal(attempts,1);
+});
+test('page 8 is recognized before determining the number of cells to analyze',async t=>{
+  const a=app({detectPage:()=>({page:8})});t.after(()=>a.dom.window.close());a.$('#openScan').click();await a.upload();assert.equal(a.$('#scanPage').value,'8');assert.equal(a.d.querySelectorAll('.scan-cell').length,12);assert.match(a.$('[data-scan-cell="11"]').textContent,/No.124/);assert.equal(a.d.querySelectorAll('.scan-unused').length,4);
+});
+test('captures detect their own pages independently while uncertain results leave selection empty',async t=>{
+  let attempt=0;const a=app({detectPage:()=>++attempt===1?{page:1}:attempt===2?{page:4}:null});t.after(()=>a.dom.window.close());a.$('#openScan').click();await a.upload();await a.upload();assert.equal(a.$('#scanPage').value,'4');a.$('[data-scan-file="0"]').click();await settle(a);assert.equal(a.$('#scanPage').value,'1');await a.upload();assert.equal(a.$('#scanPage').value,'');assert.match(a.$('#scanPageHelp').textContent,/직접 선택/);assert.equal(a.$('#scanApply').disabled,true);
 });

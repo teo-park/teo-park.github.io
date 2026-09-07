@@ -17,13 +17,13 @@
     function render(){
       const e=current(),p=pageFor(e),all=entries.flatMap(e=>e.results||[]),ids=ready();
       $('scanWorkspace').hidden=!e;
-      $('scanFileList').innerHTML=entries.map((e,i)=>`<button type="button" data-scan-file="${i}" aria-pressed="${i===selected}" ${busy?'disabled':''}>${i+1}. ${esc(e.file.name)}<span>${e.page?e.page+'페이지':'페이지 미지정'} · ${e.reviewed?'✓ 확인 완료':e.results?'검토 중':'인식 전'}</span></button>`).join('');
+      $('scanFileList').innerHTML=entries.map((e,i)=>`<button type="button" data-scan-file="${i}" aria-pressed="${i===selected}" ${busy?'disabled':''}>${i+1}. ${esc(e.file.name)}<span>${e.page?e.page+'페이지'+(e.pageSource==='auto'?' 자동':''):'페이지 미지정'} · ${e.reviewed?'✓ 확인 완료':e.results?'검토 중':'인식 전'}</span></button>`).join('');
       $('scanTotal').textContent=`캡처 ${entries.length}장 · 습득 ${all.filter(r=>r.state==='learned').length}칸 · 미습득 ${all.filter(r=>r.state==='missing').length}칸 · 확인 필요 ${all.filter(r=>r.state==='review').length}칸`;
       $('scanApply').disabled=!ids;$('scanApply').textContent=ids?`${ids.length}종 습득 기록에 추가`:'습득 기록에 추가';
       for(const id of ['scanAddImages','scanFiles'])$(id).disabled=busy;
       if(!e)return;
       $('scanPage').value=String(e.page||'');$('scanReviewed').checked=!!e.reviewed;$('scanReviewed').disabled=busy||editing||!p||!e.results||e.results.some(r=>r.state==='review');
-      $('scanPageHelp').textContent=p?`No.${p.spells[0].id}–${p.spells.at(-1).id} · ${p.spells.length}칸${p.spells.length<16?' (마지막 줄은 빈 칸)':''}`:'캡처 위쪽의 게임 페이지 번호를 선택하세요. 번호는 자동 인식하지 않습니다.';
+      $('scanPageHelp').textContent=p?`${e.pageSource==='auto'?`상단 선택 표시에서 ${p.number}페이지를 자동으로 찾았어요. · `:''}No.${p.spells[0].id}–${p.spells.at(-1).id} · ${p.spells.length}칸${p.spells.length<16?' (마지막 줄은 빈 칸)':''}`:e.pageDetectionDone?'페이지 번호를 확실히 읽지 못했어요. 캡처 위쪽의 번호를 직접 선택해 주세요.':'캡처의 페이지 번호를 확인하고 있어요.';
       $('scanOverlay').hidden=editing||!e.results;
       if(e.crop){$('scanOverlay').style.inset=`${e.crop.y*100}% auto auto ${e.crop.x*100}%`;$('scanOverlay').style.width=e.crop.w*100+'%';$('scanOverlay').style.height=e.crop.h*100+'%';}
       $('scanOverlay').innerHTML=e.results?Array.from({length:16},(_,i)=>{const r=e.results[i],s=p?.spells[i];if(!r)return '<span class="scan-unused">빈 칸</span>';const number=s?'No.'+s.id:`${Math.floor(i/4)+1}행 ${i%4+1}열`;return `<button type="button" class="scan-cell ${r.state} ${i===cell?'selected':''}" data-scan-cell="${i}" aria-label="${number} ${esc(s?.name||'')} ${labels[r.state]} · 누르면 변경" ${busy?'disabled':''}><b>${r.state==='learned'?'✓ ':r.state==='review'?'! ':''}${labels[r.state]}</b><span>${number}</span></button>`;}).join(''):'';
@@ -48,7 +48,9 @@
       const token=++version;busy=true;selected=index;cell=0;editing=false;bitmap?.close();bitmap=null;render();
       try{let image=await createImageBitmap(current().file);if(image.width<100||image.height<100||image.width*image.height>32000000){image.close();throw Error('100×100 이상, 3,200만 화소 이하 이미지를 사용해 주세요.');}if(token!==version){image.close();return;}
         if(Math.max(image.width,image.height)>1600){const scale=1600/Math.max(image.width,image.height),resized=await createImageBitmap(image,{resizeWidth:Math.round(image.width*scale),resizeHeight:Math.round(image.height*scale)});image.close();image=resized;}if(token!==version){image.close();return;}
-        bitmap=image;current().crop||=S.defaultCrop(image.width,image.height);busy=false;render();if(!current().results)await analyze();else status('페이지 번호와 습득 상태를 확인해 주세요.');
+        bitmap=image;const e=current();e.crop||=S.defaultCrop(image.width,image.height);
+        if(!e.pageDetectionDone){e.pageDetectionDone=true;const detected=S.detectPage(imagePixels(),e.crop,pages.length);if(detected&&pages.some(p=>p.number===detected.page)){e.page=detected.page;e.pageSource='auto';}}
+        busy=false;render();if(!e.results)await analyze();else status('페이지 번호와 습득 상태를 확인해 주세요.');
       }catch(error){if(token===version){busy=false;status(error.message);render();}}
     }
     async function add(files){
@@ -72,7 +74,7 @@
     $('scanOverlay').addEventListener('click',event=>{const b=event.target.closest('[data-scan-cell]');if(!b||busy)return;cell=+b.dataset.scanCell;setState(current().results[cell].state==='learned'?'missing':'learned');$('scanOverlay').querySelector(`[data-scan-cell="${cell}"]`)?.focus({preventScroll:true});});
     $('scanLearned').addEventListener('click',()=>setState('learned'));$('scanMissing').addEventListener('click',()=>setState('missing'));
     $('scanNextReview').addEventListener('click',()=>{const results=current()?.results||[];cell=results.findIndex((r,i)=>i>cell&&r.state==='review');if(cell<0)cell=results.findIndex(r=>r.state==='review');render();});
-    $('scanPage').addEventListener('change',()=>{const e=current();e.page=+$('scanPage').value;e.reviewed=false;cell=0;if(e.results?.length!==countFor(e))analyze();else render();});
+    $('scanPage').addEventListener('change',()=>{const e=current();e.page=+$('scanPage').value;e.pageSource='manual';e.reviewed=false;cell=0;if(e.results?.length!==countFor(e))analyze();else render();});
     $('scanReviewed').addEventListener('change',()=>{if(current())current().reviewed=$('scanReviewed').checked;render();});
     $('scanAnalyze').addEventListener('click',analyze);$('scanEditCrop').addEventListener('click',()=>{editing=true;current().reviewed=false;render();});$('scanFullImage').addEventListener('click',()=>changeCrop({x:0,y:0,w:1,h:1}));
     $('scanRemove').addEventListener('click',()=>{if(busy)return;entries.splice(selected,1);bitmap?.close();bitmap=null;editing=false;if(entries.length)select(Math.min(selected,entries.length-1));else{selected=0;render();status('캡처를 추가해 주세요.');}});
