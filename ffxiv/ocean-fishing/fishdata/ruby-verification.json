@@ -1,0 +1,210 @@
+{
+  "verifiedAt": "2026-09-07",
+  "scope": "Ruby Route: 120 rows / 119 unique fish and minion entries",
+  "sources": {
+    "measurements": "https://docs.google.com/spreadsheets/d/1R0Nt8Ye7EAQtU8CXF1XRRj67iaFpUk1BXeDgt6abxsQ/edit#gid=93698338",
+    "newStops": "https://docs.google.com/spreadsheets/d/1R0Nt8Ye7EAQtU8CXF1XRRj67iaFpUk1BXeDgt6abxsQ/edit#gid=1177495245",
+    "census": "https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json/fishing-spots.json",
+    "mechanics": "https://oceanfishing.boats/FAQ/"
+  },
+  "census": [
+    {
+      "spotId": 334,
+      "stop": "Unnamed",
+      "spectral": false,
+      "itemIds": [
+        51209,
+        51210,
+        51211,
+        51212,
+        51213,
+        51214,
+        51215,
+        51216,
+        51217,
+        51218
+      ],
+      "matched": 10
+    },
+    {
+      "spotId": 335,
+      "stop": "Unnamed",
+      "spectral": true,
+      "itemIds": [
+        51219,
+        51220,
+        51221,
+        51222,
+        51223,
+        51224,
+        51225,
+        51226,
+        51227,
+        51228
+      ],
+      "matched": 10
+    },
+    {
+      "spotId": 336,
+      "stop": "Thavnair",
+      "spectral": false,
+      "itemIds": [
+        51229,
+        51230,
+        51231,
+        51232,
+        51233,
+        51234,
+        51235,
+        51687,
+        51237,
+        51238
+      ],
+      "matched": 10
+    },
+    {
+      "spotId": 337,
+      "stop": "Thavnair",
+      "spectral": true,
+      "itemIds": [
+        51239,
+        51240,
+        51241,
+        51242,
+        51243,
+        51244,
+        51245,
+        51687,
+        51246,
+        51247
+      ],
+      "matched": 10
+    }
+  ],
+  "changes": [
+    {
+      "stop": "Sirensong",
+      "spectral": false,
+      "fish": "Sirensong Mussel",
+      "label": "세이렌 홍합",
+      "field": "BaitRagworm",
+      "before": "4 - 7",
+      "after": "4 - 7.5"
+    },
+    {
+      "stop": "Sirensong",
+      "spectral": false,
+      "fish": "Sirensong Mussel",
+      "label": "세이렌 홍합",
+      "field": "BaitKrill",
+      "before": "4 - 7",
+      "after": "4 - 7.5"
+    },
+    {
+      "stop": "Sirensong",
+      "spectral": false,
+      "fish": "Sirensong Mussel",
+      "label": "세이렌 홍합",
+      "field": "BaitPlumpWorm",
+      "before": "4 - 7",
+      "after": "4 - 7.5"
+    },
+    {
+      "stop": "Ruby Sea",
+      "spectral": false,
+      "fish": "Sanbaso",
+      "label": "산바소우",
+      "field": "BaitPlumpWorm",
+      "before": "14 - 25",
+      "after": "18 - 31"
+    },
+    {
+      "stop": "Ruby Sea",
+      "spectral": false,
+      "fish": "Sanbaso",
+      "label": "산바소우",
+      "field": "BaitVersatileLure",
+      "before": "19 - 31",
+      "after": "18 - 31"
+    },
+    {
+      "stop": "Ruby Sea",
+      "spectral": false,
+      "fish": "Shisui Goby",
+      "label": "시스이 망둥이",
+      "field": "BaitPlumpWorm",
+      "before": "18 - 31",
+      "after": "14 - 25"
+    },
+    {
+      "stop": "Ruby Sea",
+      "spectral": false,
+      "fish": "Shisui Goby",
+      "label": "시스이 망둥이",
+      "field": "BaitVersatileLure",
+      "before": "18 - 31",
+      "after": "19 - 31"
+    },
+    {
+      "stop": "Unnamed",
+      "spectral": true,
+      "fish": "Akupara",
+      "label": "세계거북",
+      "field": "BaitMooch",
+      "before": "6 - 8",
+      "after": "~6 - 8"
+    }
+  ],
+  "notes": [
+    {
+      "fish": "Tylosaurus",
+      "stop": "Unnamed",
+      "spectral": true,
+      "notes": "굵은지렁이 외에 선장의 펜 또는 시엘달레 수탉고기를 생미끼로 쓸 수 있어요. 추가 생미끼 경로의 입질 시간은 미확인이에요."
+    },
+    {
+      "fish": "F!Akupara",
+      "stop": "Unnamed",
+      "spectral": true,
+      "notes": "생미끼 입질 약 6~8초는 원본 측정표의 대략적인 값이에요. 확정 구간으로 판정하지 않아요."
+    },
+    {
+      "fish": "Junior Jinbei",
+      "stop": "Thavnair",
+      "spectral": false,
+      "notes": "꼬마친구예요. 기본 미끼 3종(바위털갯지렁이·크릴·굵은지렁이)으로 낚을 수 있고 한결같은 챔질은 사용할 수 없어요."
+    },
+    {
+      "fish": "T!Satrapsaurus",
+      "stop": "Thavnair",
+      "spectral": true,
+      "notes": "쥐꼬리 입질 5.5초 이상은 상한 미확인 값이에요."
+    },
+    {
+      "fish": "Junior Jinbei",
+      "stop": "Thavnair",
+      "spectral": true,
+      "notes": "꼬마친구예요. 기본 미끼 3종(바위털갯지렁이·크릴·굵은지렁이)으로 낚을 수 있고 한결같은 챔질은 사용할 수 없어요."
+    }
+  ],
+  "limitations": [
+    "New normal stops have no Versatile Lure timing measurements in the source; blank timing does not establish bait incompatibility.",
+    "Spreadsheet estimates (~) and lower bounds (+) are preserved, not used as exact targeting windows.",
+    "Best bait and hookset retain upstream values; source spreadsheet formatting/images were not inferred from CSV.",
+    "Teamcraft curated fishing-sources contain conflicting new-fish conditions; only its generated spot census was used.",
+    "No automatic runtime data updates."
+  ],
+  "displayLabels": {
+    "Unnamed": "이름 없는 섬",
+    "Thavnair": "사베니어 섬"
+  },
+  "labelCorrections": [
+    {
+      "stop": "Unnamed",
+      "fish": "First Mate's Finger",
+      "before": "Unnamed Island Island",
+      "after": "이름 없는 섬",
+      "note": "Checklist now groups by stable Stop code rather than the translated display label."
+    }
+  ]
+}
