@@ -15,11 +15,13 @@ function app(options = {}) {
   w.HTMLDialogElement.prototype.close = function () { this.open = false; };
   if (options.raw !== undefined) w.localStorage.setItem(KEY, options.raw);
   if (options.ids) w.localStorage.setItem(KEY, T.backup(new Set(options.ids)));
+  let scanApply;
+  w.TriadScanUI = {mount: options => { scanApply = options.apply; }};
   for (const file of ['data.js', 'engine.js', 'app.js']) w.eval(read(file));
   const $ = selector => w.document.querySelector(selector);
   const change = (selector, value) => { const el = $(selector); if (el.type === 'checkbox') el.checked = value; else el.value = value; el.dispatchEvent(new w.Event('change', {bubbles: true})); };
   const search = value => { $('#search').value = value; $('#search').dispatchEvent(new w.InputEvent('input', {bubbles: true, isComposing: true, inputType: 'insertCompositionText'})); };
-  return {dom, w, $, change, search};
+  return {dom, w, $, change, search, scanApply};
 }
 test('active Korean composition searches the final consonant immediately', t => {
   const a = app(); t.after(() => a.dom.window.close());
@@ -29,7 +31,7 @@ test('active Korean composition searches the final consonant immediately', t => 
   a.search('absolutely-no-card-here');
   assert.equal(a.$('#emptyResults').hidden, false);
   a.$('#emptyReset').click();
-  assert.equal(a.w.document.querySelectorAll('#cardGrid .collect-card').length, 24);
+  assert.equal(a.w.document.querySelectorAll('#cardGrid .collect-card').length, 30);
 });
 test('check, filter, reload and backup use the same stable card IDs', t => {
   const a = app(); t.after(() => a.dom.window.close());
@@ -116,4 +118,33 @@ test('rule limits, unavailable rule feedback and target deck work through contro
   a.$('#recommendButton').click(); await new Promise(resolve => setTimeout(resolve, 250));
   assert.equal(a.w.document.querySelectorAll('.recommended-card').length, 5);
   assert.match(a.$('#deckResult').textContent, /미수집 5장/);
+});
+
+test('screenshot import merges by default and replaces only the reviewed pages when requested', t => {
+  const a = app({ids: [1, 31, 999999]}); t.after(() => a.dom.window.close());
+  const result = a.scanApply({ownedIds: [2], seenIds: [1, 2], replacePages: false});
+  assert.equal(result.ok, true);
+  assert.deepEqual([...T.parseBackup(a.w.localStorage.getItem(KEY))], [1, 2, 31, 999999]);
+  assert.equal(a.$('#ownedCount').textContent, '3');
+  assert.equal(a.scanApply({ownedIds: [2], seenIds: [1, 2], replacePages: true}).ok, true);
+  assert.deepEqual([...T.parseBackup(a.w.localStorage.getItem(KEY))], [2, 31, 999999]);
+  assert.equal(a.$('#cardGrid [data-owned="1"]').checked, false);
+  assert.equal(a.$('#cardGrid [data-owned="2"]').checked, true);
+});
+
+test('screenshot errors and storage failures leave the prior collection intact', t => {
+  const a = app({ids: [1]}); t.after(() => a.dom.window.close());
+  for (const candidate of [
+    {ownedIds: [2], seenIds: [1]},
+    {ownedIds: [999999], seenIds: [999999]},
+    {ownedIds: null, seenIds: []}
+  ]) assert.equal(a.scanApply(candidate).ok, false);
+  assert.deepEqual([...T.parseBackup(a.w.localStorage.getItem(KEY))], [1]);
+  a.w.Storage.prototype.setItem = () => { throw Error('QuotaExceededError'); };
+  assert.equal(a.scanApply({ownedIds: [2], seenIds: [1, 2], replacePages: true}).ok, false);
+  assert.equal(a.$('#ownedCount').textContent, '1');
+  assert.deepEqual([...T.parseBackup(a.w.localStorage.getItem(KEY))], [1]);
+  const b = app({raw: '{broken'}); t.after(() => b.dom.window.close());
+  assert.equal(b.scanApply({ownedIds: [2], seenIds: [2]}).ok, false);
+  assert.equal(b.w.localStorage.getItem(KEY), '{broken');
 });

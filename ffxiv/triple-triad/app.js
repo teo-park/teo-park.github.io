@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const data = window.TRIPLE_TRIAD_DATA, T = window.Triad;
   const STORAGE_KEY = 'teo-ffxiv.triple-triad.collection.v1';
-  const PAGE_SIZE = 24;
+  const PAGE_SIZE = 30;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   function fatal(message) { $('fatal').textContent = message; $('fatal').hidden = !message; }
   if (!data?.cards?.length || !T) { fatal('카드 자료를 불러오지 못했어요. 페이지를 새로고침해 주세요.'); return; }
@@ -124,7 +124,7 @@
     if (open) {
       selectedId = Number(open.dataset.open); renderDetail();
       document.querySelectorAll('#cardGrid .collect-card').forEach(card => { const active = Number(card.querySelector('[data-open]').dataset.open) === selectedId; card.classList.toggle('selected', active); card.querySelector('[data-open]').setAttribute('aria-pressed', String(active)); });
-      if (currentView === 'deck' || window.matchMedia('(max-width: 760px)').matches) { $('dialogBody').innerHTML = detailHtml(byId.get(selectedId)); if (!$('detailDialog').open) $('detailDialog').showModal(); }
+      if (currentView === 'deck' || window.matchMedia('(max-width: 1150px)').matches) { $('dialogBody').innerHTML = detailHtml(byId.get(selectedId)); if (!$('detailDialog').open) $('detailDialog').showModal(); }
     }
     const next = event.target.closest('[data-page]');
     if (next && !next.disabled) { page = Number(next.dataset.page); renderCollection(); $('cardGrid').scrollIntoView({block: 'start'}); $('cardGrid').querySelector('button')?.focus({preventScroll: true}); }
@@ -208,5 +208,17 @@
     try { owned = readStored(); fatal(''); updateProgress(); renderCollection(); invalidateDeck(); }
     catch { fatal('다른 탭의 수집 기록을 읽을 수 없어요. 현재 표시 중인 기록은 유지했어요.'); }
   });
+  window.TriadScanUI?.mount({cards: data.cards, apply: ({ownedIds, seenIds, replacePages}) => {
+    if (!Array.isArray(ownedIds) || !Array.isArray(seenIds) || [...ownedIds, ...seenIds].some(id => !byId.has(id)) || ownedIds.some(id => !seenIds.includes(id))) return {ok: false, error: '인식한 카드 번호를 확인해 주세요.'};
+    try {
+      const next = readStored();
+      if (replacePages) seenIds.forEach(id => next.delete(id));
+      ownedIds.forEach(id => next.add(id));
+      if (!save(next)) return {ok: false, error: '브라우저 저장 공간·권한을 확인해 주세요. 기존 수집 기록은 유지했어요.'};
+      updateProgress(); renderCollection(); invalidateDeck();
+      toast(`캡처에서 확인한 보유 카드 ${ownedIds.length}장을 반영했어요.`);
+      return {ok: true};
+    } catch { return {ok: false, error: '기존 기록을 읽을 수 없어요. 백업 파일로 복구한 뒤 다시 시도해 주세요.'}; }
+  }});
   updateProgress(); renderCollection();
 })();

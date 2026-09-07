@@ -14,10 +14,12 @@
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/triple-triad/" />
   <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../theme.css?v=20260907-triad" />
-  <link rel="stylesheet" href="./styles.css?v=20260907-2" />
+  <link rel="stylesheet" href="./styles.css?v=20260907-scan2" />
   <script src="./data.js?v=20260907-2" defer></script>
   <script src="./engine.js?v=20260907-2" defer></script>
-  <script src="./app.js?v=20260907-2" defer></script>
+  <script src="./scanner.js?v=20260907-scan2" defer></script>
+  <script src="./scanner-ui.js?v=20260907-scan2" defer></script>
+  <script src="./app.js?v=20260907-scan2" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">카드 수첩으로 바로가기</a>
@@ -38,7 +40,7 @@
     </section>
     <section id="backupPanel" class="panel backup-panel" aria-label="수집 기록 가져오기와 내보내기" hidden>
       <div><h2>수집 기록 보관하기</h2><p class="muted">체크한 카드는 이 브라우저에 저장해요. 다른 기기로 옮기거나 브라우저 데이터를 지우기 전에 파일로 보관하세요.</p></div>
-      <div class="button-row"><button id="exportButton">파일로 내보내기</button><label class="file-button">파일 가져오기<input type="file" id="importFile" accept=".json,application/json" /></label></div>
+      <div class="button-row"><button id="scanOpen" class="primary">게임 캡처로 일괄 등록</button><button id="exportButton">파일로 내보내기</button><label class="file-button">파일 가져오기<input type="file" id="importFile" accept=".json,application/json" /></label></div>
       <div id="importPreview" hidden><p id="importSummary"></p><fieldset class="inline-options"><legend>가져오는 방식</legend><label><input type="radio" name="importMode" value="merge" checked /> 기존 기록에 합치기</label><label><input type="radio" name="importMode" value="replace" /> 파일의 기록으로 교체</label></fieldset><div class="button-row"><button id="applyImport" class="primary">수집 기록 가져오기</button><button id="cancelImport" class="quiet">취소</button></div></div>
       <p id="backupMessage" class="muted" role="status"></p>
     </section>
@@ -60,6 +62,30 @@
     <p id="dataNote" class="data-note muted"></p>
   </main>
   <dialog id="detailDialog" aria-label="카드 상세"><form method="dialog"><button class="dialog-close" aria-label="카드 상세 닫기">닫기 ×</button></form><div id="dialogBody"></div></dialog>
+  <dialog id="scanDialog" class="scan-dialog" aria-labelledby="scanTitle">
+    <div class="scan-heading"><div><p class="eyebrow">SCREENSHOT IMPORT</p><h2 id="scanTitle">게임 캡처로 수집 등록</h2></div><button id="scanClose" class="quiet" aria-label="캡처 등록 닫기">닫기 ×</button></div>
+    <p class="muted">5열×6행의 <strong>전체 카드 목록</strong>을 캡처해 주세요. 물음표 칸을 구분해 수집 상태를 읽어요. 캡처는 서버로 전송하지 않습니다.</p>
+    <div class="scan-upload"><label class="file-button primary-file">캡처 여러 장 선택<input id="scanFiles" type="file" accept="image/png,image/jpeg,image/webp" multiple /></label><p>PNG·JPG·WebP · 최대 30장<br /><span class="muted">파일명 순서로 페이지를 임시 지정해요. 일반 마지막 페이지 다음은 EX예요.</span></p></div>
+    <p id="scanStatus" class="scan-status" role="status">① 캡처 선택 → ② 카드 영역 지정 → ③ 인식·검토 → ④ 저장</p>
+    <div id="scanWorkspace" class="scan-workspace" hidden>
+      <aside class="scan-file-pane"><h3>캡처 목록</h3><div id="scanFileList" class="scan-file-list"></div></aside>
+      <section class="scan-review-pane" aria-label="현재 캡처 검토">
+        <div class="scan-page-controls"><label>이 캡처의 게임 페이지<select id="scanPage"></select></label><span id="scanFileName" class="small muted"></span></div>
+        <p class="small muted">첫 카드의 왼쪽 위부터 30번째 칸의 오른쪽 아래까지 드래그하세요. 페이지 번호·합계는 제외하고, 마지막 페이지의 빈 공간은 포함해요.</p>
+        <div class="scan-canvas-wrap"><canvas id="scanCanvas" aria-label="카드 영역을 드래그로 지정하는 캡처 미리보기"></canvas></div>
+        <details class="scan-crop-fields"><summary>영역을 숫자로 조정하기</summary><div><label>왼쪽 (%)<input id="scanCropX" type="number" min="0" max="99" step="0.1" /></label><label>위쪽 (%)<input id="scanCropY" type="number" min="0" max="99" step="0.1" /></label><label>너비 (%)<input id="scanCropW" type="number" min="1" max="100" step="0.1" /></label><label>높이 (%)<input id="scanCropH" type="number" min="1" max="100" step="0.1" /></label></div></details>
+        <div class="button-row scan-actions"><button id="scanCopyCrop">이 영역을 모든 캡처에 적용</button><button id="scanAnalyze" class="primary">전체 인식</button></div>
+        <p id="scanPageSummary" class="scan-page-summary" role="status"></p>
+        <div id="scanReviewGrid" class="scan-review-grid" aria-label="인식한 카드별 수집 상태"></div>
+        <div class="scan-review-actions"><label class="scan-reviewed"><input type="checkbox" id="scanReviewed" disabled /> 이 페이지 번호와 보유·미수집 칸을 확인했어요</label><button id="scanNext" disabled>다음 캡처 →</button></div>
+      </section>
+    </div>
+    <div id="scanApplyPanel" class="scan-apply-panel" hidden>
+      <p id="scanTotal" role="status"></p><label class="scan-expected">게임에 표시된 전체 보유 수 (선택)<input id="scanExpected" type="number" min="0" max="10000" placeholder="예: 230" /><span class="small muted">모든 페이지를 넣었을 때 인식 합계와 비교해요.</span></label>
+      <fieldset class="inline-options"><legend>저장 방식</legend><label><input type="radio" name="scanMode" value="merge" checked /> 보유 카드만 추가 · 기존 체크 유지</label><label><input type="radio" name="scanMode" value="pages" /> 확인한 페이지를 캡처 상태로 맞추기</label></fieldset>
+      <p id="scanApplyMessage" class="small muted" role="status"></p><button id="scanApply" class="primary" disabled>확인한 수집 상태 저장</button>
+    </div>
+  </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <footer class="site-footer"><div class="footer-top"><span>트리플 트라이어드 수첩 · 무료 팬 도구</span><a href="../">도구 목록으로 ↗</a></div><div class="site-credits" aria-label="출처 및 권리 안내">
     <p class="fan-notice">광고·후원·유료 기능 없는 비영리 사이트입니다. SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p>
