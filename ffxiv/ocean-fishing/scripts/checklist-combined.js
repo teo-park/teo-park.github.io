@@ -469,15 +469,17 @@
 				return (
 					"<tr class='" + rowClass + "'>" +
 					"<td class='text-center'>" +
+					"<label class='catch-toggle'>" +
 					"<input class='editor-active caughtFish fish-check' type='checkbox' id='" +
 					checkboxId +
 					"' data-route='" +
 					routeId +
 					"' data-fish='" +
 					escapeAttr(fish.stateKey) +
-					"' " +
+					"' aria-label='" + escapeAttr(fish.displayName) + " 수집' " +
 					checked +
 					">" +
+					"<span class='catch-toggle-face' aria-hidden='true'><span class='catch-toggle-mark'></span><span class='catch-label-empty'>미수집</span><span class='catch-label-done'>수집</span></span></label>" +
 					"</td>" +
 					"<td class='text-center'>" +
 					"<div class='checklist-icon-wrap'>" +
@@ -633,7 +635,7 @@
 				if (!tr.hasAttribute("tabindex")) {
 					tr.setAttribute("tabindex", "0");
 				}
-                (tr.hidden ? document.getElementById('undoCatch') : tr).focus({ preventScroll: true });
+                (tr.hidden ? document.getElementById('undoCatch') : target).focus({ preventScroll: true });
 			}
 			updateExportButtonVisibility();
 			updateProgress(routeId);

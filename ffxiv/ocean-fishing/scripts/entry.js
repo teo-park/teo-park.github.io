@@ -3,7 +3,11 @@
   // A client-side entrance screen, not server authentication or access control.
   const KEY = 'ocean:journal-entry:v1';
   const TOKEN = 'open-20260908';
-  const DIGEST = 'c37b2b11e7914e10d51d827b3d68656e539b165e42c930cf0323f2530b3279df';
+  // Accept the shared phrase in Korean or typed on an English keyboard.
+  const DIGESTS = new Set([
+    'c37b2b11e7914e10d51d827b3d68656e539b165e42c930cf0323f2530b3279df',
+    '3ffab9c1106344f453acfcd8033a7d0f49abe726d8a454d523efdc6597e38591'
+  ]);
   const routes = ['indigo', 'ruby', 'checklist'];
   const isEntry = document.documentElement.hasAttribute('data-entry-page');
   const route = routes.find(name => location.pathname.includes('/' + name + '/')) || 'indigo';
@@ -47,7 +51,7 @@
         const bytes = new TextEncoder().encode(field.value.normalize('NFC').trim());
         const digest = await crypto.subtle.digest('SHA-256', bytes);
         const hex = [...new Uint8Array(digest)].map(n => n.toString(16).padStart(2, '0')).join('');
-        if (hex !== DIGEST) {
+        if (!DIGESTS.has(hex)) {
           status.textContent = '비밀번호가 맞지 않아요. 띄어쓰기까지 확인해 주세요.';
           field.setAttribute('aria-invalid', 'true'); field.focus(); field.select(); return;
         }

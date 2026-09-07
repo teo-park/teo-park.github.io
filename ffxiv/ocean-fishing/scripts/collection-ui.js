@@ -98,7 +98,7 @@
   window.collectionControl = (fish, row) => {
     const required = row.LocalRequiredBy || [], score = row.LocalScore, rec = row.LocalRecommendation;
     const scoreText = score ? (scoreMode === 'DH' ? '이중 ' : '삼중 ') + score.min + (score.max !== score.min ? '–' + score.max : '') + '점. 기본 점수 × 낚는 수 기준이에요.' : '';
-    return '<div class="collection-control' + (purpose === 'score' ? ' score-comparison-fish' : '') + '"><label><input type="checkbox" class="collection-check" data-fish="' + escape(api.name(fish)) + '" ' + (row.LocalCaught ? 'checked' : '') + ' aria-label="' + escape(api.name(row.FishTranslated || fish)) + ' 잡음"><span>잡음</span></label>'
+    return '<div class="collection-control' + (purpose === 'score' ? ' score-comparison-fish' : '') + '"><label class="catch-toggle"><input type="checkbox" class="collection-check" data-fish="' + escape(api.name(fish)) + '" ' + (row.LocalCaught ? 'checked' : '') + ' aria-label="' + escape(api.name(row.FishTranslated || fish)) + ' 수집"><span class="catch-toggle-face" aria-hidden="true"><span class="catch-toggle-mark"></span><span class="catch-label-empty">미수집</span><span class="catch-label-done">수집</span></span></label>'
       + (rec ? note(rec.rank && rec.rank <= 3 ? 'score-target-fish' : 'gp-fish-note',
         rec.best ? (rec.conditional ? '조건부 ' : '') + (rec.rank <= 3 ? rec.rank + '순위 · ' : '') + actionName(rec.best.action) : rec.reason,
         recommendationText(rec)) : score ? note('score-target-fish','고득점',scoreText) : '')
