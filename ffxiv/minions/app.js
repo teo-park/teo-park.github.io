@@ -117,6 +117,7 @@
       try{
         const latest=read(),unique=[...new Set(ids)],added=unique.filter(id=>!latest.has(id)).length,message=`캡처에서 ${added}종을 보유 기록에 추가했어요. 기존 기록도 유지됩니다.`;
         if(!saveChanges(unique.map(id=>[id,true]),message))return {ok:false,error:'저장하지 못해 캡처 등록을 적용하지 않았어요.'};
+        $('recordMessage').textContent=message;
         return {ok:true,message};
       }catch{return {ok:false,error:'기존 기록을 읽지 못해 캡처 등록을 적용하지 않았어요.'};}
     }});
