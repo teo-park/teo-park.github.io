@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>청마도사 스킬 수첩 · 파판14 도구함</title>
+  <meta name="description" content="청마법 124종 습득 체크. 번호·이름·초성 검색으로 배울 기술을 찾고, 마물·던전·우상 조건을 확인하세요.">
+  <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="청마도사 스킬 수첩 · 파판14 도구함"><meta property="og:description" content="청마법 습득 체크와 장소별 습득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/blue-mage/">
+  <link rel="canonical" href="https://teo-park.github.io/ffxiv/blue-mage/"><link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260908-1">
+  <script defer src="./data.js?v=20260908-1"></script><script defer src="./engine.js?v=20260908-1"></script><script defer src="./app.js?v=20260908-1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#spellCatalog">청마법 목록으로 바로가기</a>
+  <header class="site-header"><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../minions/">꼬마친구 수첩</a><a href="./" aria-current="page">청마도사 스킬 수첩</a></nav><span class="header-note">FFXIV · KR</span></header>
+  <main class="book-main">
+    <div class="masthead"><div><p class="eyebrow">BLUE MAGIC / SPELLBOOK</p><h1>청마도사 스킬 수첩</h1><p>습득한 청마법을 체크하고 다음 습득처를 찾아보세요.</p></div><button id="openRecords" disabled>수집 기록 관리</button></div>
+    <p id="fatal" role="alert" class="fatal" hidden></p><p id="loading" role="status">청마법을 불러오고 있어요.</p><noscript><p>수첩을 사용하려면 JavaScript를 켜 주세요.</p></noscript>
+    <div id="appContent" hidden>
+      <section class="progress-strip" aria-label="청마법 습득 현황"><div><span>습득한 청마법</span><p><strong id="learnedCount">0</strong><span id="totalCount"></span></p></div><div class="progress-meter"><div><span id="remainingCount"></span><b id="learnedPercent"></b></div><progress id="collectionProgress" value="0" max="124" aria-label="청마법 습득률"></progress><small>체크는 이 브라우저에 저장돼요.</small></div><div class="free-note"><strong>무료 · 비영리</strong><small>광고·후원·유료 기능 없음</small></div></section>
+      <aside class="learning-note"><p>대상이 기술을 사용한 뒤 처치해야 체득할 수 있어요. 우상은 조건을 달성한 뒤 수령해 사용하세요.</p><a href="https://guide.ff14.co.kr/job/BlueMage/18?type=E#anchor_h3" target="_blank" rel="noopener noreferrer">공식 체득 안내 ↗</a></aside>
+      <section class="filters" aria-label="청마법 검색과 필터">
+        <label class="search-label" for="search">번호·이름·초성·습득처 검색</label><div class="search-field"><input id="search" type="search" placeholder="24, 날아라 정어리, ㄴㅇㄹㅈㅇㄹ, 시리우스…" autocomplete="off"><button id="clearSearch" class="quiet" aria-label="검색어 지우기">지우기</button></div>
+        <div class="filter-row"><label>습득 상태<select id="status"><option value="all">전체</option><option value="unlearned">미습득</option><option value="learned">습득</option></select></label><label>습득 방법<select id="source"><option value="all">모든 방법</option></select></label><label class="location-filter">장소<select id="location"><option value="all">모든 장소</option></select></label><label>속성<select id="aspect"><option value="all">모든 속성</option></select></label><label>등급<select id="rank"><option value="all">모든 등급</option><option value="1">★ 1</option><option value="2">★ 2</option><option value="3">★ 3</option><option value="4">★ 4</option><option value="5">★ 5</option></select></label><button id="resetFilters" class="quiet">초기화</button></div>
+      </section>
+      <section id="spellCatalog" class="catalog" aria-label="청마법 목록"><div class="list-heading"><div><h2>청마법 목록</h2><span id="resultCount" role="status"></span></div><div class="view-switch" aria-label="목록 보기 방식"><button id="numberView" aria-pressed="true">번호순</button><button id="locationView" aria-pressed="false">장소별</button></div></div>
+        <div class="quick-tools"><p id="viewHint">아이콘 = 습득 체크 · 습득처 = 장소와 조건</p><div><button id="markPage" class="quiet">이 페이지 모두 습득</button><button id="refreshResults" hidden>체크 반영해 목록 정리</button></div></div>
+        <div id="spellGrid" class="spell-grid"></div><div id="locationGroups" class="location-groups" hidden></div>
+        <div id="emptyResults" class="empty-state" hidden><strong>조건에 맞는 청마법이 없어요.</strong><p>검색어나 필터를 바꿔 보세요.</p><button id="emptyReset">전체 목록 보기</button></div>
+        <nav id="pagination" class="pagination" aria-label="청마법 목록 페이지"></nav>
+      </section>
+      <p id="dataNote" class="data-note"></p>
+    </div>
+  </main>
+  <dialog id="detailDialog" aria-labelledby="detailTitle"><div class="dialog-top"><span>청마법 습득 안내</span><button id="closeDetail" aria-label="습득 안내 닫기">닫기 ×</button></div><div id="detailBody"></div></dialog>
+  <dialog id="recordsDialog" aria-labelledby="recordsTitle"><div class="dialog-top"><h2 id="recordsTitle">수집 기록 관리</h2><button id="closeRecords" aria-label="수집 기록 관리 닫기">닫기 ×</button></div><p id="recordCount"></p>
+    <section class="number-entry"><h3>번호로 한 번에 등록</h3><p>게임 청마도서에서 습득한 기술 번호를 입력하세요. 기존 기록에 추가합니다.</p><label for="learnedNumbers">습득한 청마법 번호</label><textarea id="learnedNumbers" rows="3" placeholder="1-10, 13, 20, 24, 77"></textarea><p id="numberPreview" role="status">쉼표·공백으로 구분하고, 연속된 번호는 1-10처럼 입력하세요.</p><button id="applyNumbers" class="primary" disabled>습득 기록에 추가</button></section>
+    <section class="backup-section"><h3>백업과 복원</h3><p>다른 기기로 옮기거나 브라우저 데이터를 지우기 전에 백업해 주세요. 가져오기는 기존 기록에 추가합니다.</p><div class="record-actions"><button id="exportRecords">백업 파일 내보내기</button><button id="importRecords">백업 파일 가져오기</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></section><p id="recordMessage" role="status"></p>
+  </dialog>
+  <aside id="notice" class="notice" hidden><span id="noticeText" role="status" aria-live="polite"></span><button id="undo" hidden>실행 취소</button><button id="closeNotice" aria-label="알림 닫기">×</button></aside>
+  <footer class="site-footer"><div class="footer-top"><span>청마도사 스킬 수첩 · 무료·비영리 팬 도구</span><a href="../">도구 목록으로 ↗</a></div><div class="site-credits"><p class="fan-notice">SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p><p>청마도사·체득 안내: <a href="https://guide.ff14.co.kr/job/BlueMage/18?type=E" target="_blank" rel="noopener noreferrer">한국 공식 가이드</a> · 습득처: <a href="https://ffxivcollect.com/spells" target="_blank" rel="noopener noreferrer">FFXIV Collect</a> · <a href="./README.md">한국어 명칭·데이터 출처</a> · <a href="../triple-triad/licenses/ffxiv-collect-MIT.txt">Collect 라이선스</a></p><p>글꼴: <a href="https://hangeul.naver.com/font/nanum" target="_blank" rel="noopener noreferrer">네이버 나눔스퀘어라운드</a> · <a href="../fonts/nanum-square-round/OFL.txt">글꼴 라이선스</a></p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p><p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">한국 저작물 이용 허락 조건</a></p></div></footer>
+</body>
+</html>

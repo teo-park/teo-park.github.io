@@ -11,6 +11,7 @@
 - [임무 초성 사전](https://teo-park.github.io/ffxiv/duty-finder/) — 던전·토벌전·레이드 등 공식 임무의 한글·초성 검색 ([앱 안내](./duty-finder/README.md))
 - [트리플 트라이어드 수첩](https://teo-park.github.io/ffxiv/triple-triad/) — 카드 수집 체크·획득처·규칙별 보유 카드 덱 추천 ([데이터와 추천 안내](./triple-triad/README.md))
 - [꼬마친구 수첩](https://teo-park.github.io/ffxiv/minions/) — 아이콘으로 빠른 보유 체크·초성 검색·획득처·확장팩 필터 ([데이터와 이용 안내](./minions/README.md))
+- [청마도사 스킬 수첩](https://teo-park.github.io/ffxiv/blue-mage/) — 청마법 습득 체크·번호와 초성 검색·장소별 습득처·우상 조건 ([데이터와 이용 안내](./blue-mage/README.md))
 
 ## 출처 및 권리 안내
 
@@ -19,6 +20,7 @@
 - PvP 경험치·보상 수치: [FFXIV Console Games Wiki — Series Malmstones](https://ffxiv.consolegameswiki.com/wiki/Series_Malmstones)
 - 카드·NPC·획득처: [FFXIV Collect 공개 API](https://ffxivcollect.com/api), 한국어 명칭: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko), 규칙: [한국 공식 트리플 트라이어드 안내](https://guide.ff14.co.kr/Goldsaucer/tripletriad)
 - 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum), [SIL Open Font License 1.1](./fonts/nanum-square-round/OFL.txt)
+- 청마법 목록·습득처: [FFXIV Collect](https://ffxivcollect.com/spells), 체득 안내: [한국 공식 청마도사 가이드](https://guide.ff14.co.kr/job/BlueMage/18?type=E), 한국어 명칭과 수치: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko)
 
 기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.
 
@@ -41,7 +43,8 @@ GitHub Pages의 원본은 `main` 브랜치의 `/ (root)`입니다. 실제 도구
 ├── pvp-series-calculator/
 ├── duty-finder/
 ├── triple-triad/
-└── minions/
+├── minions/
+└── blue-mage/
 ```
 
 검증: `node --test msq-tracker/tests/progress.test.cjs`
@@ -53,6 +56,8 @@ PvP 시리즈 계산기 검증: `node --test pvp-series-calculator/tests/pvp-ser
 카드 수첩 검증: `cd triple-triad` 후 `npm ci --ignore-scripts` 및 `npm test` (정적 배포에는 설치·빌드 불필요)
 
 꼬마친구 수첩 검증: `cd minions` 후 `npm ci --ignore-scripts` 및 `npm test`
+
+청마법 수첩 검증: `cd blue-mage` 후 `npm ci --ignore-scripts` 및 `npm test`
 
 공통 색상·상단 메뉴·하단 영역은 `theme.css`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
 
