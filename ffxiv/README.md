@@ -15,6 +15,8 @@
 
 - [세계를 누비는 어부](https://teo-park.github.io/ffxiv/fishing-log/) — 어류·작살도감 10×10 수집 체크·캡처 등록·Teamcraft 기록 호환·미끼와 장소별 보기·내 접속 시간의 낚시 예보·페이지 접속 중 알림 ([데이터와 이용 안내](./fishing-log/README.md))
 
+- [마수도감](https://teo-park.github.io/ffxiv/beastmaster/) — 마수 50종 5×5 수집 체크·장소별 포획·항아리 교환 가격과 선행 퀘스트 ([데이터와 이용 안내](./beastmaster/README.md))
+
 ## 출처 및 권리 안내
 
 - 퀘스트 이름·레벨·분류·선행 관계: [파이널판타지14 한국 공식 가이드 — 주요 퀘스트](https://guide.ff14.co.kr/lodestone/db/quest)
@@ -23,6 +25,7 @@
 - 카드·NPC·획득처: [FFXIV Collect 공개 API](https://ffxivcollect.com/api), 한국어 명칭: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko), 규칙: [한국 공식 트리플 트라이어드 안내](https://guide.ff14.co.kr/Goldsaucer/tripletriad)
 - 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum), [SIL Open Font License 1.1](./fonts/nanum-square-round/OFL.txt)
 - 청마법 목록·습득처: [FFXIV Collect](https://ffxivcollect.com/spells), 체득 안내: [한국 공식 청마도사 가이드](https://guide.ff14.co.kr/job/BlueMage/18?type=E), 한국어 명칭과 수치: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko)
+- 마수도감 이름·장소·항아리 획득처: [한국어·글로벌 게임 데이터](./beastmaster/README.md), 기능과 교환 NPC 위치: [한국 공식 7.56 안내](https://www.ff14.co.kr/news/notice/view/2947)
 
 기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.
 
@@ -49,7 +52,8 @@ GitHub Pages의 원본은 `main` 브랜치의 `/ (root)`입니다. 실제 도구
 ├── triple-triad/
 ├── minions/
 ├── blue-mage/
-└── fishing-log/
+├── fishing-log/
+└── beastmaster/
 ```
 
 검증: `node --test msq-tracker/tests/progress.test.cjs`
@@ -65,6 +69,8 @@ PvP 시리즈 계산기 검증: `node --test pvp-series-calculator/tests/pvp-ser
 청마법 수첩 검증: `cd blue-mage` 후 `npm ci --ignore-scripts` 및 `npm test`
 
 어부 수첩 검증: `cd fishing-log` 후 `npm ci --ignore-scripts` 및 `npm test`
+
+마수도감 검증: `cd beastmaster` 후 `npm ci --ignore-scripts` 및 `npm test`
 
 공통 색상·상단 메뉴·하단 영역은 `theme.css`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
 

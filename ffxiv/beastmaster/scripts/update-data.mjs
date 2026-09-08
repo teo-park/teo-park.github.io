@@ -133,7 +133,7 @@ export function build(sheets) {
     count:beasts.length,coverage,beasts,items,actions,
     captureRules:{assessmentActionId:44882,captureActionId:44880,source:patchNotes},
     limitations:[
-      '원본 7.56 XBMPet의 ID 1~50을 사용합니다. 게임 화면의 정렬·페이지 배치는 아직 실물과 대조하지 않았습니다.',
+      '원본 7.56 XBMPet의 ID 1~50을 사용합니다. 제공된 공식 도감 이미지에서 5×5 배치와 1페이지 번호를 확인했습니다. 2페이지 전체 아이콘은 개별 대조 전입니다.',
       '주요 출현 지역은 도감 힌트이며, 모든 포획 대상 개체·정확한 좌표·난이도·확률은 포함하지 않습니다.',
       '의미가 확인되지 않은 분류·능력치 열은 unmapped에 원본 값으로 보존합니다. 포획 레벨이나 난이도로 추정하지 않습니다.',
       '기술 tooltip.text는 원문 미리보기입니다. hasConditions가 true인 기술은 캐릭터 레벨 등의 조건을 적용하지 않았으므로 확정 효과로 사용하지 마세요.',
@@ -175,7 +175,7 @@ export async function update({refresh=false}={}) {
 
 export function catalog(data) {
   const itemById=new Map(data.items.map(i=>[i.id,i]));
-  const lines=['# 마수도감 데이터 목록','','패치 7.56 · 50종 · 수집 UI 제작 전 데이터 확인용 목록입니다. 번호는 XBMPet ID이며 게임 화면 정렬은 별도 확인이 필요합니다.','','장소는 도감의 주요 출현 지역입니다. 개별 포획 대상·좌표·난이도는 아직 연결하지 않았습니다.','','| ID | 마수 | 주요 출현 지역 | 항아리 획득 |','| --- | --- | --- | --- |'];
+  const lines=['# 마수도감 데이터 목록','','패치 7.56 · 50종 · 데이터 확인용 목록입니다. 번호는 XBMPet ID이며 수집 페이지는 5×5, 25종씩 2페이지로 표시합니다.','','장소는 도감의 주요 출현 지역입니다. 개별 포획 대상·좌표·난이도는 아직 연결하지 않았습니다.','','| ID | 마수 | 주요 출현 지역 | 항아리 획득 |','| --- | --- | --- | --- |'];
   for(const b of data.beasts) {
     const item=b.acquisition.find(a=>a.type==='item');
     const methods=item?itemById.get(item.itemId).sources.map(s=>s.type==='quest'?`「${s.quest.name}」 진행 중 지급`:s.costs.map(c=>`${c.name} ${c.count}개`).join(' + ')+` · 선행: ${s.prerequisiteQuests.map(q=>'「'+q.name+'」').join(', ')}`).join(' / '):'—';
