@@ -4,7 +4,7 @@
   const $=id=>document.getElementById(id),D=window.BLUE_MAGE_DATA,E=window.BlueMageBook,KEY='teo-ffxiv.blue-mage.collection.v1';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const byId=new Map((D?.spells||[]).map(s=>[s.id,s]));
-  let learned=new Set(),filtered=[],page=1,pageItems=[],view='number',history=[];
+  let learned=new Set(),filtered=[],page=1,pageItems=[],view='number',history=[],loadoutUI;
   const read=()=>{const raw=localStorage.getItem(KEY);return raw===null?new Set():E.parseBackup(raw);};
   const knownCount=ids=>[...ids].filter(id=>byId.has(id)).length;
   function notify(text){$('noticeText').textContent=text;$('notice').hidden=false;$('undo').hidden=!history.length;}
@@ -14,6 +14,7 @@
     $('collectionProgress').value=count;$('collectionProgress').max=D.count;$('collectionProgress').setAttribute('aria-label',`청마법 ${count} / ${D.count}종 습득`);
     $('recordCount').textContent=`습득 ${count}종`+(learned.size>count?` · 현재 목록 외 ${learned.size-count}개 번호도 보존 중`:'');
     $('markPage').disabled=!pageItems.some(s=>!learned.has(s.id));
+    loadoutUI?.refresh();
   }
   function updateChecks(){
     for(const button of document.querySelectorAll('[data-collect]')){
@@ -86,7 +87,7 @@
       const b=event.target.closest('[data-collect],[data-detail],[data-location]');if(!b)return;
       if(b.hasAttribute('data-collect'))toggle(+b.dataset.collect);
       else if(b.hasAttribute('data-detail'))detail(+b.dataset.detail);
-      else {for(const id of ['source','aspect','rank'])$(id).value='all';$('search').value='';$('status').value='unlearned';$('location').value=b.dataset.location;view='location';$('detailDialog').close();refilter();$('spellCatalog').scrollIntoView({block:'start'});}
+      else {for(const id of ['source','aspect','rank'])$(id).value='all';$('search').value='';$('status').value='unlearned';$('location').value=b.dataset.location;view='location';$('detailDialog').close();$('bookMode').click();refilter();$('spellCatalog').scrollIntoView({block:'start'});}
     });
     $('pagination').addEventListener('click',event=>{const b=event.target.closest('[data-page]');if(!b||b.disabled)return;page=+b.dataset.page;render();$('spellCatalog').scrollIntoView({block:'start'});$('pagination').querySelector('[aria-current=page]')?.focus({preventScroll:true});});
     $('markPage').addEventListener('click',()=>save(pageItems.map(s=>[s.id,true]),`현재 페이지 ${pageItems.length}종을 습득으로 체크했어요.`));
@@ -117,6 +118,7 @@
     const places=E.groupByLocation(D.spells);$('location').insertAdjacentHTML('beforeend',places.map(g=>`<option value="${esc(g.key)}">${esc(g.name)}${g.level?' · Lv.'+g.level:''}</option>`).join(''));
     $('aspect').insertAdjacentHTML('beforeend',[...new Set(D.spells.map(s=>s.aspect))].map(a=>`<option value="${esc(a)}">${esc(a==='없음'?'무속성':a)}</option>`).join(''));
     $('dataNote').innerHTML=`${esc(D.updatedAt)} 기준 · 청마법 ${D.count}종 · 습득 경로 ${D.sourceCount}개. 한국어 게임 명칭과 공개 습득처 자료를 사용합니다. <a href="./README.md">데이터 범위·출처</a>`;
+    loadoutUI=window.BlueMageLoadoutUI?.mount({spells:D.spells,getLearned:()=>learned});
     events();refilter();
     window.BlueMageScanUI?.mount({spells:D.spells,apply:ids=>{
       if(!Array.isArray(ids)||!ids.length||ids.some(id=>!Number.isSafeInteger(id)||!byId.has(id)))return {ok:false,error:'수첩에 없는 번호가 포함되어 있어요.'};

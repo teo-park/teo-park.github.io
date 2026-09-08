@@ -4,19 +4,23 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>청마도사 스킬 수첩 · 파판14 도구함</title>
   <meta name="description" content="청마법 124종 습득 체크. 번호·이름·초성 검색으로 배울 기술을 찾고, 마물·던전·우상 조건을 확인하세요.">
-  <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="청마도사 스킬 수첩 · 파판14 도구함"><meta property="og:description" content="청마법 습득 체크와 장소별 습득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/blue-mage/">
+  <meta name="theme-color" content="#0b1220"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:title" content="청마도사 스킬 수첩 · 파판14 도구함"><meta property="og:description" content="청마법 습득 체크, 역할별 조합·사용 순서 추천, 장소별 습득처 검색."><meta property="og:url" content="https://teo-park.github.io/ffxiv/blue-mage/">
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/blue-mage/"><link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260908-1"><link rel="stylesheet" href="./scanner.css?v=20260908-2">
-  <script defer src="./data.js?v=20260908-1"></script><script defer src="./engine.js?v=20260908-1"></script><script defer src="./scanner.js?v=20260908-3"></script><script defer src="./scanner-ui.js?v=20260908-3"></script><script defer src="./app.js?v=20260908-2"></script>
+  <link rel="stylesheet" href="./loadouts.css?v=20260908-1">
+  <script defer src="./data.js?v=20260908-1"></script><script defer src="./engine.js?v=20260908-1"></script><script defer src="./scanner.js?v=20260908-3"></script><script defer src="./scanner-ui.js?v=20260908-3"></script><script defer src="./loadouts.js?v=20260908-1"></script><script defer src="./loadouts-ui.js?v=20260908-1"></script><script defer src="./app.js?v=20260908-4"></script>
 </head>
 <body>
-  <a class="skip-link" href="#spellCatalog">청마법 목록으로 바로가기</a>
+  <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
   <header class="site-header"><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../minions/">꼬마친구 수첩</a><a href="./" aria-current="page">청마도사 스킬 수첩</a></nav><span class="header-note">FFXIV · KR</span></header>
-  <main class="book-main">
-    <div class="masthead"><div><p class="eyebrow">BLUE MAGIC / SPELLBOOK</p><h1>청마도사 스킬 수첩</h1><p>습득한 청마법을 체크하고 다음 습득처를 찾아보세요.</p></div><button id="openRecords" disabled>수집 기록 관리</button></div>
+  <main id="mainContent" class="book-main" tabindex="-1">
+    <div class="masthead"><div><p class="eyebrow">BLUE MAGIC / SPELLBOOK</p><h1>청마도사 스킬 수첩</h1><p>습득한 청마법을 기록하고, 역할별 조합과 사용 순서를 확인하세요.</p></div><button id="openRecords" disabled>수집 기록 관리</button></div>
     <p id="fatal" role="alert" class="fatal" hidden></p><p id="loading" role="status">청마법을 불러오고 있어요.</p><noscript><p>수첩을 사용하려면 JavaScript를 켜 주세요.</p></noscript>
     <div id="appContent" hidden>
       <section class="progress-strip" aria-label="청마법 습득 현황"><div><span>습득한 청마법</span><p><strong id="learnedCount">0</strong><span id="totalCount"></span></p></div><div class="progress-meter"><div><span id="remainingCount"></span><b id="learnedPercent"></b></div><progress id="collectionProgress" value="0" max="124" aria-label="청마법 습득률"></progress><small>체크는 이 브라우저에 저장돼요.</small></div><div class="free-note"><strong>무료 · 비영리</strong><small>광고·후원·유료 기능 없음</small></div></section>
+      <nav class="book-modes" aria-label="수첩 기능"><button id="bookMode" aria-pressed="true">스킬 수첩</button><button id="loadoutMode" aria-pressed="false">조합·사용 순서 추천</button></nav>
+      <section id="loadoutPanel" aria-label="습득한 청마법 조합 추천" hidden></section>
+      <div id="bookPanel">
       <aside class="learning-note"><p>대상이 기술을 사용한 뒤 처치해야 체득할 수 있어요. 우상은 조건을 달성한 뒤 수령해 사용하세요.</p><a href="https://guide.ff14.co.kr/job/BlueMage/18?type=E#anchor_h3" target="_blank" rel="noopener noreferrer">공식 체득 안내 ↗</a></aside>
       <section class="filters" aria-label="청마법 검색과 필터">
         <label class="search-label" for="search">번호·이름·초성·습득처 검색</label><div class="search-field"><input id="search" type="search" placeholder="24, 날아라 정어리, ㄴㅇㄹㅈㅇㄹ, 시리우스…" autocomplete="off"><button id="clearSearch" class="quiet" aria-label="검색어 지우기">지우기</button></div>
@@ -29,6 +33,7 @@
         <nav id="pagination" class="pagination" aria-label="청마법 목록 페이지"></nav>
       </section>
       <p id="dataNote" class="data-note"></p>
+      </div>
     </div>
   </main>
   <dialog id="detailDialog" aria-labelledby="detailTitle"><div class="dialog-top"><span>청마법 습득 안내</span><button id="closeDetail" aria-label="습득 안내 닫기">닫기 ×</button></div><div id="detailBody"></div></dialog>

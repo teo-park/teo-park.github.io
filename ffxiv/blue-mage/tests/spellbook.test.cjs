@@ -10,7 +10,7 @@ function open(storage=memory()){
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
   let scanApply;w.BlueMageScanUI={mount:({apply})=>{scanApply=apply;}};
-  for(const file of ['data.js','engine.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
+  for(const file of ['data.js','engine.js','loadouts.js','loadouts-ui.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
   const $=s=>d.querySelector(s),all=s=>[...d.querySelectorAll(s)],change=(s,value,event='change')=>{const el=$(s);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
   assert.equal($('#appContent').hidden,false);
   return {w,d,$,all,change,storage,downloads,scanApply,close:()=>w.close()};
@@ -92,4 +92,41 @@ test('other-tab edits are reflected and subsequent changes read fresh state',()=
 });
 test('capture registration merges fresh records, keeps missing and future IDs, and supports undo',()=>{
   const ui=open(memory({[KEY]:E.backup(new Set([51,99999]))}));try{ui.storage.setItem(KEY,E.backup(new Set([51,80,99999])));assert.equal(ui.scanApply([49,50,49]).ok,true);assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([49,50,51,80,99999]));assert.match(ui.$('#recordMessage').textContent,/2종/);ui.$('#undo').click();assert.deepEqual(E.parseBackup(ui.storage.getItem(KEY)),new Set([51,80,99999]));const before=ui.storage.getItem(KEY);for(const ids of [[],null,[99999],['49']])assert.equal(ui.scanApply(ids).ok,false);assert.equal(ui.storage.getItem(KEY),before);}finally{ui.close();}
+});
+test('recommendation navigation and changing options never modify the learned record',()=>{
+  const storage=memory({[KEY]:E.backup(new Set(D.spells.map(s=>s.id)))}),before=storage.getItem(KEY),ui=open(storage);
+  try{
+    ui.$('#loadoutMode').click();assert.equal(ui.$('#bookPanel').hidden,true);assert.equal(ui.$('#loadoutPanel').hidden,false);assert.match(ui.$('.rotation-burst h3').textContent,/기본 2분/);
+    ui.change('#loadoutRole','healer');assert.equal(ui.$('.rotation-burst'),null);assert.match(ui.$('#loadoutResult').textContent,/자신에게 폼폼 케알 → 하얀 바람/);
+    ui.$('#loadoutSpellsTab').click();assert.ok(ui.$('[data-recommended="88"]'));assert.equal(ui.$('[data-recommended="100"]'),null);
+    ui.change('#loadoutDuty','solo');assert.equal(ui.$('#loadoutRole').disabled,true);assert.ok(ui.$('[data-recommended="91"]'));assert.match(ui.$('#loadoutSummary').textContent,/탱 청마/);
+    ui.change('#loadoutDuty','boss');assert.equal(ui.$('#loadoutRole').disabled,false);assert.match(ui.$('#loadoutSummary').textContent,/힐 청마/);
+    assert.equal(storage.getItem(KEY),before);ui.$('#bookMode').click();assert.equal(ui.$('#bookPanel').hidden,false);
+  }finally{ui.close();}
+});
+test('loadouts refresh after bulk entry, detail checks, capture registration, undo and cross-tab changes',()=>{
+  const ui=open();try{
+    ui.$('#loadoutMode').click();ui.$('#loadoutSpellsTab').click();
+    ui.change('#learnedNumbers','1, 77','input');ui.$('#applyNumbers').click();assert.ok(ui.$('[data-recommended="77"]'));assert.ok(ui.$('[data-recommended="1"]'));
+    ui.$('#loadoutResult [data-detail="77"]').click();ui.$('.detail-check').click();assert.equal(ui.$('[data-recommended="77"]'),null);ui.$('#closeDetail').click();
+    ui.$('#undo').click();assert.ok(ui.$('[data-recommended="77"]'));
+    ui.scanApply([63]);assert.ok(ui.$('[data-recommended="63"]'));assert.equal(ui.$('[data-recommended="1"]'),null);
+    ui.storage.setItem(KEY,E.backup(new Set([1,77,100])));ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:KEY}));assert.ok(ui.$('[data-recommended="100"]'));assert.equal(ui.$('[data-recommended="63"]'),null);
+  }finally{ui.close();}
+});
+test('missing spell acquisition links return to the visible catalog and imports update recommendations',async()=>{
+  const ui=open();try{
+    ui.$('#loadoutMode').click();ui.$('#loadoutMissingTab').click();ui.$('#loadoutResult [data-detail="77"]').click();assert.equal(ui.$('#detailDialog').open,true);
+    ui.$('#detailBody [data-location]').click();assert.equal(ui.$('#loadoutPanel').hidden,true);assert.equal(ui.$('#bookPanel').hidden,false);
+    const file=ui.$('#importFile');Object.defineProperty(file,'files',{value:[{size:100,text:async()=>E.backup(new Set([77,63]))}]});file.dispatchEvent(new ui.w.Event('change'));await new Promise(r=>setTimeout(r,0));
+    ui.$('#loadoutMode').click();ui.$('#loadoutSpellsTab').click();assert.ok(ui.$('[data-recommended="77"]'));assert.ok(ui.$('[data-recommended="63"]'));
+  }finally{ui.close();}
+});
+test('copy exports only selected learned spells and offers text fallback when clipboard is unavailable',async()=>{
+  const ui=open(memory({[KEY]:E.backup(new Set([1,77]))}));try{
+    ui.$('#loadoutMode').click();let copied;Object.defineProperty(ui.w.navigator,'clipboard',{configurable:true,value:{writeText:async text=>{copied=text;}}});
+    ui.$('#loadoutCopy').click();await new Promise(r=>setTimeout(r,0));assert.match(copied,/No.001 물대포/);assert.match(copied,/No.077 에테르 복사/);assert.doesNotMatch(copied,/No.100/);
+    Object.defineProperty(ui.w.navigator,'clipboard',{value:{writeText:async()=>{throw Error('blocked');}}});ui.$('#loadoutCopy').click();await new Promise(r=>setTimeout(r,0));
+    assert.equal(ui.$('#loadoutCopyFallback').hidden,false);assert.equal(ui.$('#loadoutCopyFallback').value,copied);
+  }finally{ui.close();}
 });
