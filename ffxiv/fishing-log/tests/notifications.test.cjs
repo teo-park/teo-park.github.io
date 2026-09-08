@@ -8,6 +8,15 @@ test('upcoming notifications respect ontime, deduplicate overlaps and ignore cau
   const message=E.message(data,Book.create(data),batch.events);assert.match(message.body,/미끼/);assert.equal(message.fish,2);
   const wake=E.next(data,weather,{...prefs,sent},batch.events[0].end+1);assert.ok(!wake.events.some(e=>e.end<=batch.events[0].end));
 });
+test('normal untimed fish notify once per play session, not on every timer tick or every route',()=>{
+  const ordinary={...data,fishes:[{id:3,name:'일반 물고기',kind:'rod',routes:[{verified:true,spotKey:'rod:1',bait:1},{verified:true,spotKey:'rod:1',bait:1}]}]},settings={...prefs,ids:[3],includeAlways:true};
+  const first=E.next(ordinary,weather,settings,start);assert.equal(first.at,Date.parse('2026-09-08T20:00:00+09:00'));assert.equal(first.events.length,1);assert.equal(first.events[0].always,true);
+  const sent=E.remember([],first.events,first.at),later=E.next(ordinary,weather,{...settings,sent},first.at+5*F.MINUTE);
+  assert.ok(later.events.length);assert.equal(later.events[0].sessionStart,first.events[0].sessionStart+F.DAY);assert.notEqual(later.events[0].key,first.events[0].key);
+  assert.deepEqual(E.next(ordinary,weather,{...settings,includeAlways:false},start).events,[]);assert.deepEqual(E.next(ordinary,weather,{...settings,ids:[]},first.at).events,[]);
+  const disabled={...settings,settings:{...settings.settings,days:settings.settings.days.map(d=>({...d,enabled:false}))}};assert.deepEqual(E.next(ordinary,weather,disabled,start).events,[]);
+  const message=E.message(ordinary,Book.create(ordinary),first.events);assert.match(message.title,/상시 낚시 준비/);assert.match(message.body,/시간·날씨 제한 없음/);
+});
 test('page alerts request permission only on click, use local history and stop after disabling',async()=>{
   const p=open(),notices=[];let requests=0,now=start,settings={...prefs},timers=new Map(),seq=0;
   try{

@@ -73,7 +73,7 @@
       const play=sessions(settings,from,to),out=[];
       for(const [index,route] of fish.routes.entries()){
         if(reason(route)||!includeAlways&&!limited(route))continue;
-        const ranges=windows(route,from,to);
+        const always=!limited(route),ranges=windows(route,from,to);
         let cursor=0;
         for(const window of ranges){
           while(cursor<play.length&&play[cursor].end<=window.start)cursor++;
@@ -81,8 +81,10 @@
             const overlap=intersect(window,play[i]);if(!overlap)continue;
             const start=Math.max(from,overlap.start),end=Math.min(to,overlap.end);
             if(end-start<settings.minMinutes*MINUTE)continue;
-            out.push({id:fish.id,route:index,windowStart:window.start,windowEnd:window.end,start,end,sessionStart:play[i].start,sessionEnd:play[i].end,
-              notifyAt:Math.max(play[i].start,overlap.start-settings.lead*MINUTE),key:`${fish.id}:${index}:${window.start}:${play[i].start}`});
+            // Untimed fish use the whole play session as their stable opportunity.
+            const windowStart=always?play[i].start:window.start,windowEnd=always?play[i].end:window.end;
+            out.push({id:fish.id,route:index,always,windowStart,windowEnd,start,end,sessionStart:play[i].start,sessionEnd:play[i].end,
+              notifyAt:always?play[i].start:Math.max(play[i].start,overlap.start-settings.lead*MINUTE),key:`${fish.id}:${index}:${windowStart}:${play[i].start}`});
           }
         }
       }
