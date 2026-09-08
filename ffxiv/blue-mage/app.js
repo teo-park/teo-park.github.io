@@ -4,7 +4,7 @@
   const $=id=>document.getElementById(id),D=window.BLUE_MAGE_DATA,E=window.BlueMageBook,KEY='teo-ffxiv.blue-mage.collection.v1';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const byId=new Map((D?.spells||[]).map(s=>[s.id,s]));
-  let learned=new Set(),filtered=[],page=1,pageItems=[],view='number',history=[],loadoutUI;
+  let learned=new Set(),filtered=[],page=1,pageItems=[],view='number',history=[],loadoutUI,carnivaleUI;
   const read=()=>{const raw=localStorage.getItem(KEY);return raw===null?new Set():E.parseBackup(raw);};
   const knownCount=ids=>[...ids].filter(id=>byId.has(id)).length;
   function notify(text){$('noticeText').textContent=text;$('notice').hidden=false;$('undo').hidden=!history.length;}
@@ -15,6 +15,7 @@
     $('recordCount').textContent=`습득 ${count}종`+(learned.size>count?` · 현재 목록 외 ${learned.size-count}개 번호도 보존 중`:'');
     $('markPage').disabled=!pageItems.some(s=>!learned.has(s.id));
     loadoutUI?.refresh();
+    carnivaleUI?.refresh();
   }
   function updateChecks(){
     for(const button of document.querySelectorAll('[data-collect]')){
@@ -77,6 +78,11 @@
     try{const ids=E.parseNumbers($('learnedNumbers').value,D.spells);$('numberPreview').textContent=`${ids.size}종 선택 · ${[...ids].filter(id=>!learned.has(id)).length}종 새로 추가`;$('applyNumbers').disabled=false;}catch(e){$('numberPreview').textContent=e.message;}
   }
   function events(){
+    const modes=['book','loadout','carnivale'];
+    for(const mode of modes)$(mode+'Mode').addEventListener('click',()=>{
+      for(const other of modes){$(other+'Panel').hidden=other!==mode;$(other+'Mode').setAttribute('aria-pressed',String(other===mode));}
+      if(mode==='loadout')loadoutUI?.refresh();if(mode==='carnivale')carnivaleUI?.refresh();
+    });
     $('search').addEventListener('input',refilter);$('search').addEventListener('compositionupdate',()=>queueMicrotask(refilter));$('search').addEventListener('compositionend',refilter);
     $('clearSearch').addEventListener('click',()=>{$('search').value='';refilter();$('search').focus();});
     for(const id of ['status','source','location','aspect','rank'])$(id).addEventListener('change',refilter);
@@ -119,6 +125,7 @@
     $('aspect').insertAdjacentHTML('beforeend',[...new Set(D.spells.map(s=>s.aspect))].map(a=>`<option value="${esc(a)}">${esc(a==='없음'?'무속성':a)}</option>`).join(''));
     $('dataNote').innerHTML=`${esc(D.updatedAt)} 기준 · 청마법 ${D.count}종 · 습득 경로 ${D.sourceCount}개. 한국어 게임 명칭과 공개 습득처 자료를 사용합니다. <a href="./README.md">데이터 범위·출처</a>`;
     loadoutUI=window.BlueMageLoadoutUI?.mount({spells:D.spells,getLearned:()=>learned});
+    carnivaleUI=window.BlueMageCarnivaleUI?.mount({spells:D.spells,getLearned:()=>learned});
     events();refilter();
     window.BlueMageScanUI?.mount({spells:D.spells,apply:ids=>{
       if(!Array.isArray(ids)||!ids.length||ids.some(id=>!Number.isSafeInteger(id)||!byId.has(id)))return {ok:false,error:'수첩에 없는 번호가 포함되어 있어요.'};

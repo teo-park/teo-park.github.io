@@ -10,11 +10,35 @@ function open(storage=memory()){
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
   w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
   let scanApply;w.BlueMageScanUI={mount:({apply})=>{scanApply=apply;}};
-  for(const file of ['data.js','engine.js','loadouts.js','loadouts-ui.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
+  for(const file of ['data.js','engine.js','loadouts.js','loadouts-ui.js','carnivale-data.js','carnivale.js','carnivale-ui.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
   const $=s=>d.querySelector(s),all=s=>[...d.querySelectorAll(s)],change=(s,value,event='change')=>{const el=$(s);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
   assert.equal($('#appContent').hidden,false);
   return {w,d,$,all,change,storage,downloads,scanApply,close:()=>w.close()};
 }
+test('three modes are exclusive, all 32 guides are selectable, and navigation does not change records',()=>{
+  const storage=memory({[KEY]:E.backup(new Set([1,99999]))}),before=storage.getItem(KEY),ui=open(storage);
+  try{
+    for(const mode of ['carnivale','loadout','book','carnivale']){ui.$('#'+mode+'Mode').click();for(const other of ['book','loadout','carnivale']){assert.equal(ui.$('#'+other+'Panel').hidden,mode!==other);assert.equal(ui.$('#'+other+'Mode').getAttribute('aria-pressed'),String(mode===other));}}
+    assert.equal(ui.all('[data-carnivale-stage]').length,32);assert.equal(ui.all('#carnivaleSelect option').length,32);
+    for(let n=1;n<=32;n++){ui.$(`[data-carnivale-stage="${n}"]`).click();assert.match(ui.$('#carnivaleStageTitle').textContent,new RegExp('^'+String(n).padStart(2,'0')));assert.ok(ui.all('.carnivale-phase').length);assert.ok(ui.$('.carnivale-sources a').href.endsWith('/'+String(n).padStart(2,'0')+'/'));}
+    assert.equal(ui.$('[data-carnivale-move="1"]').disabled,true);ui.$('[data-carnivale-move="-1"]').click();assert.match(ui.$('#carnivaleStageTitle').textContent,/31\./);
+    ui.change('#carnivaleSearch','25','input');assert.equal(ui.all('[data-carnivale-stage]').length,1);assert.match(ui.$('#carnivaleStageTitle').textContent,/25\./);assert.ok(ui.$('.carnivale-achievement'));assert.equal(ui.$('#carnivaleSelect').value,'25');
+    ui.change('#carnivaleSearch','없는 시합','input');assert.equal(ui.$('#carnivaleEmpty').hidden,false);assert.equal(ui.$('#carnivaleGuide').hidden,true);assert.equal(ui.$('#carnivaleSelect').disabled,true);
+    ui.change('#carnivaleSearch','','input');ui.change('#carnivaleSelect','20');assert.match(ui.$('#carnivaleStageTitle').textContent,/20\./);assert.ok(ui.$('.carnivale-learnable [data-detail]'));
+    assert.equal(storage.getItem(KEY),before);
+  }finally{ui.close();}
+});
+test('Carnivale updates preparation after detail, capture, undo, import and another tab',async()=>{
+  const ui=open();try{
+    ui.$('#carnivaleMode').click();ui.$('[data-carnivale-stage="5"]').click();assert.match(ui.$('#carnivaleReady').textContent,/0 \/ 1/);
+    ui.$('#carnivaleGuide [data-detail="36"]').click();assert.equal(ui.$('#detailDialog').open,true);ui.$('.detail-check').click();assert.match(ui.$('#carnivaleReady').textContent,/1 \/ 1/);assert.ok(ui.$('#carnivaleGuide [data-detail="36"]').classList.contains('is-known'));ui.$('#closeDetail').click();
+    ui.$('#undo').click();assert.match(ui.$('#carnivaleReady').textContent,/0 \/ 1/);
+    ui.scanApply([33]);assert.match(ui.$('#carnivaleReady').textContent,/0 \/ 1/);ui.scanApply([92]);assert.match(ui.$('#carnivaleReady').textContent,/1 \/ 1/);ui.$('#undo').click();assert.match(ui.$('#carnivaleReady').textContent,/0 \/ 1/);
+    const input=ui.$('#importFile');Object.defineProperty(input,'files',{value:[{size:100,text:async()=>E.backup(new Set([42]))}]});input.dispatchEvent(new ui.w.Event('change'));await new Promise(r=>setTimeout(r,0));assert.match(ui.$('#carnivaleReady').textContent,/1 \/ 1/);
+    ui.storage.setItem(KEY,E.backup(new Set([99999])));ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:KEY}));assert.match(ui.$('#carnivaleReady').textContent,/0 \/ 1/);assert.match(ui.$('#carnivaleStageTitle').textContent,/05\./);
+    ui.$('#carnivaleGuide [data-detail="36"]').click();ui.$('#detailBody [data-location]').click();assert.equal(ui.$('#bookPanel').hidden,false);assert.equal(ui.$('#carnivalePanel').hidden,true);assert.equal(ui.$('#loadoutPanel').hidden,true);
+  }finally{ui.close();}
+});
 test('catalog has every numbered Korean spell and preserves separate Collect and game IDs',()=>{
   assert.equal(D.count,124);assert.deepEqual(D.spells.map(s=>s.id),Array.from({length:124},(_,i)=>i+1));
   assert.equal(D.spells[0].name,'물대포');assert.equal(D.spells[0].collectId,3);assert.equal(D.spells[0].actionId,11385);
@@ -68,7 +92,7 @@ test('search includes composing final Korean consonant and resets filters',()=>{
 });
 test('detail shows all routes and totem requirements, and guides users to unlearned spells at that place',()=>{
   const ui=open();try{
-    const s=D.spells.find(s=>s.sources.some(x=>x.requirement?.type==='learned')),source=s.sources.find(x=>x.requirement?.type==='learned');ui.change('#search',String(s.id),'input');ui.$('[data-detail]').click();
+    const s=D.spells.find(s=>s.sources.some(x=>x.requirement?.type==='learned')),source=s.sources.find(x=>x.requirement?.type==='learned');ui.change('#search',String(s.id),'input');ui.$('#spellGrid [data-detail]').click();
     assert.equal(ui.$('#detailDialog').open,true);assert.equal(ui.all('.detail-sources>li').length,s.sources.length);assert.match(ui.$('#detailBody').textContent,/청가면 탄생/);assert.match(ui.$('[data-totem-count]').textContent,/수첩 기록 0/);
     ui.$('.detail-check').click();assert.equal(ui.$('.spell-check').getAttribute('aria-pressed'),'true');assert.match(ui.$('[data-totem-count]').textContent,/수첩 기록 1/);
     ui.$(`[data-location="${source.locationKey}"]`).click();assert.equal(ui.$('#detailDialog').open,false);assert.equal(ui.$('#status').value,'unlearned');assert.equal(ui.$('#location').value,source.locationKey);assert.equal(ui.all('.location-group').length,1);assert.ok(ui.all('.location-entry').every(el=>!el.querySelector(`[data-collect="${s.id}"]`)));

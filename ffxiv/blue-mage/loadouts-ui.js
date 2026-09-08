@@ -52,9 +52,6 @@
       const text=[`${L.roles[current.role]} · ${L.duties[current.duty]} (${current.selected.length}/24)`,...current.selected.map(s=>`No.${String(s.id).padStart(3,'0')} ${byId.get(s.id).name}`)].join('\n');
       try{await navigator.clipboard.writeText(text);$('loadoutCopyStatus').textContent='추천 조합을 복사했어요.';}catch{$('loadoutCopyFallback').value=text;$('loadoutCopyFallback').hidden=false;$('loadoutCopyFallback').select();$('loadoutCopyStatus').textContent='아래 텍스트를 Ctrl+C로 복사하세요.';}
     });
-    for(const [id,showLoadout] of [['bookMode',false],['loadoutMode',true]])$(id).addEventListener('click',()=>{
-      $('bookPanel').hidden=showLoadout;$('loadoutPanel').hidden=!showLoadout;$('bookMode').setAttribute('aria-pressed',String(!showLoadout));$('loadoutMode').setAttribute('aria-pressed',String(showLoadout));if(showLoadout)refresh();
-    });
     refresh();return {refresh};
   }};
 })();
