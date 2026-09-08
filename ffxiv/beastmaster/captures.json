@@ -1,0 +1,2208 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-09",
+  "scope": "공개 포획 제보 목록. 좌표는 대표 위치이며 모든 출현 지점이나 포획 성공을 보증하지 않습니다.",
+  "coverage": {
+    "beasts": 49,
+    "targets": 76,
+    "pins": 46,
+    "regions": 25
+  },
+  "regions": [
+    {
+      "key": "duty:3",
+      "id": 3,
+      "name": "구리종 광산",
+      "englishName": "Copperbell Mines",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:12",
+      "id": 12,
+      "name": "나무꾼의 비명",
+      "englishName": "Cutter's Cry",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:98",
+      "id": 98,
+      "name": "대미궁 바하무트: 침공편 1",
+      "englishName": "The Second Coil of Bahamut - Turn 1",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:8",
+      "id": 8,
+      "name": "브레이플록스의 야영지",
+      "englishName": "Brayflox's Longstop",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:4",
+      "id": 4,
+      "name": "사스타샤 침식 동굴",
+      "englishName": "Sastasha",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:28",
+      "id": 28,
+      "name": "사스타샤 침식 동굴(어려움)",
+      "englishName": "Sastasha (Hard)",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:17",
+      "id": 17,
+      "name": "시리우스 대등대",
+      "englishName": "Pharos Sirius",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:27",
+      "id": 27,
+      "name": "얼음외투 대빙벽",
+      "englishName": "Snowcloak",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:22",
+      "id": 22,
+      "name": "옛 암다포르 시가지",
+      "englishName": "The Lost City of Amdapor",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:92",
+      "id": 92,
+      "name": "크리스탈 타워: 고대인의 미궁",
+      "englishName": "Labyrinth of the Ancients",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:75",
+      "id": 75,
+      "name": "하이드라 토벌전",
+      "englishName": "A Relic Reborn: The Hydra",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "duty:7",
+      "id": 7,
+      "name": "할라탈리 수련장",
+      "englishName": "Halatali",
+      "type": "duty",
+      "mapId": null
+    },
+    {
+      "key": "field:55",
+      "id": 55,
+      "name": "검은장막 숲 동부삼림",
+      "englishName": "East Shroud",
+      "type": "field",
+      "mapId": 5
+    },
+    {
+      "key": "field:57",
+      "id": 57,
+      "name": "검은장막 숲 북부삼림",
+      "englishName": "North Shroud",
+      "type": "field",
+      "mapId": 7
+    },
+    {
+      "key": "field:54",
+      "id": 54,
+      "name": "검은장막 숲 중부삼림",
+      "englishName": "Central Shroud",
+      "type": "field",
+      "mapId": 4
+    },
+    {
+      "key": "field:34",
+      "id": 34,
+      "name": "고지 라노시아",
+      "englishName": "Upper La Noscea",
+      "type": "field",
+      "mapId": 19
+    },
+    {
+      "key": "field:45",
+      "id": 45,
+      "name": "남부 다날란",
+      "englishName": "Southern Thanalan",
+      "type": "field",
+      "mapId": 23
+    },
+    {
+      "key": "field:32",
+      "id": 32,
+      "name": "동부 라노시아",
+      "englishName": "Eastern La Noscea",
+      "type": "field",
+      "mapId": 17
+    },
+    {
+      "key": "field:67",
+      "id": 67,
+      "name": "모르도나",
+      "englishName": "Mor Dhona",
+      "type": "field",
+      "mapId": 25
+    },
+    {
+      "key": "field:42",
+      "id": 42,
+      "name": "서부 다날란",
+      "englishName": "Western Thanalan",
+      "type": "field",
+      "mapId": 20
+    },
+    {
+      "key": "field:33",
+      "id": 33,
+      "name": "서부 라노시아",
+      "englishName": "Western La Noscea",
+      "type": "field",
+      "mapId": 18
+    },
+    {
+      "key": "field:350",
+      "id": 350,
+      "name": "외지 라노시아",
+      "englishName": "Outer La Noscea",
+      "type": "field",
+      "mapId": 30
+    },
+    {
+      "key": "field:31",
+      "id": 31,
+      "name": "저지 라노시아",
+      "englishName": "Lower La Noscea",
+      "type": "field",
+      "mapId": 16
+    },
+    {
+      "key": "field:43",
+      "id": 43,
+      "name": "중부 다날란",
+      "englishName": "Central Thanalan",
+      "type": "field",
+      "mapId": 21
+    },
+    {
+      "key": "field:30",
+      "id": 30,
+      "name": "중부 라노시아",
+      "englishName": "Middle La Noscea",
+      "type": "field",
+      "mapId": 15
+    }
+  ],
+  "targets": [
+    {
+      "id": "2:1:1",
+      "beastId": 2,
+      "name": "청설모",
+      "englishName": "Ground Squirrel",
+      "npcNameIds": [
+        37
+      ],
+      "level": 1,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 23,
+        "y": 16
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/2",
+        "target": "Lv 1 Ground Squirrel",
+        "location": "Central Shroud (23, 16)"
+      }
+    },
+    {
+      "id": "2:2:2",
+      "beastId": 2,
+      "name": "마멋",
+      "englishName": "Star Marmot",
+      "npcNameIds": [
+        262
+      ],
+      "level": 1,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:43",
+      "coordinates": {
+        "x": 20,
+        "y": 25
+      },
+      "mapId": 21,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/2",
+        "target": "Lv 1 Star Marmot",
+        "location": "Central Thanalan (20,25)"
+      }
+    },
+    {
+      "id": "3:1:1",
+      "beastId": 3,
+      "name": "양",
+      "englishName": "Lost Lamb",
+      "npcNameIds": [
+        392
+      ],
+      "level": 3,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 22,
+        "y": 25
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/3",
+        "target": "Lv 3 Lost Lamb",
+        "location": "Middle La Noscea (22, 25)"
+      }
+    },
+    {
+      "id": "4:1:1",
+      "beastId": 4,
+      "name": "푸길",
+      "englishName": "Pugil",
+      "npcNameIds": [
+        640,
+        14410
+      ],
+      "level": 4,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 21,
+        "y": 22
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/4",
+        "target": "Lv 4 Pugil",
+        "location": "Middle La Noscea (21, 22)"
+      }
+    },
+    {
+      "id": "5:1:1",
+      "beastId": 5,
+      "name": "오포오포",
+      "englishName": "Opo-opo",
+      "npcNameIds": [
+        5,
+        14411
+      ],
+      "level": 5,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:57",
+      "coordinates": {
+        "x": 27,
+        "y": 25
+      },
+      "mapId": 7,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/5",
+        "target": "Lv 5 Opo-opo",
+        "location": "North Shroud (27, 25)"
+      }
+    },
+    {
+      "id": "6:1:1",
+      "beastId": 6,
+      "name": "도도",
+      "englishName": "Wild Dodo",
+      "npcNameIds": [
+        393
+      ],
+      "level": 4,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:31",
+      "coordinates": {
+        "x": 28,
+        "y": 21
+      },
+      "mapId": 16,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/6",
+        "target": "Lv 4 Wild Dodo",
+        "location": "Lower La Noscea (28, 21)"
+      }
+    },
+    {
+      "id": "6:2:2",
+      "beastId": 6,
+      "name": "목도리 도도",
+      "englishName": "Ruffled Dodo",
+      "npcNameIds": [
+        2971
+      ],
+      "level": 12,
+      "kind": "fate",
+      "event": "Don't Drink the Water",
+      "regionKey": "field:31",
+      "coordinates": {
+        "x": 21,
+        "y": 34
+      },
+      "mapId": 16,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/6",
+        "target": "Lv 12 Ruffled Dodo",
+        "location": "FATE: \"Don't Drink the Water\" - Lower La Noscea (21,34)"
+      }
+    },
+    {
+      "id": "6:3:3",
+      "beastId": 6,
+      "name": "걸신들린 거트루드",
+      "englishName": "Gluttonous Gertrude",
+      "npcNameIds": [
+        859
+      ],
+      "level": 14,
+      "kind": "fate",
+      "event": "Tender Buttons",
+      "regionKey": "field:33",
+      "coordinates": {
+        "x": 32,
+        "y": 28
+      },
+      "mapId": 18,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/6",
+        "target": "Lv 14 Gluttonous Gertrude",
+        "location": "FATE: \"Tender Buttons\" - Western La Noscea (32,28)"
+      }
+    },
+    {
+      "id": "7:1:1",
+      "beastId": 7,
+      "name": "녹슨 코브란",
+      "englishName": "Rusty Coblyn",
+      "npcNameIds": [
+        276
+      ],
+      "level": 6,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:42",
+      "coordinates": {
+        "x": 22,
+        "y": 27
+      },
+      "mapId": 20,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/7",
+        "target": "Lv 6 Rusty Coblyn",
+        "location": "Western Thanalan (22, 27)"
+      }
+    },
+    {
+      "id": "7:2:2",
+      "beastId": 7,
+      "name": "구리종 코브란",
+      "englishName": "Copperbell Coblyn",
+      "npcNameIds": [
+        629
+      ],
+      "level": 17,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:3",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/7",
+        "target": "Lv 17 Copperbell Coblyn",
+        "location": "Copperbell Mines"
+      }
+    },
+    {
+      "id": "8:1:1",
+      "beastId": 8,
+      "name": "거미전갈",
+      "englishName": "Diremite",
+      "npcNameIds": [
+        10,
+        14414
+      ],
+      "level": 10,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 20,
+        "y": 19
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/8",
+        "target": "Lv 10 Diremite",
+        "location": "Central Shroud (20,19)"
+      }
+    },
+    {
+      "id": "9:1:1",
+      "beastId": 9,
+      "name": "대왕게",
+      "englishName": "Megalocrab",
+      "npcNameIds": [
+        561,
+        14415
+      ],
+      "level": 10,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 15,
+        "y": 15
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/9",
+        "target": "Lv 10 Megalocrab",
+        "location": "Middle La Noscea (15, 15)"
+      }
+    },
+    {
+      "id": "10:1:1",
+      "beastId": 10,
+      "name": "거대 말벌",
+      "englishName": "Huge Hornet",
+      "npcNameIds": [
+        632
+      ],
+      "level": 1,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:43",
+      "coordinates": {
+        "x": 20,
+        "y": 25
+      },
+      "mapId": 21,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/10",
+        "target": "Lv 1 Huge Hornet",
+        "location": "Central Thanalan (20,25)"
+      }
+    },
+    {
+      "id": "10:2:2",
+      "beastId": 10,
+      "name": "따끔한 소피",
+      "englishName": "Stinging Sophie",
+      "npcNameIds": [
+        2920
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "B급 마물",
+      "regionKey": "field:55",
+      "coordinates": null,
+      "mapId": 5,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/10",
+        "target": "Lv 50 Stinging Sophie",
+        "location": "B Rank Hunt - East Shroud"
+      }
+    },
+    {
+      "id": "11:1:1",
+      "beastId": 11,
+      "name": "둥지 짓는 독수리",
+      "englishName": "Nesting Buzzard",
+      "npcNameIds": [
+        299
+      ],
+      "level": 6,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:42",
+      "coordinates": {
+        "x": 21,
+        "y": 25
+      },
+      "mapId": 20,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/11",
+        "target": "Lv 6 Nesting Buzzard",
+        "location": "Western Thanalan (21, 25)"
+      }
+    },
+    {
+      "id": "11:2:2",
+      "beastId": 11,
+      "name": "부오코",
+      "englishName": "Vuokho",
+      "npcNameIds": [
+        2933
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "B급 마물",
+      "regionKey": "field:350",
+      "coordinates": null,
+      "mapId": 30,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/11",
+        "target": "Lv 50 Vuokho",
+        "location": "B Rank Hunt - Outer La Noscea"
+      }
+    },
+    {
+      "id": "12:1:1",
+      "beastId": 12,
+      "name": "꼬마 만드라고라",
+      "englishName": "Tiny Mandragora",
+      "npcNameIds": [
+        405
+      ],
+      "level": 5,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 23,
+        "y": 18
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/12",
+        "target": "Lv 5 Tiny Mandragora",
+        "location": "Middle La Noscea (23, 18)"
+      }
+    },
+    {
+      "id": "13:1:1",
+      "beastId": 13,
+      "name": "게슌페스트",
+      "englishName": "Geshunpest",
+      "npcNameIds": [
+        7466,
+        14419,
+        14941
+      ],
+      "level": 14,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 20,
+        "y": 27
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/13",
+        "target": "Lv 14 Geshunpest",
+        "location": "Central Shroud (20, 27)"
+      }
+    },
+    {
+      "id": "14:1:1",
+      "beastId": 14,
+      "name": "어린 푸크",
+      "englishName": "Puk Hatchling",
+      "npcNameIds": [
+        401
+      ],
+      "level": 4,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 21,
+        "y": 20
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/14",
+        "target": "Lv 4 Puk Hatchling",
+        "location": "Middle La Noscea (21, 20)"
+      }
+    },
+    {
+      "id": "15:1:1",
+      "beastId": 15,
+      "name": "딱딱지게",
+      "englishName": "Thickshell",
+      "npcNameIds": [
+        636
+      ],
+      "level": 13,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:42",
+      "coordinates": {
+        "x": 16,
+        "y": 17
+      },
+      "mapId": 20,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/15",
+        "target": "Lv 13 Thickshell",
+        "location": "Western Thanalan (16, 17)"
+      }
+    },
+    {
+      "id": "15:3:2",
+      "beastId": 15,
+      "name": "카르키노스",
+      "englishName": "Karkinos",
+      "npcNameIds": [
+        1520
+      ],
+      "level": 21,
+      "kind": "fate",
+      "event": "Giant Enemy Crab",
+      "regionKey": "field:34",
+      "coordinates": {
+        "x": 14,
+        "y": 24
+      },
+      "mapId": 19,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/15",
+        "target": "Lv 21 Karkinos",
+        "location": "FATE: \"Giant Enemy Crab\" - Upper La Noscea (14,24)"
+      }
+    },
+    {
+      "id": "16:1:1",
+      "beastId": 16,
+      "name": "살인사마귀",
+      "englishName": "Killer Mantis",
+      "npcNameIds": [
+        644
+      ],
+      "level": 16,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:33",
+      "coordinates": {
+        "x": 22,
+        "y": 23
+      },
+      "mapId": 18,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/16",
+        "target": "Lv 16 Killer Mantis",
+        "location": "Western La Noscea (22,23)"
+      }
+    },
+    {
+      "id": "16:2:2",
+      "beastId": 16,
+      "name": "대왕사마귀",
+      "englishName": "Mantis King",
+      "npcNameIds": [
+        1529
+      ],
+      "level": 40,
+      "kind": "fate",
+      "event": "The King's Justice",
+      "regionKey": "field:33",
+      "coordinates": {
+        "x": 14,
+        "y": 34
+      },
+      "mapId": 18,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/16",
+        "target": "Lv 40 Mantis King",
+        "location": "FATE: \"The King's Justice\" - Wesern La Noscea (14,34)"
+      }
+    },
+    {
+      "id": "17:1:1",
+      "beastId": 17,
+      "name": "분노한 고름",
+      "englishName": "Ichorous Ire",
+      "npcNameIds": [
+        554
+      ],
+      "level": 17,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:3",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/17",
+        "target": "Lv 17 Ichorous Ire",
+        "location": "Copperbell Mines"
+      }
+    },
+    {
+      "id": "17:2:2",
+      "beastId": 17,
+      "name": "하수도 시럽",
+      "englishName": "Sewer Syrup",
+      "npcNameIds": [
+        2923
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "B급 마물",
+      "regionKey": "field:42",
+      "coordinates": null,
+      "mapId": 20,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/17",
+        "target": "Lv 50 Sewer Syrup",
+        "location": "B Rank Hunt - Western Thanalan"
+      }
+    },
+    {
+      "id": "18:1:1",
+      "beastId": 18,
+      "name": "독토르",
+      "englishName": "Doctore",
+      "npcNameIds": [
+        1188
+      ],
+      "level": 20,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:7",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/18",
+        "target": "Lv 20 Doctore",
+        "location": "Halatali"
+      }
+    },
+    {
+      "id": "19:1:1",
+      "beastId": 19,
+      "name": "동굴박쥐",
+      "englishName": "Cave Bat",
+      "npcNameIds": [
+        364
+      ],
+      "level": 7,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:31",
+      "coordinates": {
+        "x": 26,
+        "y": 16
+      },
+      "mapId": 16,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/19",
+        "target": "Lv 7 Cave Bat",
+        "location": "Lower La Noscea (26, 16)"
+      }
+    },
+    {
+      "id": "19:2:2",
+      "beastId": 19,
+      "name": "바바스텔",
+      "englishName": "Barbastelle",
+      "npcNameIds": [
+        2929
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "B급 마물",
+      "regionKey": "field:31",
+      "coordinates": null,
+      "mapId": 16,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/19",
+        "target": "Lv 50 Barbastelle",
+        "location": "B Rank Hunt - Lower La Noscea"
+      }
+    },
+    {
+      "id": "19:3:3",
+      "beastId": 19,
+      "name": "검은박쥐",
+      "englishName": "Black Bat",
+      "npcNameIds": [
+        38
+      ],
+      "level": 15,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:4",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/19",
+        "target": "Lv 15 Black Bat",
+        "location": "Sastasha"
+      }
+    },
+    {
+      "id": "20:1:1",
+      "beastId": 20,
+      "name": "작은 넝쿨장미",
+      "englishName": "Roselet",
+      "npcNameIds": [
+        22
+      ],
+      "level": 10,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 23,
+        "y": 27
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/20",
+        "target": "Lv 10 Roselet",
+        "location": "Central Shroud (23, 27)"
+      }
+    },
+    {
+      "id": "20:2:2",
+      "beastId": 20,
+      "name": "넝쿨장미",
+      "englishName": "Roseling",
+      "npcNameIds": [
+        400
+      ],
+      "level": 10,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:33",
+      "coordinates": {
+        "x": 34,
+        "y": 30
+      },
+      "mapId": 18,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/20",
+        "target": "Lv 10 Roseling",
+        "location": "Western La Noscea (34,30)"
+      }
+    },
+    {
+      "id": "21:1:1",
+      "beastId": 21,
+      "name": "로들리트 사다새",
+      "englishName": "Rothlyt Pelican",
+      "npcNameIds": [
+        1181
+      ],
+      "level": 16,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:33",
+      "coordinates": {
+        "x": 23,
+        "y": 24
+      },
+      "mapId": 18,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/21",
+        "target": "Lv 16 Rothlyt Pelican",
+        "location": "Western La Noscea (23,24)"
+      }
+    },
+    {
+      "id": "21:2:2",
+      "beastId": 21,
+      "name": "노란 왕사다새",
+      "englishName": "Great Yellow Pelican",
+      "npcNameIds": [
+        1280
+      ],
+      "level": 32,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:8",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/21",
+        "target": "Lv 32 Great Yellow Pelican",
+        "location": "Brayflox's Longstop"
+      }
+    },
+    {
+      "id": "22:1:1",
+      "beastId": 22,
+      "name": "선인장",
+      "englishName": "Cactuar",
+      "npcNameIds": [
+        287
+      ],
+      "level": 3,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:42",
+      "coordinates": {
+        "x": 28,
+        "y": 25
+      },
+      "mapId": 20,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/22",
+        "target": "Lv 3 Cactuar",
+        "location": "Western Thanalan (28, 25)"
+      }
+    },
+    {
+      "id": "23:1:1",
+      "beastId": 23,
+      "name": "모래돌 골렘",
+      "englishName": "Sandstone Golem",
+      "npcNameIds": [
+        280
+      ],
+      "level": 29,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:45",
+      "coordinates": {
+        "x": 22,
+        "y": 12
+      },
+      "mapId": 23,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/23",
+        "target": "Lv 29 Sandstone Golem",
+        "location": "Southern Thanalan (22,12)"
+      }
+    },
+    {
+      "id": "23:2:2",
+      "beastId": 23,
+      "name": "바위 골렘",
+      "englishName": "Stone Golem",
+      "npcNameIds": [
+        552
+      ],
+      "level": 25,
+      "kind": "fate",
+      "event": "That Which Binds Us",
+      "regionKey": "field:57",
+      "coordinates": {
+        "x": 17,
+        "y": 26
+      },
+      "mapId": 7,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/23",
+        "target": "Lv 25 Stone Golem",
+        "location": "FATE: \"That Which Binds Us\" - North Shroud (17,26)"
+      }
+    },
+    {
+      "id": "23:3:3",
+      "beastId": 23,
+      "name": "찰흙 골렘",
+      "englishName": "Clay Golem",
+      "npcNameIds": [
+        30,
+        616
+      ],
+      "level": 28,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:57",
+      "coordinates": {
+        "x": 17,
+        "y": 27
+      },
+      "mapId": 7,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/23",
+        "target": "Lv 28 Clay Golem",
+        "location": "North Shroud (17,27)"
+      }
+    },
+    {
+      "id": "24:1:1",
+      "beastId": 24,
+      "name": "아프칼루",
+      "englishName": "Apkallu",
+      "npcNameIds": [
+        341,
+        14430
+      ],
+      "level": 30,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:32",
+      "coordinates": {
+        "x": 30,
+        "y": 34
+      },
+      "mapId": 17,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/24",
+        "target": "Lv 30 Apkallu",
+        "location": "Eastern La Noscea (30, 34)"
+      }
+    },
+    {
+      "id": "24:2:2",
+      "beastId": 24,
+      "name": "핏빛 메리",
+      "englishName": "Bloody Mary",
+      "npcNameIds": [
+        2930
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "B급 마물",
+      "regionKey": "field:32",
+      "coordinates": null,
+      "mapId": 17,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/24",
+        "target": "Lv 50 Bloody Mary",
+        "location": "B Rank Hunt - Eastern La Noscea"
+      }
+    },
+    {
+      "id": "25:1:1",
+      "beastId": 25,
+      "name": "거대거북",
+      "englishName": "Giant Tortoise",
+      "npcNameIds": [
+        244
+      ],
+      "level": 12,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:43",
+      "coordinates": null,
+      "mapId": 21,
+      "status": "conflict",
+      "note": "도감과 Eorzea Weather는 중부 다날란, FFXIV Collect는 서부 다날란 (27,24)으로 안내합니다. 지역·좌표 확인 전까지 핀을 표시하지 않아요.",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/25",
+        "target": "Lv 12 Giant Tortoise",
+        "location": "Western Thanalan (27, 24)"
+      },
+      "additionalSource": {
+        "name": "Eorzea Weather",
+        "url": "https://eorzea-weather.com/beastmaster"
+      }
+    },
+    {
+      "id": "26:1:1",
+      "beastId": 26,
+      "name": "다친 검은수염소",
+      "englishName": "Wounded Aurochs",
+      "npcNameIds": [
+        358
+      ],
+      "level": 8,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 18,
+        "y": 16
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/26",
+        "target": "Lv 8 Wounded Aurochs",
+        "location": "Middle La Noscea (18,16)"
+      }
+    },
+    {
+      "id": "27:1:1",
+      "beastId": 27,
+      "name": "돛배조개",
+      "englishName": "Scaphite",
+      "npcNameIds": [
+        635
+      ],
+      "level": 14,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:42",
+      "coordinates": {
+        "x": 17,
+        "y": 15
+      },
+      "mapId": 20,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/27",
+        "target": "Lv 14 Scaphite",
+        "location": "Western Thanalan (17, 15)"
+      }
+    },
+    {
+      "id": "27:2:2",
+      "beastId": 27,
+      "name": "조레도나이트",
+      "englishName": "Zoredonite",
+      "npcNameIds": [
+        1521
+      ],
+      "level": 31,
+      "kind": "fate",
+      "event": "Shell Shocked",
+      "regionKey": "field:34",
+      "coordinates": {
+        "x": 29,
+        "y": 24
+      },
+      "mapId": 19,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/27",
+        "target": "Lv 31 Zoredonite",
+        "location": "FATE: \"Shell Shocked\" - Upper La Noscea (29,24)"
+      }
+    },
+    {
+      "id": "27:3:3",
+      "beastId": 27,
+      "name": "살아있는 화석",
+      "englishName": "Living Fossil",
+      "npcNameIds": [
+        986
+      ],
+      "level": 17,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:3",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/27",
+        "target": "Lv 17 Living Fossil",
+        "location": "Copperbell Mines"
+      }
+    },
+    {
+      "id": "28:1:1",
+      "beastId": 28,
+      "name": "모래지렁이",
+      "englishName": "Sandworm",
+      "npcNameIds": [
+        290
+      ],
+      "level": 31,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:45",
+      "coordinates": {
+        "x": 15,
+        "y": 33
+      },
+      "mapId": 23,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/28",
+        "target": "Lv 31 Sandworm",
+        "location": "Southern Thanalan (15, 33)"
+      }
+    },
+    {
+      "id": "29:1:1",
+      "beastId": 29,
+      "name": "스프리건 도굴꾼",
+      "englishName": "Spriggan Graverobber",
+      "npcNameIds": [
+        317
+      ],
+      "level": 7,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:43",
+      "coordinates": {
+        "x": 17,
+        "y": 23
+      },
+      "mapId": 21,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/29",
+        "target": "Lv 7 Spriggan Graverobber",
+        "location": "Central Thanalan (17, 23)"
+      }
+    },
+    {
+      "id": "29:2:2",
+      "beastId": 29,
+      "name": "스프리건 구리구리",
+      "englishName": "Spriggan Copper Copper",
+      "npcNameIds": [
+        631
+      ],
+      "level": 17,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:3",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/29",
+        "target": "Lv 17 Spriggan Copper Copper",
+        "location": "Copperbell Mines"
+      }
+    },
+    {
+      "id": "30:1:1",
+      "beastId": 30,
+      "name": "민둥구부",
+      "englishName": "Mossless Goobue",
+      "npcNameIds": [
+        354
+      ],
+      "level": 12,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:31",
+      "coordinates": {
+        "x": 23,
+        "y": 24
+      },
+      "mapId": 16,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/30",
+        "target": "Lv 12 Mossless Goobue",
+        "location": "Lower La Noscea (23, 24)"
+      }
+    },
+    {
+      "id": "31:1:1",
+      "beastId": 31,
+      "name": "개울두꺼비",
+      "englishName": "Rivertoad",
+      "npcNameIds": [
+        349
+      ],
+      "level": 4,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:31",
+      "coordinates": {
+        "x": 25,
+        "y": 23
+      },
+      "mapId": 16,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/31",
+        "target": "Lv 4 Rivertoad",
+        "location": "Lower La Noscea (25, 23)"
+      }
+    },
+    {
+      "id": "32:1:1",
+      "beastId": 32,
+      "name": "콜리브리",
+      "englishName": "Colibri",
+      "npcNameIds": [
+        639,
+        14438
+      ],
+      "level": 33,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:32",
+      "coordinates": {
+        "x": 30,
+        "y": 24
+      },
+      "mapId": 17,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/32",
+        "target": "Lv 33 Colibri",
+        "location": "Eastern La Noscea (30, 24)"
+      }
+    },
+    {
+      "id": "32:2:2",
+      "beastId": 32,
+      "name": "미라드로시",
+      "englishName": "Myradrosh",
+      "npcNameIds": [
+        2932
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "B급 마물",
+      "regionKey": "field:34",
+      "coordinates": null,
+      "mapId": 19,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/32",
+        "target": "Lv 50 Myradrosh",
+        "location": "B Rank Hunt - Upper La Noscea"
+      }
+    },
+    {
+      "id": "33:1:1",
+      "beastId": 33,
+      "name": "큰 커얼",
+      "englishName": "Master Coeurl",
+      "npcNameIds": [
+        9911
+      ],
+      "level": 24,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:34",
+      "coordinates": {
+        "x": 9,
+        "y": 21
+      },
+      "mapId": 19,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/33",
+        "target": "Lv 24 Master Coeurl",
+        "location": "Upper La Noscea (9,21)"
+      }
+    },
+    {
+      "id": "33:2:2",
+      "beastId": 33,
+      "name": "도륙자",
+      "englishName": "Chopper",
+      "npcNameIds": [
+        1204
+      ],
+      "level": 15,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:4",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/33",
+        "target": "Lv 15 Chopper",
+        "location": "Sastasha"
+      }
+    },
+    {
+      "id": "34:1:1",
+      "beastId": 34,
+      "name": "아놀도마뱀",
+      "englishName": "Anole",
+      "npcNameIds": [
+        120
+      ],
+      "level": 9,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 31,
+        "y": 20
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/34",
+        "target": "Lv 9 Anole",
+        "location": "Central Shroud (31,20)"
+      }
+    },
+    {
+      "id": "34:2:2",
+      "beastId": 34,
+      "name": "아놀도마뱀",
+      "englishName": "Anole",
+      "npcNameIds": [
+        120
+      ],
+      "level": 3,
+      "kind": "fate",
+      "event": "Clever Girls",
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 25,
+        "y": 19
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/34",
+        "target": "Lv 3 Anole",
+        "location": "FATE: \"Clever Girls\" - Central Shroud (25,19)"
+      }
+    },
+    {
+      "id": "35:1:1",
+      "beastId": 35,
+      "name": "도마뱀",
+      "englishName": "Sundrake",
+      "npcNameIds": [
+        264
+      ],
+      "level": 32,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:45",
+      "coordinates": {
+        "x": 23,
+        "y": 38
+      },
+      "mapId": 23,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/35",
+        "target": "Lv 32 Sundrake",
+        "location": "Southern Thanalan (23,38)"
+      }
+    },
+    {
+      "id": "35:3:2",
+      "beastId": 35,
+      "name": "잿빛도마뱀",
+      "englishName": "Ashdrake",
+      "npcNameIds": [
+        1292
+      ],
+      "level": 32,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:8",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/35",
+        "target": "Lv 32 Ashdrake or Infernal Drake",
+        "location": "Brayflox's Longstop"
+      }
+    },
+    {
+      "id": "35:3:3",
+      "beastId": 35,
+      "name": "Infernal Drake",
+      "englishName": "Infernal Drake",
+      "npcNameIds": [],
+      "level": 32,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:8",
+      "coordinates": null,
+      "mapId": null,
+      "status": "name-pending",
+      "note": "영문 대상명과 한국어 게임 데이터의 연결을 확인 중입니다.",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/35",
+        "target": "Lv 32 Ashdrake or Infernal Drake",
+        "location": "Brayflox's Longstop"
+      }
+    },
+    {
+      "id": "36:1:1",
+      "beastId": 36,
+      "name": "나무정령 묘목",
+      "englishName": "Treant Sapling",
+      "npcNameIds": [
+        128
+      ],
+      "level": 12,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 28,
+        "y": 15
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/36",
+        "target": "Lv 12 Treant Sapling",
+        "location": "Central Shroud (28, 15)"
+      }
+    },
+    {
+      "id": "37:1:1",
+      "beastId": 37,
+      "name": "거대개미",
+      "englishName": "Antling",
+      "npcNameIds": [],
+      "level": 38,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:12",
+      "coordinates": null,
+      "mapId": null,
+      "status": "name-pending",
+      "note": "원문은 마수 종 이름만 기재합니다. 개미 개체의 정확한 이름은 확인이 필요해요.",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/37",
+        "target": "Lv 38 Antling",
+        "location": "Cutter's Cry"
+      }
+    },
+    {
+      "id": "38:1:1",
+      "beastId": 38,
+      "name": "키마이라",
+      "englishName": "Chimera",
+      "npcNameIds": [
+        1590,
+        7632,
+        14444
+      ],
+      "level": 38,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:12",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/38",
+        "target": "Lv 38 Chimera",
+        "location": "Cutter's Cry"
+      }
+    },
+    {
+      "id": "39:1:1",
+      "beastId": 39,
+      "name": "스트로퍼",
+      "englishName": "Stroper",
+      "npcNameIds": [
+        238
+      ],
+      "level": 31,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 13,
+        "y": 22
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/39",
+        "target": "Lv 31 Stroper",
+        "location": "Central Shroud (13,22)"
+      }
+    },
+    {
+      "id": "40:1:1",
+      "beastId": 40,
+      "name": "악령",
+      "englishName": "Bogy",
+      "npcNameIds": [
+        404
+      ],
+      "level": 7,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:30",
+      "coordinates": {
+        "x": 20,
+        "y": 19
+      },
+      "mapId": 15,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/40",
+        "target": "Lv 7 Bogy",
+        "location": "Middle La Noscea (20, 19)"
+      }
+    },
+    {
+      "id": "40:2:2",
+      "beastId": 40,
+      "name": "떠도는 영혼",
+      "englishName": "Errant Soul",
+      "npcNameIds": [
+        984
+      ],
+      "level": 17,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:3",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/40",
+        "target": "Lv 17 Errant Soul",
+        "location": "Copperbell Mines"
+      }
+    },
+    {
+      "id": "41:1:1",
+      "beastId": 41,
+      "name": "검은 큰도롱뇽",
+      "englishName": "Black Eft",
+      "npcNameIds": [
+        196
+      ],
+      "level": 6,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:54",
+      "coordinates": {
+        "x": 26,
+        "y": 18
+      },
+      "mapId": 4,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/41",
+        "target": "Lv 6 Black Eft",
+        "location": "Central Shroud (26,18)"
+      }
+    },
+    {
+      "id": "41:2:2",
+      "beastId": 41,
+      "name": "쿠레아",
+      "englishName": "Kurrea",
+      "npcNameIds": [
+        2952
+      ],
+      "level": 50,
+      "kind": "hunt",
+      "event": "A급 마물",
+      "regionKey": "field:67",
+      "coordinates": null,
+      "mapId": 25,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/41",
+        "target": "Lv 50 Kurrea",
+        "location": "A Rank Hunt - Mor Dhona"
+      }
+    },
+    {
+      "id": "42:1:1",
+      "beastId": 42,
+      "name": "호수 코브라",
+      "englishName": "Lake Cobra",
+      "npcNameIds": [
+        1851
+      ],
+      "level": 45,
+      "kind": "field",
+      "event": null,
+      "regionKey": "field:67",
+      "coordinates": {
+        "x": 25,
+        "y": 12
+      },
+      "mapId": 25,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/42",
+        "target": "Lv 45 Lake Cobra",
+        "location": "Mor Dhona (25, 12)"
+      }
+    },
+    {
+      "id": "42:2:2",
+      "beastId": 42,
+      "name": "검투장 비단뱀",
+      "englishName": "Coliseum Python",
+      "npcNameIds": [
+        1190
+      ],
+      "level": 20,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:7",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/42",
+        "target": "Lv 20 Coliseum Python",
+        "location": "Halatali"
+      }
+    },
+    {
+      "id": "43:1:1",
+      "beastId": 43,
+      "name": "하이드라",
+      "englishName": "Hydra",
+      "npcNameIds": [
+        2161,
+        14449
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:75",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/43",
+        "target": "Lv 50 Hydra",
+        "location": "A Relic Reborn: The Hydra"
+      }
+    },
+    {
+      "id": "44:1:1",
+      "beastId": 44,
+      "name": "쇠가죽파리",
+      "englishName": "Gadfly",
+      "npcNameIds": [
+        2578
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:22",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/44",
+        "target": "Lv 50 Gadfly",
+        "location": "The Lost City of Amdapor"
+      }
+    },
+    {
+      "id": "45:1:1",
+      "beastId": 45,
+      "name": "부패한 대식가",
+      "englishName": "Decaying Gourmand",
+      "npcNameIds": [
+        2556
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:22",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/45",
+        "target": "Lv 50 Decaying Gourmand",
+        "location": "The Lost City of Amdapor"
+      }
+    },
+    {
+      "id": "46:1:1",
+      "beastId": 46,
+      "name": "즈",
+      "englishName": "Zu",
+      "npcNameIds": [
+        2261,
+        14452
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:17",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/46",
+        "target": "Lv 50 Zu",
+        "location": "Pharos Sirius"
+      }
+    },
+    {
+      "id": "47:1:1",
+      "beastId": 47,
+      "name": "얼음 골렘",
+      "englishName": "Ice Golem",
+      "npcNameIds": [
+        13840,
+        14453
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:27",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/47",
+        "target": "Lv 50 Ice Golem",
+        "location": "Snowcloak"
+      }
+    },
+    {
+      "id": "48:1:1",
+      "beastId": 48,
+      "name": "칼라보스",
+      "englishName": "Karlabos",
+      "npcNameIds": [
+        3014,
+        14454
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:28",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/48",
+        "target": "Lv 50 Karlabos",
+        "location": "Sastasha (Hard)"
+      }
+    },
+    {
+      "id": "49:1:1",
+      "beastId": 49,
+      "name": "라플레시아",
+      "englishName": "Rafflesia",
+      "npcNameIds": [
+        2609,
+        14455
+      ],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:98",
+      "coordinates": null,
+      "mapId": null,
+      "status": "reported",
+      "note": "",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/49",
+        "target": "Lv 50 Rafflesia",
+        "location": "The Second Coil of Bahamut - Turn 1"
+      }
+    },
+    {
+      "id": "50:1:1",
+      "beastId": 50,
+      "name": "베히모스",
+      "englishName": "Behemoth",
+      "npcNameIds": [],
+      "level": 50,
+      "kind": "duty",
+      "event": null,
+      "regionKey": "duty:92",
+      "coordinates": null,
+      "mapId": null,
+      "status": "name-pending",
+      "note": "원문은 베히모스로만 기재합니다. 임무 안의 정확한 포획 대상명은 확인이 필요해요.",
+      "source": {
+        "name": "FFXIV Collect",
+        "url": "https://ffxivcollect.com/beasts/50",
+        "target": "Lv 50 Behemoth",
+        "location": "Labyrinth of the Ancients"
+      }
+    }
+  ],
+  "maps": {
+    "4": {
+      "id": 4,
+      "path": "f1f1/00",
+      "name": "검은장막 숲 중부삼림",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/f1f1/00"
+    },
+    "5": {
+      "id": 5,
+      "path": "f1f2/00",
+      "name": "검은장막 숲 동부삼림",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/f1f2/00"
+    },
+    "7": {
+      "id": 7,
+      "path": "f1f4/00",
+      "name": "검은장막 숲 북부삼림",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/f1f4/00"
+    },
+    "15": {
+      "id": 15,
+      "path": "s1f1/00",
+      "name": "중부 라노시아",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f1/00"
+    },
+    "16": {
+      "id": 16,
+      "path": "s1f2/00",
+      "name": "저지 라노시아",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f2/00"
+    },
+    "17": {
+      "id": 17,
+      "path": "s1f3/01",
+      "name": "동부 라노시아",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f3/01"
+    },
+    "18": {
+      "id": 18,
+      "path": "s1f4/00",
+      "name": "서부 라노시아",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f4/00"
+    },
+    "19": {
+      "id": 19,
+      "path": "s1f5/00",
+      "name": "고지 라노시아",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f5/00"
+    },
+    "20": {
+      "id": 20,
+      "path": "w1f1/00",
+      "name": "서부 다날란",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/w1f1/00"
+    },
+    "21": {
+      "id": 21,
+      "path": "w1f2/00",
+      "name": "중부 다날란",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/w1f2/00"
+    },
+    "23": {
+      "id": 23,
+      "path": "w1f4/01",
+      "name": "남부 다날란",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/w1f4/01"
+    },
+    "25": {
+      "id": 25,
+      "path": "l1f1/01",
+      "name": "모르도나",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/l1f1/01"
+    },
+    "30": {
+      "id": 30,
+      "path": "s1f6/00",
+      "name": "외지 라노시아",
+      "sizeFactor": 100,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f6/00"
+    }
+  }
+}

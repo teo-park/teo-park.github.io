@@ -10,10 +10,12 @@ export function mapPosition(coordinates,sizeFactor=100){
   if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||x>100||y<0||y>100)throw Error('지도 밖 좌표입니다.');
   return {x,y};
 }
-export function create(data,locationData=null){
+export function create(data,locationData=null,captureData=null){
   if(data?.count!==data?.beasts?.length||!data?.items||!data.count)throw Error('마수도감 자료를 읽지 못했어요. 새로고침해 주세요.');
   const byId=new Map(data.beasts.map(b=>[b.id,b])),items=new Map(data.items.map(i=>[i.id,i])),routes=new Map();
   const locations=new Map((locationData?.entries||[]).map(e=>[e.beastId,e.targets])),maps=locationData?.maps||{};
+  const captures=captureData?.targets||[],regions=new Map((captureData?.regions||[]).map(r=>[r.key,r]));
+  const capturesByBeast=new Map(data.beasts.map(b=>[b.id,captures.filter(t=>t.beastId===b.id)]));
   for(const b of data.beasts){
     const entries=[];
     for(const a of b.acquisition){
@@ -21,11 +23,16 @@ export function create(data,locationData=null){
       else if(a.type==='item'){const item=items.get(a.itemId);if(!item)throw Error('마수 획득처 자료가 빠졌어요.');
         for(const source of item.sources){const exchange=source.type==='exchange';entries.push({type:source.type,key:`${source.type}:${exchange?source.shopId:source.quest.id}`,name:exchange?source.shopName:source.quest.name,link:exchange?source.location.source:source.quest.official,item,source});}}
     }
+    for(const t of capturesByBeast.get(b.id)){
+      const region=regions.get(t.regionKey);let route=entries.find(r=>r.key===t.regionKey);
+      if(!route){route={type:region.type,key:region.key,name:region.name,link:t.source.url,reported:true};entries.push(route);}
+      (route.targets??=[]).push(t);
+    }
     routes.set(b.id,entries);
   }
   const sourceMatches=(r,o={})=>(!o.method||o.method==='all'||r.type===o.method)&&(!o.place||o.place==='all'||r.key===o.place);
   const matchingRoutes=(b,o={})=>routes.get(b.id).filter(r=>sourceMatches(r,o));
-  const terms=new Map(data.beasts.map(b=>{const text=[b.name,b.englishName,...(locations.get(b.id)||[]).flatMap(t=>[t.name,t.region,t.area]),...routes.get(b.id).flatMap(r=>[r.name,r.item?.name,r.source?.merchant,...(r.source?.costs||[]).map(c=>c.name),...(r.source?.prerequisiteQuests||[]).map(q=>q.name)])].filter(Boolean).join(' ');return [b.id,{text:normalize(text),initials:normalize(initialText(text))}];}));
+  const terms=new Map(data.beasts.map(b=>{const text=[b.name,b.englishName,...capturesByBeast.get(b.id).flatMap(t=>[t.name,t.englishName,t.event]),...(locations.get(b.id)||[]).flatMap(t=>[t.name,t.region,t.area]),...routes.get(b.id).flatMap(r=>[r.name,r.item?.name,r.source?.merchant,...(r.source?.costs||[]).map(c=>c.name),...(r.source?.prerequisiteQuests||[]).map(q=>q.name)])].filter(Boolean).join(' ');return [b.id,{text:normalize(text),initials:normalize(initialText(text))}];}));
   function filter(owned,o={}){const q=normalize(o.query),number=/^(?:no)?\d+$/.test(q)?Number(q.replace(/^no/,'')):null;
     return data.beasts.filter(b=>(!o.status||o.status==='all'||owned.has(b.id)===(o.status==='owned'))&&matchingRoutes(b,o).length&&(!q||(number!==null?b.id===number:terms.get(b.id).text.includes(q)||terms.get(b.id).initials.includes(q))));}
   function groups(beasts,o={}){const found=new Map();for(const b of beasts)for(const r of matchingRoutes(b,o)){
@@ -33,7 +40,8 @@ export function create(data,locationData=null){
     found.get(r.key).entries.push({beast:b,route:r});}
     return [...found.values()].sort((a,b)=>Object.keys(methods).indexOf(a.type)-Object.keys(methods).indexOf(b.type)||a.name.localeCompare(b.name,'ko'));
   }
-  return {byId,items,routes,matchingRoutes,filter,groups,locations,maps};
+  const regionTargets=(key,beasts)=>{const ids=new Set(beasts.map(b=>b.id));return captures.filter(t=>t.regionKey===key&&ids.has(t.beastId));};
+  return {byId,items,routes,matchingRoutes,filter,groups,locations,maps,captures,regions,capturesByBeast,regionTargets,captureMaps:captureData?.maps||{}};
 }
 export function parseNumbers(text,valid){
   const ids=new Set(),tokens=String(text).trim().replace(/[，、]/g,',').replace(/\s*[-~～–]\s*/g,'-').split(/[\s,]+/).filter(Boolean);

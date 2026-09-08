@@ -1,14 +1,16 @@
-import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260908-maps1';
+import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260909-atlas1';
+import {createAtlas,captureDetails} from './atlas.js?v=20260909-atlas1';
 
 const PAGE_SIZE=25;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const external=(url,label)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`;
 
-export function mount(win,data,locationData=null){
-  const doc=win.document,$=id=>doc.getElementById(id),model=create(data,locationData),valid=new Set(model.byId.keys());
+export function mount(win,data,locationData=null,captureData=null){
+  const doc=win.document,$=id=>doc.getElementById(id),model=create(data,locationData,captureData),valid=new Set(model.byId.keys());
   let detailId=null;
   let owned=new Set(),undoChange=null,page=1,view='number',shown=[],storageError=false;
-  const options=()=>({query:$('search').value,status:$('status').value,method:$('method').value,place:$('place').value});
+  const options=()=>({query:$('search').value,status:$('status').value,method:view==='map'?'all':$('method').value,place:view==='map'?'all':$('place').value});
+  const atlas=createAtlas(doc,model,{onRegionChange:()=>render()});
   const read=()=>{const raw=win.localStorage.getItem(KEY);return raw===null?new Set():parseBackup(raw);};
   function announce(message,undoable=false){$('noticeText').textContent=message;$('notice').hidden=false;$('undo').hidden=!undoable;}
   try{owned=read();}catch{storageError=true;}
@@ -31,7 +33,7 @@ export function mount(win,data,locationData=null){
       const group=model.groups(shown,options()).find(g=>g.key===label.dataset.groupCount);
       if(group)label.textContent=`${group.entries.filter(e=>owned.has(e.beast.id)).length} / ${group.entries.length}종 수집`;
     }
-    previewNumbers();
+    atlas.updateOwned(owned);previewNumbers();
   }
   function changed(message){
     updateCounts();if($('status').value!=='all')$('refreshResults').hidden=false;
@@ -57,7 +59,7 @@ export function mount(win,data,locationData=null){
     }catch{announce('실행 취소를 저장하지 못했어요. 기존 기록은 유지됩니다.',true);}
   }
   function art(b){return `<span class="beast-art" aria-hidden="true"><span class="icon-fallback">${String(b.id).padStart(2,'0')}</span><img src="${esc(b.icon.url)}" alt="" loading="lazy" width="56" height="56"></span>`;}
-  function tile(b){const routes=model.routes.get(b.id),primary=routes[0];return `<article class="beast-tile" data-id="${b.id}"><button class="beast-check" data-check="${b.id}" aria-pressed="false"><span class="tile-top"><span>No.${b.id}</span><span class="check-mark" aria-hidden="true">＋</span></span>${art(b)}<strong class="beast-name">${esc(b.name)}</strong><span class="state-label">미수집</span></button><p class="tile-location" title="${esc(primary.name)}">${esc(primary.type==='quest'?'개방 퀘스트':primary.name)}</p><button class="source-button" data-detail="${b.id}" aria-label="${esc(b.name)} 획득처 자세히 보기">획득처${routes.length>1?' <span class="alternate-dot" aria-label="여러 경로">· 2</span>':''} <span aria-hidden="true">↗</span></button></article>`;}
+  function tile(b){const routes=model.routes.get(b.id),primary=routes[0];return `<article class="beast-tile" data-id="${b.id}"><button class="beast-check" data-check="${b.id}" aria-pressed="false"><span class="tile-top"><span>No.${b.id}</span><span class="check-mark" aria-hidden="true">＋</span></span>${art(b)}<strong class="beast-name">${esc(b.name)}</strong><span class="state-label">미수집</span></button><p class="tile-location" title="${esc(primary.name)}">${esc(primary.type==='quest'?'개방 퀘스트':primary.name)}</p><button class="source-button" data-detail="${b.id}" aria-label="${esc(b.name)} 획득처 자세히 보기">획득처${routes.length>1?` <span class="alternate-dot" aria-label="여러 경로">· ${routes.length}</span>`:''} <span aria-hidden="true">↗</span></button></article>`;}
   function populatePlaces(){
     const previous=$('place').value,entries=model.groups(data.beasts,{method:$('method').value});
     $('place').innerHTML='<option value="all">모든 장소</option>'+entries.map(g=>`<option value="${esc(g.key)}">${esc(g.name)} · ${g.entries.length}종</option>`).join('');
@@ -71,21 +73,23 @@ export function mount(win,data,locationData=null){
   function render(reset=true){
     if(reset){page=1;shown=model.filter(owned,options());$('refreshResults').hidden=true;}
     page=Math.max(1,Math.min(page,Math.ceil(shown.length/PAGE_SIZE)));
-    const isNumber=view==='number',pageBeasts=shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
-    $('beastGrid').hidden=!isNumber;$('placeGroups').hidden=isNumber;
-    $('numberView').setAttribute('aria-pressed',String(isNumber));$('placeView').setAttribute('aria-pressed',String(!isNumber));
+    const isNumber=view==='number',isMap=view==='map',pageBeasts=shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
+    $('beastGrid').hidden=!isNumber;$('placeGroups').hidden=view!=='place';$('regionAtlas').hidden=!isMap;
+    $('collectionLayoutSwitch').hidden=isMap;$('method').closest('label').hidden=isMap;$('place').closest('label').hidden=isMap;
+    $('numberView').setAttribute('aria-pressed',String(isNumber));$('placeView').setAttribute('aria-pressed',String(view==='place'));$('mapView').setAttribute('aria-pressed',String(isMap));
     $('resultCount').textContent=`${shown.length}종`;
     updateViewHint();
     if(isNumber){$('placeGroups').replaceChildren();$('beastGrid').innerHTML=pageBeasts.map(tile).join('');}
-    else{$('beastGrid').replaceChildren();$('placeGroups').innerHTML=model.groups(shown,options()).map(g=>`<section class="place-group"><div class="group-heading"><div><span class="method-badge">${methods[g.type]}</span><h3>${esc(g.name)}</h3></div><span data-group-count="${esc(g.key)}"></span></div><div class="beast-grid">${g.entries.map(e=>tile(e.beast)).join('')}</div></section>`).join('');}
-    $('markPage').hidden=!shown.length;$('markPage').textContent=isNumber?`이 페이지 ${pageBeasts.length}종 모두 수집`:`표시된 ${shown.length}종 모두 수집`;
-    $('emptyResults').hidden=!!shown.length;pagination();updateCounts();
+    else if(isMap){$('beastGrid').replaceChildren();$('placeGroups').replaceChildren();$('resultCount').textContent=`${atlas.render(shown)}종`;}
+    else{$('regionAtlas').replaceChildren();$('beastGrid').replaceChildren();$('placeGroups').innerHTML=model.groups(shown,options()).map(g=>`<section class="place-group"><div class="group-heading"><div><span class="method-badge">${methods[g.type]}</span><h3>${esc(g.name)}</h3></div><span data-group-count="${esc(g.key)}"></span></div><div class="beast-grid">${g.entries.map(e=>tile(e.beast)).join('')}</div></section>`).join('');}
+    $('markPage').hidden=isMap||!shown.length;$('markPage').textContent=isNumber?`이 페이지 ${pageBeasts.length}종 모두 수집`:`표시된 ${shown.length}종 모두 수집`;
+    $('emptyResults').hidden=isMap||!!shown.length;pagination();updateCounts();
   }
   function reset(){for(const id of ['status','method','place'])$(id).value='all';$('search').value='';populatePlaces();render();}
-  function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
+  function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:view==='map'?'지역을 고르면 공개된 포획 대상을 함께 표시합니다. 위 수집 상태에서 미수집만 볼 수 있어요.':'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
   function routeDetails(r){
     let body='';
-    if(r.capture){body=`<h3>${esc(r.name)}</h3><p class="muted">도감의 주요 출현 지역</p><p>포획 가능한 개체와 난이도는 현장에서 ‘파악하기’로 확인하세요.</p>${external(r.link,'공식 가이드에서 장소 검색')}`;}
+    if(r.capture||r.reported){body=`<h3>${esc(r.name)}</h3><p class="muted">${r.capture?'도감의 주요 출현 지역':'추가 포획처 · 공개 제보'}</p>${r.targets?.length?`<p>${r.targets.map(t=>`Lv.${t.level} ${esc(t.name)}${t.status==='conflict'?' (위치 확인 필요)':''}`).join(' · ')}</p>`:''}<p>포획 가능한 개체와 난이도는 현장에서 ‘파악하기’로 확인하세요.</p>${external(r.link,r.capture?'공식 가이드에서 장소 검색':'포획 제보 원문')}`;}
     else if(r.type==='exchange'){
       const s=r.source;body=`<h3>${esc(r.item.name)}</h3><p>항아리를 마수조련사로 사용하면 계약할 수 있어요.</p><dl class="source-facts"><div><dt>교환 가격</dt><dd>${s.costs.map(c=>`${esc(c.name)} <strong>${c.count}개</strong>`).join(' + ')} <span class="muted">/ 항아리 ${s.receiveCount}개</span></dd></div><div><dt>교환 NPC</dt><dd>${esc(s.merchant)}</dd></div><div><dt>상인 위치</dt><dd>${esc(s.location.name)}<br>X:${s.location.coordinates.x} · Y:${s.location.coordinates.y}</dd></div><div><dt>선행 퀘스트</dt><dd>${s.prerequisiteQuests.map(q=>external(q.official,`Lv.${q.level} ${q.name}`)).join('<br>')||'없음'}</dd></div></dl>${external(r.item.official,'공식 가이드에서 항아리 검색')} · ${external(r.link,'공식 교환 안내')}`;
     }else{body=`<h3>${esc(r.source.quest.name)}</h3><p>Lv.${r.source.quest.level} · 마수조련사 개방 퀘스트</p><p>${esc(r.source.note)}</p><p class="item-name">${esc(r.item.name)}</p>${external(r.link,'공식 가이드에서 퀘스트 검색')}`;}
@@ -105,7 +109,7 @@ export function mount(win,data,locationData=null){
   function showDetail(id){
     const b=model.byId.get(id);if(!b)return;
     detailId=id;
-    $('detailBody').innerHTML=`<div class="detail-heading">${art(b)}<div><p class="eyebrow">No.${b.id} / ${esc(b.englishName)}</p><h2 id="detailTitle">${esc(b.name)}</h2></div></div><button class="detail-check" data-check="${b.id}" aria-pressed="false"><span class="check-mark" aria-hidden="true">＋</span> <span class="state-label">미수집</span></button>${locationDetails(b)}<p class="description">${esc(b.description)}</p><h2 class="section-title">획득 방법 <span>${model.routes.get(id).length}</span></h2>${model.routes.get(id).map(routeDetails).join('')}<p class="detail-official">${external(b.official,'공식 가이드에서 마수 검색')}</p>`;
+    $('detailBody').innerHTML=`<div class="detail-heading">${art(b)}<div><p class="eyebrow">No.${b.id} / ${esc(b.englishName)}</p><h2 id="detailTitle">${esc(b.name)}</h2></div></div><button class="detail-check" data-check="${b.id}" aria-pressed="false"><span class="check-mark" aria-hidden="true">＋</span> <span class="state-label">미수집</span></button>${captureDetails(b,model)}${locationDetails(b)}<p class="description">${esc(b.description)}</p><h2 class="section-title">획득 방법 <span>${model.routes.get(id).length}</span></h2>${model.routes.get(id).map(routeDetails).join('')}<p class="detail-official">${external(b.official,'공식 가이드에서 마수 검색')}</p>`;
     renderLocation();if($('locationTarget'))$('locationTarget').onchange=()=>renderLocation($('locationTarget').value);
     updateCounts();if(!$('detailDialog').open)$('detailDialog').showModal();$('detailBody').scrollTop=0;
   }
@@ -132,6 +136,7 @@ export function mount(win,data,locationData=null){
     const button=event.target.closest('button');if(!button||button.disabled)return;
     if(button.dataset.check){const id=Number(button.dataset.check);let latest;try{latest=read();}catch{announce('기존 수집 기록을 읽지 못했어요. 브라우저 저장 설정을 확인해 주세요.');return;}mutate([id],!latest.has(id),`${model.byId.get(id).name} 수집 기록을 ${latest.has(id)?'해제':'추가'}했어요.`);}
     else if(button.dataset.detail)showDetail(Number(button.dataset.detail));
+    else if(button.dataset.openRegion){$('search').value='';$('status').value='all';atlas.open(button.dataset.openRegion,button.dataset.target);view='map';$('detailDialog').close();render();$('catalog').scrollIntoView({block:'start'});}
     else if(button.dataset.copyLocation){const target=(model.locations.get(detailId)||[]).find(t=>t.id===button.dataset.copyLocation);if(!target)return;const status=$('coordinateCopyStatus'),value=`${target.name} · ${target.region} X:${target.coordinates.x} Y:${target.coordinates.y} 부근`;
       if(!win.navigator.clipboard?.writeText){status.textContent=value;return;}
       win.navigator.clipboard.writeText(value).then(()=>{status.textContent='좌표를 복사했어요.';},()=>{status.textContent='복사하지 못했어요. 위 좌표를 직접 선택해 주세요.';});}
@@ -146,6 +151,8 @@ export function mount(win,data,locationData=null){
   $('method').onchange=()=>{populatePlaces();render();};
   $('resetFilters').onclick=reset;$('emptyReset').onclick=reset;$('refreshResults').onclick=()=>render();
   $('numberView').onclick=()=>{view='number';render();};$('placeView').onclick=()=>{view='place';render();};
+  $('mapView').onclick=()=>{view='map';render();};
+  win.addEventListener('resize',()=>{if(view==='map')render(false);});
   $('markPage').onclick=()=>{const ids=(view==='number'?shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE):shown).map(b=>b.id);mutate(ids,true,'표시된 마수를 수집 기록에 추가했어요.');};
   $('openRecords').onclick=()=>{$('recordMessage').textContent='';updateCounts();$('recordsDialog').showModal();};
   $('closeDetail').onclick=()=>$('detailDialog').close();$('closeRecords').onclick=()=>$('recordsDialog').close();
@@ -164,7 +171,7 @@ export function mount(win,data,locationData=null){
 
 if(typeof window!=='undefined'){
   const readJson=path=>fetch(new URL(path,import.meta.url)).then(r=>{if(!r.ok)throw Error(path);return r.json();});
-  Promise.all([readJson('./data.json?v=20260908-book'),readJson('./locations.json?v=20260908-maps1').catch(()=>null)]).then(([data,locations])=>mount(window,data,locations)).catch(()=>{
+  Promise.all([readJson('./data.json?v=20260908-book'),readJson('./locations.json?v=20260908-maps1').catch(()=>null),readJson('./captures.json?v=20260909-atlas1').catch(()=>null)]).then(([data,locations,captures])=>mount(window,data,locations,captures)).catch(()=>{
     document.getElementById('loading').hidden=true;const fatal=document.getElementById('fatal');fatal.hidden=false;fatal.textContent='마수도감을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요. 저장된 수집 기록은 유지됩니다.';
   });
 }
