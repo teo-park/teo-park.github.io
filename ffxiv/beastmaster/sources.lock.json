@@ -1,0 +1,106 @@
+{
+  "patch": "7.56",
+  "revisions": {
+    "ko": {
+      "repo": "Ra-Workspace/ffxiv-datamining-ko",
+      "sha": "66eceba69eb2398958bdb133b241a69c13672b6c"
+    },
+    "en": {
+      "repo": "xivapi/ffxiv-datamining",
+      "sha": "a67c23b00fe8cb254855d06b59845958b55d28f3"
+    }
+  },
+  "files": [
+    {
+      "language": "en",
+      "path": "csv/en/Pet.csv",
+      "revision": "a67c23b00fe8cb254855d06b59845958b55d28f3",
+      "url": "https://github.com/xivapi/ffxiv-datamining/blob/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/Pet.csv",
+      "sha256": "74d5a2111a4acdc2e86763e0f12d5b4e14f790a999f6e61075b5d2dca186a716"
+    },
+    {
+      "language": "en",
+      "path": "csv/en/XBMPet.csv",
+      "revision": "a67c23b00fe8cb254855d06b59845958b55d28f3",
+      "url": "https://github.com/xivapi/ffxiv-datamining/blob/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/XBMPet.csv",
+      "sha256": "280c41c4f06077807d917a5ef22aaad7ea98b23d53e30d78fbd4dbe389b0ccd0"
+    },
+    {
+      "language": "ko",
+      "path": "csv/Action.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/Action.csv",
+      "sha256": "7c1d1cfd6edca362142fa7ec563ece685e28aeae015bca88c98f33359f7f8151"
+    },
+    {
+      "language": "ko",
+      "path": "csv/ActionTransient.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/ActionTransient.csv",
+      "sha256": "25ea91b2ff7b9ae07f1e7fa1b3fee2457e0ecbc53effcdf936f37b063d13f21c"
+    },
+    {
+      "language": "ko",
+      "path": "csv/ContentFinderCondition.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/ContentFinderCondition.csv",
+      "sha256": "1f2975b982ac804d99fb1a37241e5665797bb12d51d03d94c83fffdd8af79075"
+    },
+    {
+      "language": "ko",
+      "path": "csv/Item.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/Item.csv",
+      "sha256": "9302a373cf2970b590ffc206b2550e485d72d48ca4df48bd974f42fab46c3f0e"
+    },
+    {
+      "language": "ko",
+      "path": "csv/ItemAction.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/ItemAction.csv",
+      "sha256": "33b2f4c93de7e8da2e65540406afa1813bc9cc0e4ce69f8b69dc89428166bdaf"
+    },
+    {
+      "language": "ko",
+      "path": "csv/Pet.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/Pet.csv",
+      "sha256": "3b7dafa106558205800936b74aeef63bbd9300a4c905a130c087b5d083d5a12d"
+    },
+    {
+      "language": "ko",
+      "path": "csv/PlaceName.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/PlaceName.csv",
+      "sha256": "99883e7fe914240aa2aff7cc903d06a11d2665b81f909ce6bf5ce21c780fd5bf"
+    },
+    {
+      "language": "ko",
+      "path": "csv/Quest.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/Quest.csv",
+      "sha256": "b97028901bc094f6b7a5b26b086dfaac9d072e0eb4f51b3ab56b64f6a96aba75"
+    },
+    {
+      "language": "ko",
+      "path": "csv/quest/054/JobXbm001_05490.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/quest/054/JobXbm001_05490.csv",
+      "sha256": "7669ceb63b07bfb3a88843e2bddcff50ef0878a819d17c7f3a26279d70955ddc"
+    },
+    {
+      "language": "ko",
+      "path": "csv/SpecialShop.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/SpecialShop.csv",
+      "sha256": "c9ff6eaa33be30a0275b8882bd1b19194d707c6d9aa0057aab8ad50a6a3538bb"
+    },
+    {
+      "language": "ko",
+      "path": "csv/XBMPet.csv",
+      "revision": "66eceba69eb2398958bdb133b241a69c13672b6c",
+      "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/XBMPet.csv",
+      "sha256": "834f8302a12f2245f07948bc176b13cf2b911434066ab40683ae3c289f2a286c"
+    }
+  ]
+}
