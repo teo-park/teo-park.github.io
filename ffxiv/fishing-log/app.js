@@ -3,7 +3,7 @@
   const $=id=>document.getElementById(id),D=window.FISHING_DATA,E=window.FishingBook,KEY='teo-ffxiv.fishing.collection.v1';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const known=new Set(D?.fishes.map(f=>f.id)||[]),kinds={rod:'어류도감',spear:'작살도감'};
-  let M,caught=new Set(),kind='rod',page=1,filtered=[],pageFish=[],groups=[],history=[],detailId=null;
+  let M,caught=new Set(),kind='rod',page=1,filtered=[],pageFish=[],groups=[],history=[],detailId=null,lastCollectionStamp='';
   const read=()=>{const raw=localStorage.getItem(KEY);return raw===null?new Set():E.parseBackup(raw);};
   const link=(url,label)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`;
   const tcFish=f=>`https://ffxivteamcraft.com/db/ko/item/${f.id}`;
@@ -13,6 +13,7 @@
     for(const type of ['rod','spear']){const count=D.fishes.filter(f=>f.kind===type&&caught.has(f.id)).length;$(`${type}Count`).textContent=`${count.toLocaleString()} / ${D.counts[type].toLocaleString()}`;$(`${type}Progress`).max=D.counts[type];$(`${type}Progress`).value=count;}
     const count=[...caught].filter(id=>known.has(id)).length;$('totalCount').textContent=`${count.toLocaleString()} / ${D.count.toLocaleString()}`;$('recordCount').textContent=`수집 ${count.toLocaleString()}종`+(caught.size>count?` · 현재 목록 밖 ID ${caught.size-count}개 보존`:'');
     $('markPage').disabled=!pageFish.some(f=>!caught.has(f.id));
+    const stamp=[...caught].sort((a,b)=>a-b).join(',');if(stamp!==lastCollectionStamp){lastCollectionStamp=stamp;document.dispatchEvent(new CustomEvent('fishing-collection-changed'));}
   }
   function updateChecks(){for(const b of document.querySelectorAll('[data-caught]')){const has=caught.has(+b.dataset.caught);b.setAttribute('aria-pressed',String(has));b.closest('.fish-tile,.fish-row')?.classList.toggle('is-caught',has);const state=b.querySelector('.fish-state');if(state)state.textContent=has?'✓':'○';else b.textContent=has?'✓ 수집 완료':'수집 체크';}for(const s of document.querySelectorAll('[data-related-state]'))s.textContent=caught.has(+s.dataset.relatedState)?'✓ 수집':'미수집';}
   function save(changes,message,remember=true){try{const next=read(),before=[];for(const [id,value] of changes){if(!known.has(id)||next.has(id)===value)continue;before.push([id,next.has(id)]);if(value)next.add(id);else next.delete(id);}if(before.length){localStorage.setItem(KEY,E.backup(next));if(remember){history.push(before);if(history.length>25)history.shift();}}caught=next;counts();updateChecks();if($('status').value!=='all')$('refreshResults').hidden=false;notify(message);return true;}catch{notify('저장하지 못했어요. 기존 기록은 그대로입니다. 브라우저 저장 권한·공간을 확인해 주세요.');return false;}}
@@ -59,5 +60,6 @@
     fillRegions();events();refilter();$('dataNote').textContent=`${D.updatedAt} 공개 데이터 기준 · 어류 ${D.counts.rod.toLocaleString()}종 · 작살 ${D.counts.spear.toLocaleString()}종 · 낚시 조건 자료 확인 필요 ${D.missingConditions.length}종.`;
     window.FishingScanUI?.mount({fishes:D.fishes,apply:ids=>{if(!Array.isArray(ids)||!ids.length||ids.some(id=>!known.has(id)))return {ok:false,error:'도감에 없는 물고기가 포함되어 있어요.'};try{const latest=read(),fresh=[...new Set(ids)].filter(id=>!latest.has(id)).length,message=`캡처에서 ${fresh}종 수집 기록을 추가했어요.`;if(!merge(new Set(ids),message))return {ok:false,error:'저장하지 못해 적용하지 않았어요.'};$('recordMessage').textContent=message;return {ok:true,message};}catch{return {ok:false,error:'기존 기록을 읽지 못했어요.'};}}});
     $('appContent').hidden=false;$('loading').hidden=true;$('openRecords').disabled=false;
+    window.FishingPlanner?.mount({data:D,model:M,getCaught:()=>new Set(caught)});
   }catch(e){$('loading').hidden=true;$('fatal').textContent=e.message;$('fatal').hidden=false;}
 })();
