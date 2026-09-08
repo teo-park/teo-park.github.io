@@ -10,10 +10,25 @@ function open(storage=memory()){
   w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
   let scanApply;w.MinionScanUI={mount:({apply})=>{scanApply=apply;}};
   for(const file of ['data.js','engine.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
+  w.eval(fs.readFileSync(path.join(root,'..','collection-layout.js'),'utf8'));
   const $=selector=>d.querySelector(selector),change=(selector,value,event='change')=>{const el=$(selector);if(el.type==='checkbox')el.checked=value;else el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
   assert.equal($('#appContent').hidden,false);
   return{w,d,$,change,storage,downloads,scanApply,close:()=>w.close()};
 }
+test('layout icons preserve the page, live checks and filters, and restore only this book preference',()=>{
+  const store=memory();let p=open(store);try{
+    p.$('#pagination [aria-label="2페이지"]').click();p.$('#minionGrid [data-collect]').click();
+    const ids=[...p.d.querySelectorAll('.minion-tile')].map(e=>e.dataset.id),before=store.getItem(KEY),node=p.$('#minionGrid [data-collect]');
+    p.$('[data-layout-choice="list"]').click();assert.equal(p.$('#minionCatalog').dataset.collectionLayout,'list');assert.equal(p.$('[data-layout-choice="list"]').getAttribute('aria-pressed'),'true');
+    assert.equal(p.$('#minionGrid [data-collect]'),node);assert.deepEqual([...p.d.querySelectorAll('.minion-tile')].map(e=>e.dataset.id),ids);assert.equal(store.getItem(KEY),before);
+    p.change('#search','뚱냥이','input');assert.equal(p.$('#minionCatalog').dataset.collectionLayout,'list');assert.match(p.$('.collection-row-info').textContent,/거래/);
+    p.close();p=open(store);assert.equal(p.$('#minionCatalog').dataset.collectionLayout,'list');assert.equal(store.getItem('teo-ffxiv.collection-layout.triple-triad.v1'),null);
+    p.$('[data-layout-choice="list"]').dispatchEvent(new p.w.KeyboardEvent('keydown',{key:'ArrowLeft',bubbles:true}));assert.equal(p.$('#minionCatalog').dataset.collectionLayout,'grid');assert.equal(store.getItem(KEY),before);
+  }finally{p.close();}
+});
+test('layout changes remain usable when saving preferences fails',()=>{
+  const store=memory(),p=open(store);try{store.setItem=()=>{throw Error('quota');};p.$('[data-layout-choice="list"]').click();assert.equal(p.$('#minionCatalog').dataset.collectionLayout,'list');assert.equal(p.$('[data-layout-choice="grid"]').getAttribute('aria-pressed'),'false');}finally{p.close();}
+});
 test('catalog covers all Korean names, valid source links, unique IDs and explicit unknown sources',()=>{
   assert.equal(D.count,D.minions.length);assert.equal(new Set(D.minions.map(m=>m.id)).size,D.count);assert.ok(D.count>500);assert.ok(D.officialCount>500);
   assert.equal(D.sourceCount,D.minions.reduce((n,m)=>n+m.sources.length,0));

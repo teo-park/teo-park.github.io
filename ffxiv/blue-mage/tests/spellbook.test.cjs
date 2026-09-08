@@ -11,10 +11,19 @@ function open(storage=memory()){
   w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=function(){};
   let scanApply;w.BlueMageScanUI={mount:({apply})=>{scanApply=apply;}};
   for(const file of ['data.js','engine.js','loadouts.js','loadouts-ui.js','carnivale-data.js','carnivale.js','carnivale-ui.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
+  w.eval(fs.readFileSync(path.join(root,'..','collection-layout.js'),'utf8'));
   const $=s=>d.querySelector(s),all=s=>[...d.querySelectorAll(s)],change=(s,value,event='change')=>{const el=$(s);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
   assert.equal($('#appContent').hidden,false);
   return {w,d,$,all,change,storage,downloads,scanApply,close:()=>w.close()};
 }
+test('grid/list layout survives page and grouping navigation without changing learned spells',()=>{
+  const p=open();try{
+    p.$('#pagination [aria-label="2페이지"]').click();p.$('#spellGrid [data-collect]').click();const before=p.storage.getItem(KEY),first=p.$('#spellGrid [data-collect]');
+    p.$('[data-layout-choice="list"]').click();assert.equal(p.$('#spellCatalog').dataset.collectionLayout,'list');assert.equal(p.$('#spellGrid [data-collect]'),first);assert.equal(p.storage.getItem(KEY),before);
+    p.$('#locationView').click();assert.equal(p.$('#collectionLayoutSwitch').hidden,true);p.$('#numberView').click();assert.equal(p.$('#collectionLayoutSwitch').hidden,false);assert.equal(p.$('#spellCatalog').dataset.collectionLayout,'list');
+    p.$('[data-layout-choice="grid"]').click();assert.equal(p.$('#spellCatalog').dataset.collectionLayout,'grid');assert.equal(p.storage.getItem(KEY),before);
+  }finally{p.close();}
+});
 test('three modes are exclusive, all 32 guides are selectable, and navigation does not change records',()=>{
   const storage=memory({[KEY]:E.backup(new Set([1,99999]))}),before=storage.getItem(KEY),ui=open(storage);
   try{

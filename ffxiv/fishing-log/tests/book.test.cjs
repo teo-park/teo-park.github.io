@@ -1,5 +1,14 @@
 const test=require('node:test'),assert=require('node:assert/strict'),E=require('../engine.js'),{D,KEY,memory,open}=require('./helpers.cjs');
 const known=new Set(D.fishes.map(f=>f.id));
+test('layout icons keep fish IDs, checks, pagination and the spear book intact',()=>{
+ const p=open();try{
+  p.$('#paginationTop [aria-label="2페이지"]').click();p.$('#fishGrid [data-caught]').click();const before=p.storage.getItem(KEY),node=p.$('#fishGrid [data-caught]'),first=node.dataset.caught;
+  p.$('[data-layout-choice="list"]').click();assert.equal(p.$('#catalog').dataset.collectionLayout,'list');assert.equal(p.$('#fishGrid [data-caught]'),node);assert.equal(p.$('#fishGrid [data-caught]').dataset.caught,first);assert.equal(p.storage.getItem(KEY),before);assert.ok(p.$('.collection-row-info').textContent.length);
+  p.$('#spearMode').click();assert.equal(p.$('#catalog').dataset.collectionLayout,'list');assert.match(p.$('.collection-row-info').textContent,/작살질/);
+  p.change('#view','spot');assert.equal(p.$('#collectionLayoutSwitch').hidden,true);p.change('#view','book');assert.equal(p.$('#collectionLayoutSwitch').hidden,false);
+  p.$('[data-layout-choice="grid"]').click();assert.equal(p.$('#catalog').dataset.collectionLayout,'grid');assert.equal(p.storage.getItem(KEY),before);
+ }finally{p.close();}
+});
 test('catalog keeps all log-visible fish, including hidden-name big fish, with separate ordered spear pages',()=>{
  assert.equal(D.count,1806);assert.deepEqual(D.counts,{rod:1517,spear:289});assert.equal(known.size,D.count);assert.equal(D.missingConditions.length,39);
  for(const kind of ['rod','spear'])assert.deepEqual(D.fishes.filter(f=>f.kind===kind).map(f=>f.order),Array.from({length:D.counts[kind]},(_,i)=>i+1));

@@ -8,12 +8,12 @@ import {mount} from '../app.js';
 const data=JSON.parse(readFileSync(new URL('../data.json',import.meta.url))),html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const model=create(data),valid=new Set(model.byId.keys());
 function setup(seed){
-  const dom=new JSDOM(html,{url:'https://example.test/ffxiv/beastmaster/',pretendToBeVisual:true}),w=dom.window,d=w.document;
+  const dom=new JSDOM(html,{url:'https://example.test/ffxiv/beastmaster/',pretendToBeVisual:true,runScripts:'outside-only'}),w=dom.window,d=w.document;
   w.HTMLElement.prototype.scrollIntoView=function(){};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
   w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
   if(seed!==undefined)w.localStorage.setItem(KEY,typeof seed==='string'?seed:backup(new Set(seed)));
-  mount(w,data);
+  mount(w,data);w.eval(readFileSync(new URL('../../collection-layout.js',import.meta.url),'utf8'));
   const $=id=>d.getElementById(id),click=selector=>{const e=d.querySelector(selector);assert.ok(e,selector);e.click();};
   const input=(id,value,event='input')=>{$(id).value=value;$(id).dispatchEvent(new w.Event(event,{bubbles:true}));};
   const ids=()=>[...d.querySelectorAll('#beastGrid .beast-tile')].map(e=>Number(e.dataset.id));
@@ -21,6 +21,14 @@ function setup(seed){
   return {w,d,$,click,input,ids,saved,close:()=>w.close()};
 }
 
+test('layout controls preserve the 25-entry page, checks and acquisition grouping',()=>{
+  const a=setup();try{
+    a.click('#paginationTop [aria-label="2페이지"]');a.click('#beastGrid [data-check="50"]');const ids=a.ids(),before=a.w.localStorage.getItem(KEY),node=a.d.querySelector('#beastGrid [data-check="50"]');
+    a.click('[data-layout-choice="list"]');assert.equal(a.$('catalog').dataset.collectionLayout,'list');assert.deepEqual(a.ids(),ids);assert.equal(a.d.querySelector('#beastGrid [data-check="50"]'),node);assert.match(a.$('viewHint').textContent,/도감 번호순/);
+    a.click('#placeView');assert.equal(a.$('catalog').dataset.collectionLayout,'list');a.click('[data-layout-choice="grid"]');assert.equal(a.$('placeGroups').hidden,false);assert.equal(a.w.localStorage.getItem(KEY),before);
+    const key='teo-ffxiv.collection-layout.beastmaster.v1';a.w.localStorage.setItem(key,'list');a.w.dispatchEvent(new a.w.StorageEvent('storage',{key}));assert.equal(a.$('catalog').dataset.collectionLayout,'list');assert.equal(a.w.localStorage.getItem(KEY),before);
+  }finally{a.close();}
+});
 test('50 beasts have correct source filters and Korean initial/name/number searches',()=>{
   const empty=new Set();
   assert.equal(model.filter(empty).length,50);

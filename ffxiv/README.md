@@ -17,6 +17,10 @@
 
 - [마수도감](https://teo-park.github.io/ffxiv/beastmaster/) — 마수 50종 5×5 수집 체크·장소별 포획·항아리 교환 가격과 선행 퀘스트 ([데이터와 이용 안내](./beastmaster/README.md))
 
+수집형 도감(카드·꼬마친구·청마법·마수·어류/작살도감)은 창문 모양 **그리드 아이콘**과 **목록 아이콘**으로 배치를 전환합니다. 현재 페이지·필터·수집 체크는 유지하고 각 도감의 보기 방식은 브라우저에 기억합니다. 기존 페이지 크기는 유지합니다. 청마법 장소별, 낚시 미끼·장소별 보기는 자체 목록을 사용합니다.
+
+공통 배치 UI는 `collection-layout.js`와 `collection-layout.css`에서 관리하며, 보기 설정은 `teo-ffxiv.collection-layout.<도감>.v1`에 수집 기록과 별도로 저장합니다.
+
 ## 출처 및 권리 안내
 
 - 퀘스트 이름·레벨·분류·선행 관계: [파이널판타지14 한국 공식 가이드 — 주요 퀘스트](https://guide.ff14.co.kr/lodestone/db/quest)

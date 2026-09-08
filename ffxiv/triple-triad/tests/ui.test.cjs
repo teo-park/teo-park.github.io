@@ -18,11 +18,18 @@ function app(options = {}) {
   let scanApply;
   w.TriadScanUI = {mount: options => { scanApply = options.apply; }};
   for (const file of ['data.js', 'engine.js', 'app.js']) w.eval(read(file));
+  w.eval(read('../collection-layout.js'));
   const $ = selector => w.document.querySelector(selector);
   const change = (selector, value) => { const el = $(selector); if (el.type === 'checkbox') el.checked = value; else el.value = value; el.dispatchEvent(new w.Event('change', {bubbles: true})); };
   const search = value => { $('#search').value = value; $('#search').dispatchEvent(new w.InputEvent('input', {bubbles: true, isComposing: true, inputType: 'insertCompositionText'})); };
   return {dom, w, $, change, search, scanApply};
 }
+test('layout icons keep the current card page, selected card and collection record',t=>{
+  const a=app();t.after(()=>a.dom.window.close());a.$('#pagination [aria-label="다음 페이지"]').click();
+  const first=a.$('#cardGrid [data-owned]');a.change(`#cardGrid [data-owned="${first.dataset.owned}"]`,true);const before=a.w.localStorage.getItem(KEY),name=a.$('#cardGrid .card-name').textContent,node=a.$('#cardGrid .card-open');
+  a.$('[data-layout-choice="list"]').click();assert.equal(a.$('#cardCatalog').dataset.collectionLayout,'list');assert.equal(a.$('#cardGrid .card-open'),node);assert.equal(a.$('#cardGrid .card-name').textContent,name);assert.equal(a.w.localStorage.getItem(KEY),before);
+  a.search('초코보');assert.equal(a.$('#cardCatalog').dataset.collectionLayout,'list');a.$('[data-layout-choice="grid"]').click();assert.equal(a.$('#search').value,'초코보');assert.equal(a.w.localStorage.getItem(KEY),before);
+});
 test('active Korean composition searches the final consonant immediately', t => {
   const a = app(); t.after(() => a.dom.window.close());
   a.search('ㅊㅋㅂ');

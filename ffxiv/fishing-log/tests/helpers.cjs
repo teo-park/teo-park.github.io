@@ -13,6 +13,7 @@ function open({storage=memory(),scan=false,analyze,plan=false}={}){
  if(scan){w.eval(fs.readFileSync(path.join(root,'scanner.js'),'utf8'));w.FishingScanner.analyze=analyze||(async()=>Array.from({length:100},(_,index)=>({index,state:index===4?'missing':'learned'})));w.createImageBitmap=async()=>({width:451,height:491,close(){}});w.eval(fs.readFileSync(path.join(root,'scanner-ui.js'),'utf8'));}
  let planSnapshot;if(plan){w.FishingNotifications={mount:({snapshot})=>{planSnapshot=snapshot;}};for(const name of ['weather-data.js','forecast.js','planner.js'])w.eval(fs.readFileSync(path.join(root,name),'utf8'));}
  w.eval(fs.readFileSync(path.join(root,'app.js'),'utf8'));
+ w.eval(fs.readFileSync(path.join(root,'..','collection-layout.js'),'utf8'));
  const $=s=>d.querySelector(s),all=s=>[...d.querySelectorAll(s)],change=(s,value,event='change')=>{const el=$(s);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
  return {w,d,$,all,change,storage,downloads,scanApply,planSnapshot,close:()=>w.close(),async addImage(name='sample.png'){const el=$('#scanFiles');Object.defineProperty(el,'files',{configurable:true,value:[{name,type:'image/png',size:100}]});el.dispatchEvent(new w.Event('change'));await new Promise(r=>setTimeout(r,0));}};
 }

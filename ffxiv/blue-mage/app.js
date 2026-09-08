@@ -61,6 +61,7 @@
     $('numberView').setAttribute('aria-pressed',view==='number');$('locationView').setAttribute('aria-pressed',view==='location');
     $('viewHint').textContent=view==='number'?'아이콘 = 습득 체크 · 습득처 = 장소와 조건':'같은 장소에서 배울 수 있는 청마법을 모았어요. 여러 습득처가 있으면 각 장소에 표시합니다.';
     $('spellGrid').hidden=view!=='number';$('locationGroups').hidden=view!=='location';
+    $('collectionLayoutSwitch').hidden=view!=='number';
     $('spellGrid').innerHTML=view==='number'?visible.map(tile).join(''):'';$('locationGroups').innerHTML=view==='location'?visible.map(groupCard).join(''):'';
     $('emptyResults').hidden=!!filtered.length;$('markPage').hidden=!pageItems.length;$('markPage').textContent=`이 페이지 ${pageItems.length}종 모두 습득`;
     const nums=[...new Set([1,...Array.from({length:5},(_,i)=>page+i-2).filter(n=>n>0&&n<=pages),pages])].sort((a,b)=>a-b);

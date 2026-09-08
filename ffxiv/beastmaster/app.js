@@ -74,13 +74,14 @@ export function mount(win,data){
     $('beastGrid').hidden=!isNumber;$('placeGroups').hidden=isNumber;
     $('numberView').setAttribute('aria-pressed',String(isNumber));$('placeView').setAttribute('aria-pressed',String(!isNumber));
     $('resultCount').textContent=`${shown.length}종`;
-    $('viewHint').textContent=isNumber?'5 × 5 · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기':'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';
+    updateViewHint();
     if(isNumber){$('placeGroups').replaceChildren();$('beastGrid').innerHTML=pageBeasts.map(tile).join('');}
     else{$('beastGrid').replaceChildren();$('placeGroups').innerHTML=model.groups(shown,options()).map(g=>`<section class="place-group"><div class="group-heading"><div><span class="method-badge">${methods[g.type]}</span><h3>${esc(g.name)}</h3></div><span data-group-count="${esc(g.key)}"></span></div><div class="beast-grid">${g.entries.map(e=>tile(e.beast)).join('')}</div></section>`).join('');}
     $('markPage').hidden=!shown.length;$('markPage').textContent=isNumber?`이 페이지 ${pageBeasts.length}종 모두 수집`:`표시된 ${shown.length}종 모두 수집`;
     $('emptyResults').hidden=!!shown.length;pagination();updateCounts();
   }
   function reset(){for(const id of ['status','method','place'])$(id).value='all';$('search').value='';populatePlaces();render();}
+  function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
   function routeDetails(r){
     let body='';
     if(r.capture){body=`<h3>${esc(r.name)}</h3><p class="muted">도감의 주요 출현 지역</p><p>포획 가능한 개체와 난이도는 현장에서 ‘파악하기’로 확인하세요. 세부 포획 좌표는 아직 확인되지 않았어요.</p>${external(r.link,'공식 가이드에서 장소 검색')}`;}
@@ -119,6 +120,7 @@ export function mount(win,data){
     else if(button.dataset.route){$('search').value='';$('status').value='missing';$('method').value=button.dataset.method;populatePlaces();$('place').value=button.dataset.route;view='place';$('detailDialog').close();render();$('catalog').scrollIntoView({block:'start'});}
   });
   $('search').addEventListener('input',()=>render());
+  $('catalog').addEventListener('collectionlayoutchange',updateViewHint);
   $('search').addEventListener('compositionend',()=>render());
   $('clearSearch').onclick=()=>{$('search').value='';render();$('search').focus();};
   for(const id of ['status','place'])$(id).onchange=()=>render();
