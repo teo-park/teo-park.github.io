@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>세계를 누비는 어부 · 파판14 도구함</title>
+  <meta name="description" content="어류도감·작살도감 수집 체크, 미수집 물고기의 미끼·장소·낚시 조건, Teamcraft 기록 가져오기와 게임 캡처 등록."><meta name="theme-color" content="#0b1220">
+  <meta property="og:title" content="세계를 누비는 어부 · 어부 수첩"><meta property="og:description" content="어류도감과 작살도감 수집 기록 · 미끼별 미수집 보기"><meta property="og:url" content="https://teo-park.github.io/ffxiv/fishing-log/"><meta property="og:type" content="website"><meta property="og:locale" content="ko_KR">
+  <link rel="canonical" href="https://teo-park.github.io/ffxiv/fishing-log/"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../theme.css?v=20260907-minions"><link rel="stylesheet" href="./styles.css?v=20260908-1"><link rel="stylesheet" href="./scanner.css?v=20260908-1">
+  <script defer src="./data.js?v=20260908-1"></script><script defer src="./engine.js?v=20260908-1"></script><script defer src="./scanner.js?v=20260908-1"></script><script defer src="./scanner-ui.js?v=20260908-1"></script><script defer src="./app.js?v=20260908-1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">본문으로 바로가기</a>
+  <header class="site-header"><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="../minions/">꼬마친구 수첩</a><a href="./" aria-current="page">어부 수첩</a></nav><span class="header-note">FFXIV · KR</span></header>
+  <main id="mainContent" class="fish-main" tabindex="-1">
+    <div class="masthead"><div><p class="eyebrow">FISHING / COLLECTION</p><h1>세계를 누비는 어부</h1><p>어류도감·작살도감 수집 기록과 낚시 조건</p></div><button id="openRecords" disabled>수집 기록 관리</button></div>
+    <p id="loading" role="status">어부 수첩을 불러오고 있어요.</p><p id="fatal" role="alert" hidden></p><noscript>수첩을 사용하려면 JavaScript를 켜 주세요.</noscript>
+    <div id="appContent" hidden>
+      <section class="progress-strip" aria-label="어부 도감 수집 현황"><div><span>전체 수집</span><strong id="totalCount"></strong><small>이 브라우저에 저장돼요.</small></div><div><span>어류도감</span><strong id="rodCount"></strong><progress id="rodProgress" aria-label="어류도감 수집률" max="1517" value="0"></progress></div><div><span>작살도감</span><strong id="spearCount"></strong><progress id="spearProgress" aria-label="작살도감 수집률" max="289" value="0"></progress></div></section>
+      <div class="book-toolbar"><nav class="book-modes" aria-label="도감 종류"><button id="rodMode" aria-pressed="true">어류도감</button><button id="spearMode" aria-pressed="false">작살도감</button></nav><p class="free-note">무료 · 비영리 · 광고·후원 없음</p></div>
+      <section class="filters" aria-label="물고기 검색과 필터"><label for="search">물고기·초성·미끼·장소 검색</label><div class="search-field"><input id="search" type="search" placeholder="미역, ㄱㅈㄹㅇ, 림사 로민사…" autocomplete="off"><button id="clearSearch" class="quiet" aria-label="검색어 지우기">지우기</button></div>
+        <div class="filter-row"><label>보기 방식<select id="view"><option value="book">도감 순서 · 10×10</option><option id="baitViewOption" value="bait">미끼별</option><option value="spot">장소별</option></select></label><label>수집 상태<select id="status"><option value="all">전체</option><option value="missing">미수집</option><option value="caught">수집</option></select></label><label>지역<select id="region"><option value="all">모든 지역</option></select></label><label id="baitField">시작 미끼<select id="bait"><option value="all">모든 미끼</option></select></label><label id="rarityField">분류<select id="rarity"><option value="all">모든 어종</option><option value="big">터주·희귀 어종</option><option value="legendary">전설어</option></select></label><button id="resetFilters" class="quiet">초기화</button></div>
+        <p id="kindNote" hidden>작살질은 미끼를 사용하지 않습니다. 장소별 보기에서 어영 크기·속도와 출현 조건을 확인하세요.</p>
+      </section>
+      <section id="catalog" aria-label="물고기 목록"><div class="catalog-heading"><div><h2 id="catalogTitle">어류도감</h2><p id="resultCount" role="status"></p></div><button id="markPage" class="quiet">이 페이지 모두 수집</button></div><div class="view-hint"><p id="viewHint"></p><button id="refreshResults" hidden>체크 반영해 목록 정리</button></div><nav id="paginationTop" class="pagination" aria-label="도감 페이지"></nav>
+        <div id="gridViewport" class="grid-viewport"><div id="fishGrid" class="fish-grid"></div></div><div id="fishGroups" class="fish-groups" hidden></div><div id="emptyResults" class="empty-state" hidden><strong>조건에 맞는 물고기가 없어요.</strong><p>검색어나 필터를 바꿔 주세요.</p><button id="emptyReset">전체 목록 보기</button></div><nav id="pagination" class="pagination" aria-label="물고기 목록 하단 페이지"></nav>
+      </section>
+      <aside class="data-note"><p id="dataNote"></p><p>낚시 조건은 Teamcraft 공개 자료를 참고합니다. 미끼는 확인된 경로이며, 낚을 수 있는 모든 미끼나 실시간 출현 상태를 뜻하지 않습니다. 생미끼·직감 조건 물고기는 수집했어도 준비가 필요해요.</p><a href="https://guide.ff14.co.kr/job/Fisher/31?type=L" target="_blank" rel="noopener noreferrer">한국 공식 어부 가이드 ↗</a> · <a href="./README.md">데이터 범위·출처</a></aside>
+    </div>
+  </main>
+  <dialog id="detailDialog" aria-labelledby="detailTitle"><div class="dialog-top"><span>물고기와 낚시 조건</span><button id="closeDetail" aria-label="물고기 정보 닫기">닫기 ×</button></div><div id="detailBody"></div></dialog>
+  <dialog id="recordsDialog" aria-labelledby="recordsTitle"><div class="dialog-top"><h2 id="recordsTitle">수집 기록 관리</h2><button id="closeRecords" aria-label="수집 기록 관리 닫기">닫기 ×</button></div><p id="recordCount"></p>
+    <section><h3>게임 캡처로 등록</h3><p>10열 × 10행 도감의 물음표를 읽고 이미지 위에서 수정합니다. 도감 종류와 게임 페이지를 선택한 뒤 확인해 주세요.</p><button id="openScan" disabled>캡처로 등록</button></section>
+    <section><h3>Teamcraft·백업 가져오기</h3><p>Teamcraft 어부 수첩에서 복사한 숫자 ID 배열 또는 이 수첩의 백업을 넣으세요. 수집한 물고기를 기존 기록에 추가합니다.</p><label for="importText">가져올 JSON</label><textarea id="importText" rows="4" placeholder="[19956, 19933, 17560]"></textarea><div class="record-actions"><button id="chooseImport">JSON 파일 선택</button><input id="importFile" type="file" accept=".json,application/json" hidden><button id="applyImport" class="primary" disabled>수집 기록에 추가</button></div><p id="importPreview" role="status"></p></section>
+    <section><h3>내보내기</h3><div class="record-actions"><button id="exportRecords">전체 백업 파일</button><button id="copyTeamcraft">Teamcraft용 기록 복사</button></div><p>Teamcraft의 ‘CarbunclePlushy에서 가져오기’에 붙여 넣으세요. 수집 상태를 추가하며, 여기서 해제한 체크가 Teamcraft 기록을 삭제하지는 않습니다.</p><p>계정과 자동 연결되지는 않아요. 두 사이트에서 기록을 바꾼 뒤 가져오기·내보내기로 맞출 수 있습니다.</p><label id="copyFallbackLabel" for="copyFallback" hidden>복사할 Teamcraft 기록<textarea id="copyFallback" rows="3" readonly></textarea></label><p id="recordMessage" role="status"></p></section>
+  </dialog>
+  <dialog id="scanDialog" class="scan-dialog" aria-labelledby="scanTitle"></dialog>
+  <aside id="notice" class="notice" hidden><span id="noticeText" role="status" aria-live="polite"></span><button id="undo" hidden>실행 취소</button><button id="closeNotice" aria-label="알림 닫기">×</button></aside>
+  <footer class="site-footer"><div class="footer-top"><span>세계를 누비는 어부 · 무료·비영리 팬 도구</span><a href="../">도구 목록으로 ↗</a></div><div class="site-credits"><p>SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p><p>낚시 데이터: <a href="https://ffxivteamcraft.com/log-tracker/FSH" target="_blank" rel="noopener noreferrer">FFXIV Teamcraft</a> · <a href="./licenses/Teamcraft-MIT.txt">MIT 라이선스</a> · <a href="./README.md">게임 데이터·출처 안내</a></p><p>글꼴: <a href="https://hangeul.naver.com/font/nanum">네이버 나눔스퀘어라운드</a> · <a href="../fonts/nanum-square-round/OFL.txt">OFL</a></p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p><p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">한국 저작물 이용 허락 조건</a></p></div></footer>
+</body></html>
