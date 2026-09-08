@@ -3,9 +3,17 @@ export const methods={field:'필드 포획',duty:'임무 포획',exchange:'항�
 const initials=[...'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'];
 export const normalize=v=>String(v??'').normalize('NFC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu,'');
 export const initialText=v=>[...v].map(c=>{const n=c.charCodeAt(0)-0xac00;return n>=0&&n<11172?initials[Math.floor(n/588)]:c;}).join('');
-export function create(data){
+export function mapPosition(coordinates,sizeFactor=100){
+  // Displayed in-game coordinates already include the map's world offset.
+  // Invert the 41-unit, scale-adjusted game map transform to image percentages.
+  const x=(coordinates.x-1)*sizeFactor/41,y=(coordinates.y-1)*sizeFactor/41;
+  if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||x>100||y<0||y>100)throw Error('지도 밖 좌표입니다.');
+  return {x,y};
+}
+export function create(data,locationData=null){
   if(data?.count!==data?.beasts?.length||!data?.items||!data.count)throw Error('마수도감 자료를 읽지 못했어요. 새로고침해 주세요.');
   const byId=new Map(data.beasts.map(b=>[b.id,b])),items=new Map(data.items.map(i=>[i.id,i])),routes=new Map();
+  const locations=new Map((locationData?.entries||[]).map(e=>[e.beastId,e.targets])),maps=locationData?.maps||{};
   for(const b of data.beasts){
     const entries=[];
     for(const a of b.acquisition){
@@ -17,7 +25,7 @@ export function create(data){
   }
   const sourceMatches=(r,o={})=>(!o.method||o.method==='all'||r.type===o.method)&&(!o.place||o.place==='all'||r.key===o.place);
   const matchingRoutes=(b,o={})=>routes.get(b.id).filter(r=>sourceMatches(r,o));
-  const terms=new Map(data.beasts.map(b=>{const text=[b.name,b.englishName,...routes.get(b.id).flatMap(r=>[r.name,r.item?.name,r.source?.merchant,...(r.source?.costs||[]).map(c=>c.name),...(r.source?.prerequisiteQuests||[]).map(q=>q.name)])].filter(Boolean).join(' ');return [b.id,{text:normalize(text),initials:normalize(initialText(text))}];}));
+  const terms=new Map(data.beasts.map(b=>{const text=[b.name,b.englishName,...(locations.get(b.id)||[]).flatMap(t=>[t.name,t.region,t.area]),...routes.get(b.id).flatMap(r=>[r.name,r.item?.name,r.source?.merchant,...(r.source?.costs||[]).map(c=>c.name),...(r.source?.prerequisiteQuests||[]).map(q=>q.name)])].filter(Boolean).join(' ');return [b.id,{text:normalize(text),initials:normalize(initialText(text))}];}));
   function filter(owned,o={}){const q=normalize(o.query),number=/^(?:no)?\d+$/.test(q)?Number(q.replace(/^no/,'')):null;
     return data.beasts.filter(b=>(!o.status||o.status==='all'||owned.has(b.id)===(o.status==='owned'))&&matchingRoutes(b,o).length&&(!q||(number!==null?b.id===number:terms.get(b.id).text.includes(q)||terms.get(b.id).initials.includes(q))));}
   function groups(beasts,o={}){const found=new Map();for(const b of beasts)for(const r of matchingRoutes(b,o)){
@@ -25,7 +33,7 @@ export function create(data){
     found.get(r.key).entries.push({beast:b,route:r});}
     return [...found.values()].sort((a,b)=>Object.keys(methods).indexOf(a.type)-Object.keys(methods).indexOf(b.type)||a.name.localeCompare(b.name,'ko'));
   }
-  return {byId,items,routes,matchingRoutes,filter,groups};
+  return {byId,items,routes,matchingRoutes,filter,groups,locations,maps};
 }
 export function parseNumbers(text,valid){
   const ids=new Set(),tokens=String(text).trim().replace(/[，、]/g,',').replace(/\s*[-~～–]\s*/g,'-').split(/[\s,]+/).filter(Boolean);

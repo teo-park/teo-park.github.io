@@ -1,11 +1,12 @@
-import {KEY,methods,create,parseNumbers,parseBackup,backup} from './engine.js';
+import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260908-maps1';
 
 const PAGE_SIZE=25;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const external=(url,label)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`;
 
-export function mount(win,data){
-  const doc=win.document,$=id=>doc.getElementById(id),model=create(data),valid=new Set(model.byId.keys());
+export function mount(win,data,locationData=null){
+  const doc=win.document,$=id=>doc.getElementById(id),model=create(data,locationData),valid=new Set(model.byId.keys());
+  let detailId=null;
   let owned=new Set(),undoChange=null,page=1,view='number',shown=[],storageError=false;
   const options=()=>({query:$('search').value,status:$('status').value,method:$('method').value,place:$('place').value});
   const read=()=>{const raw=win.localStorage.getItem(KEY);return raw===null?new Set():parseBackup(raw);};
@@ -84,15 +85,28 @@ export function mount(win,data){
   function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
   function routeDetails(r){
     let body='';
-    if(r.capture){body=`<h3>${esc(r.name)}</h3><p class="muted">도감의 주요 출현 지역</p><p>포획 가능한 개체와 난이도는 현장에서 ‘파악하기’로 확인하세요. 세부 포획 좌표는 아직 확인되지 않았어요.</p>${external(r.link,'공식 가이드에서 장소 검색')}`;}
+    if(r.capture){body=`<h3>${esc(r.name)}</h3><p class="muted">도감의 주요 출현 지역</p><p>포획 가능한 개체와 난이도는 현장에서 ‘파악하기’로 확인하세요.</p>${external(r.link,'공식 가이드에서 장소 검색')}`;}
     else if(r.type==='exchange'){
       const s=r.source;body=`<h3>${esc(r.item.name)}</h3><p>항아리를 마수조련사로 사용하면 계약할 수 있어요.</p><dl class="source-facts"><div><dt>교환 가격</dt><dd>${s.costs.map(c=>`${esc(c.name)} <strong>${c.count}개</strong>`).join(' + ')} <span class="muted">/ 항아리 ${s.receiveCount}개</span></dd></div><div><dt>교환 NPC</dt><dd>${esc(s.merchant)}</dd></div><div><dt>상인 위치</dt><dd>${esc(s.location.name)}<br>X:${s.location.coordinates.x} · Y:${s.location.coordinates.y}</dd></div><div><dt>선행 퀘스트</dt><dd>${s.prerequisiteQuests.map(q=>external(q.official,`Lv.${q.level} ${q.name}`)).join('<br>')||'없음'}</dd></div></dl>${external(r.item.official,'공식 가이드에서 항아리 검색')} · ${external(r.link,'공식 교환 안내')}`;
     }else{body=`<h3>${esc(r.source.quest.name)}</h3><p>Lv.${r.source.quest.level} · 마수조련사 개방 퀘스트</p><p>${esc(r.source.note)}</p><p class="item-name">${esc(r.item.name)}</p>${external(r.link,'공식 가이드에서 퀘스트 검색')}`;}
     return `<section class="source-card"><span class="method-badge">${methods[r.type]}</span>${body}<button class="route-filter quiet" data-route="${esc(r.key)}" data-method="${r.type}">이곳의 미수집 마수 보기 →</button></section>`;
   }
+  function locationDetails(b){
+    const targets=model.locations.get(b.id)||[];
+    if(!targets.length)return b.locationHint?.type==='field'?`<section class="location-section"><h2 class="section-title">몬스터 위치 지도</h2><p class="muted">${locationData?'인벤 토벌수첩에서 연결할 위치를 아직 찾지 못했어요. 아래 주요 출현 지역을 참고하세요.':'지도 자료를 불러오지 못했어요. 새로고침하거나 아래 공식 가이드 링크를 이용해 주세요.'}</p></section>`:'';
+    return `<section class="location-section" aria-labelledby="locationTitle"><h2 id="locationTitle" class="section-title">몬스터 위치 지도 <span>토벌수첩 참고</span></h2><p class="location-note">인벤의 기존 몬스터 출현 위치입니다. 최신 포획 가능 여부와 위치는 ‘파악하기’로 확인하세요.</p>${targets.length>1?`<label class="location-select" for="locationTarget">지도에 표시할 몬스터<select id="locationTarget">${targets.map(t=>`<option value="${esc(t.id)}">${esc(t.name)} · ${esc(t.area)} (X:${t.coordinates.x}, Y:${t.coordinates.y})</option>`).join('')}</select></label>`:''}<div id="locationMapContent"></div></section>`;
+  }
+  function renderLocation(targetId){
+    const b=model.byId.get(detailId),targets=model.locations.get(detailId)||[];
+    const t=targets.find(t=>t.id===targetId)||targets[0];if(!t||!$('locationMapContent'))return;
+    const map=model.maps[t.mapId],point=mapPosition(t.coordinates,map.sizeFactor);
+    $('locationMapContent').innerHTML=`<div class="location-summary"><div><strong>${esc(t.name)}</strong><span>${esc(t.region)} · ${esc(t.area)}</span></div><b>X:${t.coordinates.x} · Y:${t.coordinates.y} 부근</b></div>${!t.matchesHint?`<p class="location-alternate">도감의 주요 출현 지역(${esc(b.locationHint.name)})과 다른 지역의 참고 위치예요.</p>`:''}<figure class="location-map"><img data-location-map src="${esc(map.url)}" alt="${esc(map.name)} 지도" width="1024" height="1024"><span class="location-pin" style="left:${point.x}%;top:${point.y}%" role="img" aria-label="${esc(t.name)} 참고 위치 X:${t.coordinates.x}, Y:${t.coordinates.y}"><span aria-hidden="true">●</span></span><figcaption data-map-status role="status">지도를 불러오는 중…</figcaption></figure><div class="location-tools">${external(t.source.url,'인벤 위치 원문')}<button class="quiet" data-copy-location="${esc(t.id)}">좌표 복사</button><span id="coordinateCopyStatus" role="status"></span></div><p class="map-credit">지도 © SQUARE ENIX · 제공 XIVAPI</p>`;
+  }
   function showDetail(id){
     const b=model.byId.get(id);if(!b)return;
-    $('detailBody').innerHTML=`<div class="detail-heading">${art(b)}<div><p class="eyebrow">No.${b.id} / ${esc(b.englishName)}</p><h2 id="detailTitle">${esc(b.name)}</h2></div></div><button class="detail-check" data-check="${b.id}" aria-pressed="false"><span class="check-mark" aria-hidden="true">＋</span> <span class="state-label">미수집</span></button><p class="description">${esc(b.description)}</p><h2 class="section-title">획득 방법 <span>${model.routes.get(id).length}</span></h2>${model.routes.get(id).map(routeDetails).join('')}<p class="detail-official">${external(b.official,'공식 가이드에서 마수 검색')}</p>`;
+    detailId=id;
+    $('detailBody').innerHTML=`<div class="detail-heading">${art(b)}<div><p class="eyebrow">No.${b.id} / ${esc(b.englishName)}</p><h2 id="detailTitle">${esc(b.name)}</h2></div></div><button class="detail-check" data-check="${b.id}" aria-pressed="false"><span class="check-mark" aria-hidden="true">＋</span> <span class="state-label">미수집</span></button>${locationDetails(b)}<p class="description">${esc(b.description)}</p><h2 class="section-title">획득 방법 <span>${model.routes.get(id).length}</span></h2>${model.routes.get(id).map(routeDetails).join('')}<p class="detail-official">${external(b.official,'공식 가이드에서 마수 검색')}</p>`;
+    renderLocation();if($('locationTarget'))$('locationTarget').onchange=()=>renderLocation($('locationTarget').value);
     updateCounts();if(!$('detailDialog').open)$('detailDialog').showModal();$('detailBody').scrollTop=0;
   }
   function previewNumbers(){
@@ -112,10 +126,15 @@ export function mount(win,data){
   }
   doc.addEventListener('load',event=>{if(event.target.matches?.('.beast-art img'))event.target.classList.add('loaded');},true);
   doc.addEventListener('error',event=>{if(event.target.matches?.('.beast-art img'))event.target.hidden=true;},true);
+  doc.addEventListener('load',event=>{if(event.target.matches?.('[data-location-map]'))event.target.closest('figure').querySelector('[data-map-status]').hidden=true;},true);
+  doc.addEventListener('error',event=>{if(event.target.matches?.('[data-location-map]')){const figure=event.target.closest('figure');figure.classList.add('map-failed');figure.querySelector('[data-map-status]').textContent='지도 이미지를 불러오지 못했어요. 위 좌표와 인벤 위치 원문을 참고하세요.';}},true);
   doc.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button||button.disabled)return;
     if(button.dataset.check){const id=Number(button.dataset.check);let latest;try{latest=read();}catch{announce('기존 수집 기록을 읽지 못했어요. 브라우저 저장 설정을 확인해 주세요.');return;}mutate([id],!latest.has(id),`${model.byId.get(id).name} 수집 기록을 ${latest.has(id)?'해제':'추가'}했어요.`);}
     else if(button.dataset.detail)showDetail(Number(button.dataset.detail));
+    else if(button.dataset.copyLocation){const target=(model.locations.get(detailId)||[]).find(t=>t.id===button.dataset.copyLocation);if(!target)return;const status=$('coordinateCopyStatus'),value=`${target.name} · ${target.region} X:${target.coordinates.x} Y:${target.coordinates.y} 부근`;
+      if(!win.navigator.clipboard?.writeText){status.textContent=value;return;}
+      win.navigator.clipboard.writeText(value).then(()=>{status.textContent='좌표를 복사했어요.';},()=>{status.textContent='복사하지 못했어요. 위 좌표를 직접 선택해 주세요.';});}
     else if(button.dataset.page){page=Number(button.dataset.page);render(false);$('catalog').scrollIntoView({block:'start'});}
     else if(button.dataset.route){$('search').value='';$('status').value='missing';$('method').value=button.dataset.method;populatePlaces();$('place').value=button.dataset.route;view='place';$('detailDialog').close();render();$('catalog').scrollIntoView({block:'start'});}
   });
@@ -144,7 +163,8 @@ export function mount(win,data){
 }
 
 if(typeof window!=='undefined'){
-  fetch(new URL('./data.json?v=20260908-book',import.meta.url)).then(r=>{if(!r.ok)throw Error('data');return r.json();}).then(data=>mount(window,data)).catch(()=>{
+  const readJson=path=>fetch(new URL(path,import.meta.url)).then(r=>{if(!r.ok)throw Error(path);return r.json();});
+  Promise.all([readJson('./data.json?v=20260908-book'),readJson('./locations.json?v=20260908-maps1').catch(()=>null)]).then(([data,locations])=>mount(window,data,locations)).catch(()=>{
     document.getElementById('loading').hidden=true;const fatal=document.getElementById('fatal');fatal.hidden=false;fatal.textContent='마수도감을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요. 저장된 수집 기록은 유지됩니다.';
   });
 }

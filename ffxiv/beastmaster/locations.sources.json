@@ -1,0 +1,20 @@
+{
+  "files": [
+    {
+      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/Map.csv",
+      "sha256": "758afc0be55bcf020376fdbd8f135db435583b1840d477c3b3eb5651c34e396a"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Ra-Workspace/ffxiv-datamining-ko/66eceba69eb2398958bdb133b241a69c13672b6c/csv/PlaceName.csv",
+      "sha256": "99883e7fe914240aa2aff7cc903d06a11d2665b81f909ce6bf5ce21c780fd5bf"
+    },
+    {
+      "url": "https://ff14.inven.co.kr/dataninfo/hunting/list.php?dataidx=51",
+      "sha256": "a86cbbafce8eda8059ccf9c843d2a5472e5ade7cd6ffd6f85ac051676129b815"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Ra-Workspace/ffxiv-datamining-ko/66eceba69eb2398958bdb133b241a69c13672b6c/csv/BNpcName.csv",
+      "sha256": "25ee75e35940030c090dee4c65d805dbe06180f99d08c6341c975f12142965d9"
+    }
+  ]
+}

@@ -1,0 +1,1182 @@
+{
+  "schemaVersion": 1,
+  "source": "https://ff14.inven.co.kr/dataninfo/hunting/list.php?dataidx=51",
+  "scope": "토벌수첩의 몬스터 출현 참고 위치. 마수 포획 가능 여부·현재 위치는 별도 확인 필요.",
+  "coverage": {
+    "beasts": 35,
+    "targets": 40,
+    "captureVerified": 0
+  },
+  "entries": [
+    {
+      "beastId": 2,
+      "targets": [
+        {
+          "id": "2:261",
+          "name": "청설모",
+          "npcNameIds": [
+            37,
+            14408
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "비취 호수",
+          "coordinates": {
+            "x": 22,
+            "y": 17
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=261",
+            "locationText": "검은장막 숲 중부삼림>비취 호수(22, 17)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 3,
+      "targets": [
+        {
+          "id": "3:454",
+          "name": "양",
+          "npcNameIds": [
+            392,
+            13832,
+            14409
+          ],
+          "region": "중부 라노시아",
+          "area": "산들바람 줄기",
+          "coordinates": {
+            "x": 23,
+            "y": 24
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 15,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=454",
+            "locationText": "중부 라노시아>산들바람 줄기(23, 24)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 4,
+      "targets": [
+        {
+          "id": "4:604",
+          "name": "푸길",
+          "npcNameIds": [
+            640,
+            14410
+          ],
+          "region": "중부 라노시아",
+          "area": "여름여울",
+          "coordinates": {
+            "x": 20,
+            "y": 22
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 15,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=604",
+            "locationText": "중부 라노시아>여름여울(20, 22)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 5,
+      "targets": [
+        {
+          "id": "5:197",
+          "name": "오포오포",
+          "npcNameIds": [
+            5,
+            14411
+          ],
+          "region": "검은장막 숲 북부삼림",
+          "area": "평온의 정원",
+          "coordinates": {
+            "x": 27,
+            "y": 24
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 7,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=197",
+            "locationText": "검은장막 숲 북부삼림>평온의 정원(27, 24)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 6,
+      "targets": [
+        {
+          "id": "6:135",
+          "name": "도도",
+          "npcNameIds": [
+            393,
+            14412
+          ],
+          "region": "저지 라노시아",
+          "area": "삼나무 숲",
+          "coordinates": {
+            "x": 29,
+            "y": 19
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 16,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=135",
+            "locationText": "저지 라노시아>삼나무 숲(29, 19)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 7,
+      "targets": [
+        {
+          "id": "7:392",
+          "name": "녹슨 코브란",
+          "npcNameIds": [
+            276
+          ],
+          "region": "서부 다날란",
+          "area": "망치 대지",
+          "coordinates": {
+            "x": 20,
+            "y": 28
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=392",
+            "locationText": "서부 다날란>망치 대지(20, 28)"
+          }
+        },
+        {
+          "id": "7:12",
+          "name": "구리 코브란",
+          "npcNameIds": [
+            277
+          ],
+          "region": "서부 다날란",
+          "area": "지평선 가장자리",
+          "coordinates": {
+            "x": 27,
+            "y": 17
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=12",
+            "locationText": "서부 다날란>지평선 가장자리(27, 17)"
+          }
+        },
+        {
+          "id": "7:26",
+          "name": "납 코브란",
+          "npcNameIds": [
+            278
+          ],
+          "region": "서부 다날란",
+          "area": "발자국 계곡",
+          "coordinates": {
+            "x": 13,
+            "y": 10
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=26",
+            "locationText": "서부 다날란>발자국 계곡(13, 10)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 8,
+      "targets": [
+        {
+          "id": "8:203",
+          "name": "거미전갈",
+          "npcNameIds": [
+            10,
+            14414
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "굽은가지 가도",
+          "coordinates": {
+            "x": 18,
+            "y": 19
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=203",
+            "locationText": "검은장막 숲 중부삼림>굽은가지 가도(18, 19)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 9,
+      "targets": [
+        {
+          "id": "9:140",
+          "name": "대왕게",
+          "npcNameIds": [
+            561,
+            14415
+          ],
+          "region": "중부 라노시아",
+          "area": "삼 말름 굽잇길",
+          "coordinates": {
+            "x": 14,
+            "y": 13
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 15,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=140",
+            "locationText": "중부 라노시아>삼 말름 굽잇길(14, 13)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 10,
+      "targets": [
+        {
+          "id": "10:63",
+          "name": "거대 말벌",
+          "npcNameIds": [
+            632
+          ],
+          "region": "중부 다날란",
+          "area": "가시 빠진 분지",
+          "coordinates": {
+            "x": 21,
+            "y": 26
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 21,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=63",
+            "locationText": "중부 다날란>가시 빠진 분지(21, 26)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 11,
+      "targets": [
+        {
+          "id": "11:68",
+          "name": "둥지 짓는 독수리",
+          "npcNameIds": [
+            299
+          ],
+          "region": "서부 다날란",
+          "area": "망치 대지",
+          "coordinates": {
+            "x": 21,
+            "y": 25
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=68",
+            "locationText": "서부 다날란>망치 대지(21, 25)"
+          }
+        },
+        {
+          "id": "11:79",
+          "name": "독수리",
+          "npcNameIds": [
+            13
+          ],
+          "region": "서부 다날란",
+          "area": "발자국 계곡",
+          "coordinates": {
+            "x": 17,
+            "y": 16
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=79",
+            "locationText": "서부 다날란>발자국 계곡(17, 16)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 12,
+      "targets": [
+        {
+          "id": "12:136",
+          "name": "꼬마 만드라고라",
+          "npcNameIds": [
+            405
+          ],
+          "region": "중부 라노시아",
+          "area": "여름여울",
+          "coordinates": {
+            "x": 22,
+            "y": 18
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 15,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=136",
+            "locationText": "중부 라노시아>여름여울(22, 18)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 14,
+      "targets": [
+        {
+          "id": "14:148",
+          "name": "푸크",
+          "npcNameIds": [
+            402,
+            14074,
+            14420
+          ],
+          "region": "서부 라노시아",
+          "area": "해골 골짜기",
+          "coordinates": {
+            "x": 28,
+            "y": 24
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": false,
+          "mapId": 18,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=148",
+            "locationText": "서부 라노시아>해골 골짜기(28, 24)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 16,
+      "targets": [
+        {
+          "id": "16:151",
+          "name": "살인사마귀",
+          "npcNameIds": [
+            644
+          ],
+          "region": "서부 라노시아",
+          "area": "해골 골짜기",
+          "coordinates": {
+            "x": 21,
+            "y": 22
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 18,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=151",
+            "locationText": "서부 라노시아>해골 골짜기(21, 22)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 19,
+      "targets": [
+        {
+          "id": "19:458",
+          "name": "동굴박쥐",
+          "npcNameIds": [
+            364
+          ],
+          "region": "저지 라노시아",
+          "area": "삼나무 숲",
+          "coordinates": {
+            "x": 25,
+            "y": 15
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 16,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=458",
+            "locationText": "저지 라노시아>삼나무 숲(25, 15)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 20,
+      "targets": [
+        {
+          "id": "20:269",
+          "name": "작은 넝쿨장미",
+          "npcNameIds": [
+            22
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "굽은가지 가도",
+          "coordinates": {
+            "x": 22,
+            "y": 26
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=269",
+            "locationText": "검은장막 숲 중부삼림>굽은가지 가도(22, 26)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 21,
+      "targets": [
+        {
+          "id": "21:150",
+          "name": "로들리트 사다새",
+          "npcNameIds": [
+            1181
+          ],
+          "region": "서부 라노시아",
+          "area": "해골 골짜기",
+          "coordinates": {
+            "x": 24,
+            "y": 22
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 18,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=150",
+            "locationText": "서부 라노시아>해골 골짜기(24, 22)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 22,
+      "targets": [
+        {
+          "id": "22:3",
+          "name": "선인장",
+          "npcNameIds": [
+            287
+          ],
+          "region": "서부 다날란",
+          "area": "사사모의 여든 계단",
+          "coordinates": {
+            "x": 27,
+            "y": 24
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=3",
+            "locationText": "서부 다날란>사사모의 여든 계단(27, 24)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 23,
+      "targets": [
+        {
+          "id": "23:482",
+          "name": "모래돌 골렘",
+          "npcNameIds": [
+            280
+          ],
+          "region": "남부 다날란",
+          "area": "불결한 샘터",
+          "coordinates": {
+            "x": 22,
+            "y": 11
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 23,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=482",
+            "locationText": "남부 다날란>불결한 샘터(22, 11)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 24,
+      "targets": [
+        {
+          "id": "24:35",
+          "name": "아프칼루",
+          "npcNameIds": [
+            341,
+            14430
+          ],
+          "region": "동부 라노시아",
+          "area": "핏빛해안",
+          "coordinates": {
+            "x": 28,
+            "y": 36
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 17,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=35",
+            "locationText": "동부 라노시아>핏빛해안(28, 36)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 25,
+      "targets": [
+        {
+          "id": "25:38",
+          "name": "금강거북",
+          "npcNameIds": [
+            34,
+            12628,
+            14431
+          ],
+          "region": "검은장막 숲 남부삼림",
+          "area": "낮은길",
+          "coordinates": {
+            "x": 17,
+            "y": 30
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": false,
+          "mapId": 6,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=38",
+            "locationText": "검은장막 숲 남부삼림>낮은길(17, 30)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 26,
+      "targets": [
+        {
+          "id": "26:138",
+          "name": "다친 검은수염소",
+          "npcNameIds": [
+            358
+          ],
+          "region": "중부 라노시아",
+          "area": "여름여울",
+          "coordinates": {
+            "x": 18,
+            "y": 17
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 15,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=138",
+            "locationText": "중부 라노시아>여름여울(18, 17)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 27,
+      "targets": [
+        {
+          "id": "27:18",
+          "name": "돛배조개",
+          "npcNameIds": [
+            635
+          ],
+          "region": "서부 다날란",
+          "area": "발자국 계곡",
+          "coordinates": {
+            "x": 17,
+            "y": 14
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 20,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=18",
+            "locationText": "서부 다날란>발자국 계곡(17, 14)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 28,
+      "targets": [
+        {
+          "id": "28:40",
+          "name": "모래지렁이",
+          "npcNameIds": [
+            290
+          ],
+          "region": "남부 다날란",
+          "area": "사골리 사막",
+          "coordinates": {
+            "x": 17,
+            "y": 33
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 23,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=40",
+            "locationText": "남부 다날란>사골리 사막(17, 33)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 29,
+      "targets": [
+        {
+          "id": "29:8",
+          "name": "스프리건 도굴꾼",
+          "npcNameIds": [
+            317
+          ],
+          "region": "중부 다날란",
+          "area": "검은솔 들판",
+          "coordinates": {
+            "x": 16,
+            "y": 23
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 21,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=8",
+            "locationText": "중부 다날란>검은솔 들판(16, 23)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 30,
+      "targets": [
+        {
+          "id": "30:142",
+          "name": "민둥구부",
+          "npcNameIds": [
+            354
+          ],
+          "region": "저지 라노시아",
+          "area": "모라비 만",
+          "coordinates": {
+            "x": 22,
+            "y": 24
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 16,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=142",
+            "locationText": "저지 라노시아>모라비 만(22, 24)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 31,
+      "targets": [
+        {
+          "id": "31:361",
+          "name": "왕두꺼비",
+          "npcNameIds": [
+            26,
+            14437
+          ],
+          "region": "동부 라노시아",
+          "area": "빗물받이 숲",
+          "coordinates": {
+            "x": 18,
+            "y": 26
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": false,
+          "mapId": 17,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=361",
+            "locationText": "동부 라노시아>빗물받이 숲(18, 26)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 32,
+      "targets": [
+        {
+          "id": "32:489",
+          "name": "콜리브리",
+          "npcNameIds": [
+            639,
+            14438
+          ],
+          "region": "동부 라노시아",
+          "area": "핏빛해안",
+          "coordinates": {
+            "x": 30,
+            "y": 24
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 17,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=489",
+            "locationText": "동부 라노시아>핏빛해안(30, 24)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 33,
+      "targets": [
+        {
+          "id": "33:490",
+          "name": "커얼",
+          "npcNameIds": [
+            106,
+            14439
+          ],
+          "region": "외지 라노시아",
+          "area": "기나긴 오르막",
+          "coordinates": {
+            "x": 14,
+            "y": 14
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 30,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=490",
+            "locationText": "외지 라노시아>기나긴 오르막(14, 14)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 34,
+      "targets": [
+        {
+          "id": "34:202",
+          "name": "아놀도마뱀",
+          "npcNameIds": [
+            120
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "숲눈물 벌채지",
+          "coordinates": {
+            "x": 31,
+            "y": 20
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=202",
+            "locationText": "검은장막 숲 중부삼림>숲눈물 벌채지(31, 20)"
+          }
+        },
+        {
+          "id": "34:100",
+          "name": "린드부름",
+          "npcNameIds": [
+            130
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "수영풀 쉼터",
+          "coordinates": {
+            "x": 13,
+            "y": 19
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=100",
+            "locationText": "검은장막 숲 중부삼림>수영풀 쉼터(13, 19)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 35,
+      "targets": [
+        {
+          "id": "35:234",
+          "name": "도마뱀",
+          "npcNameIds": [
+            264,
+            14441
+          ],
+          "region": "남부 다날란",
+          "area": "사골리 사막",
+          "coordinates": {
+            "x": 25,
+            "y": 38
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 23,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=234",
+            "locationText": "남부 다날란>사골리 사막(25, 38)"
+          }
+        },
+        {
+          "id": "35:128",
+          "name": "자하라크 전투도마뱀",
+          "npcNameIds": [
+            1841
+          ],
+          "region": "남부 다날란",
+          "area": "자하라크 진영",
+          "coordinates": {
+            "x": 29,
+            "y": 19
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 23,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=128",
+            "locationText": "남부 다날란>자하라크 진영(29, 19)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 36,
+      "targets": [
+        {
+          "id": "36:206",
+          "name": "나무정령 묘목",
+          "npcNameIds": [
+            128
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "비취 호수",
+          "coordinates": {
+            "x": 22,
+            "y": 16
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=206",
+            "locationText": "검은장막 숲 중부삼림>비취 호수(22, 16)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 39,
+      "targets": [
+        {
+          "id": "39:165",
+          "name": "스트로퍼",
+          "npcNameIds": [
+            238
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "수영풀 쉼터",
+          "coordinates": {
+            "x": 12,
+            "y": 21
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=165",
+            "locationText": "검은장막 숲 중부삼림>수영풀 쉼터(12, 21)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 40,
+      "targets": [
+        {
+          "id": "40:137",
+          "name": "악령",
+          "npcNameIds": [
+            404
+          ],
+          "region": "중부 라노시아",
+          "area": "여름여울",
+          "coordinates": {
+            "x": 20,
+            "y": 19
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 15,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=137",
+            "locationText": "중부 라노시아>여름여울(20, 19)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 41,
+      "targets": [
+        {
+          "id": "41:199",
+          "name": "검은 큰도롱뇽",
+          "npcNameIds": [
+            196
+          ],
+          "region": "검은장막 숲 중부삼림",
+          "area": "숲눈물 벌채지",
+          "coordinates": {
+            "x": 26,
+            "y": 20
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 4,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=199",
+            "locationText": "검은장막 숲 중부삼림>숲눈물 벌채지(26, 20)"
+          }
+        }
+      ]
+    },
+    {
+      "beastId": 42,
+      "targets": [
+        {
+          "id": "42:56",
+          "name": "호수 코브라",
+          "npcNameIds": [
+            1851
+          ],
+          "region": "모르도나",
+          "area": "은빛눈물 호수 북부",
+          "coordinates": {
+            "x": 27,
+            "y": 13
+          },
+          "approximate": true,
+          "captureVerified": false,
+          "matchesHint": true,
+          "mapId": 25,
+          "source": {
+            "name": "인벤 토벌수첩",
+            "url": "https://ff14.inven.co.kr/dataninfo/hunting/detail.php?d=51&c=56",
+            "locationText": "모르도나>은빛눈물 호수 북부(27, 13)"
+          }
+        }
+      ]
+    }
+  ],
+  "maps": {
+    "4": {
+      "id": 4,
+      "path": "f1f1/00",
+      "name": "검은장막 숲 중부삼림",
+      "sizeFactor": 100,
+      "territoryId": 148,
+      "url": "https://v2.xivapi.com/api/asset/map/f1f1/00"
+    },
+    "6": {
+      "id": 6,
+      "path": "f1f3/00",
+      "name": "검은장막 숲 남부삼림",
+      "sizeFactor": 100,
+      "territoryId": 153,
+      "url": "https://v2.xivapi.com/api/asset/map/f1f3/00"
+    },
+    "7": {
+      "id": 7,
+      "path": "f1f4/00",
+      "name": "검은장막 숲 북부삼림",
+      "sizeFactor": 100,
+      "territoryId": 154,
+      "url": "https://v2.xivapi.com/api/asset/map/f1f4/00"
+    },
+    "15": {
+      "id": 15,
+      "path": "s1f1/00",
+      "name": "중부 라노시아",
+      "sizeFactor": 100,
+      "territoryId": 134,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f1/00"
+    },
+    "16": {
+      "id": 16,
+      "path": "s1f2/00",
+      "name": "저지 라노시아",
+      "sizeFactor": 100,
+      "territoryId": 135,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f2/00"
+    },
+    "17": {
+      "id": 17,
+      "path": "s1f3/01",
+      "name": "동부 라노시아",
+      "sizeFactor": 100,
+      "territoryId": 137,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f3/01"
+    },
+    "18": {
+      "id": 18,
+      "path": "s1f4/00",
+      "name": "서부 라노시아",
+      "sizeFactor": 100,
+      "territoryId": 138,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f4/00"
+    },
+    "20": {
+      "id": 20,
+      "path": "w1f1/00",
+      "name": "서부 다날란",
+      "sizeFactor": 100,
+      "territoryId": 140,
+      "url": "https://v2.xivapi.com/api/asset/map/w1f1/00"
+    },
+    "21": {
+      "id": 21,
+      "path": "w1f2/00",
+      "name": "중부 다날란",
+      "sizeFactor": 100,
+      "territoryId": 141,
+      "url": "https://v2.xivapi.com/api/asset/map/w1f2/00"
+    },
+    "23": {
+      "id": 23,
+      "path": "w1f4/01",
+      "name": "남부 다날란",
+      "sizeFactor": 100,
+      "territoryId": 146,
+      "url": "https://v2.xivapi.com/api/asset/map/w1f4/01"
+    },
+    "25": {
+      "id": 25,
+      "path": "l1f1/01",
+      "name": "모르도나",
+      "sizeFactor": 100,
+      "territoryId": 156,
+      "url": "https://v2.xivapi.com/api/asset/map/l1f1/01"
+    },
+    "30": {
+      "id": 30,
+      "path": "s1f6/00",
+      "name": "외지 라노시아",
+      "sizeFactor": 100,
+      "territoryId": 180,
+      "url": "https://v2.xivapi.com/api/asset/map/s1f6/00"
+    }
+  }
+}

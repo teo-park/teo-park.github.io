@@ -117,6 +117,31 @@ dialog::backdrop{background:#050b16c9;backdrop-filter:blur(4px)}
 .source-card h3{margin:12px 0 8px}
 .source-card p{margin:8px 0 14px}
 .source-card p.muted{margin-top:0}
+.location-section{margin:22px 0;padding-top:2px}
+.location-section .section-title{margin-bottom:10px}
+.location-note,.location-alternate,.map-credit{font-size:13.334px;line-height:1.6;color:var(--ff-muted)}
+.location-note{margin:0 0 14px}
+.location-alternate{padding:10px 12px;background:#47382070;border-left:2px solid var(--beast);margin:0 0 12px}
+.location-select{display:grid;gap:7px;margin-bottom:16px;font-size:14px}
+.location-select select{width:100%;min-width:0;font:inherit;padding:10px}
+.location-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0}
+.location-summary>div{display:grid;gap:5px;min-width:0}
+.location-summary strong{font-size:18px;color:var(--beast)}
+.location-summary span{font-size:13.334px;color:var(--ff-muted)}
+.location-summary>b{font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.location-map{position:relative;width:min(100%,440px);margin:0 auto;aspect-ratio:1;background:#252a2e;border:1px solid #76664e;border-radius:6px;isolation:isolate}
+.location-map>img{display:block;width:100%;height:100%;object-fit:contain;border-radius:5px}
+.location-pin{position:absolute;transform:translate(-50%,-50%);width:22px;height:22px;display:grid;place-items:center;border:3px solid #fff4d2;background:#8f231b;border-radius:50%;box-shadow:0 0 0 3px #24221ce6,0 3px 10px #000a;color:#fff4d2;font-size:9px;pointer-events:none}
+.location-pin:after{content:'';position:absolute;inset:-11px;border:2px solid #982118;background:#af30262b;border-radius:50%;z-index:-1}
+.location-map figcaption{position:absolute;inset:0;display:grid;place-items:center;background:#152031e8;padding:24px;text-align:center;line-height:1.7;font-size:14px}
+.location-map figcaption[hidden]{display:none}
+.location-map.map-failed{aspect-ratio:auto;min-height:150px}
+.map-failed>img,.map-failed>.location-pin{display:none}
+.location-tools{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-top:12px;font-size:14px}
+.location-tools button{font-size:14px;min-height:40px}
+#coordinateCopyStatus{font-size:13.334px;color:var(--beast)}
+.map-credit{margin:8px 0 0;text-align:right}
+@media(max-width:520px){.location-summary{align-items:flex-start;flex-direction:column;gap:8px}.location-select select{font-size:16px}.location-pin{width:19px;height:19px;border-width:2px}}
 .muted{color:var(--ff-muted)}
 .source-facts{margin:18px 0}
 .source-facts>div{display:grid;grid-template-columns:90px 1fr;gap:15px;padding:9px 0;border-bottom:1px solid var(--ff-line)}
