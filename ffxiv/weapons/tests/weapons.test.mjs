@@ -92,9 +92,9 @@ test('relic table aligns six full series by job despite an old single-series/gri
 },null,{filters:{kind:'relic',series:'zodiac'},layout:'grid'}));
 
 test('paired table changes preserve scroll/focus and keep other series independent',()=>harness(({d,change,click,saved})=>{
- const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=260;scroll.scrollTop=400;
+ const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=260;
  const input=d.querySelector(`[data-stage="${pld.id}"]`);input.focus();change(input,pld.items.at(-1).id);
- assert.equal(d.activeElement.id,input.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,260);assert.equal(d.getElementById('relicTableScroll').scrollTop,400);
+ assert.equal(d.activeElement.id,input.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,260);
  assert.ok(d.querySelector(`[data-track="${pld.id}"]`).classList.contains('complete'));
  assert.equal(d.querySelector(`[data-stage="${shield.id}"]`),null);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);assert.equal(saved().records[shield.id].itemId,shield.items.at(-1).id);
  const anima=t('anima.PLD.weapon');change(d.querySelector(`[data-stage="${anima.id}"]`),anima.items[1].id);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);click('#undo');assert.equal(saved().records[anima.id],undefined);
@@ -130,10 +130,10 @@ test('ultimate table includes seven raids with one collection button and two ico
  const sword=t('ucob.PLD.weapon'),shield=t('ucob.PLD.shield');
  assert.equal(d.querySelectorAll('[data-job="PLD"] [data-series="ucob"] [data-collect]').length,1);
  assert.deepEqual([...d.querySelectorAll('[data-job="PLD"] [data-series="ucob"] [data-detail]')].map(b=>b.dataset.detail),[sword.id,shield.id]);
- const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=350;scroll.scrollTop=240;
+ const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=350;
  const button=d.querySelector('[data-collect="ucob.PLD.weapon"]');button.focus();click('[data-collect="ucob.PLD.weapon"]');
  assert.equal(saved().records[sword.id].itemId,sword.items[0].id);assert.equal(saved().records[shield.id].itemId,shield.items[0].id);
- assert.equal(d.activeElement.dataset.collect,sword.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,350);assert.equal(d.getElementById('relicTableScroll').scrollTop,240);
+ assert.equal(d.activeElement.dataset.collect,sword.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,350);
  click('[data-collect="ucob.PLD.weapon"]');assert.equal(saved().records[sword.id].itemId,0);assert.equal(saved().records[shield.id].itemId,0);click('#undo');assert.equal(saved().records[shield.id].itemId,shield.items[0].id);assert.equal(saved().records[sword.id].itemId,sword.items[0].id);
  change(d.getElementById('jobFilter'),'VPR');assert.equal(d.querySelector('[data-job="VPR"] td').textContent,'—');assert.ok(d.querySelector('[data-collect="top.VPR.weapon"]'));
 },null,{filters:{kind:'ultimate',series:'ucob'},layout:'grid'}));
@@ -162,9 +162,9 @@ test('enhanced buttons cycle sword and shield together without touching metadata
  click('[data-kind="enhanced"]');const id='exquisite.PLD.weapon',weapon=t(id),button=()=>d.querySelector('[data-cycle="'+id+'"]');
  const text=()=>button().querySelector('.cycle-value').textContent;
  assert.equal(text(),'없음');assert.match(button().getAttribute('aria-label'),/현재 없음, 클릭하면 보강/);
- const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=80;scroll.scrollTop=190;button().focus();
+ const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=80;button().focus();
  click('[data-cycle="'+id+'"]');assert.equal(text(),'보강');assert.equal(saved().records[id].itemId,weapon.items[0].id);
- assert.equal(d.activeElement.id,'cycle-'+id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,80);assert.equal(d.getElementById('relicTableScroll').scrollTop,190);
+ assert.equal(d.activeElement.id,'cycle-'+id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,80);
  assert.ok(button().closest('.relic-entry').classList.contains('progress'));
  click('[data-cycle="'+id+'"]');assert.equal(text(),'재보강');assert.equal(saved().records[id].itemId,weapon.items[1].id);assert.ok(button().closest('.relic-entry').classList.contains('complete'));
  click('[data-cycle="'+id+'"]');assert.equal(text(),'없음');assert.equal(saved().records[id].itemId,0);

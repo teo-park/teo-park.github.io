@@ -1,12 +1,12 @@
 .filters.relic-filters{grid-template-columns:minmax(200px,1.4fr) minmax(140px,.7fr) minmax(160px,.8fr)}
 .catalog-toolbar h2 #resultLabel{font:inherit;color:inherit;margin:0}
-.relic-table-scroll{width:max-content;max-width:100%;overflow:auto;max-height:min(720px,72dvh);border:1px solid var(--ff-line);border-radius:8px;scrollbar-gutter:stable;scroll-padding:94px 0 0 106px}
+.relic-table-scroll{width:max-content;max-width:100%;overflow-x:auto;border:1px solid var(--ff-line);border-radius:8px;scroll-padding-left:106px}
 .relic-table{width:var(--table-width,944px);table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
 .relic-table .relic-job-col{width:104px}
 .relic-table th,.relic-table td{border-right:1px solid var(--ff-line);border-bottom:1px solid var(--ff-line);padding:4px;vertical-align:middle;background:#121e31}
 .relic-table tr>*:last-child{border-right:0}
 .relic-table tbody tr:last-child>*{border-bottom:0}
-.relic-table thead th{position:sticky;top:0;z-index:3;background:#203149;padding:10px 6px;font-weight:700;box-shadow:0 1px 0 #516883}
+.relic-table thead th{position:sticky;top:0;z-index:3;background:#203149;padding:10px 6px;font-weight:700;box-shadow:0 1px 0 #516883;transform:translateY(var(--relic-head-offset,0px))}
 .relic-table thead th:first-child{left:0;z-index:4}
 .relic-table th small{display:block;font-size:13.334px;color:var(--ff-muted);font-weight:400;margin-top:4px;white-space:nowrap}
 .relic-table thead a{display:block;word-break:keep-all;overflow-wrap:anywhere;text-underline-offset:4px}

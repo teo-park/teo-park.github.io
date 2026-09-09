@@ -8,6 +8,18 @@ const COLUMN_NAMES={zodiac:'제타',ucob:'절 바하무트',uwu:'절 알테마',
 let data,state=emptyBackup(),storageBlocked=false,rawStored=null,undoState=null,pendingImport=null,detailId=null;
 let filters={kind:'relic',series:'',job:'',status:'',query:'',target:false};
 let seriesById,jobsById,trackById,showcase;
+let tableHeaderFrame=0;
+function positionTableHeader(){
+ tableHeaderFrame=0;
+ const table=$('relicTableScroll')?.querySelector('table'),head=table?.tHead;
+ if(!head)return;
+ const rect=table.getBoundingClientRect(),top=document.querySelector('.site-header')?.getBoundingClientRect().bottom||0;
+ // Horizontal overflow prevents CSS sticky from following the document vertically.
+ // Move the real column headings within the full-height table instead of cloning them.
+ const offset=Math.max(0,Math.min(top-rect.top,rect.height-head.offsetHeight));
+ table.style.setProperty('--relic-head-offset',`${offset}px`);
+}
+function scheduleTableHeader(){if(!tableHeaderFrame)tableHeaderFrame=requestAnimationFrame(positionTableHeader);}
 const label=t=>jobsById.get(t.jobId).name+(t.jobId==='PLD'?(t.slot==='shield'?' · 방패':' · 검'):'');
 const getRecord=id=>state.records[id]||emptyRecord();
 function warn(text){$('storageWarning').textContent=text;$('storageWarning').hidden=!text;}
@@ -73,7 +85,7 @@ function collectionTable(list){
  const matched=new Set(list.map(t=>t.id)),jobs=data.jobs.filter(j=>list.some(t=>t.jobId===j.id));
  const seriesIds=new Set(series.map(s=>s.id)),all=data.tracks.filter(t=>seriesIds.has(t.seriesId));
  const boundary=index=>index>0&&series[index-1].kind!==series[index].kind?' series-boundary':'';
- return `<div id="relicTableScroll" class="relic-table-scroll" role="region" aria-label="직업별 무기 수집표, 가로와 세로로 스크롤 가능" tabindex="0"><table class="relic-table" style="--table-width:${104+series.length*140}px"><caption class="visually-hidden">직업별 무기 수집 현황과 완료 단계. 나이트 검과 방패는 함께 변경됩니다.</caption><colgroup><col class="relic-job-col">${series.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">직업</th>${series.map((s,index)=>`<th scope="col" class="${boundary(index)}"><a href="${esc(s.source)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(s.name)} 획득 안내" title="${esc(s.name)}">${esc(COLUMN_NAMES[s.id]||s.short)} ↗</a><small>${KIND_NAMES[s.kind]} · ${s.labels.length===1?`Lv.${s.level}`:`${s.labels.length}단계`}</small></th>`).join('')}</tr></thead><tbody>${jobs.map(j=>{
+ return `<div id="relicTableScroll" class="relic-table-scroll" role="region" aria-label="직업별 무기 수집표, 가로로 스크롤 가능" tabindex="0"><table class="relic-table" style="--table-width:${104+series.length*140}px"><caption class="visually-hidden">직업별 무기 수집 현황과 완료 단계. 나이트 검과 방패는 함께 변경됩니다.</caption><colgroup><col class="relic-job-col">${series.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">직업</th>${series.map((s,index)=>`<th scope="col" class="${boundary(index)}"><a href="${esc(s.source)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(s.name)} 획득 안내" title="${esc(s.name)}">${esc(COLUMN_NAMES[s.id]||s.short)} ↗</a><small>${KIND_NAMES[s.kind]} · ${s.labels.length===1?`Lv.${s.level}`:`${s.labels.length}단계`}</small></th>`).join('')}</tr></thead><tbody>${jobs.map(j=>{
   const own=all.filter(t=>t.jobId===j.id),stats=summarize(own,state.records);
   return `<tr data-job="${j.id}"><th scope="row"><span class="relic-job" data-role="${j.role}">${esc(j.name)}</span><small>${j.id} · ${stats.complete}/${stats.total}</small></th>${series.map((s,index)=>{
    const available=own.filter(t=>t.seriesId===s.id),entries=available.filter(t=>matched.has(t.id)),edge=boundary(index);
@@ -85,14 +97,15 @@ function collectionTable(list){
 }
 function render(){
  const active=document.activeElement,focus=active?.id||null,focusTarget=active?.dataset?.target,focusCollect=active?.dataset?.collect;
- const scroll=$('relicTableScroll'),scrollPosition=scroll?{left:scroll.scrollLeft,top:scroll.scrollTop}:null;
+ const scroll=$('relicTableScroll'),scrollLeft=scroll?.scrollLeft||0;
  $('resultLabel').textContent=filters.kind==='relic'?'고대무기 진행표':filters.kind==='ultimate'?'절 무기 수집표':filters.kind==='enhanced'?'재보강 무기 진행표':'전체 무기 수집표';
  const total=summarize(data.tracks,state.records);$('completeCount').textContent=total.complete;$('totalCount').textContent=`/ ${total.total}개`;$('progressCount').textContent=total.progress;$('targetCount').textContent=total.targets;
  const list=filterTracks(data,state.records,filters);
  $('resultCount').textContent=`${list.length}개`;$('targetFilter').setAttribute('aria-pressed',String(filters.target));$('targetFilter').textContent=filters.target?'★ 관심 무기만':'☆ 관심 무기만';
  $('scopeNote').textContent='칸에서 바꾸면 자동 저장됩니다. 나이트 검·방패는 함께 변경하며, 각 아이콘으로 상세정보를 엽니다. — 해당 무기 없음 · 조건 제외: 필터 불일치';
  $('weaponList').innerHTML=list.length?collectionTable(list):'';
- if(scrollPosition&&$('relicTableScroll')){$('relicTableScroll').scrollLeft=scrollPosition.left;$('relicTableScroll').scrollTop=scrollPosition.top;}
+ if($('relicTableScroll'))$('relicTableScroll').scrollLeft=scrollLeft;
+ positionTableHeader();
  $('emptyResults').hidden=list.length>0;
  if(detailId&&$('detailDialog').open)renderDetail();
  showcase?.refresh();
@@ -110,7 +123,7 @@ function renderDetail(){
  $('detailDialog').scrollTop=scroll;
 }
 function openDetail(id){detailId=id;renderDetail();$('detailDialog').showModal();$('detailDialog').scrollTop=0;}
-function changedFilters(){if($('relicTableScroll'))$('relicTableScroll').scrollTop=0;preferences();render();}
+function changedFilters(){preferences();render();}
 function resetFilters(){filters={kind:'',series:'',job:'',status:'',query:'',target:false};$('search').value='';$('jobFilter').value='';$('statusFilter').value='';renderSeriesOptions();changedFilters();}
 function download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function previewImport(){
@@ -131,8 +144,15 @@ async function boot(){
   try{const p=JSON.parse(localStorage.getItem(PREFS)||'null');if(p?.filters){filters={...filters,...p.filters};if(!['','relic','ultimate','enhanced'].includes(filters.kind))filters.kind='';if(!seriesById.has(filters.series))filters.series='';if(!jobsById.has(filters.job))filters.job='';if(!['','unstarted','progress','complete'].includes(filters.status))filters.status='';filters.query=typeof filters.query==='string'?filters.query:'';filters.target=!!filters.target;}}catch{}
   $('jobFilter').innerHTML='<option value="">모든 직업</option>'+data.jobs.map(j=>`<option value="${j.id}">${j.name}</option>`).join('');$('jobFilter').value=filters.job;$('statusFilter').value=filters.status;$('search').value=filters.query;
   renderSeriesOptions();render();$('app').hidden=false;$('loadStatus').hidden=true;$('openRecords').disabled=false;
+  positionTableHeader();
  }catch(error){$('loadStatus').textContent='무기 데이터를 불러오지 못했습니다. 새로고침해 주세요. '+error.message;return;}
  showcase=mountShowcase({catalog:data,getRecords:()=>latest().records});
+ window.addEventListener('scroll',scheduleTableHeader,{passive:true});
+ window.addEventListener('resize',scheduleTableHeader,{passive:true});
+ if(typeof ResizeObserver!=='undefined'){
+  const observer=new ResizeObserver(scheduleTableHeader);
+  observer.observe(document.querySelector('.site-header'));observer.observe($('weaponList'));
+ }
  $('search').addEventListener('input',()=>{filters.query=$('search').value;changedFilters();});
  $('search').addEventListener('compositionend',()=>{filters.query=$('search').value;changedFilters();});
  $('seriesFilter').addEventListener('change',()=>{filters.series=$('seriesFilter').value;changedFilters();});
