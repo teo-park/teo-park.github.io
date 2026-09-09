@@ -1,4 +1,4 @@
-import {STORAGE_KEY,emptyBackup,emptyRecord,parseBackup,mergeBackups,stageIndex,statusOf,summarize,filterTracks} from './core.js';
+import {STORAGE_KEY,emptyBackup,emptyRecord,parseBackup,mergeBackups,stageIndex,summarize,filterTracks} from './core.js';
 import {mountShowcase} from './showcase-ui.js?v=20260909-line1';
 
 const $=id=>document.getElementById(id),esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -27,11 +27,24 @@ function updateRecord(id,patch){
   return persist(next,{message:`${label(trackById.get(id))} 기록을 저장했습니다.`});
  }catch(error){warn(error.message);return false;}
 }
-function setStage(id,itemId){const t=trackById.get(id);if(!t||(itemId!==0&&!t.items.some(i=>i.id===itemId)))return false;return updateRecord(id,{itemId});}
-function cycleStage(id){
- try{const t=trackById.get(id);if(!t||seriesById.get(t.seriesId).kind!=='enhanced')return false;
-  const step=stageIndex(t,latest().records[id]);return setStage(id,t.items[step]?.id||0);
+const companionTracks=t=>t.jobId==='PLD'?['weapon','shield'].map(slot=>trackById.get(`${t.seriesId}.PLD.${slot}`)).filter(Boolean):[t];
+function pairState(tracks,records){
+ const steps=tracks.map(t=>stageIndex(t,records[t.id])),step=Math.max(...steps),mixed=steps.some(n=>n!==step);
+ return {step,mixed,status:mixed?'progress':step===tracks[0].items.length?'complete':step?'progress':'unstarted',target:tracks.some(t=>records[t.id]?.target)};
+}
+function updateCollection(id,patchFor){
+ try{const t=trackById.get(id);if(!t)return false;const tracks=companionTracks(t),base=latest(),next=structuredClone(base),group=pairState(tracks,base.records);
+  for(const track of tracks)next.records[track.id]={...(base.records[track.id]||emptyRecord()),...patchFor(track,group)};
+  const name=tracks.length>1?'나이트 검·방패':label(t);return persist(next,{message:`${name} 기록을 저장했습니다.`});
  }catch(error){warn(error.message);return false;}
+}
+function setStage(id,itemId){
+ const t=trackById.get(id);if(!t||(itemId!==0&&!t.items.some(i=>i.id===itemId)))return false;
+ const index=t.items.findIndex(i=>i.id===itemId);return updateCollection(id,track=>({itemId:track.items[index]?.id||0}));
+}
+function cycleStage(id){
+ const t=trackById.get(id);if(!t||seriesById.get(t.seriesId).kind!=='enhanced')return false;
+ return updateCollection(id,(track,{step,mixed})=>({itemId:track.items[mixed?step-1:step]?.id||0}));
 }
 function preferences(){try{localStorage.setItem(PREFS,JSON.stringify({filters}));}catch{/* Collection storage reports failures separately. */}}
 function renderSeriesOptions(){
@@ -43,29 +56,30 @@ function renderSeriesOptions(){
  document.querySelectorAll('[data-kind]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.kind===filters.kind)));
 }
 function tableEntry(t){
- const r=getRecord(t.id),step=stageIndex(t,r),status=statusOf(t,r),single=t.items.length===1,cycling=seriesById.get(t.seriesId).kind==='enhanced';
- const current=t.items[step?step-1:t.items.length-1],name=label(t)+' '+seriesById.get(t.seriesId).short;
- const slot=t.jobId==='PLD'?`<span class="relic-slot">${t.slot==='shield'?'방패':'검'}</span>`:'';
- const stateLabel=step?t.items[step-1].stage:'없음',nextLabel=t.items[step]?.stage||'없음';
+ const tracks=companionTracks(t),paired=tracks.length>1,{step,mixed,status,target}=pairState(tracks,state.records),single=t.items.length===1,cycling=seriesById.get(t.seriesId).kind==='enhanced';
+ const current=t.items[step?step-1:t.items.length-1],name=(paired?'나이트 검·방패':label(t))+' '+seriesById.get(t.seriesId).short;
+ const stateLabel=mixed?'단계 다름':step?t.items[step-1].stage:'없음',nextLabel=t.items[mixed?step-1:step]?.stage||'없음';
+ const icons=tracks.map(track=>{const n=stageIndex(track,getRecord(track.id)),item=track.items[n?n-1:track.items.length-1];return `<button class="relic-item-icon" data-detail="${track.id}" aria-label="${esc(label(track)+' · '+item.name)} 단계·획득처" title="${esc(label(track)+' · '+(n?item.stage:'미수집')+' · '+item.name)}"><img loading="lazy" src="${esc(item.icon)}" alt=""></button>`;}).join('');
  const control=cycling
   ? `<div class="relic-stage"><button id="cycle-${t.id}" class="stage-cycle" data-cycle="${t.id}" aria-label="${esc(name)}: 현재 ${esc(stateLabel)}, 클릭하면 ${esc(nextLabel)}" title="${esc(['없음',...t.items.map(i=>i.stage),'없음'].join(' → '))}"><span class="cycle-value">${esc(stateLabel)}</span><span class="cycle-arrow" aria-hidden="true">↻</span></button></div>`
   : single
-  ? `<div class="relic-stage"><button class="collect-toggle" data-collect="${t.id}" aria-pressed="${step>0}" aria-label="${esc(name)} 수집"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg>수집</button></div>`
-  : `<label class="relic-stage" for="stage-${t.id}"><select id="stage-${t.id}" data-stage="${t.id}" aria-label="${esc(name)} 완료한 단계" title="${step?`${step}. ${esc(t.items[step-1].stage)}`:'미시작'}"><option value="0"${!step?' selected':''}>미시작</option>${t.items.map((item,n)=>`<option value="${item.id}"${r.itemId===item.id?' selected':''}>${esc(item.stage)}${n===t.items.length-1?' ✓':''}</option>`).join('')}</select></label>`;
- return `<div class="relic-entry ${status}" data-track="${t.id}">${control}<div class="relic-cell-actions"><button class="relic-detail" data-detail="${t.id}" aria-label="${esc(name+' · '+current.name)} 단계·획득처" title="${esc(current.name)} · 단계·획득처">${slot}<img loading="lazy" src="${esc(current.icon)}" alt=""><span>${single||cycling?(slot?'정보':'획득처'):step?`${step}/${t.items.length}`:'단계'}</span></button><button class="relic-target" data-target="${t.id}" aria-pressed="${r.target}" aria-label="${esc(name)} 관심 무기" title="관심 무기">${r.target?'★':'☆'}</button></div></div>`;
+  ? `<div class="relic-stage"><button class="collect-toggle" data-collect="${t.id}" aria-pressed="${mixed?'mixed':step>0}" aria-label="${esc(name)} 수집${mixed?' · 일부 수집, 클릭하면 모두 수집':''}"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 8 3 3 7-7"/></svg>수집</button></div>`
+  : `<label class="relic-stage" for="stage-${t.id}"><select id="stage-${t.id}" data-stage="${t.id}" aria-label="${esc(name)} 완료한 단계" title="${mixed?'검·방패의 기존 단계가 다릅니다. 선택하면 함께 변경합니다.':step?`${step}. ${esc(t.items[step-1].stage)}`:'미시작'}">${mixed?'<option value="mixed" selected disabled>단계 다름</option>':''}<option value="0"${!step?' selected':''}>미시작</option>${t.items.map((item,n)=>`<option value="${item.id}"${!mixed&&step===n+1?' selected':''}>${esc(item.stage)}${n===t.items.length-1?' ✓':''}</option>`).join('')}</select></label>`;
+ const detail=paired?`<div class="relic-pair-icons">${icons}</div>`:`<button class="relic-detail" data-detail="${t.id}" aria-label="${esc(name+' · '+current.name)} 단계·획득처" title="${esc(current.name)} · 단계·획득처"><img loading="lazy" src="${esc(current.icon)}" alt=""><span>${single||cycling?'획득처':step?`${step}/${t.items.length}`:'단계'}</span></button>`;
+ return `<div class="relic-entry ${status}${paired?' relic-pair':''}" data-track="${t.id}">${control}<div class="relic-cell-actions">${detail}<button class="relic-target" data-target="${t.id}" aria-pressed="${target}" aria-label="${esc(name)} 관심 무기" title="관심 무기">${target?'★':'☆'}</button></div></div>`;
 }
 function collectionTable(list){
  const series=data.series.filter(s=>(!filters.kind||s.kind===filters.kind)&&(!filters.series||s.id===filters.series));
  const matched=new Set(list.map(t=>t.id)),jobs=data.jobs.filter(j=>list.some(t=>t.jobId===j.id));
  const seriesIds=new Set(series.map(s=>s.id)),all=data.tracks.filter(t=>seriesIds.has(t.seriesId));
  const boundary=index=>index>0&&series[index-1].kind!==series[index].kind?' series-boundary':'';
- return `<div id="relicTableScroll" class="relic-table-scroll" role="region" aria-label="직업별 무기 수집표, 가로와 세로로 스크롤 가능" tabindex="0"><table class="relic-table" style="--table-width:${104+series.length*120}px"><caption class="visually-hidden">직업별 무기 수집 현황과 완료 단계. 같은 칸의 나이트 검과 방패는 따로 저장됩니다.</caption><colgroup><col class="relic-job-col">${series.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">직업</th>${series.map((s,index)=>`<th scope="col" class="${boundary(index)}"><a href="${esc(s.source)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(s.name)} 획득 안내" title="${esc(s.name)}">${esc(COLUMN_NAMES[s.id]||s.short)} ↗</a><small>${KIND_NAMES[s.kind]} · ${s.labels.length===1?`Lv.${s.level}`:`${s.labels.length}단계`}</small></th>`).join('')}</tr></thead><tbody>${jobs.map(j=>{
+ return `<div id="relicTableScroll" class="relic-table-scroll" role="region" aria-label="직업별 무기 수집표, 가로와 세로로 스크롤 가능" tabindex="0"><table class="relic-table" style="--table-width:${104+series.length*140}px"><caption class="visually-hidden">직업별 무기 수집 현황과 완료 단계. 나이트 검과 방패는 함께 변경됩니다.</caption><colgroup><col class="relic-job-col">${series.map(()=>'<col>').join('')}</colgroup><thead><tr><th scope="col">직업</th>${series.map((s,index)=>`<th scope="col" class="${boundary(index)}"><a href="${esc(s.source)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(s.name)} 획득 안내" title="${esc(s.name)}">${esc(COLUMN_NAMES[s.id]||s.short)} ↗</a><small>${KIND_NAMES[s.kind]} · ${s.labels.length===1?`Lv.${s.level}`:`${s.labels.length}단계`}</small></th>`).join('')}</tr></thead><tbody>${jobs.map(j=>{
   const own=all.filter(t=>t.jobId===j.id),stats=summarize(own,state.records);
   return `<tr data-job="${j.id}"><th scope="row"><span class="relic-job" data-role="${j.role}">${esc(j.name)}</span><small>${j.id} · ${stats.complete}/${stats.total}</small></th>${series.map((s,index)=>{
    const available=own.filter(t=>t.seriesId===s.id),entries=available.filter(t=>matched.has(t.id)),edge=boundary(index);
    if(!available.length)return `<td class="relic-unavailable${edge}"><span aria-label="해당 무기 없음">—</span></td>`;
    if(!entries.length)return `<td class="relic-filtered${edge}">조건 제외</td>`;
-   return `<td data-series="${s.id}" class="${edge}">${entries.map(tableEntry).join('')}</td>`;
+   return `<td data-series="${s.id}" class="${edge}">${j.id==='PLD'?tableEntry(available.find(t=>t.slot==='weapon')||available[0]):entries.map(tableEntry).join('')}</td>`;
   }).join('')}</tr>`;
  }).join('')}</tbody></table></div>`;
 }
@@ -76,7 +90,7 @@ function render(){
  const total=summarize(data.tracks,state.records);$('completeCount').textContent=total.complete;$('totalCount').textContent=`/ ${total.total}개`;$('progressCount').textContent=total.progress;$('targetCount').textContent=total.targets;
  const list=filterTracks(data,state.records,filters);
  $('resultCount').textContent=`${list.length}개`;$('targetFilter').setAttribute('aria-pressed',String(filters.target));$('targetFilter').textContent=filters.target?'★ 관심 무기만':'☆ 관심 무기만';
- $('scopeNote').textContent='칸에서 단계나 수집 여부를 바꾸면 자동 저장됩니다. 나이트 검·방패는 별도 기록합니다. — 해당 무기 없음 · 조건 제외: 필터 불일치';
+ $('scopeNote').textContent='칸에서 바꾸면 자동 저장됩니다. 나이트 검·방패는 함께 변경하며, 각 아이콘으로 상세정보를 엽니다. — 해당 무기 없음 · 조건 제외: 필터 불일치';
  $('weaponList').innerHTML=list.length?collectionTable(list):'';
  if(scrollPosition&&$('relicTableScroll')){$('relicTableScroll').scrollLeft=scrollPosition.left;$('relicTableScroll').scrollTop=scrollPosition.top;}
  $('emptyResults').hidden=list.length>0;
@@ -89,9 +103,10 @@ function render(){
 }
 function renderDetail(){
  const t=trackById.get(detailId),s=seriesById.get(t.seriesId),r=getRecord(t.id),n=stageIndex(t,r),last=t.items.at(-1);
+ const group=pairState(companionTracks(t),state.records),paired=companionTracks(t).length>1;
  const note=$('weaponNote')?.value,oldNoteTrack=$('weaponNote')?.dataset.track,scroll=$('detailDialog').scrollTop;
  $('detailTitle').textContent=label(t)+' · '+s.short;
- $('detailBody').innerHTML=`<div class="detail-intro"><img src="${esc(last.icon)}" alt=""><div><h3>${esc(last.name)}</h3><p>${esc(s.name)} · 최종 IL ${last.itemLevel}</p></div></div><div class="acquisition"><p>${esc(s.acquisition)}</p><a href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">획득 경로 자세히 보기 ↗</a></div><p class="muted">완료한 단계의 「여기까지」를 누르면 이전 단계도 함께 기록됩니다. 모조품의 별도 구매 여부는 포함하지 않습니다.</p><ol class="stage-list">${t.items.map((item,i)=>`<li class="${i<n?'done':''} ${i===n-1?'current':''}"><span class="stage-number">${i<n?'✓':i+1}</span><img loading="lazy" src="${esc(item.icon)}" alt=""><div class="stage-info"><strong>${esc(item.name)}</strong><small>${esc(item.stage)} · IL ${item.itemLevel}</small><a href="${esc(item.official)}" target="_blank" rel="noopener noreferrer">공식 가이드 ↗</a></div><button data-set-stage="${item.id}"${i===n-1?' disabled':''}>${i===n-1?'현재 단계':'여기까지'}</button></li>`).join('')}</ol><div class="detail-actions"><button id="clearStage"${n?'':' disabled'}>${t.items.length===1?'미수집으로':'미시작으로'}</button></div><div class="note-area"><label for="weaponNote">진행 메모</label><textarea id="weaponNote" data-track="${t.id}" maxlength="500" rows="3" placeholder="모아 둔 재료, 다음에 할 퀘스트 등">${esc(oldNoteTrack===t.id?note:r.note)}</textarea><button id="saveNote">메모 저장</button></div>`;
+ $('detailBody').innerHTML=`<div class="detail-intro"><img src="${esc(last.icon)}" alt=""><div><h3>${esc(last.name)}</h3><p>${esc(s.name)} · 최종 IL ${last.itemLevel}</p></div></div><div class="acquisition"><p>${esc(s.acquisition)}</p><a href="${esc(s.source)}" target="_blank" rel="noopener noreferrer">획득 경로 자세히 보기 ↗</a></div><p class="muted">${paired?'단계를 변경하면 검·방패에 함께 적용됩니다. 메모는 각 아이템별로 보관합니다. ':''}완료한 단계의 「여기까지」를 누르면 이전 단계도 함께 기록됩니다. 모조품의 별도 구매 여부는 포함하지 않습니다.</p><ol class="stage-list">${t.items.map((item,i)=>`<li class="${i<n?'done':''} ${i===n-1?'current':''}"><span class="stage-number">${i<n?'✓':i+1}</span><img loading="lazy" src="${esc(item.icon)}" alt=""><div class="stage-info"><strong>${esc(item.name)}</strong><small>${esc(item.stage)} · IL ${item.itemLevel}</small><a href="${esc(item.official)}" target="_blank" rel="noopener noreferrer">공식 가이드 ↗</a></div><button data-set-stage="${item.id}"${i===n-1&&!group.mixed?' disabled':''}>${i===n-1&&!group.mixed?'현재 단계':'여기까지'}</button></li>`).join('')}</ol><div class="detail-actions"><button id="clearStage"${group.step?'':' disabled'}>${t.items.length===1?'미수집으로':'미시작으로'}</button></div><div class="note-area"><label for="weaponNote">진행 메모</label><textarea id="weaponNote" data-track="${t.id}" maxlength="500" rows="3" placeholder="모아 둔 재료, 다음에 할 퀘스트 등">${esc(oldNoteTrack===t.id?note:r.note)}</textarea><button id="saveNote">메모 저장</button></div>`;
  $('detailDialog').scrollTop=scroll;
 }
 function openDetail(id){detailId=id;renderDetail();$('detailDialog').showModal();$('detailDialog').scrollTop=0;}
@@ -126,7 +141,7 @@ async function boot(){
  $('targetFilter').addEventListener('click',()=>{filters.target=!filters.target;changedFilters();});$('resetFilters').addEventListener('click',resetFilters);
  $('kinds').addEventListener('click',e=>{const b=e.target.closest('[data-kind]');if(b){filters.kind=b.dataset.kind;filters.series='';renderSeriesOptions();changedFilters();}});
  $('weaponList').addEventListener('change',e=>{if(e.target.matches('[data-stage]')&&!setStage(e.target.dataset.stage,Number(e.target.value)))render();});
- $('weaponList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.detail)openDetail(b.dataset.detail);if(b.dataset.target)updateRecord(b.dataset.target,{target:!getRecord(b.dataset.target).target});if(b.dataset.cycle)cycleStage(b.dataset.cycle);if(b.dataset.collect){const t=trackById.get(b.dataset.collect);setStage(t.id,getRecord(t.id).itemId?0:t.items[0].id);}});
+ $('weaponList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.detail)openDetail(b.dataset.detail);if(b.dataset.target)updateCollection(b.dataset.target,(_t,group)=>({target:!group.target}));if(b.dataset.cycle)cycleStage(b.dataset.cycle);if(b.dataset.collect)updateCollection(b.dataset.collect,(t,group)=>({itemId:group.status==='complete'?0:t.items[0].id}));});
  $('detailBody').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.setStage)setStage(detailId,Number(b.dataset.setStage));if(b.id==='clearStage')setStage(detailId,0);if(b.id==='saveNote'&&updateRecord(detailId,{note:$('weaponNote').value}))$('saveNote').textContent='저장했습니다';});
  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.close).close()));
  $('detailDialog').addEventListener('close',()=>{detailId=null;$('detailBody').innerHTML='';});

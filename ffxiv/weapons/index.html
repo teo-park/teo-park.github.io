@@ -7,8 +7,8 @@
   <meta name="theme-color" content="#0b1220"><link rel="canonical" href="https://teo-park.github.io/ffxiv/weapons/">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../theme.css?v=20260909-line1">
   <link rel="stylesheet" href="./styles.css?v=20260909-share1">
-  <link rel="stylesheet" href="./relic-table.css?v=20260909-table3">
-  <script type="module" src="./app.js?v=20260909-table3"></script>
+  <link rel="stylesheet" href="./relic-table.css?v=20260909-pair1">
+  <script type="module" src="./app.js?v=20260909-pair1"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog">무기 목록으로 바로가기</a>
@@ -29,7 +29,7 @@
         <p id="scopeNote" class="scope-note"></p><div id="weaponList"></div>
         <div id="emptyResults" class="empty-state" hidden><strong>조건에 맞는 무기가 없습니다.</strong><p>시리즈에 따라 지원하는 직업이 다릅니다. 필터를 바꿔 보세요.</p></div>
       </section>
-      <p class="data-note">패치 7.56 기준 · 성장형 6종, 절 레이드 7종, 재보강 신곡 무기와 마법 신사 우산을 포함합니다. 나이트의 검·방패는 각각 기록합니다. 현재 소지품이 아닌 제작·획득 이력을 관리하며, 기록은 이 브라우저에 저장됩니다.</p>
+      <p class="data-note">패치 7.56 기준 · 성장형 6종, 절 레이드 7종, 재보강 신곡 무기와 마법 신사 우산을 포함합니다. 나이트의 검·방패는 함께 변경하며, 수집 개수는 아이템별로 셉니다. 현재 소지품이 아닌 제작·획득 이력을 관리하며, 기록은 이 브라우저에 저장됩니다.</p>
     </div>
   </main>
   <dialog id="showcaseDialog" class="showcase-dialog" aria-labelledby="showcaseTitle"><div class="dialog-top"><h2 id="showcaseTitle">전체 수집 현황</h2><div class="showcase-actions"><button id="copyShowcase" class="primary" disabled>이미지 복사</button><button id="saveShowcase" disabled>PNG 저장</button><button id="closeShowcase" aria-label="전체 수집 현황 닫기">닫기 ×</button></div></div><div class="dialog-body showcase-body"><div class="share-options"><label>이름 <span class="muted">선택</span><input id="shareName" maxlength="30" autocomplete="off" placeholder="모험가 이름"></label><label>표시할 무기<select id="shareKind"><option value="">전체 시리즈</option><option value="relic">성장형 무기</option><option value="ultimate">절 무기</option><option value="enhanced">재보강 무기</option></select></label><label>배경<select id="shareTheme"><option value="night">밤하늘</option><option value="paper">양피지</option></select></label><label class="share-check"><input id="shareOnlyStarted" type="checkbox">기록한 직업만</label></div><div class="share-hint"><p>직업별 한 행 · 시리즈별 한 열. 검색·목록 필터와 관계없이 전체 기록으로 만듭니다.</p><button id="shareZoom" aria-pressed="false">크게 보기</button></div><div class="share-status"><p id="shareStatus" role="status" aria-live="polite"></p><button id="retryShowcase" hidden>다시 불러오기</button></div><div id="sharePreview" class="share-preview" aria-busy="false" tabindex="0" aria-label="공유 이미지 미리보기, 스크롤로 전체 보기"><img id="shareImage" alt="무기 수집 현황 이미지" hidden></div><details class="share-text-details"><summary>직업별 현황 텍스트 보기</summary><div id="shareText" class="share-text"></div></details></div></dialog>

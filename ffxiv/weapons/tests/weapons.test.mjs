@@ -62,9 +62,9 @@ async function harness(tester,stored=null,prefs=null){
  const saved=()=>JSON.parse(w.localStorage.getItem(core.STORAGE_KEY)||'null');
  try{await tester({w,d,click,change,saved});}finally{dom.window.close();}
 }
-test('UI stage changes persist without changing shield and undo restores exactly',()=>harness(({d,change,click,saved})=>{
+test('UI stage changes save sword and shield atomically and undo restores exactly',()=>harness(({d,change,click,saved})=>{
  change(d.querySelector(`[data-stage="${pld.id}"]`),pld.items[5].id);
- assert.equal(saved().records[pld.id].itemId,pld.items[5].id);assert.equal(saved().records[shield.id],undefined);assert.equal(d.getElementById('progressCount').textContent,'1');
+ assert.equal(saved().records[pld.id].itemId,pld.items[5].id);assert.equal(saved().records[shield.id].itemId,shield.items[5].id);assert.equal(d.getElementById('progressCount').textContent,'2');
  click('#undo');assert.deepEqual(saved().records,{});
 }));
 test('UI existing records restore, stage detail shows previous steps, notes are escaped',()=>harness(({d,click,change,saved})=>{
@@ -84,18 +84,19 @@ test('UI IME input searches the composing consonant and changing table scope pre
 test('relic table aligns six full series by job despite an old single-series/grid preference',()=>harness(({d})=>{
  assert.equal(d.getElementById('catalog').dataset.collectionLayout,'table');assert.equal(d.getElementById('seriesField').hidden,true);assert.equal(d.querySelector('.collection-layout-switch'),null);
  assert.deepEqual([...d.querySelectorAll('.relic-table thead th a')].map(x=>x.textContent.replace(' ↗','')),['제타','아니마','에우레카','레지스탕스','맨더빌','팬텀']);
- assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);assert.equal(d.querySelectorAll('.relic-entry').length,101);assert.equal(d.getElementById('pagination'),null);
- assert.equal(d.querySelectorAll('[data-job="PLD"] td[data-series="zodiac"] [data-stage]').length,2);
+ assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);assert.equal(d.querySelectorAll('.relic-entry').length,95);assert.equal(d.getElementById('pagination'),null);
+ assert.equal(d.querySelectorAll('[data-job="PLD"] td[data-series="zodiac"] [data-stage]').length,1);
+ assert.equal(d.querySelectorAll('[data-job="PLD"] td[data-series="zodiac"] .relic-item-icon').length,2);
  assert.equal(d.querySelector('[data-job="SGE"] td').textContent,'—');assert.equal(d.querySelector('[data-job="BLU"]'),null);
  assert.equal(d.getElementById('seriesFilter').value,'');
 },null,{filters:{kind:'relic',series:'zodiac'},layout:'grid'}));
 
-test('table changes preserve scroll/focus and keep sword, shield and other series independent',()=>harness(({d,change,click,saved})=>{
+test('paired table changes preserve scroll/focus and keep other series independent',()=>harness(({d,change,click,saved})=>{
  const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=260;scroll.scrollTop=400;
  const input=d.querySelector(`[data-stage="${pld.id}"]`);input.focus();change(input,pld.items.at(-1).id);
  assert.equal(d.activeElement.id,input.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,260);assert.equal(d.getElementById('relicTableScroll').scrollTop,400);
  assert.ok(d.querySelector(`[data-track="${pld.id}"]`).classList.contains('complete'));
- change(d.querySelector(`[data-stage="${shield.id}"]`),shield.items[2].id);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);assert.equal(saved().records[shield.id].itemId,shield.items[2].id);
+ assert.equal(d.querySelector(`[data-stage="${shield.id}"]`),null);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);assert.equal(saved().records[shield.id].itemId,shield.items.at(-1).id);
  const anima=t('anima.PLD.weapon');change(d.querySelector(`[data-stage="${anima.id}"]`),anima.items[1].id);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);click('#undo');assert.equal(saved().records[anima.id],undefined);
 }));
 
@@ -121,33 +122,34 @@ test('UI writes merge unseen changes from another tab instead of losing them',()
 }));
 
 
-test('ultimate table includes seven raids with separate sword and shield records',()=>harness(({d,click,change,saved})=>{
+test('ultimate table includes seven raids with one collection button and two icons per PLD pair',()=>harness(({d,click,change,saved})=>{
  assert.equal(d.getElementById('resultLabel').textContent,'절 무기 수집표');
  assert.equal(d.querySelectorAll('.relic-table thead th').length,8);assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);
- assert.equal(d.querySelectorAll('[data-collect]').length,136);assert.equal(d.querySelectorAll('[data-stage]').length,0);
+ assert.equal(d.querySelectorAll('[data-collect]').length,129);assert.equal(d.querySelectorAll('[data-stage]').length,0);
  assert.equal(d.getElementById('seriesField').hidden,true);assert.equal(d.getElementById('seriesFilter').value,'');
  const sword=t('ucob.PLD.weapon'),shield=t('ucob.PLD.shield');
- assert.equal(d.querySelectorAll('[data-job="PLD"] [data-series="ucob"] [data-collect]').length,2);
+ assert.equal(d.querySelectorAll('[data-job="PLD"] [data-series="ucob"] [data-collect]').length,1);
+ assert.deepEqual([...d.querySelectorAll('[data-job="PLD"] [data-series="ucob"] [data-detail]')].map(b=>b.dataset.detail),[sword.id,shield.id]);
  const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=350;scroll.scrollTop=240;
  const button=d.querySelector('[data-collect="ucob.PLD.weapon"]');button.focus();click('[data-collect="ucob.PLD.weapon"]');
- assert.equal(saved().records[sword.id].itemId,sword.items[0].id);assert.equal(saved().records[shield.id],undefined);
+ assert.equal(saved().records[sword.id].itemId,sword.items[0].id);assert.equal(saved().records[shield.id].itemId,shield.items[0].id);
  assert.equal(d.activeElement.dataset.collect,sword.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,350);assert.equal(d.getElementById('relicTableScroll').scrollTop,240);
- click('[data-collect="ucob.PLD.shield"]');click('#undo');assert.equal(saved().records[shield.id],undefined);assert.equal(saved().records[sword.id].itemId,sword.items[0].id);
+ click('[data-collect="ucob.PLD.weapon"]');assert.equal(saved().records[sword.id].itemId,0);assert.equal(saved().records[shield.id].itemId,0);click('#undo');assert.equal(saved().records[shield.id].itemId,shield.items[0].id);assert.equal(saved().records[sword.id].itemId,sword.items[0].id);
  change(d.getElementById('jobFilter'),'VPR');assert.equal(d.querySelector('[data-job="VPR"] td').textContent,'—');assert.ok(d.querySelector('[data-collect="top.VPR.weapon"]'));
 },null,{filters:{kind:'ultimate',series:'ucob'},layout:'grid'}));
 
 test('all table exposes every record and all fifteen series on aligned job rows',()=>harness(({d,click,change,saved})=>{
  click('[data-kind=""]');assert.equal(d.getElementById('resultLabel').textContent,'전체 무기 수집표');
  assert.equal(d.querySelectorAll('.relic-table tbody tr').length,22);assert.equal(d.querySelectorAll('.relic-table thead th').length,16);
- assert.equal(d.querySelectorAll('.relic-entry').length,260);assert.equal(d.querySelectorAll('[data-stage]').length,101);assert.equal(d.querySelectorAll('[data-cycle]').length,23);assert.equal(d.querySelectorAll('[data-collect]').length,136);
+ assert.equal(d.querySelectorAll('.relic-entry').length,246);assert.equal(d.querySelectorAll('[data-stage]').length,95);assert.equal(d.querySelectorAll('[data-cycle]').length,22);assert.equal(d.querySelectorAll('[data-collect]').length,129);
  assert.equal(d.querySelectorAll('.relic-table thead .series-boundary').length,2);
  assert.ok(d.querySelector('[data-job="BLU"] [data-cycle="gentlemage.BLU.weapon"]'));assert.equal(d.querySelector('[data-job="BLU"] td').textContent,'—');
- assert.equal(d.querySelectorAll('[data-job="PLD"] td').length,15);assert.equal(d.querySelectorAll('[data-job="PLD"] .relic-entry').length,28);
+ assert.equal(d.querySelectorAll('[data-job="PLD"] td').length,15);assert.equal(d.querySelectorAll('[data-job="PLD"] .relic-entry').length,14);assert.equal(d.querySelectorAll('[data-job="PLD"] .relic-item-icon').length,28);
  change(d.querySelector('[data-stage="zodiac.PLD.weapon"]'),pld.items[2].id);click('[data-collect="tea.PLD.weapon"]');
  const exquisite=t('exquisite.PLD.weapon');click('[data-cycle="exquisite.PLD.weapon"]');click('[data-cycle="exquisite.PLD.weapon"]');
  assert.equal(saved().records[pld.id].itemId,pld.items[2].id);assert.equal(saved().records['tea.PLD.weapon'].itemId,t('tea.PLD.weapon').items[0].id);assert.equal(saved().records[exquisite.id].itemId,exquisite.items[1].id);
  change(d.getElementById('statusFilter'),'complete');assert.equal(d.querySelectorAll('.relic-table thead th').length,16);assert.equal(d.querySelectorAll('.relic-entry').length,2);
- assert.equal(d.querySelector('[data-job="PLD"] th small').textContent,'PLD · 2/28');
+ assert.equal(d.querySelector('[data-job="PLD"] th small').textContent,'PLD · 4/28');
 }));
 
 test('ultimate collection storage failures preserve prior state and button',()=>harness(({w,d,click,saved})=>{
@@ -156,7 +158,7 @@ test('ultimate collection storage failures preserve prior state and button',()=>
 }));
 
 
-test('enhanced buttons cycle absent to augmented to exquisite and back without touching shield or metadata',()=>harness(({d,click,saved})=>{
+test('enhanced buttons cycle sword and shield together without touching metadata',()=>harness(({d,click,saved})=>{
  click('[data-kind="enhanced"]');const id='exquisite.PLD.weapon',weapon=t(id),button=()=>d.querySelector('[data-cycle="'+id+'"]');
  const text=()=>button().querySelector('.cycle-value').textContent;
  assert.equal(text(),'없음');assert.match(button().getAttribute('aria-label'),/현재 없음, 클릭하면 보강/);
@@ -166,9 +168,9 @@ test('enhanced buttons cycle absent to augmented to exquisite and back without t
  assert.ok(button().closest('.relic-entry').classList.contains('progress'));
  click('[data-cycle="'+id+'"]');assert.equal(text(),'재보강');assert.equal(saved().records[id].itemId,weapon.items[1].id);assert.ok(button().closest('.relic-entry').classList.contains('complete'));
  click('[data-cycle="'+id+'"]');assert.equal(text(),'없음');assert.equal(saved().records[id].itemId,0);
- assert.equal(saved().records[id].target,true);assert.equal(saved().records[id].note,'남은 재료');assert.equal(saved().records['exquisite.PLD.shield'].itemId,t('exquisite.PLD.shield').items[0].id);
- click('#undo');assert.equal(text(),'재보강');assert.equal(saved().records[id].itemId,weapon.items[1].id);
-},bk({'exquisite.PLD.weapon':record(0,true,'남은 재료'),'exquisite.PLD.shield':record(t('exquisite.PLD.shield').items[0].id)})));
+ assert.equal(saved().records[id].target,true);assert.equal(saved().records[id].note,'남은 재료');assert.equal(saved().records['exquisite.PLD.shield'].itemId,0);assert.equal(saved().records['exquisite.PLD.shield'].note,'방패 메모');
+ click('#undo');assert.equal(text(),'재보강');assert.equal(saved().records[id].itemId,weapon.items[1].id);assert.equal(saved().records['exquisite.PLD.shield'].itemId,t('exquisite.PLD.shield').items[1].id);
+},bk({'exquisite.PLD.weapon':record(0,true,'남은 재료'),'exquisite.PLD.shield':record(0,false,'방패 메모')})));
 
 test('enhanced cycle restores existing progress, reads newest tab state and preserves real umbrella stage names',()=>harness(({w,d,click,saved})=>{
  click('[data-kind="enhanced"]');const id='exquisite.WAR.weapon',weapon=t(id);
@@ -182,5 +184,36 @@ test('enhanced cycle restores existing progress, reads newest tab state and pres
 
 test('enhanced cycle save failure keeps the current state and collection',()=>harness(({w,d,click,saved})=>{
  click('[data-kind="enhanced"]');const before=saved();w.Storage.prototype.setItem=()=>{throw Error('Quota exceeded');};
- click('[data-cycle="exquisite.PLD.weapon"]');assert.deepEqual(saved(),before);assert.equal(d.querySelector('[data-cycle="exquisite.PLD.weapon"] .cycle-value').textContent,'보강');assert.match(d.getElementById('storageWarning').textContent,/자동 저장 실패/);
+ click('[data-cycle="exquisite.PLD.weapon"]');assert.deepEqual(saved(),before);assert.equal(d.querySelector('[data-cycle="exquisite.PLD.weapon"] .cycle-value').textContent,'단계 다름');assert.match(d.getElementById('storageWarning').textContent,/자동 저장 실패/);
 },bk({'exquisite.PLD.weapon':record(t('exquisite.PLD.weapon').items[0].id)})));
+
+test('legacy unequal relic stages remain untouched until a shared edit, including edits from shield details',()=>harness(({d,click,change,saved})=>{
+ const before=saved();assert.equal(d.querySelector('[data-stage="'+pld.id+'"]').value,'mixed');
+ assert.equal(d.getElementById('completeCount').textContent,'1');
+ click('[data-detail="'+shield.id+'"]');assert.match(d.getElementById('detailTitle').textContent,/방패/);assert.match(d.getElementById('detailBody').textContent,/검·방패에 함께 적용/);
+ assert.equal(d.querySelector('[data-set-stage="'+shield.items[2].id+'"]').disabled,false);assert.deepEqual(saved(),before);
+ click('[data-set-stage="'+shield.items[2].id+'"]');assert.equal(saved().records[pld.id].itemId,pld.items[2].id);assert.equal(saved().records[shield.id].itemId,shield.items[2].id);
+ assert.equal(saved().records[pld.id].note,'검 메모');assert.equal(saved().records[shield.id].note,'방패 메모');
+ click('[data-close="detailDialog"]');click('#undo');assert.deepEqual(saved(),before);assert.equal(d.querySelector('[data-stage="'+pld.id+'"]').value,'mixed');
+ // A filter matching only the shield still exposes shared controls and both detail icons.
+ change(d.getElementById('statusFilter'),'progress');assert.equal(d.querySelectorAll('.relic-entry').length,1);assert.equal(d.querySelectorAll('.relic-item-icon').length,2);
+ click('[data-target="'+pld.id+'"]');assert.equal(saved().records[pld.id].target,false);assert.equal(saved().records[shield.id].target,false);
+ assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);assert.equal(saved().records[shield.id].itemId,shield.items[2].id);
+},bk({[pld.id]:record(pld.items.at(-1).id,false,'검 메모'),[shield.id]:record(shield.items[2].id,true,'방패 메모')})));
+
+test('half-collected ultimate pair completes together using the latest tab data and keeps unrelated records',()=>harness(({w,d,click,saved})=>{
+ const sword=t('ucob.PLD.weapon'),shield=t('ucob.PLD.shield'),button='[data-collect="'+sword.id+'"]';
+ click('[data-kind="ultimate"]');assert.equal(d.querySelector(button).getAttribute('aria-pressed'),'mixed');
+ const before=saved(),war=t('tea.WAR.weapon');before.records[shield.id]=record(0,true,'다른 탭 메모');before.records[war.id]=record(war.items[0].id);
+ w.localStorage.setItem(core.STORAGE_KEY,JSON.stringify(before));click(button);
+ assert.equal(d.querySelector(button).getAttribute('aria-pressed'),'true');assert.equal(saved().records[sword.id].itemId,sword.items[0].id);assert.equal(saved().records[shield.id].itemId,shield.items[0].id);
+ assert.equal(saved().records[shield.id].note,'다른 탭 메모');assert.deepEqual(saved().records[war.id],before.records[war.id]);
+ click('#undo');assert.deepEqual(saved(),before);assert.equal(d.querySelector(button).getAttribute('aria-pressed'),'mixed');
+},bk({'ucob.PLD.weapon':record(t('ucob.PLD.weapon').items[0].id)})));
+
+test('unequal enhanced pairs align to the higher stage before cycling, with no automatic migration',()=>harness(({d,click,saved})=>{
+ const sword=t('exquisite.PLD.weapon'),shield=t('exquisite.PLD.shield'),button='[data-cycle="'+sword.id+'"]';
+ const before=saved();click('[data-kind="enhanced"]');assert.deepEqual(saved(),before);assert.equal(d.querySelector(button+' .cycle-value').textContent,'단계 다름');assert.match(d.querySelector(button).getAttribute('aria-label'),/클릭하면 재보강/);
+ click(button);assert.equal(saved().records[sword.id].itemId,sword.items[1].id);assert.equal(saved().records[shield.id].itemId,shield.items[1].id);
+ click('#undo');assert.deepEqual(saved(),before);click(button);click(button);assert.equal(saved().records[sword.id].itemId,0);assert.equal(saved().records[shield.id].itemId,0);
+},bk({'exquisite.PLD.weapon':record(t('exquisite.PLD.weapon').items[1].id),'exquisite.PLD.shield':record(t('exquisite.PLD.shield').items[0].id)})));

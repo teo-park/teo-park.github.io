@@ -1,7 +1,7 @@
 .filters.relic-filters{grid-template-columns:minmax(200px,1.4fr) minmax(140px,.7fr) minmax(160px,.8fr)}
 .catalog-toolbar h2 #resultLabel{font:inherit;color:inherit;margin:0}
 .relic-table-scroll{width:max-content;max-width:100%;overflow:auto;max-height:min(720px,72dvh);border:1px solid var(--ff-line);border-radius:8px;scrollbar-gutter:stable;scroll-padding:94px 0 0 106px}
-.relic-table{width:var(--table-width,824px);table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
+.relic-table{width:var(--table-width,944px);table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
 .relic-table .relic-job-col{width:104px}
 .relic-table th,.relic-table td{border-right:1px solid var(--ff-line);border-bottom:1px solid var(--ff-line);padding:4px;vertical-align:middle;background:#121e31}
 .relic-table tr>*:last-child{border-right:0}
@@ -36,6 +36,11 @@
 .relic-entry.complete .relic-detail{color:#b6e9cc}
 .relic-target{width:24px;flex:none;color:var(--ff-muted)}
 .relic-target[aria-pressed=true]{color:var(--ff-gold)}
+.relic-pair-icons{display:flex;align-items:center;gap:4px}
+.relic-pair-icons .relic-item-icon{display:grid;place-items:center;width:32px;min-height:28px;padding:2px}
+.relic-item-icon img{display:block;width:24px;height:24px;object-fit:contain}
+.relic-pair .collect-toggle[aria-pressed=mixed]{color:var(--ff-gold);border-color:#aa8b51;background:#332f23}
+.relic-pair .collect-toggle[aria-pressed=mixed] svg{opacity:.5}
 .relic-table .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 @media(max-width:760px){.filters.relic-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.relic-filters .search-label{grid-column:1/-1}.relic-table .relic-job-col{width:104px}.relic-table-scroll{scroll-padding-left:106px}.relic-table tbody th{padding:8px}.relic-table td{padding:4px}}
 @media(pointer:coarse){.relic-stage select{min-height:44px}.relic-cell-actions button{min-height:40px}.relic-target{width:40px}}
@@ -50,3 +55,4 @@
 .relic-entry.progress .stage-cycle{border-color:#aa8b51;color:#f2d496;background:#332f23}
 .relic-entry.complete .stage-cycle{border-color:#70b99b;color:#c4f0db;background:#16382f}
 @media(pointer:coarse){.relic-stage .stage-cycle{min-height:44px}.relic-cell-actions .relic-detail .relic-slot{font-size:13.334px}.relic-cell-actions .relic-detail img{display:none}}
+@media(pointer:coarse){.relic-pair-icons .relic-item-icon{width:40px;min-height:40px}.relic-pair-icons{gap:2px}}
