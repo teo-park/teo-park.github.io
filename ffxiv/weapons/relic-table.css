@@ -1,4 +1,4 @@
-.filters.relic-filters{grid-template-columns:minmax(200px,1.4fr) minmax(140px,.7fr) minmax(160px,.8fr)}
+
 .catalog-toolbar h2 #resultLabel{font:inherit;color:inherit;margin:0}
 .relic-table-scroll{width:max-content;max-width:100%;overflow-x:auto;border:1px solid var(--ff-line);border-radius:8px;scroll-padding-left:106px}
 .relic-table{width:var(--table-width,944px);table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
@@ -42,12 +42,12 @@
 .relic-pair .collect-toggle[aria-pressed=mixed]{color:var(--ff-gold);border-color:#aa8b51;background:#332f23}
 .relic-pair .collect-toggle[aria-pressed=mixed] svg{opacity:.5}
 .relic-table .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-@media(max-width:760px){.filters.relic-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.relic-filters .search-label{grid-column:1/-1}.relic-table .relic-job-col{width:104px}.relic-table-scroll{scroll-padding-left:106px}.relic-table tbody th{padding:8px}.relic-table td{padding:4px}}
+@media(max-width:760px){.relic-table .relic-job-col{width:104px}.relic-table-scroll{scroll-padding-left:106px}.relic-table tbody th{padding:8px}.relic-table td{padding:4px}}
 @media(pointer:coarse){.relic-stage select{min-height:44px}.relic-cell-actions button{min-height:40px}.relic-target{width:40px}}
 
 .relic-table .series-boundary{border-left:3px solid #617892}
 .relic-stage .collect-toggle{flex:1;min-width:0;min-height:36px;padding:6px;font-size:13.334px;white-space:nowrap}
-@media(max-width:760px){.relic-filters label:last-child{grid-column:auto}}
+
 @media(pointer:coarse){.relic-stage .collect-toggle{min-height:44px}}
 
 .relic-stage .stage-cycle{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:0;min-height:36px;padding:6px;font-size:13.334px;white-space:nowrap}

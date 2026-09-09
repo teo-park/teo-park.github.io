@@ -57,9 +57,6 @@ body .select-options > .select-option:hover:not(:disabled):not([aria-checked="tr
 body .select-options > .select-option:focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: 2px; z-index: 2; }
 body .select-options > .select-option:disabled { opacity: .45; cursor: not-allowed; }
 body .select-options[aria-invalid="true"] { outline: 1px solid #e69891; outline-offset: 3px; border-radius: 5px; }
-@media (min-width: 1051px) {
-  body .weapon-main .filters { grid-template-columns: minmax(200px,1.3fr) minmax(190px,1.2fr) minmax(130px,.7fr) minmax(max-content,1fr); }
-}
 @media (max-width: 480px) {
   body .select-options > .select-option { padding-inline: 6px; }
 }
