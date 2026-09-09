@@ -139,12 +139,12 @@ test('ultimate table includes seven raids with separate sword and shield records
 test('all table exposes every record and all fifteen series on aligned job rows',()=>harness(({d,click,change,saved})=>{
  click('[data-kind=""]');assert.equal(d.getElementById('resultLabel').textContent,'전체 무기 수집표');
  assert.equal(d.querySelectorAll('.relic-table tbody tr').length,22);assert.equal(d.querySelectorAll('.relic-table thead th').length,16);
- assert.equal(d.querySelectorAll('.relic-entry').length,260);assert.equal(d.querySelectorAll('[data-stage]').length,124);assert.equal(d.querySelectorAll('[data-collect]').length,136);
+ assert.equal(d.querySelectorAll('.relic-entry').length,260);assert.equal(d.querySelectorAll('[data-stage]').length,101);assert.equal(d.querySelectorAll('[data-cycle]').length,23);assert.equal(d.querySelectorAll('[data-collect]').length,136);
  assert.equal(d.querySelectorAll('.relic-table thead .series-boundary').length,2);
- assert.ok(d.querySelector('[data-job="BLU"] [data-stage="gentlemage.BLU.weapon"]'));assert.equal(d.querySelector('[data-job="BLU"] td').textContent,'—');
+ assert.ok(d.querySelector('[data-job="BLU"] [data-cycle="gentlemage.BLU.weapon"]'));assert.equal(d.querySelector('[data-job="BLU"] td').textContent,'—');
  assert.equal(d.querySelectorAll('[data-job="PLD"] td').length,15);assert.equal(d.querySelectorAll('[data-job="PLD"] .relic-entry').length,28);
  change(d.querySelector('[data-stage="zodiac.PLD.weapon"]'),pld.items[2].id);click('[data-collect="tea.PLD.weapon"]');
- const exquisite=t('exquisite.PLD.weapon');change(d.querySelector('[data-stage="exquisite.PLD.weapon"]'),exquisite.items[1].id);
+ const exquisite=t('exquisite.PLD.weapon');click('[data-cycle="exquisite.PLD.weapon"]');click('[data-cycle="exquisite.PLD.weapon"]');
  assert.equal(saved().records[pld.id].itemId,pld.items[2].id);assert.equal(saved().records['tea.PLD.weapon'].itemId,t('tea.PLD.weapon').items[0].id);assert.equal(saved().records[exquisite.id].itemId,exquisite.items[1].id);
  change(d.getElementById('statusFilter'),'complete');assert.equal(d.querySelectorAll('.relic-table thead th').length,16);assert.equal(d.querySelectorAll('.relic-entry').length,2);
  assert.equal(d.querySelector('[data-job="PLD"] th small').textContent,'PLD · 2/28');
@@ -154,3 +154,33 @@ test('ultimate collection storage failures preserve prior state and button',()=>
  click('[data-kind="ultimate"]');w.Storage.prototype.setItem=()=>{throw Error('Quota exceeded');};
  click('[data-collect="ucob.PLD.weapon"]');assert.equal(saved(),null);assert.equal(d.querySelector('[data-collect="ucob.PLD.weapon"]').getAttribute('aria-pressed'),'false');assert.match(d.getElementById('storageWarning').textContent,/자동 저장 실패/);
 }));
+
+
+test('enhanced buttons cycle absent to augmented to exquisite and back without touching shield or metadata',()=>harness(({d,click,saved})=>{
+ click('[data-kind="enhanced"]');const id='exquisite.PLD.weapon',weapon=t(id),button=()=>d.querySelector('[data-cycle="'+id+'"]');
+ const text=()=>button().querySelector('.cycle-value').textContent;
+ assert.equal(text(),'없음');assert.match(button().getAttribute('aria-label'),/현재 없음, 클릭하면 보강/);
+ const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=80;scroll.scrollTop=190;button().focus();
+ click('[data-cycle="'+id+'"]');assert.equal(text(),'보강');assert.equal(saved().records[id].itemId,weapon.items[0].id);
+ assert.equal(d.activeElement.id,'cycle-'+id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,80);assert.equal(d.getElementById('relicTableScroll').scrollTop,190);
+ assert.ok(button().closest('.relic-entry').classList.contains('progress'));
+ click('[data-cycle="'+id+'"]');assert.equal(text(),'재보강');assert.equal(saved().records[id].itemId,weapon.items[1].id);assert.ok(button().closest('.relic-entry').classList.contains('complete'));
+ click('[data-cycle="'+id+'"]');assert.equal(text(),'없음');assert.equal(saved().records[id].itemId,0);
+ assert.equal(saved().records[id].target,true);assert.equal(saved().records[id].note,'남은 재료');assert.equal(saved().records['exquisite.PLD.shield'].itemId,t('exquisite.PLD.shield').items[0].id);
+ click('#undo');assert.equal(text(),'재보강');assert.equal(saved().records[id].itemId,weapon.items[1].id);
+},bk({'exquisite.PLD.weapon':record(0,true,'남은 재료'),'exquisite.PLD.shield':record(t('exquisite.PLD.shield').items[0].id)})));
+
+test('enhanced cycle restores existing progress, reads newest tab state and preserves real umbrella stage names',()=>harness(({w,d,click,saved})=>{
+ click('[data-kind="enhanced"]');const id='exquisite.WAR.weapon',weapon=t(id);
+ assert.equal(d.querySelector('[data-cycle="'+id+'"] .cycle-value').textContent,'보강');
+ w.localStorage.setItem(core.STORAGE_KEY,JSON.stringify(bk({[id]:record(weapon.items[1].id)})));
+ click('[data-cycle="'+id+'"]');assert.equal(saved().records[id].itemId,0);
+ const umbrella=t('gentlemage.BLU.weapon');click('[data-cycle="gentlemage.BLU.weapon"]');assert.equal(saved().records[umbrella.id].itemId,umbrella.items[0].id);assert.equal(d.querySelector('[data-cycle="gentlemage.BLU.weapon"] .cycle-value').textContent,'일반');
+ click('[data-cycle="gentlemage.BLU.weapon"]');assert.equal(saved().records[umbrella.id].itemId,umbrella.items[1].id);
+ click('[data-cycle="gentlemage.BLU.weapon"]');assert.equal(saved().records[umbrella.id].itemId,0);
+},bk({'exquisite.WAR.weapon':record(t('exquisite.WAR.weapon').items[0].id)})));
+
+test('enhanced cycle save failure keeps the current state and collection',()=>harness(({w,d,click,saved})=>{
+ click('[data-kind="enhanced"]');const before=saved();w.Storage.prototype.setItem=()=>{throw Error('Quota exceeded');};
+ click('[data-cycle="exquisite.PLD.weapon"]');assert.deepEqual(saved(),before);assert.equal(d.querySelector('[data-cycle="exquisite.PLD.weapon"] .cycle-value').textContent,'보강');assert.match(d.getElementById('storageWarning').textContent,/자동 저장 실패/);
+},bk({'exquisite.PLD.weapon':record(t('exquisite.PLD.weapon').items[0].id)})));
