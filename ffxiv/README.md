@@ -81,7 +81,9 @@ PvP 시리즈 계산기 검증: `node --test pvp-series-calculator/tests/pvp-ser
 
 마수도감 검증: `cd beastmaster` 후 `npm ci --ignore-scripts` 및 `npm test`
 
-공통 색상·상단 메뉴·하단 영역은 `theme.css`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
+공통 색상·하단 영역은 `theme.css`, 상단 카테고리 메뉴는 `navigation.css`와 `navigation.js`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
+
+상단 메뉴는 모든 페이지에서 진행·검색 / 수집·육성 / 낚시로 통일합니다. 메뉴 항목은 `tools/site-navigation.cjs`에서 관리하며, 저장소 루트에서 `node ffxiv/tools/site-navigation.cjs`를 실행하면 15개 페이지의 정적 메뉴와 공통 파일 참조를 갱신합니다. JavaScript 없이도 카테고리를 열어 이동할 수 있고, JavaScript는 바깥 클릭·Esc 닫기와 방향키 이동을 보완합니다. 검증: `node --test ffxiv/tests/navigation.test.cjs` (항해일지의 개발 의존성 설치 필요).
 
 모든 페이지의 본문·숫자·영문·라벨은 네이버 **나눔스퀘어라운드**를 공통으로 사용합니다. [네이버 공식 배포 페이지](https://hangeul.naver.com/font/nanum)의 Regular·Bold·ExtraBold 웹폰트를 `fonts/nanum-square-round/`에 포함해 직접 제공합니다. 원본 파일은 변경하지 않았으며, [저작권 안내와 SIL Open Font License 1.1](./fonts/nanum-square-round/OFL.txt)을 함께 배포합니다. [네이버 라이선스 안내](https://help.naver.com/support/contents/contents.help?serviceNo=1074&categoryNo=3497).
 

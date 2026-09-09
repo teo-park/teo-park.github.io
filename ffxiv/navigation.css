@@ -1,0 +1,106 @@
+/* Category navigation shared by every tool, independent of each app's controls. */
+body .site-header[data-navigation] {
+  min-height: 64px;
+  padding: 0;
+  gap: 20px;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+body .site-header[data-navigation] .site-nav {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  order: 0;
+  width: auto;
+  min-height: 0;
+  margin: 0 0 0 auto;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+[data-navigation] .nav-category {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+[data-navigation] .nav-category > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ff-muted);
+  font: 700 14px/1.5 var(--ff-sans);
+  white-space: nowrap;
+  list-style: none;
+  cursor: pointer;
+}
+[data-navigation] .nav-category > summary::-webkit-details-marker { display: none; }
+[data-navigation] .nav-category > summary::after { content: none; }
+[data-navigation] .nav-category > summary svg { width: 16px; height: 16px; flex-shrink: 0; }
+[data-navigation] .nav-category[data-current-category] > summary { color: var(--ff-cyan); background: #142b3a; }
+[data-navigation] .nav-category > summary:hover,
+[data-navigation] .nav-category[open] > summary { color: var(--ff-text); background: var(--ff-raised); border-color: var(--ff-line); }
+[data-navigation] .nav-category[open] > summary svg { transform: rotate(180deg); }
+[data-navigation] .nav-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1;
+  width: 292px;
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border: 1px solid #415572;
+  border-radius: 8px;
+  background: #121e31;
+  box-shadow: 0 14px 36px #0007;
+}
+[data-navigation] .nav-dropdown ul { list-style: none; padding: 0; margin: 0; }
+[data-navigation] .nav-dropdown li { padding: 0; margin: 0; }
+body .site-header[data-navigation] .nav-dropdown a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  color: var(--ff-text);
+  background: transparent;
+  font: 400 14px/1.5 var(--ff-sans);
+  text-decoration: none;
+  white-space: normal;
+}
+body .site-header[data-navigation] .nav-dropdown a:hover { background: var(--ff-raised); color: var(--ff-cyan); }
+body .site-header[data-navigation] .nav-dropdown a[aria-current="page"] { background: #1b3c4e; color: #a6e9f7; }
+body .site-header[data-navigation] .nav-dropdown a::after { content: none; }
+[data-navigation] .nav-current-label { font-size: 13.334px; white-space: nowrap; color: var(--ff-cyan); }
+[data-navigation] .nav-journal-pages { border-top: 1px solid var(--ff-line); margin-top: 4px; padding-top: 4px; }
+body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24px; color: var(--ff-muted); }
+[data-navigation] .site-nav :focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: -2px; }
+@media (max-width: 760px) {
+  body .site-header[data-navigation] { flex-wrap: wrap; padding-top: 12px; gap: 8px 12px; }
+  body .site-header[data-navigation] .header-note { margin-left: auto; }
+  body .site-header[data-navigation] .site-nav {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    order: 3;
+    width: 100%;
+    margin: 0;
+    padding-bottom: 8px;
+    gap: 4px;
+  }
+  [data-navigation] .nav-category { position: static; min-width: 0; }
+  [data-navigation] .nav-category > summary { padding: 8px 4px; gap: 5px; }
+  [data-navigation] .nav-dropdown { top: 100%; left: 0; right: 0; width: auto; max-height: calc(100dvh - 132px); }
+}
