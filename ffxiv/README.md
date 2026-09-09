@@ -47,6 +47,8 @@
 
 GitHub Pages의 원본은 `main` 브랜치의 `/ (root)`입니다. 실제 도구는 저장소의 `ffxiv/` 폴더에 있으며, 빌드나 패키지 설치 없이 루트의 `.nojekyll`을 사용해 배포합니다.
 
+검색 등록용 사이트맵은 `https://teo-park.github.io/sitemap.xml`입니다. 루트의 사이트맵 색인에서 이 폴더의 `sitemap.xml`을 참조하며, 루트 `robots.txt`에도 같은 주소를 안내합니다. 새 도구를 공개하면 `ffxiv/sitemap.xml`에 해당 페이지의 대표 주소를 추가합니다.
+
 ```text
 /
 ├── index.html
