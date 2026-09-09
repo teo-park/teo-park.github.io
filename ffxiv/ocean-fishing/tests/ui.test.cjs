@@ -10,6 +10,37 @@ function memory(values={}) {
   const map=new Map(Object.entries(values));
   return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)};
 }
+test('voyage supplies react to collection changes, undo and imports without losing caught prerequisites',async()=>{
+ const caught=Object.fromEntries(payload.fish.filter(f=>f.route==='indigo').map(f=>[C.name(f.Fish),true]));caught.Sothis=false;
+ const ui=await open('indigo',memory({[storageKey]:JSON.stringify({indigo:caught,ruby:{}})}));
+ try {
+  const glow=()=>ui.$('#voyageBaits [data-bait-group="recommended"] [data-bait="glowworm"]');
+  assert.ok(glow());assert.match(ui.$('#voyageBaits').textContent,/도감 채우기/);
+  assert.ok(ui.$('#voyageBaits [data-bait="krill"]'));assert.ok(ui.$('#voyageBaits [data-bait="ragworm"]'));
+  const before=ui.$('#voyageBaits').textContent;ui.$('[data-stop="2"]').click();assert.equal(ui.$('#voyageBaits').textContent,before);
+  const sothis=payload.fish.find(f=>f.Fish==='Sothis');ui.$(`[data-fish-id="${sothis.id}"] input[data-entry]`).click();assert.equal(glow(),null);
+  ui.$('#undoCatch').click();assert.ok(glow());ui.submit(JSON.stringify([sothis.id]));assert.equal(glow(),null);
+  assert.ok(ui.$('#voyageBaits [data-bait-group="recommended"] .bait-chip'));assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+for(const route of ['indigo','ruby'])test(`${route}: supplies cover all three stops and follow purpose, GP and departure`,async()=>{
+ const ui=await open(route);
+ try {
+  const check=()=>{
+   const start=Number(ui.$('[data-voyage][aria-pressed="true"]').dataset.voyage),v=V.at(route,start);
+   const rows=payload.fish.filter(f=>f.route===route&&v.stops.some((_,i)=>V.available(f,v,i)));
+   const expected=new Set(rows.filter(f=>f.BaitAny!=='Yes'&&!/^M!/.test(f.BestBait)).map(f=>C.key(f.BestBait)));
+   const shown=new Set([...ui.d.querySelectorAll('#voyageBaits [data-bait-group="recommended"] [data-bait]')].map(b=>b.dataset.bait));assert.deepEqual(shown,expected);
+  };
+  ui.$('[name=purpose][value=all]').click();check();ui.$('#scheduleToggle').click();ui.d.querySelectorAll('[data-voyage]')[5].click();check();
+  ui.$('[name=purpose][value=score]').click();assert.ok(ui.$('#voyageBaits .bait-chip-score'));ui.input('#strategyGP','399');assert.equal(ui.$('#voyageBaits .bait-chip-score'),null);check();
+  ui.$('[name=purpose][value=mission]').click();assert.equal(ui.$('#voyageBaits [data-bait-group="mooch"]'),null);
+  ui.d.querySelectorAll('[name=species]')[0].click();ui.d.querySelectorAll('[name=species]')[1].click();assert.match(ui.$('#voyageBaits').textContent,/선상과제\/업적/);
+  const rows=[...ui.d.querySelectorAll('#fishPanels tr[data-fish-id]')].map(el=>payload.fish.find(f=>f.id===+el.dataset.fishId));
+  for(const f of rows.filter(f=>!/^M!/.test(f.BestBait)&&f.BaitAny!=='Yes'))assert.ok(ui.$(`#voyageBaits [data-bait="${C.key(f.BestBait)}"]`),f.Fish);
+  assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
 async function open(page,storage=memory(),failData=false) {
   const errors=[],requests=[],downloads=[],console=new VirtualConsole();
   console.on('jsdomError',e=>errors.push(e.message));

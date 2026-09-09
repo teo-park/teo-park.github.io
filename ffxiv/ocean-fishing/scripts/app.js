@@ -85,6 +85,22 @@
     if(f.BaitMoochType) out.push(`<span class="condition-label">생미끼</span> ${esc(label(f.BaitMoochType))}${f.BaitMoochAlternatives?' / '+f.BaitMoochAlternatives.split('|').map(name=>esc(label(name))).join(' / '):''}`);
     return out.length?`<div class="fish-conditions">${out.map(line=>`<div>${line}</div>`).join('')}</div>`:'';
   }
+  function renderVoyageBaits(rows) {
+    const summary=C.voyageBaits(rows), purposeLabel={all:'전체 보기',collection:'도감 채우기',mission:'선상과제/업적',score:'고득점'}[purpose];
+    const scoreBaits=new Set();
+    if(purpose==='score')for(const f of rows.filter(f=>f.LocalScore)) {
+      if(f.BaitAny==='Yes')continue;
+      scoreBaits.add((/^M!/.test(f.BestBait)?'mooch:':'bait:')+C.key(f.BestBait));
+    }
+    const chips=(items,mooch=false)=>items.map(b=>{
+      const locations=[...new Set(b.fish.map(f=>(V.names[f.Stop]||f.StopTranslated||f.Stop)+' · '+(f.spectral?'환해류':'일반')))];
+      const recommended=scoreBaits.has((mooch?'mooch:':'bait:')+b.id);
+      return `<span class="bait-chip ${mooch?'bait-chip-mooch':''} ${recommended?'bait-chip-score':''}" data-bait="${esc(b.id)}" title="${esc(locations.join(' / '))}">${esc(mooch?(names.get(b.id)||b.name):b.name)}${recommended?'<b>추천</b>':''}</span>`;
+    }).join('');
+    const line=(kind,title,content)=>content?`<div class="voyage-bait-row" data-bait-group="${kind}"><strong>${title}</strong><div class="zone-bait-list">${content}</div></div>`:'';
+    const basicChoice=summary.basicChoice?'<span class="bait-chip">바위털갯지렁이 / 크릴 / 굵은지렁이 중 하나</span>':'';
+    $('voyageBaits').innerHTML=`<div class="voyage-baits-heading"><h3 id="voyageBaitsTitle">항로 준비 미끼</h3><span>${purposeLabel} · 3구역 일반·환해류</span></div>${line('recommended','권장 미끼',chips(summary.recommended)+basicChoice)}${line('alternatives','대체 가능',chips(summary.alternatives))}${line('mooch','생미끼',chips(summary.mooch,true))}<p class="voyage-baits-note">현재 목적·필터로 표시되는 물고기와 직감·생미끼 조건 기준. 대체 미끼는 일부 어종에만 사용할 수 있으며, 생미끼는 항로에서 낚아 준비합니다.${purpose==='score'?' 추천 표시는 GP 추천 대상의 권장 미끼입니다.':''}${summary.unknown.length?' 권장 미끼 미확인 '+summary.unknown.length+'종.':''}${!rows.length?' 표시할 물고기가 없습니다.':''}</p>`;
+  }
   function weatherText(f) {
     if(!f.weather.length) return f.spectral?'환해류 중':'날씨 미확인';
     const yes=f.weather.filter(w=>w.available), no=f.weather.filter(w=>!w.available);
@@ -200,6 +216,7 @@
   function renderFishing() {
     const focused=document.activeElement, focusZone=focused?.closest('[data-zone]')?.dataset.zone, focusOption=focused?.dataset.zoneOption;
     const plannedFish=planned();
+    renderVoyageBaits(plannedFish);
     $('selectedTime').textContent=time(selected.start)+' 출항';
     $('selectedStops').textContent=selected.stops.map(stop=>stop.name).join(' → ');
     $('returnFirst').hidden=selected.start===voyages[0].start;

@@ -28,6 +28,31 @@
     }
     return entries;
   }
+  // Prerequisites are included by plan(); never expand this list to other voyages.
+  function voyageBaits(rows) {
+    const recommended=new Map(), alternatives=new Map(), mooch=new Map(), unknown=[];
+    const basicKeys=['ragworm','krill','plumpworm'];let anyBasic=false;
+    function add(map,raw,label,row) {
+      const id=key(raw);if(!id)return;
+      if(!map.has(id))map.set(id,{id,name:name(label||raw),fish:[]});
+      const entry=map.get(id);if(!entry.fish.includes(row))entry.fish.push(row);
+    }
+    for(const row of rows) {
+      const best=row.BestBait||'', isMooch=/^M!/.test(best);
+      if(row.BaitAny==='Yes')anyBasic=true;
+      else if(present(best))add(isMooch?mooch:recommended,best,row.BestBaitTranslated,row);
+      else unknown.push(row);
+      // A special-bait name alone is not evidence it works; use measured bait entries.
+      for(const bait of row.baits||[])if(present(bait.name)&&present(bait.time))add(bait.kind==='Mooch'?mooch:alternatives,bait.name,bait.label,row);
+      if(isMooch||present(row.BaitMooch))for(const raw of String(row.BaitMoochAlternatives||'').split('|'))if(present(raw))add(mooch,raw,raw,row);
+    }
+    for(const [id,entry] of recommended) {
+      for(const row of alternatives.get(id)?.fish||[])if(!entry.fish.includes(row))entry.fish.push(row);
+      alternatives.delete(id);
+    }
+    const sort=map=>[...map.values()].sort((a,b)=>(basicKeys.includes(a.id)?basicKeys.indexOf(a.id):3)-(basicKeys.includes(b.id)?basicKeys.indexOf(b.id):3)||a.name.localeCompare(b.name,'ko'));
+    return {recommended:sort(recommended),alternatives:sort(alternatives),mooch:sort(mooch),anyBasic,basicChoice:anyBasic&&!basicKeys.some(id=>recommended.has(id)),unknown};
+  }
   function haulScore(row, mode) {
     const raw = Array.isArray(row[mode]) ? row[mode][0] : row[mode];
     const counts = String(raw || (mode === 'DH' ? '3 - 4' : '5 - 7')).match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
@@ -263,7 +288,7 @@
       .map(([id]) => Number(id)).sort((a, b) => a - b);
     return { completed };
   }
-  const api = { name, key, alwaysVisible, haulScore, numberRange, baitInfo, biteTimeText, recommend, dependencies, createCatalog, plan, routeAchievements, read, caught, setCaught, parseImport, importCaught, importTeamcraft, exportTeamcraft };
+  const api = { name, key, alwaysVisible, haulScore, numberRange, baitInfo, biteTimeText, recommend, dependencies, createCatalog, voyageBaits, plan, routeAchievements, read, caught, setCaught, parseImport, importCaught, importTeamcraft, exportTeamcraft };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OceanCollection = api;
 })(typeof window === 'undefined' ? globalThis : window);
