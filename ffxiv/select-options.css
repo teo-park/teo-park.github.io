@@ -2,14 +2,22 @@ body select.select-options-native { display: none !important; }
 body .select-options {
   --select-option-height: 40px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: stretch;
-  gap: 5px;
+  gap: 0;
   width: 100%;
   min-width: 0;
   max-width: 100%;
   margin: 0;
   text-align: left;
+}
+/* Let a connected group move as a whole when a filter row runs out of room. */
+body .filter-row > label:has(> .select-options),
+body .filters > label:has(> .select-options),
+body .combat-filter-row > label:has(> .select-options) {
+  flex: 1 0 max-content;
+  min-width: 0;
+  max-width: 100%;
 }
 /* Match each tool's native select size and label spacing. */
 body:has(#beastGrid) .select-options { --select-option-height: 44px; }
@@ -26,35 +34,32 @@ body .select-options > .select-option {
   max-width: 100%;
   min-height: var(--select-option-height);
   margin: 0;
-  padding: 7px 10px 7px 29px;
+  padding: 7px 10px;
   border: 1px solid #40536d;
-  border-radius: 5px;
+  border-radius: 0;
   background: #0c1727;
   color: var(--ff-muted);
   font: 400 13.334px/1.5 var(--ff-sans);
-  text-align: left;
+  text-align: center;
   text-decoration: none;
   white-space: normal;
   word-break: keep-all;
   overflow-wrap: anywhere;
   cursor: pointer;
 }
-body .select-options > .select-option::before {
-  content: '';
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  transform: translateY(-50%);
-  border: 1px solid #6f849e;
-  border-radius: 50%;
-  background: #0c1727;
-}
+body .select-options > .select-option + .select-option { margin-left: -1px; }
+body .select-options > .select-option:first-child { border-top-left-radius: 5px; border-bottom-left-radius: 5px; }
+body .select-options > .select-option:last-child { border-top-right-radius: 5px; border-bottom-right-radius: 5px; }
+body .select-options > .select-option::before,
 body .select-options > .select-option::after { content: none; }
-body .select-options > .select-option[aria-checked="true"] { border-color: #79c5d8; background: #1b3c4e; color: #c5f0fa; font-weight: 700; }
-body .select-options > .select-option[aria-checked="true"]::before { background: var(--ff-cyan); border-color: var(--ff-cyan); box-shadow: inset 0 0 0 3px #1b3c4e; }
-body .select-options > .select-option:hover:not(:disabled) { border-color: var(--ff-cyan); color: var(--ff-text); }
-body .select-options > .select-option:focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: 2px; z-index: 1; }
+body .select-options > .select-option[aria-checked="true"] { z-index: 1; border-color: var(--ff-cyan); background: var(--ff-cyan); color: #0b2030; font-weight: 700; }
+body .select-options > .select-option:hover:not(:disabled):not([aria-checked="true"]) { z-index: 1; border-color: var(--ff-cyan); background: #1b3c4e; color: var(--ff-text); }
+body .select-options > .select-option:focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: 2px; z-index: 2; }
 body .select-options > .select-option:disabled { opacity: .45; cursor: not-allowed; }
 body .select-options[aria-invalid="true"] { outline: 1px solid #e69891; outline-offset: 3px; border-radius: 5px; }
+@media (min-width: 1051px) {
+  body .weapon-main .filters { grid-template-columns: minmax(200px,1.3fr) minmax(190px,1.2fr) minmax(130px,.7fr) minmax(max-content,1fr); }
+}
+@media (max-width: 480px) {
+  body .select-options > .select-option { padding-inline: 6px; }
+}
