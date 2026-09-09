@@ -201,26 +201,6 @@
     if(root.FishingCollection)return root.FishingCollection.writeOcean(storage,state);
     storage.setItem('caughtFishLS-combined',JSON.stringify(state));return state;
   }
-  function routeAchievements(rows, stops) {
-    if (!Array.isArray(stops) || stops.length !== 3 || stops.some(stop => !stop.stop || !['Day', 'Sunset', 'Night'].includes(stop.time))) return [];
-    const groupsByStop = stops.map(stop => {
-      const groups = new Map();
-      // The original route configuration abbreviates the CSV's Bloodbrine stop.
-      const stopName = stop.stop === 'Blood' ? 'Bloodbrine' : stop.stop;
-      for (const row of rows) {
-        if (row.Stop !== stopName || !present(row.Species)) continue;
-        const spectral = present(row.TimeFrameDay);
-        if (spectral && row['TimeFrame' + stop.time] !== 'Yes') continue;
-        if (!groups.has(row.Species)) groups.set(row.Species, { label: row.SpeciesTranslated || row.Species, regular: false, spectral: false });
-        groups.get(row.Species)[spectral ? 'spectral' : 'regular'] = true;
-      }
-      return groups;
-    });
-    return [...groupsByStop[0]].filter(([id]) => groupsByStop.every(groups => groups.has(id))).map(([id, group]) => {
-      const appearances = groupsByStop.map((groups, index) => ({ ...stops[index], ...groups.get(id) }));
-      return { id, label: group.label, stops: appearances, requiresSpectral: appearances.some(stop => !stop.regular) };
-    }).sort((a, b) => a.label.localeCompare(b.label, 'ko'));
-  }
   function caught(state, route, fish) {
     const id = key(fish);
     return Object.entries(state[route] || {}).some(([entry, value]) => value === true && key(entry.split('|')[0]) === id);
@@ -293,7 +273,7 @@
       .map(([id]) => Number(id)).sort((a, b) => a - b);
     return { completed };
   }
-  const api = { name, key, alwaysVisible, haulScore, numberRange, baitInfo, biteTimeText, recommend, dependencies, createCatalog, voyageBaits, plan, routeAchievements, read, caught, setCaught, parseImport, importCaught, importTeamcraft, exportTeamcraft };
+  const api = { name, key, alwaysVisible, haulScore, numberRange, baitInfo, biteTimeText, recommend, dependencies, createCatalog, voyageBaits, plan, read, caught, setCaught, parseImport, importCaught, importTeamcraft, exportTeamcraft };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OceanCollection = api;
 })(typeof window === 'undefined' ? globalThis : window);

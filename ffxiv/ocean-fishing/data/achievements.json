@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "verifiedAt": "2026-09-10",
+  "patch": "7.5",
+  "sources": [
+    {"id":"guide","label":"Teamcraft · Tyo'to Tayuun","url":"https://guides.ffxivteamcraft.com/guide/ocean-fishing-bonus-achievements"},
+    {"id":"routes","label":"OceanFishing.Boats · 업적별 항로","url":"https://oceanfishing.boats/achievements/"},
+    {"id":"indigo","label":"Mikah Tayuun · 근해 공략","url":"https://na.finalfantasyxiv.com/lodestone/character/27182703/blog/4721961/"},
+    {"id":"ruby","label":"Mikah Tayuun · 원양 공략","url":"https://na.finalfantasyxiv.com/lodestone/character/27182703/blog/5316713/"},
+    {"id":"counts","label":"Lulu’s Tools · 보너스 조건","url":"https://ffxiv.pf-n.co/ocean-fishing/bonuses"},
+    {"id":"mantis-count","label":"갯가재 50마리 · 영문 표기 오류 제보","url":"https://forum.square-enix.com/ffxiv/threads/530373-Translation-Discrepancy-Ocean-Fishing-Time-Waits-for-No-Mantis-Bonus?p=6832646"}
+  ],
+  "goals": [
+    {
+      "id":"Jellyfish","label":"해파리","route":"indigo","scope":"party","count":150,
+      "bonus":"Jelled Together","recommended":[5],"alternatives":[1,2,3,4,6],"sourceIds":["counts","guide","indigo"],
+      "note":"남쪽의 일반 해역에 집중하고, 부족하면 로타노 환해류에서 보충해요.",
+      "steps":{
+        "Galadion":{"current":"prepare","note":"GP와 어부의 예술을 준비해요.","targets":[]},
+        "Southern":{"current":"avoid","note":"일반 해역의 라노시아 젤리가 주력이에요.","targets":["La Noscean Jelly"]},
+        "Rhotano":{"current":"seek","note":"남은 마릿수를 환해류에서 보충해요.","targets":["Floating Saucer"]}
+      }
+    },
+    {
+      "id":"Seadragon","label":"해마","route":"indigo","scope":"party","count":100,
+      "bonus":"Maritime Dragonslayers","recommended":[1],"alternatives":[2,3,4,5,6],"sourceIds":["counts","guide","indigo"],
+      "note":"수풀해마가 주력이며 남쪽 날씨에 따라 환해류 운영이 달라져요.",
+      "steps":{
+        "Southern":{"current":"weather","note":"흐림·안개면 환해류 유도, 그 외에는 일반 해역에 집중해요.","targets":["Shaggy Seadragon","Aetheric Seadragon"]},
+        "Galadion":{"current":"avoid","note":"북쪽 환해류를 위해 GP를 모아요.","targets":[]},
+        "Northern":{"current":"seek","note":"남은 마릿수를 보충해요.","targets":["Coral Seadragon"]}
+      }
+    },
+    {
+      "id":"Shark","label":"상어","route":"indigo","scope":"party","count":200,
+      "bonus":"Certifiable Shark Hunters","recommended":[6],"alternatives":[],"sourceIds":["counts","guide","indigo"],
+      "note":"첫 구간과 마지막 구간의 환해류가 핵심이에요.",
+      "steps":{
+        "Galadion":{"current":"seek","note":"망령상어·깔때기상어를 우선 노려요.","targets":["Ghost Shark","Funnel Shark"]},
+        "Southern":{"current":"avoid","note":"상어 없음 · 마지막 구간을 위해 GP를 모아요.","targets":[]},
+        "Rhotano":{"current":"seek","note":"일반 크롬 망치상어와 환해류 사형집행어를 노려요.","targets":["Chrome Hammerhead","Executioner"]}
+      }
+    },
+    {
+      "id":"Octopus","label":"문어","route":"indigo","scope":"party","count":150,
+      "bonus":"Octopus Travelers","recommended":[2],"alternatives":[],"sourceIds":["counts","guide","indigo"],
+      "note":"갈라디온 환해류의 인어터럭에 집중해요.",
+      "steps":{
+        "Southern":{"current":"avoid","note":"문어 없음 · 다음 환해류를 위해 준비해요.","targets":[]},
+        "Galadion":{"current":"seek","note":"인어터럭이 주력이에요.","targets":["Merman's Mane"]},
+        "Northern":{"current":"seek","note":"빗자루수염으로 남은 수량을 보충해요.","targets":["Mopbeard"]}
+      }
+    },
+    {
+      "id":"Fugu","label":"복어","route":"indigo","scope":"party","count":250,
+      "bonus":"Balloon Catchers","recommended":[11,12],"alternatives":[],"sourceIds":["counts","guide","indigo"],
+      "note":"두 추천 시간대 모두 유효해요. 세 구간의 환해류를 활용해요.",
+      "steps":{
+        "Cieldalaes":{"current":"seek","note":"환해류의 미스릴상자복을 노려요.","targets":["Mythril Boxfish"]},
+        "Rhotano":{"current":"seek","note":"환해류의 침묵어를 노려요.","targets":["Silencer"]},
+        "Rothlyt":{"current":"seek","note":"벌집고기와 환해류 복어로 보충해요.","targets":["Honeycomb Fish","Garum Jug","Pearl Bombfish"]}
+      }
+    },
+    {
+      "id":"Crab","label":"게","route":"indigo","scope":"party","count":250,
+      "bonus":"Crab Boat Crew","recommended":[9],"alternatives":[],"sourceIds":["counts","guide","indigo"],
+      "note":"시엘달레 노을 → 북쪽 밤 → 붉은물결 낮 조합을 추천해요.",
+      "steps":{
+        "Cieldalaes":{"current":"seek","note":"타이탄등딱지게를 노려요.","targets":["Titanshell Crab"]},
+        "Northern":{"current":"seek","note":"환해류의 재단게를 노려요.","targets":["Bartholomew the Chopper"]},
+        "Bloodbrine":{"current":"seek","note":"핏빛집게게·제사장게·몰살게를 노려요.","targets":["Bloodpolish Crab","Oracular Crab","Exterminator"]}
+      }
+    },
+    {
+      "id":"Manta","label":"가오리","route":"indigo","scope":"individual","count":25,
+      "bonus":"Sticking it to the Manta","recommended":[8,12],"alternatives":[],"sourceIds":["counts","guide","indigo"],
+      "note":"개인 기록이에요. 첫 구간과 마지막 구간에 집중해요.",
+      "steps":{
+        "Cieldalaes":{"current":"seek","note":"제트가오리가 주력이에요.","targets":["Jetborne Manta"]},
+        "Northern":{"current":"avoid","note":"가오리 없음 · 마지막 구간을 준비해요.","targets":[]},
+        "Rhotano":{"current":"avoid","note":"가오리 없음 · 마지막 구간을 준비해요.","targets":[]},
+        "Bloodbrine":{"current":"seek","note":"시인의 추억으로 보충해요.","targets":["Skaldminni"]},
+        "Rothlyt":{"current":"seek","note":"파놉테스로 보충해요.","targets":["Panoptes"]}
+      }
+    },
+    {
+      "id":"Shellfish","label":"조개","route":"ruby","scope":"party","count":350,
+      "bonus":"Maximum Mussel","recommended":[5,8],"alternatives":[2,3,6,9],"sourceIds":["counts","guide","ruby"],
+      "note":"무이강 도착을 추천해요. 쿠가네가 밤이면 환해류 조개가 없어요.",
+      "steps":{
+        "Sirensong":{"current":"avoid","note":"일반 세이렌 홍합에 집중해요.","targets":["Sirensong Mussel"]},
+        "Kugane":{"current":"seek","note":"회오리 소라가 주력이에요.","targets":["Maelstrom Turban"]},
+        "One River":{"current":"seek","note":"까마귀조개로 보충해요.","targets":["Crowshadow Mussel"]}
+      }
+    },
+    {
+      "id":"Squid","label":"오징어","route":"ruby","scope":"party","count":400,
+      "bonus":"Squid Squadron","recommended":[3,9],"alternatives":[6],"sourceIds":["counts","guide","ruby"],
+      "note":"홍옥해 도착을 추천해요. 세이렌 해가 밤이면 환해류 오징어가 없어요.",
+      "steps":{
+        "Sirensong":{"current":"seek","note":"넓적머리 오징어를 노려요.","targets":["Broadhead"]},
+        "Kugane":{"current":"seek","note":"칼머리 오징어를 노려요.","targets":["Swordtip Squid"]},
+        "Ruby Sea":{"current":"seek","note":"환해류의 두 오징어를 노려요.","targets":["Fleeting Squid","Flying Squid"]}
+      }
+    },
+    {
+      "id":"Shrimp","label":"새우","route":"ruby","scope":"individual","count":50,
+      "bonus":"Shrimp Smorgasbord","recommended":[5,6],"alternatives":[2,3,8,9],"sourceIds":["counts","routes","ruby"],
+      "note":"개인 기록이에요. 비취 갯가재는 새우 업적에 포함되지 않아요.",
+      "steps":{
+        "Sirensong":{"current":"avoid","note":"일반 분홍새우에 집중해요.","targets":["Pink Shrimp"]},
+        "Kugane":{"current":"seek","note":"비단결새우를 노려요.","targets":["Silkweft Prawn"]},
+        "One River":{"current":"seek","note":"겐스이 새우로 보충해요.","targets":["Gensui Shrimp"]},
+        "Ruby Sea":{"current":"seek","note":"궁마대하로 보충해요.","targets":["Bowbarb Lobster"]}
+      }
+    },
+    {
+      "id":"Prehistoric","label":"고대 생물","route":"ruby","scope":"party","count":300,
+      "bonus":"Prehistoric Professionals","recommended":[1],"alternatives":[4,7],"sourceIds":["guide","routes","ruby"],
+      "note":"이름 없는 섬 노을 → 세이렌 해 밤 → 사베니어 섬 낮에 대량 포획 대상을 만날 수 있어요.",
+      "steps":{
+        "Unnamed":{"current":"seek","note":"검은 로타노사우루스를 노려요.","targets":["Renegade Rhotanosaurus"]},
+        "Sirensong":{"current":"seek","note":"검은 헬리코프리온을 노려요. 환해류를 일부러 건너뛰지 않아요.","targets":["Black-jawed Helicoprion"]},
+        "Thavnair":{"current":"seek","note":"플리오사우루스를 노려요.","targets":["Pliosaurus"]}
+      }
+    },
+    {
+      "id":"Mantis","label":"갯가재","route":"ruby","scope":"individual","count":50,
+      "bonus":"Time Waits for No Mantis","recommended":[4,7],"alternatives":[1],"sourceIds":["guide","routes","ruby","mantis-count"],
+      "note":"개인 50마리예요. 영문 45마리 표기는 오류 제보가 있어요. 사베니어 섬 낮에는 호랑갯가재가 없어요.",
+      "steps":{
+        "Unnamed":{"current":"seek","note":"일반·환해류 갯가재를 모두 활용해요.","targets":["First Mate's Finger","Captain's Finger"]},
+        "Sirensong":{"current":"seek","note":"비취 갯가재를 노려요. 환해류를 일부러 건너뛰지 않아요.","targets":["Jade Mantis Shrimp"]},
+        "Thavnair":{"current":"seek","note":"호랑갯가재를 우선 노려요.","targets":["Tiger Mantis"]}
+      }
+    }
+  ]
+}

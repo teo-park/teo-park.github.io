@@ -4,9 +4,45 @@ const fs=require('node:fs'),path=require('node:path');
 const {JSDOM,ResourceLoader,VirtualConsole}=require('jsdom');
 const C=require('../scripts/collection.js'),V=require('../scripts/voyages.js');
 const Shared=require('../../fishing-collection.js').create(require('../scripts/teamcraft-ids.js'));
+const achievementData=require('../data/achievements.json');
 const payload=require('../data/fish.json'),root=path.resolve(__dirname,'..');
 const first=Date.parse(require('./fixtures/voyages.json').firstDeparture);
 const storageKey='caughtFishLS-combined';
+test('achievement plans show scope, expand inline, retain multiple groups and jump to a recommended departure',async()=>{
+ const ui=await open('ruby');
+ try {
+  ui.$('[name=purpose][value=mission]').click();
+  assert.equal(ui.d.querySelectorAll('[data-achievement]').length,5);
+  ui.$('[name=species][value=Mantis]').click();
+  assert.equal(ui.d.querySelectorAll('[data-achievement]').length,1);
+  assert.ok(ui.$('[data-achievement=Mantis]').open);assert.match(ui.$('[data-achievement=Mantis]').textContent,/개인 50마리/);
+  const catches=ui.storage.getItem(storageKey);
+  ui.$('[data-achievement-departure=Mantis]').click();
+  assert.equal(ui.$('[data-achievement=Mantis] .achievement-status').textContent,'추천 항로');
+  assert.ok(ui.$('[data-achievement=Mantis]').open);
+  assert.equal(ui.storage.getItem(storageKey),catches,'planning never changes collection');
+  const mantis=payload.fish.find(f=>f.Fish==='Tiger Mantis');assert.ok(ui.$(`[data-achievement-fish="${mantis.id}"]`));
+  ui.$('[name=species][value=Prehistoric]').click();
+  assert.equal(ui.d.querySelectorAll('[name=species]:checked').length,2);assert.equal(ui.d.querySelectorAll('[data-achievement]').length,2);
+  ui.$('[data-achievement=Mantis]>summary').click();assert.equal(ui.$('[data-achievement=Mantis]').open,false);
+  ui.$('[name=purpose][value=all]').click();assert.equal(ui.$('#achievementPlans').hidden,true);
+  ui.$('[name=purpose][value=mission]').click();assert.equal(ui.$('[data-achievement=Mantis]').open,false);
+  assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+test('manta and fugu on a shared route display conflicting current tactics rather than promising both',async()=>{
+ const ui=await open('indigo');
+ try{
+  ui.$('[name=purpose][value=mission]').click();ui.$('[data-achievement-departure=Fugu]').click();
+  ui.$('#scheduleToggle').click();ui.$('#moreVoyages').click();
+  const target=[...ui.d.querySelectorAll('[data-voyage]')].find(b=>V.at('indigo',Number(b.dataset.voyage)).number===12);assert.ok(target);target.click();
+  ui.$('[name=species][value=Manta]').click();
+  assert.match(ui.$('#achievementPlans>.achievement-caution').textContent,/로타노 해: 복어 유도 \/ 가오리 회피/);
+  assert.equal(ui.$('[data-achievement=Manta] .achievement-status').textContent,'추천 항로');
+  assert.doesNotMatch(ui.$('#scheduleRows').textContent,/업적작 가능/);
+  assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
 function memory(values={}) {
   const map=new Map(Object.entries(values));
   return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)};
@@ -64,7 +100,7 @@ async function open(page,storage=memory(),failData=false) {
       Object.defineProperty(w,'localStorage',{value:storage});
       Object.defineProperty(w,'sessionStorage',{get(){throw Error('Session storage is unavailable');}});
       w.Date.now=()=>first-60000;w.scrollTo=()=>{};
-      w.fetch=async url=>{assert.equal(url,'../data/fish.json?v='+w.document.body.dataset.version);return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(payload))};};
+      w.fetch=async url=>{assert.ok(['fish','achievements'].some(name=>url==='../data/'+name+'.json?v='+w.document.body.dataset.version));return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements.json')?achievementData:payload))};};
       w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
       w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
       w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};
@@ -81,7 +117,7 @@ async function open(page,storage=memory(),failData=false) {
 for(const route of ['indigo','ruby'])test(`${route}: native route UI, expanded departures, missions, GP and catch undo`,async()=>{
   const ui=await open(route);const {$,d,input,errors,requests}=ui;
   try {
-    assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/app.js']);
+    assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/achievements.js','scripts/app.js']);
     for(const global of ['$','jQuery','bootstrap','moment'])assert.equal(ui.w[global],undefined);
     assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,1);
     $('#scheduleToggle').click();assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,12);
