@@ -1,5 +1,6 @@
-import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260909-atlas1';
+import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260909-combat1';
 import {createAtlas,captureDetails} from './atlas.js?v=20260909-atlas1';
+import {initCombatFilters,combatRow,combatDetails} from './combat-view.js?v=20260909-combat1';
 
 const PAGE_SIZE=25;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,8 +10,10 @@ export function mount(win,data,locationData=null,captureData=null){
   const doc=win.document,$=id=>doc.getElementById(id),model=create(data,locationData,captureData),valid=new Set(model.byId.keys());
   let detailId=null;
   let owned=new Set(),undoChange=null,page=1,view='number',shown=[],storageError=false;
-  const options=()=>({query:$('search').value,status:$('status').value,method:view==='map'?'all':$('method').value,place:view==='map'?'all':$('place').value});
+  const combatOptions=()=>({purpose:$('combatPurpose').value,weakness:$('combatWeakness').value});
+  const options=()=>({query:$('search').value,status:$('status').value,method:['map','combat'].includes(view)?'all':$('method').value,place:['map','combat'].includes(view)?'all':$('place').value,...(view==='combat'?{combat:combatOptions()}:{})});
   const atlas=createAtlas(doc,model,{onRegionChange:()=>render()});
+  initCombatFilters(doc,()=>render());
   const read=()=>{const raw=win.localStorage.getItem(KEY);return raw===null?new Set():parseBackup(raw);};
   function announce(message,undoable=false){$('noticeText').textContent=message;$('notice').hidden=false;$('undo').hidden=!undoable;}
   try{owned=read();}catch{storageError=true;}
@@ -28,6 +31,7 @@ export function mount(win,data,locationData=null,captureData=null){
       const label=button.querySelector('.state-label');if(label)label.textContent=isOwned?'수집 완료':'미수집';
       const mark=button.querySelector('.check-mark');if(mark)mark.textContent=isOwned?'✓':'＋';
       button.closest('.beast-tile')?.classList.toggle('collected',isOwned);
+      button.closest('.combat-row')?.classList.toggle('collected',isOwned);
     }
     for(const label of doc.querySelectorAll('[data-group-count]')){
       const group=model.groups(shown,options()).find(g=>g.key===label.dataset.groupCount);
@@ -68,25 +72,29 @@ export function mount(win,data,locationData=null,captureData=null){
   function pagination(){
     const total=Math.ceil(shown.length/PAGE_SIZE),start=(page-1)*PAGE_SIZE+1,end=Math.min(page*PAGE_SIZE,shown.length);
     const html=total?`<button data-page="${page-1}" ${page===1?'disabled':''} aria-label="이전 페이지">‹</button>${Array.from({length:total},(_,i)=>`<button data-page="${i+1}" ${page===i+1?'aria-current="page"':''} aria-label="${i+1}페이지">${i+1}</button>`).join('')}<button data-page="${page+1}" ${page===total?'disabled':''} aria-label="다음 페이지">›</button><span>${start}–${end} / ${shown.length}종</span>`:'';
-    for(const id of ['pagination','paginationTop']){$(id).innerHTML=html;$(id).hidden=view!=='number'||!shown.length;}
+    for(const id of ['pagination','paginationTop']){$(id).innerHTML=html;$(id).hidden=!['number','combat'].includes(view)||!shown.length;}
   }
   function render(reset=true){
     if(reset){page=1;shown=model.filter(owned,options());$('refreshResults').hidden=true;}
     page=Math.max(1,Math.min(page,Math.ceil(shown.length/PAGE_SIZE)));
-    const isNumber=view==='number',isMap=view==='map',pageBeasts=shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
+    const isNumber=view==='number',isMap=view==='map',isCombat=view==='combat',pageBeasts=shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
     $('beastGrid').hidden=!isNumber;$('placeGroups').hidden=view!=='place';$('regionAtlas').hidden=!isMap;
-    $('collectionLayoutSwitch').hidden=isMap;$('method').closest('label').hidden=isMap;$('place').closest('label').hidden=isMap;
+    $('combatFilters').hidden=!isCombat;$('combatResults').hidden=!isCombat;
+    $('collectionLayoutSwitch').hidden=isMap||isCombat;$('method').closest('label').hidden=isMap||isCombat;$('place').closest('label').hidden=isMap||isCombat;
     $('numberView').setAttribute('aria-pressed',String(isNumber));$('placeView').setAttribute('aria-pressed',String(view==='place'));$('mapView').setAttribute('aria-pressed',String(isMap));
+    $('combatView').setAttribute('aria-pressed',String(isCombat));
     $('resultCount').textContent=`${shown.length}종`;
     updateViewHint();
+    if(!isCombat)$('combatResults').replaceChildren();
     if(isNumber){$('placeGroups').replaceChildren();$('beastGrid').innerHTML=pageBeasts.map(tile).join('');}
     else if(isMap){$('beastGrid').replaceChildren();$('placeGroups').replaceChildren();$('resultCount').textContent=`${atlas.render(shown)}종`;}
+    else if(isCombat){$('beastGrid').replaceChildren();$('placeGroups').replaceChildren();$('regionAtlas').replaceChildren();$('combatResults').innerHTML=pageBeasts.map(b=>combatRow(b,model.combat.get(b.id),combatOptions())).join('');}
     else{$('regionAtlas').replaceChildren();$('beastGrid').replaceChildren();$('placeGroups').innerHTML=model.groups(shown,options()).map(g=>`<section class="place-group"><div class="group-heading"><div><span class="method-badge">${methods[g.type]}</span><h3>${esc(g.name)}</h3></div><span data-group-count="${esc(g.key)}"></span></div><div class="beast-grid">${g.entries.map(e=>tile(e.beast)).join('')}</div></section>`).join('');}
-    $('markPage').hidden=isMap||!shown.length;$('markPage').textContent=isNumber?`이 페이지 ${pageBeasts.length}종 모두 수집`:`표시된 ${shown.length}종 모두 수집`;
+    $('markPage').hidden=isMap||isCombat||!shown.length;$('markPage').textContent=isNumber?`이 페이지 ${pageBeasts.length}종 모두 수집`:`표시된 ${shown.length}종 모두 수집`;
     $('emptyResults').hidden=isMap||!!shown.length;pagination();updateCounts();
   }
-  function reset(){for(const id of ['status','method','place'])$(id).value='all';$('search').value='';populatePlaces();render();}
-  function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:view==='map'?'지역을 고르면 공개된 포획 대상을 함께 표시합니다. 위 수집 상태에서 미수집만 볼 수 있어요.':'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
+  function reset(){for(const id of ['status','method','place','combatPurpose','combatWeakness'])$(id).value='all';$('search').value='';populatePlaces();render();}
+  function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:view==='map'?'지역을 고르면 공개된 포획 대상을 함께 표시합니다. 위 수집 상태에서 미수집만 볼 수 있어요.':view==='combat'?'수집 상태를 ‘수집 완료’로 선택하면 보유한 마수만 비교할 수 있어요.':'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
   function routeDetails(r){
     let body='';
     if(r.capture||r.reported){body=`<h3>${esc(r.name)}</h3><p class="muted">${r.capture?'도감의 주요 출현 지역':'추가 포획처 · 공개 제보'}</p>${r.targets?.length?`<p>${r.targets.map(t=>`Lv.${t.level} ${esc(t.name)}${t.status==='conflict'?' (위치 확인 필요)':''}`).join(' · ')}</p>`:''}<p>포획 가능한 개체와 난이도는 현장에서 ‘파악하기’로 확인하세요.</p>${external(r.link,r.capture?'공식 가이드에서 장소 검색':'포획 제보 원문')}`;}
@@ -109,7 +117,7 @@ export function mount(win,data,locationData=null,captureData=null){
   function showDetail(id){
     const b=model.byId.get(id);if(!b)return;
     detailId=id;
-    $('detailBody').innerHTML=`<div class="detail-heading">${art(b)}<div><p class="eyebrow">No.${b.id} / ${esc(b.englishName)}</p><h2 id="detailTitle">${esc(b.name)}</h2></div></div><button class="detail-check" data-check="${b.id}" aria-pressed="false"><span class="check-mark" aria-hidden="true">＋</span> <span class="state-label">미수집</span></button>${captureDetails(b,model)}${locationDetails(b)}<p class="description">${esc(b.description)}</p><h2 class="section-title">획득 방법 <span>${model.routes.get(id).length}</span></h2>${model.routes.get(id).map(routeDetails).join('')}<p class="detail-official">${external(b.official,'공식 가이드에서 마수 검색')}</p>`;
+    $('detailBody').innerHTML=`<div class="detail-heading">${art(b)}<div><p class="eyebrow">No.${b.id} / ${esc(b.englishName)}</p><h2 id="detailTitle">${esc(b.name)}</h2></div></div><button class="detail-check" data-check="${b.id}" aria-pressed="false"><span class="check-mark" aria-hidden="true">＋</span> <span class="state-label">미수집</span></button>${combatDetails(b,model.combat.get(b.id),data)}${captureDetails(b,model)}${locationDetails(b)}<p class="description">${esc(b.description)}</p><h2 class="section-title">획득 방법 <span>${model.routes.get(id).length}</span></h2>${model.routes.get(id).map(routeDetails).join('')}<p class="detail-official">${external(b.official,'공식 가이드에서 마수 검색')}</p>`;
     renderLocation();if($('locationTarget'))$('locationTarget').onchange=()=>renderLocation($('locationTarget').value);
     updateCounts();if(!$('detailDialog').open)$('detailDialog').showModal();$('detailBody').scrollTop=0;
   }
@@ -152,6 +160,8 @@ export function mount(win,data,locationData=null,captureData=null){
   $('resetFilters').onclick=reset;$('emptyReset').onclick=reset;$('refreshResults').onclick=()=>render();
   $('numberView').onclick=()=>{view='number';render();};$('placeView').onclick=()=>{view='place';render();};
   $('mapView').onclick=()=>{view='map';render();};
+  $('combatView').onclick=()=>{view='combat';render();};
+  $('resetCombat').onclick=()=>{$('combatPurpose').value='all';$('combatWeakness').value='all';render();};
   win.addEventListener('resize',()=>{if(view==='map')render(false);});
   $('markPage').onclick=()=>{const ids=(view==='number'?shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE):shown).map(b=>b.id);mutate(ids,true,'표시된 마수를 수집 기록에 추가했어요.');};
   $('openRecords').onclick=()=>{$('recordMessage').textContent='';updateCounts();$('recordsDialog').showModal();};

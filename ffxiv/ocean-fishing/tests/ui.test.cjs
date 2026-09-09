@@ -27,7 +27,7 @@ async function open(page,storage=memory(),failData=false) {
     url:`https://journal.test/ffxiv/ocean-fishing/${page}/`,resources:new LocalScripts(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,
     beforeParse(w) {
       Object.defineProperty(w,'localStorage',{value:storage});
-      w.sessionStorage.setItem('ocean:journal-entry:v1','open-20260908');
+      Object.defineProperty(w,'sessionStorage',{get(){throw Error('Session storage is unavailable');}});
       w.Date.now=()=>first-60000;w.scrollTo=()=>{};
       w.fetch=async url=>{assert.equal(url,'../data/fish.json?v='+w.document.body.dataset.version);return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(payload))};};
       w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
@@ -46,7 +46,7 @@ async function open(page,storage=memory(),failData=false) {
 for(const route of ['indigo','ruby'])test(`${route}: native route UI, expanded departures, missions, GP and catch undo`,async()=>{
   const ui=await open(route);const {$,d,input,errors,requests}=ui;
   try {
-    assert.deepEqual(requests,['scripts/entry.js','scripts/teamcraft-ids.js','scripts/collection.js','scripts/voyages.js','scripts/app.js']);
+    assert.deepEqual(requests,['scripts/teamcraft-ids.js','scripts/collection.js','scripts/voyages.js','scripts/app.js']);
     for(const global of ['$','jQuery','bootstrap','moment'])assert.equal(ui.w[global],undefined);
     assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,1);
     $('#scheduleToggle').click();assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,12);

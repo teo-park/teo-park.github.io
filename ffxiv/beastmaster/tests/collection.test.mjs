@@ -184,9 +184,9 @@ test('corrupt or unavailable storage cannot be overwritten by a check',()=>{
   }finally{b.close();}
 });
 
-test('portal and sitemap link the collection, leaving the ocean log unlisted',()=>{
+test('portal and sitemap link both the bestiary and the public ocean journal',()=>{
   const portal=new JSDOM(readFileSync(new URL('../../index.html',import.meta.url),'utf8')).window.document;
-  assert.equal(portal.querySelectorAll('.tool-link').length,8);assert.equal(portal.querySelector('.collection-count strong').textContent,'08');
-  assert.ok(portal.querySelector('.tool-link[href="./beastmaster/"]'));assert.equal(portal.querySelector('a[href*="ocean-fishing"]'),null);
-  const sitemap=readFileSync(new URL('../../sitemap.xml',import.meta.url),'utf8');assert.match(sitemap,/\/ffxiv\/beastmaster\//);assert.doesNotMatch(sitemap,/ocean-fishing/);
+  assert.equal(portal.querySelectorAll('.tool-link').length,9);assert.equal(portal.querySelector('.collection-count strong').textContent,'09');
+  assert.ok(portal.querySelector('.tool-link[href="./beastmaster/"]'));assert.ok(portal.querySelector('.tool-link[href="./ocean-fishing/"]'));
+  const sitemap=readFileSync(new URL('../../sitemap.xml',import.meta.url),'utf8');assert.match(sitemap,/\/ffxiv\/beastmaster\//);assert.match(sitemap,/ocean-fishing/);
 });
