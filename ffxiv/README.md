@@ -87,6 +87,8 @@ PvP 시리즈 계산기 검증: `node --test pvp-series-calculator/tests/pvp-ser
 
 상단 메뉴는 모든 페이지에서 진행·검색 / 수집·육성 / 낚시로 통일합니다. 메뉴 항목은 `tools/site-navigation.cjs`에서 관리하며, 저장소 루트에서 `node ffxiv/tools/site-navigation.cjs`를 실행하면 15개 페이지의 정적 메뉴와 공통 파일 참조를 갱신합니다. JavaScript 없이도 카테고리를 열어 이동할 수 있고, JavaScript는 바깥 클릭·Esc 닫기와 방향키 이동을 보완합니다. 검증: `node --test ffxiv/tests/navigation.test.cjs` (항해일지의 개발 의존성 설치 필요).
 
+선택지가 고정된 4항목 이하의 필터·설정은 `select-options.js`와 `select-options.css`의 라디오 그룹으로 표시합니다. 적용할 `select`에만 `data-radio-options`를 붙이며, 원래 select의 값·change 이벤트·양식 제출은 유지합니다. 데이터나 다른 조건에 따라 목록·선택 가능 항목이 바뀌는 지역·미끼·시작 도시 등에는 적용하지 않습니다. 화면이 늦게 생성되는 청마 역할·무투회 필터도 선택지 자체는 고정되어 있어 적용합니다. 검증: `node --test ffxiv/tests/select-options.test.cjs`.
+
 모든 페이지의 본문·숫자·영문·라벨은 네이버 **나눔스퀘어라운드**를 공통으로 사용합니다. [네이버 공식 배포 페이지](https://hangeul.naver.com/font/nanum)의 Regular·Bold·ExtraBold 웹폰트를 `fonts/nanum-square-round/`에 포함해 직접 제공합니다. 원본 파일은 변경하지 않았으며, [저작권 안내와 SIL Open Font License 1.1](./fonts/nanum-square-round/OFL.txt)을 함께 배포합니다. [네이버 라이선스 안내](https://help.naver.com/support/contents/contents.help?serviceNo=1074&categoryNo=3497).
 
 무기 수첩 검증: `cd weapons` 후 `npm ci --ignore-scripts` 및 `npm test`

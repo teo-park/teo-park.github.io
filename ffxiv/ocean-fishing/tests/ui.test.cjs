@@ -50,6 +50,7 @@ async function open(page,storage=memory(),failData=false) {
     fetch(url) {
       const parsed=new URL(url);assert.equal(parsed.origin,'https://journal.test');
       if(parsed.pathname.endsWith('.css'))return null;
+      if(parsed.pathname==='/ffxiv/select-options.js')return Promise.resolve(fs.readFileSync(path.join(root,'../select-options.js')));
       if(parsed.pathname==='/ffxiv/navigation.js')return Promise.resolve(fs.readFileSync(path.join(root,'../navigation.js')));
       if(parsed.pathname==='/ffxiv/fishing-collection.js'){requests.push('fishing-collection.js');return Promise.resolve(fs.readFileSync(path.join(root,'../fishing-collection.js')));}
       const relative=parsed.pathname.replace('/ffxiv/ocean-fishing/','');
