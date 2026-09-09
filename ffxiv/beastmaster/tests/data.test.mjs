@@ -50,11 +50,24 @@ test('starter quest and exchange alternatives have distinct provenance and corre
 test('tooltips remove formatting payloads but retain conditional source and stable skill links',()=>{
   const t=tooltip('<UIForeground>F201F4</UIForeground>위력\n<If(Equal(1,1))>효과<Else/></If>');
   assert.equal(t.text,'위력\n효과');assert.equal(t.hasConditions,true);assert.match(t.raw,/<If/);
-  assert.equal(Object.keys(data.actions).length,122);
+  assert.equal(Object.keys(data.actions).length,130);
   for(const b of data.beasts)for(const ref of b.actions)assert.ok(data.actions[ref.actionId].name);
   assert.equal(data.actions[44880].name,'포획하기');assert.match(data.actions[44880].tooltip.text,/자신의 레벨이 대상보다 낮으면 성공하지 않습니다/);
   assert.equal(data.actions[44936].tooltip.hasConditions,true);
   assert.equal(icon(242001).path,'ui/icon/242000/242001.tex');
+});
+
+test('all fifty beasts link to a valid family and matching Borrow instinct',()=>{
+  assert.equal(data.coverage.borrowFamilies,8);
+  assert.equal(new Set(data.beasts.map(b=>b.family.borrowActionId)).size,8);
+  for(const b of data.beasts){
+    const action=data.actions[b.family.borrowActionId];assert.equal(action.level,22);
+    assert.ok(action.tooltip.text.includes(`${b.family.name} 본능`));
+    assert.deepEqual(b.family.source,{sheet:'XBMPet',id:b.id,column:1});
+    assert.equal(b.unmapped.columns[1],undefined);
+  }
+  assert.equal(data.beasts.find(b=>b.id===14).family.name,'갑린강');
+  assert.equal(data.beasts.find(b=>b.id===13).family.name,'시체강');
 });
 
 test('source manifest pins every input and the human-readable catalog matches the generated data',async()=>{

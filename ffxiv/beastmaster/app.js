@@ -1,6 +1,6 @@
-import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260909-combat1';
+import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260909-borrow1';
 import {createAtlas,captureDetails} from './atlas.js?v=20260909-atlas1';
-import {initCombatFilters,combatRow,combatDetails} from './combat-view.js?v=20260909-combat1';
+import {initCombatFilters,combatRow,combatDetails} from './combat-view.js?v=20260909-borrow1';
 
 const PAGE_SIZE=25;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -10,7 +10,7 @@ export function mount(win,data,locationData=null,captureData=null){
   const doc=win.document,$=id=>doc.getElementById(id),model=create(data,locationData,captureData),valid=new Set(model.byId.keys());
   let detailId=null;
   let owned=new Set(),undoChange=null,page=1,view='number',shown=[],storageError=false;
-  const combatOptions=()=>({purpose:$('combatPurpose').value,weakness:$('combatWeakness').value});
+  const combatOptions=()=>({command:$('combatCommand').value,purpose:$('combatPurpose').value,weakness:$('combatWeakness').value});
   const options=()=>({query:$('search').value,status:$('status').value,method:['map','combat'].includes(view)?'all':$('method').value,place:['map','combat'].includes(view)?'all':$('place').value,...(view==='combat'?{combat:combatOptions()}:{})});
   const atlas=createAtlas(doc,model,{onRegionChange:()=>render()});
   initCombatFilters(doc,()=>render());
@@ -93,7 +93,7 @@ export function mount(win,data,locationData=null,captureData=null){
     $('markPage').hidden=isMap||isCombat||!shown.length;$('markPage').textContent=isNumber?`이 페이지 ${pageBeasts.length}종 모두 수집`:`표시된 ${shown.length}종 모두 수집`;
     $('emptyResults').hidden=isMap||!!shown.length;pagination();updateCounts();
   }
-  function reset(){for(const id of ['status','method','place','combatPurpose','combatWeakness'])$(id).value='all';$('search').value='';populatePlaces();render();}
+  function reset(){for(const id of ['status','method','place','combatCommand','combatPurpose','combatWeakness'])$(id).value='all';$('search').value='';populatePlaces();render();}
   function updateViewHint(){const shape=$('catalog').dataset.collectionLayout==='list'?'도감 번호순':'5 × 5';$('viewHint').textContent=view==='number'?`${shape} · 칸을 눌러 수집 체크 · 획득처에서 자세히 보기`:view==='map'?'지역을 고르면 공개된 포획 대상을 함께 표시합니다. 위 수집 상태에서 미수집만 볼 수 있어요.':view==='combat'?'수집 상태를 ‘수집 완료’로 선택하면 보유한 마수만 비교할 수 있어요.':'같은 장소에서 모을 마수를 확인하세요. 획득 경로가 여럿인 마수는 각 장소에 표시됩니다.';}
   function routeDetails(r){
     let body='';
@@ -161,7 +161,7 @@ export function mount(win,data,locationData=null,captureData=null){
   $('numberView').onclick=()=>{view='number';render();};$('placeView').onclick=()=>{view='place';render();};
   $('mapView').onclick=()=>{view='map';render();};
   $('combatView').onclick=()=>{view='combat';render();};
-  $('resetCombat').onclick=()=>{$('combatPurpose').value='all';$('combatWeakness').value='all';render();};
+  $('resetCombat').onclick=()=>{for(const id of ['combatCommand','combatPurpose','combatWeakness'])$(id).value='all';render();};
   win.addEventListener('resize',()=>{if(view==='map')render(false);});
   $('markPage').onclick=()=>{const ids=(view==='number'?shown.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE):shown).map(b=>b.id);mutate(ids,true,'표시된 마수를 수집 기록에 추가했어요.');};
   $('openRecords').onclick=()=>{$('recordMessage').textContent='';updateCounts();$('recordsDialog').showModal();};
@@ -181,7 +181,7 @@ export function mount(win,data,locationData=null,captureData=null){
 
 if(typeof window!=='undefined'){
   const readJson=path=>fetch(new URL(path,import.meta.url)).then(r=>{if(!r.ok)throw Error(path);return r.json();});
-  Promise.all([readJson('./data.json?v=20260908-book'),readJson('./locations.json?v=20260908-maps1').catch(()=>null),readJson('./captures.json?v=20260909-atlas1').catch(()=>null)]).then(([data,locations,captures])=>mount(window,data,locations,captures)).catch(()=>{
+  Promise.all([readJson('./data.json?v=20260909-borrow1'),readJson('./locations.json?v=20260908-maps1').catch(()=>null),readJson('./captures.json?v=20260909-atlas1').catch(()=>null)]).then(([data,locations,captures])=>mount(window,data,locations,captures)).catch(()=>{
     document.getElementById('loading').hidden=true;const fatal=document.getElementById('fatal');fatal.hidden=false;fatal.textContent='마수도감을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요. 저장된 수집 기록은 유지됩니다.';
   });
 }

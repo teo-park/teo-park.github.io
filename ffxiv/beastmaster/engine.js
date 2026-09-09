@@ -1,4 +1,4 @@
-import {buildCombat,combatMatches,combatSearchText,purposeForQuery} from './combat.js?v=20260909-combat1';
+import {buildCombat,combatMatches,combatSearchText,purposeForQuery,commands} from './combat.js?v=20260909-borrow1';
 export const KEY='teo-ffxiv.beastmaster.collection.v1';
 export const methods={field:'필드 포획',duty:'임무 포획',exchange:'항아리 교환',quest:'퀘스트 지급'};
 const initials=[...'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'];
@@ -34,9 +34,15 @@ export function create(data,locationData=null,captureData=null){
   }
   const sourceMatches=(r,o={})=>(!o.method||o.method==='all'||r.type===o.method)&&(!o.place||o.place==='all'||r.key===o.place);
   const matchingRoutes=(b,o={})=>routes.get(b.id).filter(r=>sourceMatches(r,o));
-  const terms=new Map(data.beasts.map(b=>{const text=[b.name,b.englishName,combatSearchText(combat.get(b.id)),...capturesByBeast.get(b.id).flatMap(t=>[t.name,t.englishName,t.event]),...(locations.get(b.id)||[]).flatMap(t=>[t.name,t.region,t.area]),...routes.get(b.id).flatMap(r=>[r.name,r.item?.name,r.source?.merchant,...(r.source?.costs||[]).map(c=>c.name),...(r.source?.prerequisiteQuests||[]).map(q=>q.name)])].filter(Boolean).join(' ');return [b.id,{text:normalize(text),initials:normalize(initialText(text))}];}));
+  const terms=new Map(data.beasts.map(b=>{
+    const shared=[b.name,b.englishName,...capturesByBeast.get(b.id).flatMap(t=>[t.name,t.englishName,t.event]),...(locations.get(b.id)||[]).flatMap(t=>[t.name,t.region,t.area]),...routes.get(b.id).flatMap(r=>[r.name,r.item?.name,r.source?.merchant,...(r.source?.costs||[]).map(c=>c.name),...(r.source?.prerequisiteQuests||[]).map(q=>q.name)])].filter(Boolean).join(' ');
+    return [b.id,Object.fromEntries(['all',...Object.keys(commands)].map(command=>{
+      const text=shared+' '+combatSearchText(combat.get(b.id),{command});
+      return [command,{text:normalize(text),initials:normalize(initialText(text))}];
+    }))];
+  }));
   function filter(owned,o={}){const q=normalize(o.query),number=/^(?:no)?\d+$/.test(q)?Number(q.replace(/^no/,'')):null,purpose=purposeForQuery(q);
-    return data.beasts.filter(b=>(!o.status||o.status==='all'||owned.has(b.id)===(o.status==='owned'))&&matchingRoutes(b,o).length&&(!o.combat||combatMatches(combat.get(b.id),o.combat))&&(!q||(number!==null?b.id===number:purpose?combatMatches(combat.get(b.id),{purpose}):terms.get(b.id).text.includes(q)||terms.get(b.id).initials.includes(q))));}
+    return data.beasts.filter(b=>{const searchable=terms.get(b.id)[o.combat?.command||'all'];return (!o.status||o.status==='all'||owned.has(b.id)===(o.status==='owned'))&&matchingRoutes(b,o).length&&(!o.combat||combatMatches(combat.get(b.id),o.combat))&&(!q||(number!==null?b.id===number:purpose?combatMatches(combat.get(b.id),{...o.combat,purpose}):searchable.text.includes(q)||searchable.initials.includes(q)));});}
   function groups(beasts,o={}){const found=new Map();for(const b of beasts)for(const r of matchingRoutes(b,o)){
     if(!found.has(r.key))found.set(r.key,{key:r.key,name:r.name,type:r.type,link:r.link,entries:[]});
     found.get(r.key).entries.push({beast:b,route:r});}

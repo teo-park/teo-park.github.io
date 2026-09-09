@@ -222,7 +222,8 @@ button.target-heading,button.target-heading[aria-pressed=true]{display:flex;gap:
 .combat-filters strong{color:#e5c79e}
 .combat-filters a,.combat-source a{color:var(--beast);text-decoration:underline;text-underline-offset:3px}
 .combat-filters .combat-limit{margin-top:6px}
-.combat-row{display:grid;grid-template-columns:145px minmax(0,1fr) minmax(0,1fr);border:1px solid var(--ff-line);border-radius:6px;background:#121e30;margin:0 0 12px;overflow:hidden}
+.combat-row{display:grid;grid-template-columns:145px repeat(3,minmax(0,1fr));border:1px solid var(--ff-line);border-radius:6px;background:#121e30;margin:0 0 12px;overflow:hidden}
+.combat-row.single-command{grid-template-columns:145px minmax(0,1fr)}
 .combat-row.collected{border-left:3px solid #ad946d}
 .combat-beast{padding:16px 12px;background:#ffffff03;display:flex;flex-direction:column;align-items:start;gap:7px}
 .combat-number{font-size:13.334px;color:var(--ff-muted)}
@@ -247,7 +248,7 @@ button.target-heading,button.target-heading[aria-pressed=true]{display:flex;gap:
 .combat-detail{margin:26px 0}
 .combat-detail .combat-skill{border:1px solid var(--ff-line);border-radius:5px;margin-bottom:10px;background:#162234}
 .combat-scope,.combat-source{font-size:13.334px;line-height:1.7;color:var(--ff-muted)}
-@media(max-width:800px){.combat-row{grid-template-columns:120px minmax(0,1fr)}.combat-row .combat-beast{grid-row:span 2}.combat-row .combat-skill:last-child{border-top:1px solid var(--ff-line)}.combat-filter-row{flex-wrap:wrap}.combat-filter-row label{flex-basis:40%}.combat-filter-row button{margin-left:auto}}
+@media(max-width:1000px){.combat-row,.combat-row.single-command{grid-template-columns:120px minmax(0,1fr)}.combat-row .combat-beast{grid-row:span 3}.combat-row.single-command .combat-beast{grid-row:auto}.combat-row .combat-skill+.combat-skill{border-top:1px solid var(--ff-line)}.combat-filter-row{flex-wrap:wrap}.combat-filter-row label{flex-basis:40%}.combat-filter-row button{margin-left:auto}}
 @media(max-width:520px){.combat-filters{padding:14px 12px}.combat-filter-row label{flex-basis:100%}.combat-row{display:block}.combat-beast{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:12px}.combat-beast h3{margin:0;flex:1}.combat-beast button{min-height:36px}.combat-skill{border-left:0;border-top:1px solid var(--ff-line);padding:13px}.catalog-view-controls .view-switch{flex-wrap:wrap}}
 [hidden]{display:none!important}
 @media(max-width:800px){.atlas-layout{grid-template-columns:1fr}.atlas-map-column{width:min(100%,580px);margin:auto}.atlas-targets{max-height:none;overflow:visible;padding:0}.atlas-toolbar{align-items:stretch;flex-direction:column;gap:10px}.atlas-toolbar label{width:100%}.atlas-toolbar p{margin:0}.atlas-layout{gap:12px}}

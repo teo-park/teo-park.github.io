@@ -11,6 +11,9 @@ export const revisions = {
   en: {repo:'xivapi/ffxiv-datamining', sha:'a67c23b00fe8cb254855d06b59845958b55d28f3'}
 };
 const patchNotes = 'https://www.ff14.co.kr/news/notice/view/2947';
+// XBMPet physical column 1 identifies the eight families in Borrow (44895).
+// Their transformed Beast Skills (44896–44903) require the matching instinct.
+const families=['백수강','백충강','유익강','초목강','수서강','갑린강','주술강','시체강'];
 const search = name => 'https://guide.ff14.co.kr/lodestone/search?keyword='+encodeURIComponent(name);
 const sourceUrl = (lang,path) => `https://github.com/${revisions[lang].repo}/blob/${revisions[lang].sha}/${path}`;
 export const icon = id => ({id, path:`ui/icon/${String(Math.floor(id/1000)*1000).padStart(6,'0')}/${String(id).padStart(6,'0')}.tex`,
@@ -61,13 +64,16 @@ export function build(sheets) {
     const actions=[0,1,2,3].map(slot=>({slot,actionId:integer(rawPet[String(slot+1)],'pet action')}));
     for(const a of actions)requireValue(lookup('Action',a.actionId).Name,`Unnamed player pet action ${a.actionId}`);
     const englishName=requireValue(en.Pet.rows.get(petId)?.Name,'Missing English name');
+    const familyId=integer(r['1'],'family'),familyName=requireValue(families[familyId-1],`Unknown family ${familyId}`),borrowActionId=44895+familyId;
+    requireValue(lookup('ActionTransient',borrowActionId).Description.includes(`${familyName} 본능`),`Borrow instinct mismatch ${id}`);
     beasts.push({id,petId,name,englishName,icon:icon(iconId),description:tooltip(r['8']).text,
+      family:{id:familyId,name:familyName,borrowActionId,source:{sheet:'XBMPet',id,column:1}},
       combatHints:{instinctual:tooltip(r['9']).text,release:tooltip(r['10']).text},locationHint:location,
       acquisition:location?[{type:'capture',location,enemyNames:null,captureDifficulty:null,successRate:null,
         note:'대상 개체와 난이도는 게임의 파악하기로 확인해야 합니다.'}]:[],actions,
       sourceRows:{XBMPet:id,Pet:petId},official:search(name),
       unmapped:{relatedActionId:integer(r['5'],'related action'),columns:Object.fromEntries([
-        '1','2','3',...Array.from({length:16},(_,i)=>String(i+11))
+        '2','3',...Array.from({length:16},(_,i)=>String(i+11))
       ].map(k=>[k,r[k]]))}});
   }
   beasts.sort((a,b)=>a.id-b.id);
@@ -114,7 +120,7 @@ export function build(sheets) {
     beast.acquisition.push({type:'item',itemId:id,note:'항아리를 사용하면 해당 마수와 계약합니다. 필드 포획의 대체 획득 경로입니다.'});
   }
   requireValue(items.length===16,'Unexpected number of unlock items');
-  const actionIds=[...new Set(beasts.flatMap(b=>b.actions.map(a=>a.actionId)))].sort((a,b)=>a-b);
+  const actionIds=[...new Set(beasts.flatMap(b=>[...b.actions.map(a=>a.actionId),b.family.borrowActionId]))].sort((a,b)=>a-b);
   for(const [id,r] of ko.Action.rows)if(r.ClassJob==='43' && r.Name)actionIds.push(id);
   const actions=Object.fromEntries([...new Set(actionIds)].sort((a,b)=>a-b).map(id=>{
     const a=lookup('Action',id),help=ko.ActionTransient.rows.get(id)?.Description||'';
@@ -126,8 +132,8 @@ export function build(sheets) {
     englishNames:beasts.filter(b=>b.englishName).length,iconReferences:beasts.length,descriptions:beasts.filter(b=>b.description).length,
     fieldHints:beasts.filter(b=>b.locationHint?.type==='field').length,dutyHints:beasts.filter(b=>b.locationHint?.type==='duty').length,
     starterQuest:1,unlockItems:items.length,exchangeItems:items.filter(i=>i.sources.some(s=>s.type==='exchange')).length,
-    linkedActions:Object.keys(actions).length,exactCaptureCoordinates:0,exactCaptureDifficulty:0,
-    needsCaptureDetail:missingCaptureDetails,uninterpretedColumns:[1,2,3,...Array.from({length:16},(_,i)=>i+11)]};
+    linkedActions:Object.keys(actions).length,borrowFamilies:families.length,exactCaptureCoordinates:0,exactCaptureDifficulty:0,
+    needsCaptureDetail:missingCaptureDetails,uninterpretedColumns:[2,3,...Array.from({length:16},(_,i)=>i+11)]};
   return {schemaVersion:1,patch:'7.56',locale:'ko-KR',snapshotStatus:'initial-extraction',
     revisions,source:{korean:sourceUrl('ko','csv/XBMPet.csv'),global:sourceUrl('en','csv/en/XBMPet.csv'),patchNotes},
     count:beasts.length,coverage,beasts,items,actions,
@@ -135,7 +141,7 @@ export function build(sheets) {
     limitations:[
       '원본 7.56 XBMPet의 ID 1~50을 사용합니다. 제공된 공식 도감 이미지에서 5×5 배치와 1페이지 번호를 확인했습니다. 2페이지 전체 아이콘은 개별 대조 전입니다.',
       '주요 출현 지역은 도감 힌트이며, 모든 포획 대상 개체·정확한 좌표·난이도·확률은 포함하지 않습니다.',
-      '의미가 확인되지 않은 분류·능력치 열은 unmapped에 원본 값으로 보존합니다. 포획 레벨이나 난이도로 추정하지 않습니다.',
+      '박물학적 분류와 빌리기 기술은 family에 연결합니다. 의미가 확인되지 않은 나머지 열은 unmapped에 보존하며 포획 레벨이나 난이도로 추정하지 않습니다.',
       '기술 tooltip.text는 원문 미리보기입니다. hasConditions가 true인 기술은 캐릭터 레벨 등의 조건을 적용하지 않았으므로 확정 효과로 사용하지 마세요.',
       '아이콘은 게임 리소스 ID와 XIVAPI URL 참조입니다. 이미지 파일을 복제하지 않으며 신규 아이콘 서버 반영은 별도 확인이 필요합니다.'
     ],rights:'무료·비영리 팬 도구용 게임 메타데이터. © SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.'};
