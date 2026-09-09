@@ -25,7 +25,7 @@
 
 ## 출처 및 권리 안내
 
-기본 글꼴은 [코트라 희망체](https://noonnu.cc/font_page/767)입니다. 눈누에서 안내하는 웹폰트 CDN을 사용하며, 글꼴 파일을 이 저장소에서 따로 배포하지 않습니다. [KOTRA · 공유마당 이용 안내](https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?menuNo=200023&wrtSn=13302259)를 참고하세요. 기존 나눔스퀘어라운드는 보조 글꼴로 유지합니다. `theme.css`의 `--ff-font-primary`를 `"NanumSquareRound"`로 바꾸면 전체 페이지와 무기 공유 이미지가 기존 글꼴로 돌아갑니다.
+전체 페이지와 무기 공유 이미지는 [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum)를 사용합니다. 글꼴 파일은 저장소에서 제공하며 [OFL](./fonts/nanum-square-round/OFL.txt)을 따릅니다. 공통 글꼴은 `theme.css`의 `--ff-sans`에서 관리합니다.
 
 - 퀘스트 이름·레벨·분류·선행 관계: [파이널판타지14 한국 공식 가이드 — 주요 퀘스트](https://guide.ff14.co.kr/lodestone/db/quest)
 - 임무 이름·레벨·분류: [파이널판타지14 한국 공식 가이드 — 임무](https://guide.ff14.co.kr/lodestone/db/duty)

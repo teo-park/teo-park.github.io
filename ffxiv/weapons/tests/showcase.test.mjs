@@ -74,8 +74,9 @@ test('share dialog prepares the full snapshot and does not touch collection stor
 test('denied clipboard uses a truthful message and keeps PNG save available',()=>ui(async({d,click,tick})=>{
  click('openShowcase');await tick();click('copyShowcase');await tick();assert.match(d.getElementById('shareStatus').textContent,/PNG 저장/);assert.equal(d.getElementById('saveShowcase').disabled,false);
 },{copy:async()=>{throw Error('NotAllowedError');}}));
-test('blocked external font still exports with the secondary font',()=>ui(async({d,click,tick,painted})=>{
- Object.defineProperty(d,'fonts',{value:{load:async family=>{if(family.includes('KotraHope'))throw Error('CDN unavailable');return [];}}});
+test('unavailable selected font still exports with the secondary font',()=>ui(async({d,click,tick,painted})=>{
+ d.documentElement.style.setProperty('--ff-sans','UnavailableFont, NanumSquareRound, sans-serif');
+ Object.defineProperty(d,'fonts',{value:{load:async family=>{if(family.includes('UnavailableFont'))throw Error('Font unavailable');return [];}}});
  click('openShowcase');await tick();assert.equal(d.getElementById('copyShowcase').disabled,false);assert.equal(painted[0].fontFamily,'NanumSquareRound, sans-serif');
 }));
 test('failed generation never copies an old preview after an option change',()=>ui(async({d,click,tick,controller})=>{

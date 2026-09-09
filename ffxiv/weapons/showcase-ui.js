@@ -1,4 +1,4 @@
-import {buildShowcase,drawShowcase,loadBundledShowcaseIcons,canvasPNG,writePNG} from './showcase.js';
+import {buildShowcase,drawShowcase,loadBundledShowcaseIcons,canvasPNG,writePNG} from './showcase.js?v=20260909-nanum2';
 
 const PREFS='teo-ffxiv.weapons.showcase.v1';
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -27,7 +27,7 @@ export function mountShowcase({catalog,getRecords,doc=document,loadIcons=loadBun
   if(!dialog.open)return;const ticket=++version;busy('무기 아이콘과 공유 이미지를 준비하고 있어요.');$('retryShowcase').hidden=true;
   try{
    const records=getRecords(),model=buildShowcase(catalog,records,options());
-   model.fontFamily=win.getComputedStyle(doc.documentElement).getPropertyValue('--ff-sans').trim()||'KotraHope, NanumSquareRound, sans-serif';
+   model.fontFamily=win.getComputedStyle(doc.documentElement).getPropertyValue('--ff-sans').trim()||'NanumSquareRound, sans-serif';
    // The normal search, series, status filter and pagination never limit this image.
    const all=buildShowcase(catalog,records),urls=all.rows.flatMap(r=>r.cells.flatMap(c=>c.entries.map(e=>e.item.icon))),key=[...new Set(urls)].sort().join('|');
    if(!assets||key!==assetKey){assetKey=key;assets=loadIcons(urls,{cache});}

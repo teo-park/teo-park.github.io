@@ -1,5 +1,5 @@
 import {STORAGE_KEY,emptyBackup,emptyRecord,parseBackup,mergeBackups,stageIndex,statusOf,summarize,filterTracks} from './core.js';
-import {mountShowcase} from './showcase-ui.js?v=20260909-share1';
+import {mountShowcase} from './showcase-ui.js?v=20260909-nanum2';
 
 const $=id=>document.getElementById(id),esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PREFS='teo-ffxiv.weapons.preferences.v1',PAGE_SIZE=24;

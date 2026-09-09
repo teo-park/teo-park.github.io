@@ -59,7 +59,7 @@
 - [FFXIV Collect — Relic Weapons](https://ffxivcollect.com/relics/weapons), [Ultimate Weapons](https://ffxivcollect.com/relics/ultimate): 시리즈별 공개 아이템 ID 목록 대조. 확인 리비전 [`bd2b6c5`](https://github.com/skyborn-industries/ffxiv-collect/tree/bd2b6c5e49cc560a06cb0bed887edc43978f597a/lib/tasks/relics). 이 페이지의 표시·검색·저장 프로그램은 자체 구현입니다.
 - [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko/tree/66eceba69eb2398958bdb133b241a69c13672b6c), [글로벌 게임 데이터](https://github.com/xivapi/ffxiv-datamining/tree/a67c23b00fe8cb254855d06b59845958b55d28f3): `Item`의 한국어 이름·아이콘·레벨과 `ClassJobCategory`의 장비 직업. 아이템 ID로 연결하고 직업·장비 슬롯 일치를 검증합니다. 원본 URL과 SHA-256은 `data/weapons.json`에 기록합니다.
 - [XIVAPI](https://v2.xivapi.com/): 게임 아이콘. [Console Games Wiki — Gentlemage's Umbrella](https://ffxiv.consolegameswiki.com/wiki/Gentlemage%27s_Umbrella): 청마도사 우산의 획득·재보강 경로 참고.
-- 기본 글꼴은 [코트라 희망체](https://noonnu.cc/font_page/767), [출처·이용 안내](https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?menuNo=200023&wrtSn=13302259)입니다. 보조 글꼴은 네이버 나눔스퀘어라운드이며 [OFL](../fonts/nanum-square-round/OFL.txt)을 따릅니다. 공유 이미지도 공통 `--ff-sans`를 사용합니다.
+- 글꼴은 [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum)이며 [OFL](../fonts/nanum-square-round/OFL.txt)을 따릅니다. 공유 이미지도 공통 `--ff-sans`를 사용합니다.
 
 게임 정보·이미지의 권리는 각 권리자에게 있습니다. 사이트의 공개가 해당 자료의 별도 자유 이용 허락을 의미하지 않습니다. SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.
 
