@@ -1,10 +1,11 @@
 import {STORAGE_KEY,emptyBackup,emptyRecord,parseBackup,mergeBackups,stageIndex,statusOf,summarize,filterTracks} from './core.js';
+import {mountShowcase} from './showcase-ui.js?v=20260909-share1';
 
 const $=id=>document.getElementById(id),esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PREFS='teo-ffxiv.weapons.preferences.v1',PAGE_SIZE=24;
 let data,state=emptyBackup(),storageBlocked=false,rawStored=null,undoState=null,pendingImport=null,detailId=null,page=1;
 let filters={kind:'relic',series:'zodiac',job:'',status:'',query:'',target:false},layout='list';
-let seriesById,jobsById,trackById;
+let seriesById,jobsById,trackById,showcase;
 const label=t=>jobsById.get(t.jobId).name+(t.jobId==='PLD'?(t.slot==='shield'?' · 방패':' · 검'):'');
 const getRecord=id=>state.records[id]||emptyRecord();
 function warn(text){$('storageWarning').textContent=text;$('storageWarning').hidden=!text;}
@@ -54,6 +55,7 @@ function render(){
  $('emptyResults').hidden=list.length>0;
  $('pagination').innerHTML=pages>1?`<button data-page="${page-1}"${page===1?' disabled':''}>이전</button><span>${page} / ${pages} 페이지</span><button data-page="${page+1}"${page===pages?' disabled':''}>다음</button>`:'';
  if(detailId&&$('detailDialog').open)renderDetail();
+ showcase?.refresh();
  let restore=focus?$(focus):null;
  if(focusTarget)restore=[...document.querySelectorAll('[data-target]')].find(b=>b.dataset.target===focusTarget);
  if(focusCollect)restore=[...document.querySelectorAll('[data-collect]')].find(b=>b.dataset.collect===focusCollect);
@@ -89,6 +91,7 @@ async function boot(){
   $('jobFilter').innerHTML='<option value="">모든 직업</option>'+data.jobs.map(j=>`<option value="${j.id}">${j.name}</option>`).join('');$('jobFilter').value=filters.job;$('statusFilter').value=filters.status;$('search').value=filters.query;
   renderSeriesOptions();applyLayout();render();$('app').hidden=false;$('loadStatus').hidden=true;$('openRecords').disabled=false;
  }catch(error){$('loadStatus').textContent='무기 데이터를 불러오지 못했습니다. 새로고침해 주세요. '+error.message;return;}
+ showcase=mountShowcase({catalog:data,getRecords:()=>latest().records});
  $('search').addEventListener('input',()=>{filters.query=$('search').value;changedFilters();});
  $('search').addEventListener('compositionend',()=>{filters.query=$('search').value;changedFilters();});
  $('seriesFilter').addEventListener('change',()=>{filters.series=$('seriesFilter').value;changedFilters();});

@@ -30,6 +30,16 @@
 
 무기명·시리즈명·직업명·초성을 검색하고, 직업·진행 상태·관심 표시로 필터링할 수 있습니다. 목록형/그리드형 전환, 단계별 공식 가이드 연결, 진행 메모, 실행 취소를 제공합니다. 목록은 24개씩 표시됩니다. 초기에는 조디악 시리즈를 보여주며 마지막 필터·보기 설정을 기억합니다.
 
+## 전체 현황 이미지
+
+상단 **전체 현황 · 이미지**에서 직업 한 행, 무기 시리즈 한 열로 전체 기록을 모아 봅니다. 나이트 검·방패는 같은 칸 안에서 왼쪽·오른쪽으로 구분합니다. 완성·수집은 금색 체크, 성장 중은 완료 단계/전체 단계, 미수집은 흐린 아이콘과 원으로 표시합니다. 지원하지 않는 직업·시리즈 조합은 대시입니다.
+
+이름, 밤하늘/양피지 배경, 전체/성장형/절/재보강 범위를 선택하고 **이미지 복사** 또는 **PNG 저장**을 누릅니다. 이미지 복사를 허용하지 않는 브라우저에서는 PNG 파일을 사용할 수 있습니다. 실제 PNG를 미리 보여주므로 복사한 이미지도 동일합니다. 작은 화면에서는 크게 보기와 스크롤로 확인하고 텍스트 현황도 열 수 있습니다.
+
+검색·목록 필터·페이지 번호는 공유 범위에 영향을 주지 않습니다. 기록한 직업만 숨김/표시해도 달성률 분모는 해당 범위 전체 무기 수를 유지합니다. 메모와 관심 표시는 이미지에 넣지 않습니다. 이미지 준비와 복사는 브라우저 안에서 처리하며, 수집 기록을 서버에 보내지 않습니다.
+
+아이콘 526개는 XIVAPI에서 받은 원본 PNG를 `data/weapon-icons.json`에 묶어 제공합니다. 브라우저가 수백 번의 외부 이미지 요청을 보내지 않도록 하며, 공통 글꼴을 준비한 뒤 두 배 해상도로 그립니다. 아이콘을 읽을 수 없으면 수집 상태를 유지한 대체 기호와 재시도 안내를 표시합니다. 데이터 갱신 후 `npm run cache-icons`로 아이콘 묶음도 갱신하세요.
+
 ## 저장과 백업
 
 - 수집 기록: `teo-ffxiv.weapons.collection.v1`, 필터와 보기: `teo-ffxiv.weapons.preferences.v1`.
@@ -49,7 +59,7 @@
 - [FFXIV Collect — Relic Weapons](https://ffxivcollect.com/relics/weapons), [Ultimate Weapons](https://ffxivcollect.com/relics/ultimate): 시리즈별 공개 아이템 ID 목록 대조. 확인 리비전 [`bd2b6c5`](https://github.com/skyborn-industries/ffxiv-collect/tree/bd2b6c5e49cc560a06cb0bed887edc43978f597a/lib/tasks/relics). 이 페이지의 표시·검색·저장 프로그램은 자체 구현입니다.
 - [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko/tree/66eceba69eb2398958bdb133b241a69c13672b6c), [글로벌 게임 데이터](https://github.com/xivapi/ffxiv-datamining/tree/a67c23b00fe8cb254855d06b59845958b55d28f3): `Item`의 한국어 이름·아이콘·레벨과 `ClassJobCategory`의 장비 직업. 아이템 ID로 연결하고 직업·장비 슬롯 일치를 검증합니다. 원본 URL과 SHA-256은 `data/weapons.json`에 기록합니다.
 - [XIVAPI](https://v2.xivapi.com/): 게임 아이콘. [Console Games Wiki — Gentlemage's Umbrella](https://ffxiv.consolegameswiki.com/wiki/Gentlemage%27s_Umbrella): 청마도사 우산의 획득·재보강 경로 참고.
-- 네이버 나눔스퀘어라운드: [글꼴 라이선스](../fonts/nanum-square-round/OFL.txt).
+- 기본 글꼴은 [코트라 희망체](https://noonnu.cc/font_page/767), [출처·이용 안내](https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?menuNo=200023&wrtSn=13302259)입니다. 보조 글꼴은 네이버 나눔스퀘어라운드이며 [OFL](../fonts/nanum-square-round/OFL.txt)을 따릅니다. 공유 이미지도 공통 `--ff-sans`를 사용합니다.
 
 게임 정보·이미지의 권리는 각 권리자에게 있습니다. 사이트의 공개가 해당 자료의 별도 자유 이용 허락을 의미하지 않습니다. SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.
 

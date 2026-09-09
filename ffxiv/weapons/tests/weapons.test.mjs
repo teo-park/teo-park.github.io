@@ -47,10 +47,10 @@ test('search supports Korean initials and intermediate weapon names with combine
 });
 
 const html=await fs.readFile(new URL('../index.html',import.meta.url),'utf8');
-const source=(await fs.readFile(new URL('../app.js',import.meta.url),'utf8')).replace(/^import[^\n]+\n/,'const {STORAGE_KEY,emptyBackup,emptyRecord,parseBackup,mergeBackups,stageIndex,statusOf,summarize,filterTracks}=window.testCore;\n');
+const source=(await fs.readFile(new URL('../app.js',import.meta.url),'utf8')).replace(/^import[^\n]+\n/gm,'')+'\n';
 async function harness(tester,stored=null){
  const dom=new JSDOM(html,{url:'https://example.test/ffxiv/weapons/',runScripts:'outside-only'}),w=dom.window,d=w.document;
- w.testCore=core;w.structuredClone=structuredClone;w.fetch=async()=>({ok:true,json:async()=>data});
+ Object.assign(w,core);w.mountShowcase=()=>({refresh(){}});w.structuredClone=structuredClone;w.fetch=async()=>({ok:true,json:async()=>data});
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');this.dispatchEvent(new w.Event('close'));};w.HTMLElement.prototype.scrollIntoView=function(){};
  if(stored!==null)w.localStorage.setItem(core.STORAGE_KEY,typeof stored==='string'?stored:JSON.stringify(stored));
  new vm.Script(source).runInContext(dom.getInternalVMContext());
