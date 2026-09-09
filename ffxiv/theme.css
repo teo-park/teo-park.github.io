@@ -1,5 +1,19 @@
 /* Shared identity for the FFXIV tools. App styles own their working layouts. */
 @font-face {
+  font-family: "LINESeedKR";
+  src: url("./fonts/line-seed-kr/LINESeedKR-Rg.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("./fonts/line-seed-kr/LINESeedKR-Bd.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
   font-family: "NanumSquareRound";
   src: url("./fonts/nanum-square-round/NanumSquareRoundR.woff2") format("woff2");
   font-style: normal;
@@ -30,7 +44,9 @@
   --ff-muted: #a7b7cd;
   --ff-cyan: #85d8ef;
   --ff-gold: #e7c78d;
-  --ff-sans: "NanumSquareRound", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --ff-font-primary: "LINESeedKR";
+  --ff-font-secondary: "NanumSquareRound";
+  --ff-sans: var(--ff-font-primary), var(--ff-font-secondary), "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 100px; }

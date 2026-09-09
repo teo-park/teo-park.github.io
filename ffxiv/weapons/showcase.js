@@ -60,7 +60,7 @@ export function writePNG(blob,{clipboard=globalThis.navigator?.clipboard,Item=gl
 export function drawShowcase(canvas,model,images=new Map(),scale=2){
  const l=showcaseLayout(model),p=THEMES[model.theme],ctx=canvas.getContext('2d');if(!ctx)throw Error('이미지 그리기를 지원하지 않는 브라우저입니다.');
  canvas.width=l.width*scale;canvas.height=l.height*scale;ctx.scale(scale,scale);
- const font=(size,weight=400)=>{ctx.font=`${weight} ${size}px ${model.fontFamily||'NanumSquareRound, sans-serif'}`;};
+ const font=(size,weight=400)=>{ctx.font=`${weight} ${size}px ${model.fontFamily||'LINESeedKR, NanumSquareRound, sans-serif'}`;};
  const text=(s,x,y,size=14,color=p.text,weight=400,align='left',max=null)=>{font(size,weight);ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='alphabetic';s=String(s);if(max&&ctx.measureText(s).width>max){while(s.length&&ctx.measureText(s+'…').width>max)s=s.slice(0,-1);s+='…';}ctx.fillText(s,x,y);};
  const box=(x,y,w,h,color,r=8,stroke=null)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=color;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}};
  const line=(x,y,x2,y2,color)=>{ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();};

@@ -25,13 +25,13 @@
 
 ## 출처 및 권리 안내
 
-전체 페이지와 무기 공유 이미지는 [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum)를 사용합니다. 글꼴 파일은 저장소에서 제공하며 [OFL](./fonts/nanum-square-round/OFL.txt)을 따릅니다. 공통 글꼴은 `theme.css`의 `--ff-sans`에서 관리합니다.
+전체 페이지와 무기 공유 이미지는 [LINE Seed KR](https://seed.line.me/index_kr.html)을 사용하고, 나눔스퀘어라운드를 보조 글꼴로 유지합니다. 공식 배포본의 Regular·Bold 웹폰트를 수정 없이 제공하며 [OFL](./fonts/line-seed-kr/OFL.txt)을 따릅니다. 공통 글꼴은 `theme.css`의 `--ff-font-primary`와 `--ff-sans`에서 관리합니다. 기존 글꼴로 돌아가려면 `--ff-font-primary`를 `"NanumSquareRound"`로 변경하세요.
 
 - 퀘스트 이름·레벨·분류·선행 관계: [파이널판타지14 한국 공식 가이드 — 주요 퀘스트](https://guide.ff14.co.kr/lodestone/db/quest)
 - 임무 이름·레벨·분류: [파이널판타지14 한국 공식 가이드 — 임무](https://guide.ff14.co.kr/lodestone/db/duty)
 - PvP 경험치·보상 수치: [FFXIV Console Games Wiki — Series Malmstones](https://ffxiv.consolegameswiki.com/wiki/Series_Malmstones)
 - 카드·NPC·획득처: [FFXIV Collect 공개 API](https://ffxivcollect.com/api), 한국어 명칭: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko), 규칙: [한국 공식 트리플 트라이어드 안내](https://guide.ff14.co.kr/Goldsaucer/tripletriad)
-- 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum), [SIL Open Font License 1.1](./fonts/nanum-square-round/OFL.txt)
+- 글꼴: [LINE Seed KR](https://seed.line.me/index_kr.html), [SIL Open Font License 1.1](./fonts/line-seed-kr/OFL.txt). 보조 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum), [OFL](./fonts/nanum-square-round/OFL.txt).
 - 청마법 목록·습득처: [FFXIV Collect](https://ffxivcollect.com/spells), 체득 안내: [한국 공식 청마도사 가이드](https://guide.ff14.co.kr/job/BlueMage/18?type=E), 한국어 명칭과 수치: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko)
 - 마수도감 이름·장소·항아리 획득처: [한국어·글로벌 게임 데이터](./beastmaster/README.md), 기능과 교환 NPC 위치: [한국 공식 7.56 안내](https://www.ff14.co.kr/news/notice/view/2947)
 
