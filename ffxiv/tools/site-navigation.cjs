@@ -29,7 +29,7 @@ const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...j
 const baseFor = page => page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
-  return `<link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios1"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
+  return `<link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios2"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
 }
 function header(page) {
   const base = baseFor(page);

@@ -1,5 +1,6 @@
 body select.select-options-native { display: none !important; }
 body .select-options {
+  --select-option-height: 40px;
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
@@ -10,6 +11,12 @@ body .select-options {
   margin: 0;
   text-align: left;
 }
+/* Match each tool's native select size and label spacing. */
+body:has(#beastGrid) .select-options { --select-option-height: 44px; }
+body:has(.weapon-main) .select-options { --select-option-height: 42px; margin-top: 5px; }
+body .triad-main .filters .select-options { margin-top: 4px; }
+body .purpose-card .select-options { --select-option-height: 36px; }
+body .carnivale-picker > .select-options { margin-bottom: 13px; }
 body .select-options > .select-option {
   position: relative;
   display: block;
@@ -17,7 +24,7 @@ body .select-options > .select-option {
   width: auto;
   min-width: 0;
   max-width: 100%;
-  min-height: 36px;
+  min-height: var(--select-option-height);
   margin: 0;
   padding: 7px 10px 7px 29px;
   border: 1px solid #40536d;
@@ -51,4 +58,3 @@ body .select-options > .select-option:hover:not(:disabled) { border-color: var(-
 body .select-options > .select-option:focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: 2px; z-index: 1; }
 body .select-options > .select-option:disabled { opacity: .45; cursor: not-allowed; }
 body .select-options[aria-invalid="true"] { outline: 1px solid #e69891; outline-offset: 3px; border-radius: 5px; }
-@media (pointer: coarse) { body .select-options > .select-option { min-height: 44px; } }
