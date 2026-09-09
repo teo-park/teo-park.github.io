@@ -74,17 +74,17 @@ test('UI existing records restore, stage detail shows previous steps, notes are 
 },bk({[pld.id]:record(pld.items[7].id)})));
 test('UI ultimate collection keeps its one-line label and filters refresh',()=>harness(({d,click,change,saved})=>{
  click('[data-kind="ultimate"]');const id='ucob.PLD.weapon';click(`[data-collect="${id}"]`);assert.equal(d.querySelector(`[data-collect="${id}"]`).textContent.trim(),'수집');assert.equal(d.querySelector(`[data-collect="${id}"]`).getAttribute('aria-pressed'),'true');
- change(d.getElementById('statusFilter'),'complete');assert.equal(d.querySelectorAll('.weapon-row').length,1);click(`[data-collect="${id}"]`);assert.equal(d.querySelectorAll('.weapon-row').length,0);assert.equal(saved().records[id].itemId,0);assert.equal(d.getElementById('emptyResults').hidden,false);
+ change(d.getElementById('statusFilter'),'complete');assert.equal(d.querySelectorAll('.relic-entry').length,1);click(`[data-collect="${id}"]`);assert.equal(d.querySelectorAll('.relic-entry').length,0);assert.equal(saved().records[id].itemId,0);assert.equal(d.getElementById('emptyResults').hidden,false);
 }));
-test('UI IME input searches the currently composing consonant and grid/list preserves records',()=>harness(({w,d,click,change,saved})=>{
+test('UI IME input searches the composing consonant and changing table scope preserves records',()=>harness(({w,d,click,change,saved})=>{
  const q=d.getElementById('search');q.value='ㅋㄹㅌㄴ';q.dispatchEvent(new w.InputEvent('input',{bubbles:true,isComposing:true}));assert.equal(d.querySelectorAll('.relic-entry').length,1);
- change(d.querySelector('[data-stage]'),pld.items[0].id);click('[data-kind="ultimate"]');click('[data-layout="grid"]');assert.equal(d.getElementById('catalog').dataset.collectionLayout,'grid');click('[data-layout="list"]');assert.equal(saved().records[pld.id].itemId,pld.items[0].id);
+ change(d.querySelector('[data-stage]'),pld.items[0].id);click('[data-kind="ultimate"]');assert.equal(d.getElementById('catalog').dataset.collectionLayout,'table');click('[data-kind="relic"]');assert.equal(saved().records[pld.id].itemId,pld.items[0].id);
 }));
 
 test('relic table aligns six full series by job despite an old single-series/grid preference',()=>harness(({d})=>{
- assert.equal(d.getElementById('catalog').dataset.collectionLayout,'table');assert.equal(d.getElementById('seriesField').hidden,true);assert.equal(d.querySelector('.collection-layout-switch').hidden,true);
+ assert.equal(d.getElementById('catalog').dataset.collectionLayout,'table');assert.equal(d.getElementById('seriesField').hidden,true);assert.equal(d.querySelector('.collection-layout-switch'),null);
  assert.deepEqual([...d.querySelectorAll('.relic-table thead th a')].map(x=>x.textContent.replace(' ↗','')),['제타','아니마','에우레카','레지스탕스','맨더빌','팬텀']);
- assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);assert.equal(d.querySelectorAll('.relic-entry').length,101);assert.equal(d.getElementById('pagination').children.length,0);
+ assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);assert.equal(d.querySelectorAll('.relic-entry').length,101);assert.equal(d.getElementById('pagination'),null);
  assert.equal(d.querySelectorAll('[data-job="PLD"] td[data-series="zodiac"] [data-stage]').length,2);
  assert.equal(d.querySelector('[data-job="SGE"] td').textContent,'—');assert.equal(d.querySelector('[data-job="BLU"]'),null);
  assert.equal(d.getElementById('seriesFilter').value,'');
@@ -103,7 +103,7 @@ test('relic state and favorite filters keep column positions and distinguish una
  change(d.getElementById('statusFilter'),'progress');assert.equal(d.querySelectorAll('.relic-table tbody tr').length,1);assert.equal(d.querySelectorAll('.relic-table thead th').length,7);assert.equal(d.querySelectorAll('.relic-entry').length,1);
  assert.equal(d.querySelector('[data-job="SGE"] td').textContent,'—');assert.equal(d.querySelector('[data-job="SGE"] .relic-filtered').textContent,'조건 제외');
  click('#targetFilter');assert.equal(d.querySelectorAll('.relic-entry').length,1);click('[data-target="phantom.SGE.weapon"]');assert.equal(d.getElementById('emptyResults').hidden,false);assert.equal(d.querySelector('.relic-table'),null);
- click('[data-kind="enhanced"]');assert.equal(d.getElementById('seriesField').hidden,false);assert.equal(d.querySelector('.collection-layout-switch').hidden,false);
+ click('[data-kind="enhanced"]');assert.equal(d.getElementById('seriesField').hidden,false);assert.equal(d.querySelector('.collection-layout-switch'),null);
 },bk({'phantom.SGE.weapon':record(t('phantom.SGE.weapon').items[0].id,true)})));
 test('UI importing requires a preview, merges by default and explicit replacement clears missing records',()=>harness(({d,click,change,saved})=>{
  click('#openRecords');d.getElementById('backupText').value=JSON.stringify(bk({[shield.id]:record(shield.items[2].id)}));click('#previewImport');assert.equal(saved().records[shield.id],undefined);click('#applyImport');assert.ok(saved().records[pld.id]);assert.ok(saved().records[shield.id]);
@@ -118,4 +118,39 @@ test('UI storage failure never claims a successful collection update',()=>harnes
 }));
 test('UI writes merge unseen changes from another tab instead of losing them',()=>harness(({w,d,change,saved})=>{
  w.localStorage.setItem(core.STORAGE_KEY,JSON.stringify(bk({[shield.id]:record(shield.items[7].id)})));change(d.querySelector(`[data-stage="${pld.id}"]`),pld.items[0].id);assert.ok(saved().records[shield.id]);assert.ok(saved().records[pld.id]);
+}));
+
+
+test('ultimate table includes seven raids with separate sword and shield records',()=>harness(({d,click,change,saved})=>{
+ assert.equal(d.getElementById('resultLabel').textContent,'절 무기 수집표');
+ assert.equal(d.querySelectorAll('.relic-table thead th').length,8);assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);
+ assert.equal(d.querySelectorAll('[data-collect]').length,136);assert.equal(d.querySelectorAll('[data-stage]').length,0);
+ assert.equal(d.getElementById('seriesField').hidden,true);assert.equal(d.getElementById('seriesFilter').value,'');
+ const sword=t('ucob.PLD.weapon'),shield=t('ucob.PLD.shield');
+ assert.equal(d.querySelectorAll('[data-job="PLD"] [data-series="ucob"] [data-collect]').length,2);
+ const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=350;scroll.scrollTop=240;
+ const button=d.querySelector('[data-collect="ucob.PLD.weapon"]');button.focus();click('[data-collect="ucob.PLD.weapon"]');
+ assert.equal(saved().records[sword.id].itemId,sword.items[0].id);assert.equal(saved().records[shield.id],undefined);
+ assert.equal(d.activeElement.dataset.collect,sword.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,350);assert.equal(d.getElementById('relicTableScroll').scrollTop,240);
+ click('[data-collect="ucob.PLD.shield"]');click('#undo');assert.equal(saved().records[shield.id],undefined);assert.equal(saved().records[sword.id].itemId,sword.items[0].id);
+ change(d.getElementById('jobFilter'),'VPR');assert.equal(d.querySelector('[data-job="VPR"] td').textContent,'—');assert.ok(d.querySelector('[data-collect="top.VPR.weapon"]'));
+},null,{filters:{kind:'ultimate',series:'ucob'},layout:'grid'}));
+
+test('all table exposes every record and all fifteen series on aligned job rows',()=>harness(({d,click,change,saved})=>{
+ click('[data-kind=""]');assert.equal(d.getElementById('resultLabel').textContent,'전체 무기 수집표');
+ assert.equal(d.querySelectorAll('.relic-table tbody tr').length,22);assert.equal(d.querySelectorAll('.relic-table thead th').length,16);
+ assert.equal(d.querySelectorAll('.relic-entry').length,260);assert.equal(d.querySelectorAll('[data-stage]').length,124);assert.equal(d.querySelectorAll('[data-collect]').length,136);
+ assert.equal(d.querySelectorAll('.relic-table thead .series-boundary').length,2);
+ assert.ok(d.querySelector('[data-job="BLU"] [data-stage="gentlemage.BLU.weapon"]'));assert.equal(d.querySelector('[data-job="BLU"] td').textContent,'—');
+ assert.equal(d.querySelectorAll('[data-job="PLD"] td').length,15);assert.equal(d.querySelectorAll('[data-job="PLD"] .relic-entry').length,28);
+ change(d.querySelector('[data-stage="zodiac.PLD.weapon"]'),pld.items[2].id);click('[data-collect="tea.PLD.weapon"]');
+ const exquisite=t('exquisite.PLD.weapon');change(d.querySelector('[data-stage="exquisite.PLD.weapon"]'),exquisite.items[1].id);
+ assert.equal(saved().records[pld.id].itemId,pld.items[2].id);assert.equal(saved().records['tea.PLD.weapon'].itemId,t('tea.PLD.weapon').items[0].id);assert.equal(saved().records[exquisite.id].itemId,exquisite.items[1].id);
+ change(d.getElementById('statusFilter'),'complete');assert.equal(d.querySelectorAll('.relic-table thead th').length,16);assert.equal(d.querySelectorAll('.relic-entry').length,2);
+ assert.equal(d.querySelector('[data-job="PLD"] th small').textContent,'PLD · 2/28');
+}));
+
+test('ultimate collection storage failures preserve prior state and button',()=>harness(({w,d,click,saved})=>{
+ click('[data-kind="ultimate"]');w.Storage.prototype.setItem=()=>{throw Error('Quota exceeded');};
+ click('[data-collect="ucob.PLD.weapon"]');assert.equal(saved(),null);assert.equal(d.querySelector('[data-collect="ucob.PLD.weapon"]').getAttribute('aria-pressed'),'false');assert.match(d.getElementById('storageWarning').textContent,/자동 저장 실패/);
 }));

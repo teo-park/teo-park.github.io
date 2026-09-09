@@ -1,7 +1,7 @@
 .filters.relic-filters{grid-template-columns:minmax(200px,1.4fr) minmax(140px,.7fr) minmax(160px,.8fr)}
 .catalog-toolbar h2 #resultLabel{font:inherit;color:inherit;margin:0}
 .relic-table-scroll{overflow:auto;max-height:min(720px,72dvh);border:1px solid var(--ff-line);border-radius:8px;scrollbar-gutter:stable;scroll-padding:70px 0 0 122px}
-.relic-table{width:100%;min-width:1140px;table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
+.relic-table{width:100%;min-width:var(--table-min-width,1140px);table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
 .relic-table .relic-job-col{width:120px}
 .relic-table th,.relic-table td{border-right:1px solid var(--ff-line);border-bottom:1px solid var(--ff-line);padding:8px;vertical-align:middle;background:#121e31}
 .relic-table tr>*:last-child{border-right:0}
@@ -39,3 +39,8 @@
 .relic-table .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 @media(max-width:760px){.filters.relic-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.relic-filters .search-label{grid-column:1/-1}.relic-table .relic-job-col{width:104px}.relic-table-scroll{scroll-padding-left:106px}.relic-table tbody th{padding:8px}.relic-table th,.relic-table td{padding:6px}}
 @media(pointer:coarse){.relic-stage select{min-height:44px}.relic-cell-actions button{min-height:40px}.relic-target{width:40px}}
+
+.relic-table .series-boundary{border-left:3px solid #617892}
+.relic-stage .collect-toggle{flex:1;min-width:0;min-height:36px;padding:6px;font-size:13.334px;white-space:nowrap}
+@media(max-width:760px){.relic-filters label:last-child{grid-column:auto}}
+@media(pointer:coarse){.relic-stage .collect-toggle{min-height:44px}}

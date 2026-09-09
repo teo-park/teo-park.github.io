@@ -6,9 +6,9 @@
   <meta name="description" content="고대·아니마·에우레카·레지스탕스·맨더빌·팬텀 웨폰의 직업별 강화 단계와 절 무기, 재보강 신곡 무기 수집을 기록하세요.">
   <meta name="theme-color" content="#0b1220"><link rel="canonical" href="https://teo-park.github.io/ffxiv/weapons/">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../theme.css?v=20260909-line1">
-  <link rel="stylesheet" href="../collection-layout.css"><link rel="stylesheet" href="./styles.css?v=20260909-share1">
-  <link rel="stylesheet" href="./relic-table.css?v=20260909-table1">
-  <script type="module" src="./app.js?v=20260909-table1"></script>
+  <link rel="stylesheet" href="./styles.css?v=20260909-share1">
+  <link rel="stylesheet" href="./relic-table.css?v=20260909-table2">
+  <script type="module" src="./app.js?v=20260909-table2"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog">무기 목록으로 바로가기</a>
@@ -22,13 +22,12 @@
       <section class="filter-panel" aria-label="무기 필터">
         <div id="kinds" class="kind-tabs" role="group" aria-label="무기 분류"><button data-kind="" aria-pressed="true">전체</button><button data-kind="relic" aria-pressed="false">성장형 무기</button><button data-kind="ultimate" aria-pressed="false">절 무기</button><button data-kind="enhanced" aria-pressed="false">재보강 무기</button></div>
         <div class="filters"><label class="search-label">무기·시리즈 검색<input id="search" type="search" placeholder="무기 이름, 시리즈, 초성" autocomplete="off"></label><label id="seriesField">시리즈<select id="seriesFilter"></select></label><label>직업<select id="jobFilter"></select></label><label>진행 상태<select id="statusFilter"><option value="">전체 상태</option><option value="unstarted">미시작·미수집</option><option value="progress">성장 중</option><option value="complete">완성·수집</option></select></label></div>
-        <div class="filter-bottom"><button id="targetFilter" class="target-filter" aria-pressed="false">☆ 관심 무기만</button><button id="resetFilters" class="text-button">필터 초기화</button><p>완료한 단계를 선택하세요. 이전 단계도 함께 기록됩니다.</p></div>
+        <div class="filter-bottom"><button id="targetFilter" class="target-filter" aria-pressed="false">☆ 관심 무기만</button><button id="resetFilters" class="text-button">필터 초기화</button><p>좌우로 스크롤해 다른 시리즈를 확인하세요.</p></div>
       </section>
-      <section id="catalog" data-collection-layout="list" aria-labelledby="resultTitle">
-        <div class="catalog-toolbar"><h2 id="resultTitle" tabindex="-1"><span id="resultLabel">고대무기 진행표</span> <span id="resultCount"></span></h2><div class="collection-layout-switch" role="group" aria-label="무기 목록 배치"><button data-layout="grid" aria-label="그리드형" title="그리드형" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button><button data-layout="list" aria-label="목록형" title="목록형" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 5h13M8 12h13M8 19h13M3 5h2M3 12h2M3 19h2"/></svg></button></div></div>
+      <section id="catalog" data-collection-layout="table" aria-labelledby="resultTitle">
+        <div class="catalog-toolbar"><h2 id="resultTitle" tabindex="-1"><span id="resultLabel">고대무기 진행표</span> <span id="resultCount"></span></h2></div>
         <p id="scopeNote" class="scope-note"></p><div id="weaponList"></div>
         <div id="emptyResults" class="empty-state" hidden><strong>조건에 맞는 무기가 없습니다.</strong><p>시리즈에 따라 지원하는 직업이 다릅니다. 필터를 바꿔 보세요.</p></div>
-        <nav id="pagination" class="pagination" aria-label="무기 목록 페이지"></nav>
       </section>
       <p class="data-note">패치 7.56 기준 · 성장형 6종, 절 레이드 7종, 재보강 신곡 무기와 마법 신사 우산을 포함합니다. 나이트의 검·방패는 각각 기록합니다. 현재 소지품이 아닌 제작·획득 이력을 관리하며, 기록은 이 브라우저에 저장됩니다.</p>
     </div>
