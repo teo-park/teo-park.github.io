@@ -73,6 +73,7 @@ Service Worker는 모바일 알림 표시와 알림 클릭 후 해당 물고기�
 
 - 계획 목록과 상세 정보의 생미끼 경로에 각 단계의 입질·낚아채기·시간을 표시합니다. 반드시 같은 낚시터와 직전 미끼 조합을 연결하며, 수집한 생미끼 물고기도 준비 경로에 남깁니다.
 - 계획의 낚시터 이름을 누르면 해당 Teamcraft 낚시터 페이지가 새 탭에서 열립니다. 이름 아래에는 Teamcraft 데이터의 X·Y 좌표를 소수점 한 자리로 표시합니다.
+- 이름·좌표에 마우스를 올리거나 키보드로 이동하면 지역 지도와 낚시터 핀이 뜹니다. 좌표 버튼을 누르면 고정되며 모바일에서도 사용할 수 있습니다. 닫기·Escape·바깥 클릭으로 닫습니다. 호버 미리보기는 스크롤하면 닫히고, 고정한 지도는 스크롤이나 예보 자동 갱신에도 유지됩니다. 해당 물고기·낚시터가 목록에서 사라지면 닫힙니다. 원본 좌표와 지도별 배율로 핀을 계산하며, 이미지는 볼 때만 요청합니다. 로딩 실패 시 좌표와 Teamcraft 링크를 유지합니다.
 - 계획의 낚시터 옆 필터 버튼은 검색어를 비우고 그 낚시터의 어종을 모읍니다. 검색창 아래에 낚시터 태그를 표시하고 ×로 낚시터 조건만 해제합니다. 드롭다운은 바꾸지 않으며 다른 지역을 선택하면 그 지역에 속하지 않는 낚시터 태그를 해제합니다. 목록 필터는 알림 대상에 영향을 주지 않습니다.
 - 상시 어종과 현재 도전 구간 안의 어종은 진한 청록 배경·왼쪽 강조선·‘지금’ 표시로 구분합니다. 직감 등 선행 준비나 포획 성공을 뜻하지는 않습니다. 관리 버튼은 ‘수집’으로 짧게 유지합니다.
 - 상세 비교는 같은 낚시터의 같은 입질을 모읍니다. 대상이 !!!이면 강력한 낚아채기는 !!·!!!, 섬세한 낚아채기는 !·!!! 중 같은 낚아채기 어종을 비교합니다. 낚아채기 정보가 없는 후보는 미확인으로 남기고 반대 낚아채기로 확정된 어종은 제외합니다. 해당 미끼의 공개 경로나 관측 기록이 있는 어종과 미끼·입질 확인이 필요한 어종을 구분합니다. 기본 미끼가 다른 어종도 해당 미끼의 관측 기록이 있으면 포함합니다. 수집 여부·현재 날씨·직감 활성 상태로 경쟁 어종을 제거하지 않습니다.
@@ -98,6 +99,7 @@ Teamcraft의 미끼별 입질 통계와 동일하게 1초 초과·600초 미만�
 ## 출처 및 권리
 
 - 낚시 조건·미끼·낚시터·어영·속도·조건 물고기: [FFXIV Teamcraft](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/tree/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json). 리비전 `ceac70405b154d268bfc3bf6cda2776ac048a6d4`. [MIT 저작권·이용 허락 고지](./licenses/Teamcraft-MIT.txt)를 함께 배포합니다.
+- 지도 이미지: © SQUARE ENIX, 제공 [XIVAPI 지도 API](https://v2.xivapi.com/docs/guides/assets/#compose-maps). 지도 65개의 이미지 경로·배율은 같은 Teamcraft 리비전의 `maps.json`에서 가져옵니다. `node scripts/update-maps.mjs --refresh --check-images`로 메타데이터를 갱신하고 이미지 응답을 검증합니다. 인게임 좌표를 `(좌표 - 1) × 배율 / 41`로 지도 이미지의 백분율 좌표에 변환합니다. 좌표에는 이미 월드 오프셋이 반영되어 있으므로 다시 더하지 않습니다. 핀은 낚시터 대표 위치이며 어종별 정확한 캐스팅 지점이나 이동 경로를 뜻하지 않습니다.
 - 입질 관측 통계: [Teamcraft 미끼별 입질 쿼리](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/pages/db/service/fish-data.gql.ts)의 `BiteTimesPerFishPerSpotPerBaitQuery`, [공개 집계 API](https://gubal.ffxivteamcraft.com/graphql). 개인 기록이 아닌 어종·낚시터·미끼·초별 집계만 수집하며 수집 시각을 `bite-times.js`에 기록합니다. 같은 MIT 고지를 적용합니다.
 - 에오르제아 시간·날씨 계산 및 지역 날씨표: 같은 Teamcraft 리비전의 [weather.service.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/core/eorzea/weather.service.ts), [weather-index.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/core/data/sources/weather-index.ts), [map-ids.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/core/data/sources/map-ids.ts). ET 하루 = 실제 4,200초, ET 8시간마다 날씨 전환. `forecast.js`는 UTC 밀리초를 받아 독립적으로 구간 교집합을 계산합니다.
 - 한국어 명칭·게임 도감 목록과 정렬: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko/tree/9431b6ce34e0f5b79686f71b585769819f81ae2b/csv), 리비전 `9431b6ce34e0f5b79686f71b585769819f81ae2b`.
