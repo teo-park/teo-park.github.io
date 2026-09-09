@@ -1,0 +1,7 @@
+{
+  "name": "ffxiv-weapon-notebook",
+  "private": true,
+  "type": "module",
+  "scripts": {"update-data": "node scripts/update-data.mjs", "test": "node --test tests/*.test.mjs"},
+  "devDependencies": {"jsdom": "^26.1.0"}
+}

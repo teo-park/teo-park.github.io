@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>파판14 도구함</title>
-  <meta name="description" content="파이널판타지14 웹 도구. 주요 퀘스트 진행률, PvP 시리즈 계획, 임무 초성 검색, 카드·꼬마친구·마수 수집과 청마법 습득을 기록하세요." />
+  <meta name="description" content="파이널판타지14 웹 도구. 주요 퀘스트 진행률, PvP 시리즈 계획, 임무 초성 검색, 카드·꼬마친구·마수·무기 수집과 청마법 습득을 기록하세요." />
   <meta name="theme-color" content="#0b1220" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ko_KR" />
@@ -26,9 +26,9 @@
     <span class="header-note">FFXIV · KR</span>
   </header>
   <main class="hub-main">
-    <div class="hub-masthead"><div><h1>파판14 도구함</h1><p>진행 확인부터 수집 기록까지, 필요한 도구를 바로 열어보세요.</p></div><div class="hub-meta"><span class="free-label">무료·비영리</span><span class="collection-count"><strong>09</strong>개 도구</span></div></div>
+    <div class="hub-masthead"><div><h1>파판14 도구함</h1><p>진행 확인부터 수집 기록까지, 필요한 도구를 바로 열어보세요.</p></div><div class="hub-meta"><span class="free-label">무료·비영리</span><span class="collection-count"><strong>10</strong>개 도구</span></div></div>
     <div class="tool-controls" id="toolControls" hidden>
-      <div class="category-picker" role="group" aria-label="도구 분류"><button type="button" data-category="all" aria-pressed="true" aria-controls="toolList">전체 <span>9</span></button><button type="button" data-category="general" aria-pressed="false" aria-controls="toolList">진행·검색 <span>3</span></button><button type="button" data-category="collection" aria-pressed="false" aria-controls="toolList">수집·육성 <span>4</span></button><button type="button" data-category="fishing" aria-pressed="false" aria-controls="toolList">낚시 <span>2</span></button></div>
+      <div class="category-picker" role="group" aria-label="도구 분류"><button type="button" data-category="all" aria-pressed="true" aria-controls="toolList">전체 <span>10</span></button><button type="button" data-category="general" aria-pressed="false" aria-controls="toolList">진행·검색 <span>3</span></button><button type="button" data-category="collection" aria-pressed="false" aria-controls="toolList">수집·육성 <span>5</span></button><button type="button" data-category="fishing" aria-pressed="false" aria-controls="toolList">낚시 <span>2</span></button></div>
       <div class="tool-search"><label class="sr-only" for="toolSearch">도구 이름·기능 검색</label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="toolSearch" type="search" autocomplete="off" placeholder="도구 이름·기능 검색" aria-controls="toolList"><button type="button" id="clearToolSearch" aria-label="검색어 지우기" hidden>×</button></div>
     </div>
     <p id="searchStatus" class="search-status" role="status" aria-live="polite" aria-atomic="true" hidden></p>
@@ -43,6 +43,7 @@
         <a class="tool-link accent-violet" href="./triple-triad/" data-group="collection" data-keywords="트트 카드 트리플 트라이어드 npc 규칙 덱 캡처 스크린샷"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="12" height="17" rx="2"/><path d="M5 6H3v14a2 2 0 0 0 2 2h11M14 7l3 4-3 4-3-4z"/></svg></span><div class="tool-copy"><h3>트리플 트라이어드 수첩</h3><p>카드 수집·획득처·덱 추천</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
         <a class="tool-link accent-mint" href="./minions/" data-group="collection" data-keywords="꼬친 미니언 보유 아이콘 캡처 스크린샷"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="5" cy="9" rx="2" ry="3"/><ellipse cx="10" cy="5" rx="2" ry="3"/><ellipse cx="16" cy="5" rx="2" ry="3"/><ellipse cx="21" cy="10" rx="2" ry="3"/><path d="M7 20c-5-4 2-9 5-9s10 6 5 9c-2 1-3-1-5-1s-3 2-5 1z"/></svg></span><div class="tool-copy"><h3>꼬마친구 수첩</h3><p>꼬마친구 수집·획득처 확인</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
         <a class="tool-link accent-blue" href="./blue-mage/" data-group="collection" data-keywords="청마 청마도서 스킬 역할 탱 힐 딜 사이클 무투회 캡처 스크린샷"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4 21 12-12 3 3L7 24M14 3v3M20 1v3M19 6l3-2M6 7v5M3.5 9.5h5M15 19v4M13 21h4"/></svg></span><div class="tool-copy"><h3>청마도사 스킬 수첩</h3><p>청마법 습득·조합·무투회 공략</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
+        <a class="tool-link accent-gold" href="./weapons/" data-group="collection" data-keywords="무기 고대 조디악 아니마 에우레카 레지스탕스 맨더빌 팬텀 절 신곡 재보강 강화 성장 수집 체크리스트"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 17 12-13h5v5L10 21M4 15l8 8M7 20l-4 4M17 9l-7 8"/></svg></span><div class="tool-copy"><h3>무기 수첩</h3><p>직업별 성장 단계·절 무기 수집</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
         <a class="tool-link accent-gold" href="./beastmaster/" data-group="collection" data-keywords="마수 조련사 마수조련사 포획 위치 약점 기술 지역별 지도"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 5 3h6l5-3-1 9-3 7H8l-3-7zM8 11l2 2M16 11l-2 2M10 17h4"/></svg></span><div class="tool-copy"><h3>마수도감</h3><p>마수 수집·포획 지도·용도 검색</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
       </div></section>
       <section class="tool-group" data-tool-group="fishing" aria-labelledby="group-fishing"><div class="group-heading"><h2 id="group-fishing">낚시</h2><span>도감·시간표·계획</span></div><div class="group-tools">
@@ -65,6 +66,7 @@
       <p>낚시 조건: <a href="https://ffxivteamcraft.com/log-tracker/FSH" target="_blank" rel="noopener noreferrer">FFXIV Teamcraft ↗</a> · <a href="./fishing-log/README.md">어부 도감 데이터 출처·MIT 라이선스</a></p>
       <p>먼바다 낚시: <a href="./ocean-fishing/sources/">항해일지 데이터 출처·라이선스</a></p>
       <p>마수도감: <a href="https://www.ff14.co.kr/news/notice/view/2947" target="_blank" rel="noopener noreferrer">한국 공식 마수조련사 안내 ↗</a> · <a href="./beastmaster/README.md">게임 데이터와 획득처 출처</a></p>
+      <p>무기 수집: <a href="https://guide.ff14.co.kr/lodestone/playguide/view/144" target="_blank" rel="noopener noreferrer">한국 공식 무기 강화 가이드 ↗</a> · <a href="./weapons/README.md">무기 목록과 단계별 데이터 출처</a></p>
       <p>글꼴: <a href="https://hangeul.naver.com/font/nanum" target="_blank" rel="noopener noreferrer">네이버 나눔스퀘어라운드 ↗</a> · <a href="./fonts/nanum-square-round/OFL.txt">글꼴 라이선스</a></p>
       <p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>
       <p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">파이널판타지14 저작물 이용 허락 조건 — 운영정책 10조 ↗</a></p>

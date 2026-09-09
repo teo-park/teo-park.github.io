@@ -8,6 +8,8 @@
 - [임무 초성 사전](https://teo-park.github.io/ffxiv/duty-finder/)
 - [트리플 트라이어드 수첩](https://teo-park.github.io/ffxiv/triple-triad/) — 카드 수집·획득처·규칙별 덱 추천
 
+- [무기 수첩](https://teo-park.github.io/ffxiv/weapons/) — 직업별 성장 단계·절 무기 수집·재보강 신곡 무기
+
 파판14 관련 파일만 `ffxiv/`에 관리합니다. 데이터 출처·권리 안내와 개발 방법은 [도구함 README](./ffxiv/README.md)를 참고하세요.
 
 GitHub Pages는 `main` 브랜치의 루트에서 배포합니다. 루트 주소는 `/ffxiv/`로 이동하며, 별도 빌드 과정은 없습니다.

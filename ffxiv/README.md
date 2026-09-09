@@ -21,6 +21,8 @@
 
 공통 배치 UI는 `collection-layout.js`와 `collection-layout.css`에서 관리하며, 보기 설정은 `teo-ffxiv.collection-layout.<도감>.v1`에 수집 기록과 별도로 저장합니다.
 
+- [무기 수첩](https://teo-park.github.io/ffxiv/weapons/) — 직업별 성장 단계·절 무기 수집·재보강 신곡 무기·백업 ([데이터와 이용 안내](./weapons/README.md))
+
 ## 출처 및 권리 안내
 
 - 퀘스트 이름·레벨·분류·선행 관계: [파이널판타지14 한국 공식 가이드 — 주요 퀘스트](https://guide.ff14.co.kr/lodestone/db/quest)
@@ -57,7 +59,8 @@ GitHub Pages의 원본은 `main` 브랜치의 `/ (root)`입니다. 실제 도구
 ├── minions/
 ├── blue-mage/
 ├── fishing-log/
-└── beastmaster/
+├── beastmaster/
+└── weapons/
 ```
 
 검증: `node --test msq-tracker/tests/progress.test.cjs`
@@ -79,3 +82,5 @@ PvP 시리즈 계산기 검증: `node --test pvp-series-calculator/tests/pvp-ser
 공통 색상·상단 메뉴·하단 영역은 `theme.css`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
 
 모든 페이지의 본문·숫자·영문·라벨은 네이버 **나눔스퀘어라운드**를 공통으로 사용합니다. [네이버 공식 배포 페이지](https://hangeul.naver.com/font/nanum)의 Regular·Bold·ExtraBold 웹폰트를 `fonts/nanum-square-round/`에 포함해 직접 제공합니다. 원본 파일은 변경하지 않았으며, [저작권 안내와 SIL Open Font License 1.1](./fonts/nanum-square-round/OFL.txt)을 함께 배포합니다. [네이버 라이선스 안내](https://help.naver.com/support/contents/contents.help?serviceNo=1074&categoryNo=3497).
+
+무기 수첩 검증: `cd weapons` 후 `npm ci --ignore-scripts` 및 `npm test`

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>무기 수첩 · 파판14 도구함</title>
+  <meta name="description" content="고대·아니마·에우레카·레지스탕스·맨더빌·팬텀 웨폰의 직업별 강화 단계와 절 무기, 재보강 신곡 무기 수집을 기록하세요.">
+  <meta name="theme-color" content="#0b1220"><link rel="canonical" href="https://teo-park.github.io/ffxiv/weapons/">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../theme.css?v=20260906-tools">
+  <link rel="stylesheet" href="../collection-layout.css"><link rel="stylesheet" href="./styles.css?v=20260909-1">
+  <script type="module" src="./app.js?v=20260909-1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#catalog">무기 목록으로 바로가기</a>
+  <header class="site-header"><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="주 메뉴"><a href="../">도구 목록</a><a href="#credits">출처·권리</a></nav><span class="header-note">FFXIV · KR</span></header>
+  <main class="weapon-main">
+    <div class="page-heading"><div><h1>무기 수첩</h1><p>직업별 성장 단계와 무기 수집 기록</p></div><button id="openRecords" disabled>수집 기록 관리</button></div>
+    <div id="loadStatus" role="status">무기 데이터를 불러오는 중입니다.</div>
+    <p id="storageWarning" class="warning" role="alert" hidden></p>
+    <div id="app" hidden>
+      <section class="summary" aria-label="전체 무기 기록"><div><span>완성·수집</span><strong id="completeCount">0</strong><small id="totalCount"></small></div><div><span>성장 중</span><strong id="progressCount">0</strong><small>중간 단계까지 완료</small></div><div><span>관심 무기</span><strong id="targetCount">0</strong><small>별표로 모아보기</small></div></section>
+      <section class="filter-panel" aria-label="무기 필터">
+        <div id="kinds" class="kind-tabs" role="group" aria-label="무기 분류"><button data-kind="" aria-pressed="true">전체</button><button data-kind="relic" aria-pressed="false">성장형 무기</button><button data-kind="ultimate" aria-pressed="false">절 무기</button><button data-kind="enhanced" aria-pressed="false">재보강 무기</button></div>
+        <div class="filters"><label class="search-label">무기·시리즈 검색<input id="search" type="search" placeholder="무기 이름, 시리즈, 초성" autocomplete="off"></label><label>시리즈<select id="seriesFilter"></select></label><label>직업<select id="jobFilter"></select></label><label>진행 상태<select id="statusFilter"><option value="">전체 상태</option><option value="unstarted">미시작·미수집</option><option value="progress">성장 중</option><option value="complete">완성·수집</option></select></label></div>
+        <div class="filter-bottom"><button id="targetFilter" class="target-filter" aria-pressed="false">☆ 관심 무기만</button><button id="resetFilters" class="text-button">필터 초기화</button><p>완료한 단계를 선택하세요. 이전 단계도 함께 기록됩니다.</p></div>
+      </section>
+      <section id="catalog" data-collection-layout="list" aria-labelledby="resultTitle">
+        <div class="catalog-toolbar"><h2 id="resultTitle" tabindex="-1">무기 목록 <span id="resultCount"></span></h2><div class="collection-layout-switch" role="group" aria-label="무기 목록 배치"><button data-layout="grid" aria-label="그리드형" title="그리드형" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button><button data-layout="list" aria-label="목록형" title="목록형" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 5h13M8 12h13M8 19h13M3 5h2M3 12h2M3 19h2"/></svg></button></div></div>
+        <p id="scopeNote" class="scope-note"></p><div id="weaponList"></div>
+        <div id="emptyResults" class="empty-state" hidden><strong>조건에 맞는 무기가 없습니다.</strong><p>시리즈에 따라 지원하는 직업이 다릅니다. 필터를 바꿔 보세요.</p></div>
+        <nav id="pagination" class="pagination" aria-label="무기 목록 페이지"></nav>
+      </section>
+      <p class="data-note">패치 7.56 기준 · 성장형 6종, 절 레이드 7종, 재보강 신곡 무기와 마법 신사 우산을 포함합니다. 나이트의 검·방패는 각각 기록합니다. 현재 소지품이 아닌 제작·획득 이력을 관리하며, 기록은 이 브라우저에 저장됩니다.</p>
+    </div>
+  </main>
+  <dialog id="detailDialog" aria-labelledby="detailTitle"><div class="dialog-top"><h2 id="detailTitle">무기 단계</h2><button data-close="detailDialog" aria-label="무기 상세보기 닫기">닫기 ×</button></div><div id="detailBody" class="dialog-body"></div></dialog>
+  <dialog id="recordsDialog" aria-labelledby="recordsTitle"><div class="dialog-top"><h2 id="recordsTitle">수집 기록 관리</h2><button data-close="recordsDialog" aria-label="수집 기록 관리 닫기">닫기 ×</button></div><div class="dialog-body"><p>자동 저장된 기록을 백업해 다른 기기에서 가져올 수 있습니다.</p><div class="record-actions"><button id="exportRecords">백업 내보내기</button><button id="importRecords">파일 가져오기</button><button id="exportRaw" hidden>읽지 못한 원본 백업</button><input id="importFile" type="file" accept=".json,application/json" hidden></div><label for="backupText">백업 내용 붙여넣기</label><textarea id="backupText" rows="5" placeholder="무기 수첩에서 내보낸 JSON 내용을 붙여넣으세요."></textarea><label class="import-mode">가져오기 방식<select id="importMode"><option value="merge">합치기 — 더 높은 단계 유지</option><option value="replace">교체 — 현재 기록을 가져온 내용으로 바꾸기</option></select></label><p class="muted">합치기는 높은 단계와 관심 표시를 유지합니다. 교체는 백업에 없는 기록을 지웁니다.</p><button id="previewImport">가져올 기록 확인</button><div id="importPreview" class="import-preview" hidden><p id="importSummary"></p><button id="applyImport" class="primary">기록 적용</button></div><p id="recordMessage" role="status" aria-live="polite"></p></div></dialog>
+  <aside id="notice" class="notice" hidden><span id="noticeText" role="status" aria-live="polite"></span><button id="undo" hidden>실행 취소</button><button id="closeNotice" aria-label="알림 닫기">×</button></aside>
+  <footer id="credits" class="site-footer"><div class="footer-top"><span>무기 수첩 · 무료·비영리 팬 도구</span><a href="../">도구 목록으로 ↗</a></div><div class="site-credits"><p>SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p><p>강화 안내: <a href="https://guide.ff14.co.kr/lodestone/playguide/view/144" target="_blank" rel="noopener noreferrer">한국 공식 고대의 무기 가이드</a> · 목록 대조: <a href="https://ffxivcollect.com/relics/weapons" target="_blank" rel="noopener noreferrer">FFXIV Collect</a> · <a href="./README.md">데이터 범위·출처</a></p><p>아이콘: <a href="https://v2.xivapi.com/" target="_blank" rel="noopener noreferrer">XIVAPI</a> · 글꼴: <a href="https://hangeul.naver.com/font/nanum" target="_blank" rel="noopener noreferrer">네이버 나눔스퀘어라운드</a> · <a href="../fonts/nanum-square-round/OFL.txt">글꼴 라이선스</a></p><p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">한국 저작물 이용 허락 조건</a></p></div></footer>
+</body>
+</html>
