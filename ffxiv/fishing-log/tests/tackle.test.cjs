@@ -64,13 +64,13 @@ test('detail comparisons simulate one exclusion without changing records, and mo
   assert.ok(p.$('.compare-target').textContent.includes('심해아귀'));
  }finally{p.close();}
 });
-test('spot buttons replace the search with an exact route filter, region changes reset it and alerts stay unchanged',()=>{
+test('spot chips preserve dropdowns, clear only the spot filter and leave alerts unchanged',()=>{
  const p=open({plan:true});try{
   p.$('#showPlanner').click();p.$('#planCollectionMode').click();const ids=[...p.planSnapshot().ids];
   p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();const button=p.$('[data-plan-spot]'),key=button.dataset.planSpot;button.click();
-  assert.equal(p.$('#planSpot').value,key);assert.equal(p.$('#planSearch').value,'');assert.ok(p.all('.plan-card').length>1);assert.ok(p.all('[data-plan-spot]').every(b=>b.dataset.planSpot===key));assert.deepEqual([...p.planSnapshot().ids],ids);
-  p.change('#planSpot','all');assert.ok(p.all('[data-plan-spot]').some(b=>b.dataset.planSpot!==key));
-  p.change('#planSpot',key);p.change('#planRegion','다날란');assert.equal(p.$('#planSpot').value,'all');assert.ok(p.all('#planSpot option').slice(1).every(o=>D.spots[o.value].region==='다날란'));
+  assert.equal(p.$('#planSpot'),null);assert.equal(p.$('#planRegion').value,'all');assert.equal(p.$('#planRarity').value,'all');assert.equal(p.$('#planSearch').value,'');assert.equal(p.$('#planActiveFilters').hidden,false);assert.ok(p.$('[data-plan-clear-spot]').textContent.includes(D.spots[key].name));assert.ok(p.all('.plan-card').length>1);assert.ok(p.all('[data-plan-spot]').every(b=>b.dataset.planSpot===key));assert.deepEqual([...p.planSnapshot().ids],ids);
+  p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();p.$('[data-plan-clear-spot]').click();assert.equal(p.$('#planSearch').value,'호수성게');assert.equal(p.$('#planActiveFilters').hidden,true);assert.equal(p.$('#planRarity').value,'all');assert.deepEqual([...p.planSnapshot().ids],ids);
+  p.$('[data-plan-spot]').click();p.change('#planRegion','다날란');assert.equal(p.$('#planActiveFilters').hidden,true);assert.ok(p.all('[data-plan-spot]').length);assert.ok(p.all('[data-plan-spot]').every(b=>D.spots[b.dataset.planSpot].region==='다날란'));
  }finally{p.close();}
 });
 test('now highlighting covers always fish and active intervals, and stops exactly when a timed interval ends',()=>{
@@ -81,5 +81,23 @@ test('now highlighting covers always fish and active intervals, and stops exactl
   const forecast=p.w.FishingForecast.create(p.w.FISHING_DATA,p.w.FISHING_WEATHER),fish=p.w.FISHING_DATA.fishes.find(f=>f.id===7678),row=forecast.plan([fish],p.planSnapshot().settings,now,30).rows[0];
   p.w.Date.now=()=>row.start;p.$('#planRefresh').click();assert.equal(p.$('.plan-card').dataset.planNow,'true');assert.equal(p.$('.plan-tug').textContent,'!!!');assert.equal(p.$('.plan-hookset').textContent,'섬세한 낚아채기');
   p.w.Date.now=()=>row.end;p.$('#planRefresh').click();assert.equal(p.$('.plan-card').dataset.planNow,'false');
+ }finally{p.close();}
+});
+
+test('alternate baits are observed at the exact spot, exclude unknown items and never bypass mooching',()=>{
+ const d=fixture();d.related[29717]={id:29717,name:'만능 루어',fish:false};
+ const range=samples=>({min:10,max:15,samples}),m=E.create(d,{ranges:{'10|rod:1|2':range(20),'10|rod:1|29717':range(8),'10|rod:2|2':range(900),'10|rod:1|9999':range(1000),'11|rod:1|2':range(500)}});
+ const direct=m.baitOptions(10,d.fishes[0].routes[0])[0];assert.equal(direct.alternative.bait.id,2);assert.equal(direct.alternative.samples,20);assert.equal(direct.versatile.samples,8);
+ const mooch=m.baitOptions(11,d.fishes[1].routes[0]);assert.ok(mooch.every(o=>o.id===10&&o.mooch));assert.ok(mooch.every(o=>o.alternative?.samples!==500));
+ assert.deepEqual(m.baitOptions(12,d.fishes[2].routes[0]),[]);assert.equal(m.baitOptions(10,{spotKey:'rod:2',bait:2})[0].versatile,null);
+ assert.deepEqual(m.baitOptions(10,{spotKey:'spear:1'}),[]);
+});
+test('planner and inline details show alternate bait, lure evidence and keep the mooch chain',()=>{
+ const p=open({plan:true});try{
+  p.$('#showPlanner').click();p.$('#planCollectionMode').click();p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();
+  assert.equal(p.$('.plan-alternate-bait').textContent,'대체 강도래 유충');assert.equal(p.$('.plan-versatile').textContent,'만능 루어 · 기록 있음');
+  p.$('[data-plan-detail]').click();assert.ok(p.$('.bait-alternatives').textContent.includes('강도래 유충'));assert.ok(p.$('.bait-alternatives').textContent.includes('만능 루어 · 사용 기록 있음'));assert.ok(!p.$('.plan-inline-detail').textContent.includes('시작 미끼 → 생미끼'));
+  p.$('#planSearch').value='심해아귀';p.$('#planRefresh').click();assert.match(p.$('.plan-alternate-bait').textContent,/^시작 /);assert.match(p.$('.plan-versatile').textContent,/만능 루어로 시작/);assert.deepEqual(p.all('.plan-mooch-name').map(b=>b.textContent),['멜토르 망둥이','줄삼치']);
+  p.$('#planSearch').value='두둑지갑';p.$('#planRefresh').click();assert.equal(p.$('.plan-versatile').textContent,'만능 루어 · 미확인');assert.equal(p.$('.plan-alternate-bait').textContent,'대체 기록 미확인');
  }finally{p.close();}
 });

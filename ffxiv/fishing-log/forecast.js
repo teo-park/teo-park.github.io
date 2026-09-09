@@ -45,6 +45,7 @@
       if(weather.specialMaps.includes(spot.map)||route.oceanFishingTime!==undefined)return '항로·특수 지역 전용 조건';
       if(route.spawn!==undefined&&(!Number.isFinite(route.spawn)||!Number.isFinite(route.duration)||route.duration<=0||route.duration>24))return '시간 자료 확인 필요';
       if((route.weathers?.length||route.weathersFrom?.length)&&!weather.byMap[spot.map])return '지역 날씨표 확인 필요';
+      if([route.weathers,route.weathersFrom].some(ids=>ids?.length&&!weather.byMap[spot.map]?.some(w=>ids.includes(w.weatherId))))return '지역 날씨 조건 확인 필요';
       if(!limited(route)&&prerequisiteWindow(route))return '생미끼·직감 선행 시간 별도 확인';
       return null;
     }
@@ -71,6 +72,7 @@
     }
     function opportunities(fish,settings,from,to,{includeAlways=false}={}){
       const play=sessions(settings,from,to),out=[];
+      if(!play.length)return out;
       for(const [index,route] of fish.routes.entries()){
         if(reason(route)||!includeAlways&&!limited(route))continue;
         const always=!limited(route),ranges=windows(route,from,to);
@@ -101,11 +103,59 @@
         // Other routes/overlaps for the same opportunity aren't a later chance.
         let currentEnd=first.end,next=null;
         for(const c of chances.slice(1)){if(c.start<=currentEnd)currentEnd=Math.max(currentEnd,c.end);else{next=c;break;}}
-        rows.push({fish,...first,nextStart:next?.start??null,nextGap:next?next.start-currentEnd:null});
+        rows.push({fish,...first,currentEnd,nextStart:next?.start??null,nextGap:next?next.start-currentEnd:null});
       }
       return {rows:rows.sort((a,b)=>a.start-b.start),excluded,always,absent,to};
     }
-    return {at,reason,limited,windows,opportunities,plan,clearCache:()=>weatherCache.clear()};
+    function playable(route,settings,from){
+      const minimum=settings.minMinutes*MINUTE,play=sessions(settings,from,from+8*DAY);
+      if(!play.some(p=>p.end-p.start>=minimum))return false;
+      const timed=Number.isFinite(route.spawn)&&route.duration<24;
+      if(!timed)return true;
+      if(route.duration*ET_HOUR<minimum)return false;
+      // The weekly play schedule and ET clock repeat together every seven days.
+      for(let day=Math.floor(from/ET_DAY)-1;day*ET_DAY<from+8*DAY;day++){
+        const start=day*ET_DAY+route.spawn*ET_HOUR,end=start+route.duration*ET_HOUR;
+        if(play.some(p=>Math.min(p.end,end)-Math.max(p.start,start)>=minimum))return true;
+      }
+      return false;
+    }
+    function startSearch(fishes,settings,from,previous=null){
+      const signature=JSON.stringify(settings),result=plan(fishes,settings,from,30),queue=[],states=new Map();
+      for(const fish of result.absent)result.rows.push({fish,route:fish.routes.findIndex(r=>!reason(r)),start:null,end:null,nextStart:null,nextGap:null,pending:true});
+      result.absent=[];
+      for(const row of result.rows){
+        if(row.nextStart!==null)continue;
+        const supported=row.fish.routes.filter(r=>!reason(r));
+        if(!supported.some(r=>playable(r,settings,from))){row.pending=false;row.unavailableReason=settings.days.some(d=>d.enabled)?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';continue;}
+        const state={row,to:result.to,currentEnd:row.currentEnd??row.end},old=previous?.signature===signature&&previous.states.get(row.fish.id);
+        // Preserve distant searches across the minute refresh, without reusing
+        // progress after route/filter changes or an expired first opportunity.
+        if(old&&old.to>state.to&&JSON.stringify(old.row.fish.routes)===JSON.stringify(row.fish.routes)&&(old.row.start===null||old.row.end>from)){
+          if(row.start===null&&old.row.start!==null)Object.assign(row,{...old.row,fish:row.fish});
+          if(row.start===null&&old.row.start===null||row.windowStart===old.row.windowStart){state.to=old.to;state.currentEnd=old.currentEnd;}
+        }
+        states.set(row.fish.id,state);queue.push(state);
+      }
+      result.pending=queue.length;
+      function step(){
+        const state=queue.shift();if(!state)return false;
+        if(weatherCache.size>100000)weatherCache.clear();
+        const row=state.row,to=state.to+30*DAY,previousStart=row.start,previousNext=row.nextStart;
+        // Overlap chunk edges so a short opening is never cut below minMinutes.
+        const chances=opportunities(row.fish,settings,Math.max(from,state.to-DAY),to+DAY).filter(c=>c.start<to);
+        for(const chance of chances){
+          if(row.start===null){Object.assign(row,chance,{pending:false});state.currentEnd=chance.end;}
+          else if(chance.start<=state.currentEnd)state.currentEnd=Math.max(state.currentEnd,chance.end);
+          else{row.nextStart=chance.start;row.nextGap=chance.start-state.currentEnd;break;}
+        }
+        state.to=to;result.to=Math.max(result.to,to);
+        if(row.nextStart===null)queue.push(state);else states.delete(row.fish.id);
+        result.pending=queue.length;return row.start!==previousStart||row.nextStart!==previousNext;
+      }
+      return {result,states,signature,step};
+    }
+    return {at,reason,limited,windows,opportunities,plan,startSearch,clearCache:()=>weatherCache.clear()};
   }
   return {MINUTE,DAY,ET_HOUR,ET_DAY,WEATHER,KST,defaults,validate,weatherTarget,merge,sessions,intersect,create};
 });

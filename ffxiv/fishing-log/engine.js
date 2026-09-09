@@ -17,6 +17,26 @@
     // Match each mooch edge, never another spot or another preceding bait.
     function tacklePaths(route){return paths(route).map(p=>({...p,steps:p.ids.map((id,i)=>({id,routes:i>0?(byId.get(id)?.routes||[]).filter(r=>r.spotKey===route.spotKey&&r.bait===p.ids[i-1]):[]}))}));}
     function biteTime(id,route){return biteTimes.ranges?.[`${id}|${route.spotKey}|${route.bait}`]||null;}
+    const observedBaits=new Map(),baitOptionsCache=new Map(),VERSATILE=29717;
+    for(const [key,range] of Object.entries(biteTimes.ranges||{})){
+      const [id,spot,baitId]=key.split('|'),bait=byId.get(+baitId);
+      if(!bait||bait.fish||range.samples<3)continue;
+      const group=id+'|'+spot;if(!observedBaits.has(group))observedBaits.set(group,[]);
+      observedBaits.get(group).push({bait,samples:range.samples,time:range});
+    }
+    function baitOptions(id,route){
+      if(!route.bait||!route.spotKey.startsWith('rod:'))return [];
+      const key=id+'|'+route.spotKey+'|'+route.bait;if(baitOptionsCache.has(key))return baitOptionsCache.get(key);
+      // Equipped-bait observations for mooched fish do not prove a direct catch.
+      // Offer substitutes only for the first direct catch in the same mooch chain.
+      const targets=byId.get(route.bait)?.fish?paths(route).filter(p=>p.complete&&p.ids.length>1).map(p=>({id:p.ids[1],base:p.ids[0],mooch:true})):[{id,base:route.bait,mooch:false}];
+      const result=[...new Map(targets.map(t=>[t.id+'|'+t.base,t])).values()].map(target=>{
+        const observed=observedBaits.get(target.id+'|'+route.spotKey)||[],other=observed.filter(o=>o.bait.id!==target.base&&o.bait.id!==VERSATILE).sort((a,b)=>b.samples-a.samples||a.bait.id-b.bait.id);
+        const versatile=observed.find(o=>o.bait.id===VERSATILE)||null;
+        return {...target,fish:byId.get(target.id),alternative:other[0]||null,versatile,versatilePrimary:target.base===VERSATILE};
+      });
+      baitOptionsCache.set(key,result);return result;
+    }
     function competitors(id,route){
       if(!route.bait||route.tug===undefined)return [];
       return [...byId.values()].filter(f=>f.fish&&f.id!==id).flatMap(f=>{
@@ -44,7 +64,7 @@
       function put(key,name,fish,routes,area){if(!found.has(key))found.set(key,{key,name,area,entries:new Map()});const g=found.get(key);if(!g.entries.has(fish.id))g.entries.set(fish.id,{fish,routes:[]});const row=g.entries.get(fish.id);for(const route of routes)if(!row.routes.includes(route))row.routes.push(route);}
       return [...found.values()].map(g=>({...g,entries:[...g.entries.values()]})).sort((a,b)=>a.key==='unknown'?1:b.key==='unknown'?-1:a.name.localeCompare(b.name,'ko'));
     }
-    return {byId,paths,tacklePaths,biteTime,competitors,routeMatches,routeList,filter,groups};
+    return {byId,paths,tacklePaths,biteTime,baitOptions,competitors,routeMatches,routeList,filter,groups};
   }
   const validIds=ids=>Array.isArray(ids)&&ids.length<=30000&&ids.every(id=>Number.isSafeInteger(id)&&id>0);
   function parseBackup(text){let v;try{v=JSON.parse(text);}catch{throw Error('JSON 기록을 읽을 수 없어요.');}if(!v||v.type!=='ffxiv-fishing-log'||v.schemaVersion!==1||!validIds(v.caught))throw Error('어부 수첩의 백업 파일이 아닙니다.');return new Set(v.caught);}

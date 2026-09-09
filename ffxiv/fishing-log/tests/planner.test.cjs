@@ -12,7 +12,7 @@ test('star-only alerts ignore the visual filter and cross-tab settings refresh t
   const p=open({plan:true});try{
     p.$('#showPlanner').click();p.$('#savePlay').click();const star=p.$('[data-plan-star]'),id=+star.dataset.planStar;star.click();p.change('#notificationScope','stars');assert.deepEqual([...p.planSnapshot().ids],[id]);
     p.change('#planRegion','다날란');assert.deepEqual([...p.planSnapshot().ids],[id]);
-    const key='teo-ffxiv.fishing.plan.v1',v=JSON.parse(p.storage.getItem(key));v.settings.days.forEach(d=>d.enabled=false);p.storage.setItem(key,JSON.stringify(v));p.w.dispatchEvent(new p.w.StorageEvent('storage',{key}));assert.ok(p.planSnapshot().settings.days.every(d=>!d.enabled));assert.equal(p.all('.plan-card[data-plan-availability="timed"]').length,0);assert.ok(p.all('.plan-card[data-plan-availability="always"]').length);
+    const key='teo-ffxiv.fishing.plan.v1',v=JSON.parse(p.storage.getItem(key));v.settings.days.forEach(d=>d.enabled=false);p.storage.setItem(key,JSON.stringify(v));p.w.dispatchEvent(new p.w.StorageEvent('storage',{key}));assert.ok(p.planSnapshot().settings.days.every(d=>!d.enabled));assert.ok(p.all('.plan-card[data-plan-availability="timed"]').every(c=>c.textContent.includes('접속 요일 설정 필요')&&c.dataset.planNow==='false'));assert.ok(p.all('.plan-card[data-plan-availability="always"]').length);
   }finally{p.close();}
 });
 test('collection purpose includes normal and always fish in cards, bait preparation and notification targets',()=>{
@@ -34,5 +34,25 @@ test('normal-only filtering controls alert targets, mode preferences survive rel
     p.change('#planAvailability','always');assert.ok(p.all('.plan-card').every(c=>c.dataset.planAvailability==='always'));p.change('#planAvailability','timed');assert.ok(p.all('.plan-card').every(c=>c.dataset.planAvailability==='timed'));
     p.$('#planToSpot').click();assert.equal(p.$('#rarity').value,'normal');assert.equal(p.$('#view').value,'spot');
     p.close();p=open({plan:true,storage:store});assert.equal(p.$('#planCollectionMode').getAttribute('aria-pressed'),'true');assert.equal(p.$('#planRarity').value,'normal');assert.equal(p.planSnapshot().includeAlways,true);
+  }finally{p.close();}
+});
+test('unlimited planner keeps a pending distant fish visible, then fills its date and year',async()=>{
+  const p=open({plan:true});try{
+    Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.w.Date.now=()=>Date.parse('2026-09-09T04:00:00Z');
+    p.$('#showPlanner').click();p.$('#planSearch').value='두둑지갑';p.$('#planRefresh').click();
+    assert.equal(p.$('#planHorizon'),null);assert.equal(p.$('.plan-name').textContent,'두둑지갑');assert.match(p.$('.plan-window').textContent,/찾는 중/);assert.equal(p.$('.plan-card').dataset.planNow,'false');
+    for(let i=0;i<30&&p.$('.plan-window').textContent.includes('찾는 중');i++)await new Promise(r=>setTimeout(r,50));
+    assert.match(p.$('.plan-window').textContent,/2027/);assert.match(p.$('#planCoverage').textContent,/기간 제한 없이/);
+  }finally{p.close();}
+});
+test('condition panels expand under each row, preserve comparisons on refresh, and close independently',()=>{
+  const p=open({plan:true});try{
+    p.$('#showPlanner').click();p.$('#planCollectionMode').click();p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();
+    p.$('.plan-card [data-plan-detail]').click();const panel=p.$('.plan-inline-detail:not([hidden])');assert.ok(panel.textContent.includes('같은 입질 비교'));assert.equal(p.$('#detailDialog').open,false);assert.equal(p.$('.plan-card [data-plan-detail]').getAttribute('aria-expanded'),'true');
+    const select=panel.querySelector('[data-compare-exclude]');select.value=select.options[1].value;select.dispatchEvent(new p.w.Event('change',{bubbles:true}));const choice=select.value;
+    p.$('#planRefresh').click();assert.equal(p.$('.plan-inline-detail:not([hidden])'),panel);assert.equal(panel.querySelector('[data-compare-exclude]').value,choice);
+    p.$('[data-plan-spot]').click();const another=p.all('.plan-card [data-plan-detail]').find(b=>b.dataset.planDetail!=='12720');another.click();assert.equal(p.all('.plan-inline-detail:not([hidden])').length,2);
+    p.$('.plan-card [data-plan-detail="12720"]').click();assert.equal(p.$('#plan-detail-12720').hidden,true);assert.equal(p.all('.plan-inline-detail:not([hidden])').length,1);
+    assert.equal(p.$('#detailDialog').open,false);assert.equal(p.$('#totalCount').textContent,'0 / 1,806');
   }finally{p.close();}
 });

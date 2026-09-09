@@ -35,3 +35,24 @@ test('intuition-only fish with timed prerequisites are not mislabeled as always 
   const real=F.create(D,W),fish=D.fishes.find(f=>f.id===24994);assert.ok(fish);assert.match(real.reason(fish.routes[0]),/선행 시간/);
   const plan=real.plan([fish],F.defaults(),Date.now(),1);assert.equal(plan.always.length,0);assert.equal(plan.excluded[0].id,24994);
 });
+test('progressive search keeps distant fish visible and finds both chances beyond 30 and 90 days',()=>{
+  const from=Date.parse('2026-09-09T04:00:00Z'),real=F.create(D,W),fishes=[49794,49800,16754].map(id=>D.fishes.find(f=>f.id===id));
+  const search=real.startSearch(fishes,F.defaults(),from);assert.equal(search.result.rows.length,3);assert.ok(search.result.rows.every(r=>r.start===null&&r.pending));
+  let steps=0;while(search.result.pending&&steps++<100)search.step();assert.equal(search.result.pending,0);
+  const reference=real.plan(fishes,F.defaults(),from,365);
+  for(const row of search.result.rows){const expected=reference.rows.find(r=>r.fish.id===row.fish.id);assert.equal(row.start,expected.start);assert.equal(row.end,expected.end);assert.equal(row.nextStart,expected.nextStart);assert.equal(row.pending,false);}
+  assert.ok(search.result.rows.find(r=>r.fish.id===49794).start>from+120*F.DAY);
+});
+test('minute refresh resumes distant searches, while changed routes and schedules start fresh',()=>{
+  const from=Date.parse('2026-09-09T04:00:00Z'),real=F.create(D,W),fish=D.fishes.find(f=>f.id===49794),settings=F.defaults(),old=real.startSearch([fish],settings,from);
+  old.step();old.step();const cursor=old.states.get(fish.id).to;assert.equal(old.result.rows[0].start,null);
+  const fresh=real.startSearch([fish],settings,from+F.MINUTE,old);assert.equal(fresh.states.get(fish.id).to,cursor);
+  const changed={...fish,routes:fish.routes.map(r=>({...r,bait:999}))};assert.ok(real.startSearch([changed],settings,from+F.MINUTE,old).states.get(fish.id).to<cursor);
+  const times=F.defaults();times.days[0].start='19:00';assert.ok(real.startSearch([fish],times,from+F.MINUTE,old).states.get(fish.id).to<cursor);
+});
+test('disabled sessions, too-short windows and unsupported weather cannot cause endless searches',()=>{
+  const fish={id:1,routes:[route({spawn:1,duration:1})]},settings=daily('20:00','23:00');settings.minMinutes=5;
+  const short=m.startSearch([fish],settings,Date.now());assert.equal(short.result.pending,0);assert.match(short.result.rows[0].unavailableReason,/최소 도전/);
+  settings.minMinutes=1;settings.days.forEach(d=>d.enabled=false);const disabled=m.startSearch([fish],settings,Date.now());assert.equal(disabled.result.pending,0);assert.equal(disabled.result.rows[0].start,null);assert.match(disabled.result.rows[0].unavailableReason,/접속 요일/);
+  const invalid=m.startSearch([{id:2,routes:[route({weathers:[999]})]}],F.defaults(),Date.now());assert.equal(invalid.result.pending,0);assert.equal(invalid.result.excluded.length,1);
+});
