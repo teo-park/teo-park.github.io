@@ -4,6 +4,8 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const date=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false});
   const time=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false});
+  // Teamcraft encodes Medium, Big, Light as 0, 1, 2. Hookset is independent.
+  const tugs={0:'!!',1:'!!!',2:'!'},hooksets={0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'};
   function mount({data,model,getCaught}){
     if(!F||!window.FISHING_WEATHER)return;
     const forecast=F.create(data,window.FISHING_WEATHER),fishById=new Map(data.fishes.map(f=>[f.id,f]));
@@ -51,8 +53,10 @@
     function card(row){
       const fish=row.fish,route=fish.routes[row.route],spot=data.spots[route.spotKey],next=row.nextStart?`${date.format(row.nextStart)}`:'30일 조회 범위 안에 없음';
       const special=(route.predators||[]).map(p=>`${model.byId.get(p.id)?.name||p.id} ×${p.amount}`).join(' · ');
+      const tug=tugs[route.tug],hookset=hooksets[route.hookset];
       return `<article class="plan-card" aria-label="${esc(fish.name)} 낚시 계획" data-plan-kind="${fish.big?'big':'normal'}" data-plan-availability="${row.always?'always':'timed'}">
         <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span>${row.always?'상시':'조건부'}</span></div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
+        <div class="plan-bite"><strong class="plan-tug ${tug?'tug-'+tug.length:'tug-unknown'}" aria-label="${tug?'입질 강도 '+tug:'입질 미확인'}">${tug||'입질 미확인'}</strong><span class="plan-hookset">${hookset||'낚아채기 미확인'}</span></div>
         <div class="plan-place"><span>${esc(spot.area)}</span><strong>${esc(spot.name)}</strong></div>
         <div class="plan-window">${row.always?'<strong>상시 낚시</strong><span>시간·날씨 제한 없음</span>':`<strong>${date.format(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.start<=result.now?' · 지금부터':''}</span>`}</div>
         <div class="plan-tackle"><p class="plan-bait">${esc(chain(route))}</p>${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}</div>
