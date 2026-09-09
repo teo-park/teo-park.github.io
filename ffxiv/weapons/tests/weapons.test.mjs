@@ -48,11 +48,12 @@ test('search supports Korean initials and intermediate weapon names with combine
 
 const html=await fs.readFile(new URL('../index.html',import.meta.url),'utf8');
 const source=(await fs.readFile(new URL('../app.js',import.meta.url),'utf8')).replace(/^import[^\n]+\n/gm,'')+'\n';
-async function harness(tester,stored=null){
+async function harness(tester,stored=null,prefs=null){
  const dom=new JSDOM(html,{url:'https://example.test/ffxiv/weapons/',runScripts:'outside-only'}),w=dom.window,d=w.document;
  Object.assign(w,core);w.mountShowcase=()=>({refresh(){}});w.structuredClone=structuredClone;w.fetch=async()=>({ok:true,json:async()=>data});
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');this.dispatchEvent(new w.Event('close'));};w.HTMLElement.prototype.scrollIntoView=function(){};
  if(stored!==null)w.localStorage.setItem(core.STORAGE_KEY,typeof stored==='string'?stored:JSON.stringify(stored));
+ if(prefs!==null)w.localStorage.setItem('teo-ffxiv.weapons.preferences.v1',JSON.stringify(prefs));
  new vm.Script(source).runInContext(dom.getInternalVMContext());
  await new Promise(resolve=>setImmediate(resolve));
  assert.equal(d.getElementById('app').hidden,false);
@@ -76,9 +77,34 @@ test('UI ultimate collection keeps its one-line label and filters refresh',()=>h
  change(d.getElementById('statusFilter'),'complete');assert.equal(d.querySelectorAll('.weapon-row').length,1);click(`[data-collect="${id}"]`);assert.equal(d.querySelectorAll('.weapon-row').length,0);assert.equal(saved().records[id].itemId,0);assert.equal(d.getElementById('emptyResults').hidden,false);
 }));
 test('UI IME input searches the currently composing consonant and grid/list preserves records',()=>harness(({w,d,click,change,saved})=>{
- const q=d.getElementById('search');q.value='ㅋㄹㅌㄴ';q.dispatchEvent(new w.InputEvent('input',{bubbles:true,isComposing:true}));assert.equal(d.querySelectorAll('.weapon-row').length,1);
- change(d.querySelector('[data-stage]'),pld.items[0].id);click('[data-layout="grid"]');assert.equal(d.getElementById('catalog').dataset.collectionLayout,'grid');click('[data-layout="list"]');assert.equal(saved().records[pld.id].itemId,pld.items[0].id);
+ const q=d.getElementById('search');q.value='ㅋㄹㅌㄴ';q.dispatchEvent(new w.InputEvent('input',{bubbles:true,isComposing:true}));assert.equal(d.querySelectorAll('.relic-entry').length,1);
+ change(d.querySelector('[data-stage]'),pld.items[0].id);click('[data-kind="ultimate"]');click('[data-layout="grid"]');assert.equal(d.getElementById('catalog').dataset.collectionLayout,'grid');click('[data-layout="list"]');assert.equal(saved().records[pld.id].itemId,pld.items[0].id);
 }));
+
+test('relic table aligns six full series by job despite an old single-series/grid preference',()=>harness(({d})=>{
+ assert.equal(d.getElementById('catalog').dataset.collectionLayout,'table');assert.equal(d.getElementById('seriesField').hidden,true);assert.equal(d.querySelector('.collection-layout-switch').hidden,true);
+ assert.deepEqual([...d.querySelectorAll('.relic-table thead th a')].map(x=>x.textContent.replace(' ↗','')),['제타','아니마','에우레카','레지스탕스','맨더빌','팬텀']);
+ assert.equal(d.querySelectorAll('.relic-table tbody tr').length,21);assert.equal(d.querySelectorAll('.relic-entry').length,101);assert.equal(d.getElementById('pagination').children.length,0);
+ assert.equal(d.querySelectorAll('[data-job="PLD"] td[data-series="zodiac"] [data-stage]').length,2);
+ assert.equal(d.querySelector('[data-job="SGE"] td').textContent,'—');assert.equal(d.querySelector('[data-job="BLU"]'),null);
+ assert.equal(d.getElementById('seriesFilter').value,'');
+},null,{filters:{kind:'relic',series:'zodiac'},layout:'grid'}));
+
+test('table changes preserve scroll/focus and keep sword, shield and other series independent',()=>harness(({d,change,click,saved})=>{
+ const scroll=d.getElementById('relicTableScroll');scroll.scrollLeft=260;scroll.scrollTop=400;
+ const input=d.querySelector(`[data-stage="${pld.id}"]`);input.focus();change(input,pld.items.at(-1).id);
+ assert.equal(d.activeElement.id,input.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,260);assert.equal(d.getElementById('relicTableScroll').scrollTop,400);
+ assert.ok(d.querySelector(`[data-track="${pld.id}"]`).classList.contains('complete'));
+ change(d.querySelector(`[data-stage="${shield.id}"]`),shield.items[2].id);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);assert.equal(saved().records[shield.id].itemId,shield.items[2].id);
+ const anima=t('anima.PLD.weapon');change(d.querySelector(`[data-stage="${anima.id}"]`),anima.items[1].id);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);click('#undo');assert.equal(saved().records[anima.id],undefined);
+}));
+
+test('relic state and favorite filters keep column positions and distinguish unavailable cells',()=>harness(({d,change,click})=>{
+ change(d.getElementById('statusFilter'),'progress');assert.equal(d.querySelectorAll('.relic-table tbody tr').length,1);assert.equal(d.querySelectorAll('.relic-table thead th').length,7);assert.equal(d.querySelectorAll('.relic-entry').length,1);
+ assert.equal(d.querySelector('[data-job="SGE"] td').textContent,'—');assert.equal(d.querySelector('[data-job="SGE"] .relic-filtered').textContent,'조건 제외');
+ click('#targetFilter');assert.equal(d.querySelectorAll('.relic-entry').length,1);click('[data-target="phantom.SGE.weapon"]');assert.equal(d.getElementById('emptyResults').hidden,false);assert.equal(d.querySelector('.relic-table'),null);
+ click('[data-kind="enhanced"]');assert.equal(d.getElementById('seriesField').hidden,false);assert.equal(d.querySelector('.collection-layout-switch').hidden,false);
+},bk({'phantom.SGE.weapon':record(t('phantom.SGE.weapon').items[0].id,true)})));
 test('UI importing requires a preview, merges by default and explicit replacement clears missing records',()=>harness(({d,click,change,saved})=>{
  click('#openRecords');d.getElementById('backupText').value=JSON.stringify(bk({[shield.id]:record(shield.items[2].id)}));click('#previewImport');assert.equal(saved().records[shield.id],undefined);click('#applyImport');assert.ok(saved().records[pld.id]);assert.ok(saved().records[shield.id]);
  change(d.getElementById('importMode'),'replace');click('#applyImport');assert.ok(saved().records[pld.id]);click('#previewImport');click('#applyImport');assert.equal(saved().records[pld.id],undefined);click('#undo');assert.ok(saved().records[pld.id]);

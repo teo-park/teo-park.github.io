@@ -1,0 +1,41 @@
+.filters.relic-filters{grid-template-columns:minmax(200px,1.4fr) minmax(140px,.7fr) minmax(160px,.8fr)}
+.catalog-toolbar h2 #resultLabel{font:inherit;color:inherit;margin:0}
+.relic-table-scroll{overflow:auto;max-height:min(720px,72dvh);border:1px solid var(--ff-line);border-radius:8px;scrollbar-gutter:stable;scroll-padding:70px 0 0 122px}
+.relic-table{width:100%;min-width:1140px;table-layout:fixed;border-spacing:0;text-align:left;font-size:14px}
+.relic-table .relic-job-col{width:120px}
+.relic-table th,.relic-table td{border-right:1px solid var(--ff-line);border-bottom:1px solid var(--ff-line);padding:8px;vertical-align:middle;background:#121e31}
+.relic-table tr>*:last-child{border-right:0}
+.relic-table tbody tr:last-child>*{border-bottom:0}
+.relic-table thead th{position:sticky;top:0;z-index:3;background:#203149;padding:12px 10px;font-weight:700;box-shadow:0 1px 0 #516883}
+.relic-table thead th:first-child{left:0;z-index:4}
+.relic-table th small{display:block;font-size:13.334px;color:var(--ff-muted);font-weight:400;margin-top:4px;white-space:nowrap}
+.relic-table thead a{display:block;white-space:nowrap;text-underline-offset:4px}
+.relic-table thead a:hover{color:var(--ff-cyan);text-decoration:underline}
+.relic-table tbody th{position:sticky;left:0;z-index:2;background:#19293e;padding:12px;box-shadow:1px 0 0 #516883}
+.relic-table tbody tr:nth-child(even) td{background:#142235}
+.relic-table tbody tr:hover td{background:#1b2e43}
+.relic-table .relic-job{display:block;white-space:nowrap}
+.relic-job[data-role=tank]{color:#a9c6fb}.relic-job[data-role=healer]{color:#b9deb5}
+.relic-table .relic-unavailable,.relic-table .relic-filtered{text-align:center;color:var(--ff-muted)}
+.relic-table .relic-filtered{font-size:13.334px}
+.relic-entry{min-width:0;padding:4px;border-radius:5px}
+.relic-entry+.relic-entry{margin-top:8px;padding-top:10px;border-top:1px solid var(--ff-line)}
+.relic-entry.progress{background:#332f23}
+.relic-entry.complete{background:#16382f}
+.relic-stage{display:flex;align-items:center;gap:5px;margin:0}
+.relic-stage select{display:block;flex:1;width:0;min-width:0;min-height:36px;padding:6px;margin:0;font-size:13.334px;font-weight:400}
+.relic-slot{font-size:13.334px;flex:none;color:var(--ff-muted)}
+.relic-entry.progress select{border-color:#aa8b51;color:#f2d496}
+.relic-entry.complete select{border-color:#70b99b;color:#c4f0db}
+.relic-cell-actions{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:3px}
+.relic-cell-actions button{min-height:28px;padding:2px 4px;border-color:transparent;background:transparent;font-size:13.334px}
+.relic-cell-actions button:hover{background:#294258;border-color:#829ab3}
+.relic-detail{display:flex;align-items:center;gap:5px;min-width:0;color:var(--ff-muted)}
+.relic-detail img{width:20px;height:20px;object-fit:contain;flex:none}
+.relic-detail span{white-space:nowrap}
+.relic-entry.complete .relic-detail{color:#b6e9cc}
+.relic-target{width:28px;flex:none;color:var(--ff-muted)}
+.relic-target[aria-pressed=true]{color:var(--ff-gold)}
+.relic-table .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(max-width:760px){.filters.relic-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.relic-filters .search-label{grid-column:1/-1}.relic-table .relic-job-col{width:104px}.relic-table-scroll{scroll-padding-left:106px}.relic-table tbody th{padding:8px}.relic-table th,.relic-table td{padding:6px}}
+@media(pointer:coarse){.relic-stage select{min-height:44px}.relic-cell-actions button{min-height:40px}.relic-target{width:40px}}
