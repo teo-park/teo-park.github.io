@@ -101,3 +101,24 @@ test('planner and inline details show alternate bait, lure evidence and keep the
   p.$('#planSearch').value='두둑지갑';p.$('#planRefresh').click();assert.equal(p.$('.plan-versatile').textContent,'만능 루어 · 미확인');assert.equal(p.$('.plan-alternate-bait').textContent,'대체 기록 미확인');
  }finally{p.close();}
 });
+
+test('big tugs compare within the chosen hookset without merging opposite or unknown hooksets',()=>{
+ const fish=(id,tug,hookset,bait=1,spotKey='rod:1')=>({id,name:'어종'+id,fish:true,routes:[{spotKey,bait,tug,hookset}]}),d={related:{1:{id:1,fish:false},2:{id:2,fish:false}},spots:{'rod:1':{},'rod:2':{}},fishes:[fish(10,1,1),fish(11,0,1),fish(12,2,2),fish(13,1,1),fish(14,1,2),fish(15,0,undefined),fish(16,1,undefined),fish(17,0,1,2),fish(18,0,1,1,'rod:2'),fish(19,2,1),fish(20,0,2),fish(21,2,undefined)]};
+ const range=(min,max)=>({min,max,samples:100}),m=E.create(d,{ranges:{'11|rod:1|1':range(10,20),'13|rod:1|1':range(25,30)}}),strong=m.competitors(10,d.fishes[0].routes[0]);
+ assert.deepEqual(strong.map(c=>c.fish.id).sort((a,b)=>a-b),[11,13,15,16,17]);assert.equal(strong.find(c=>c.fish.id===11).tugKnown,true);assert.equal(strong.find(c=>c.fish.id===15).hooksetKnown,false);assert.equal(strong.find(c=>c.fish.id===17).baitKnown,false);
+ const precise=m.competitors(10,{...d.fishes[0].routes[0],hookset:2});assert.deepEqual(precise.map(c=>c.fish.id).sort((a,b)=>a-b),[12,14,16,21]);assert.equal(precise.find(c=>c.fish.id===12).routes[0].tug,2);assert.equal(precise.find(c=>c.fish.id===16).hooksetKnown,false);
+ const known=strong.filter(c=>c.baitKnown&&c.tugKnown&&c.hooksetKnown);assert.deepEqual(E.clearBiteWindows(range(5,35),known),[[5,10],[20,25],[30,35]]);assert.deepEqual(E.clearBiteWindows(range(5,35),known.filter(c=>c.fish.id!==11)),[[5,25],[30,35]]);
+ assert.equal(E.clearBiteWindows(range(5,35),[...known,{...strong.find(c=>c.fish.id===15),time:range(1,4)}]),null);
+ assert.deepEqual(E.comparisonTugs({tug:1,hookset:1}),[0,1]);assert.deepEqual(E.comparisonTugs({tug:1,hookset:2}),[2,1]);assert.deepEqual(E.comparisonTugs({tug:1}),[1]);assert.deepEqual(E.comparisonTugs({tug:0,hookset:1}),[0]);assert.deepEqual(E.comparisonTugs({tug:2,hookset:2}),[2]);
+});
+test('both inline and modal comparisons show the wider hookset group and keep each original tug',()=>{
+ const p=open({plan:true});try{
+  p.$('#showPlanner').click();p.$('#planCollectionMode').click();
+  for(const [name,counter,tug,hook] of [['마히마히',4877,'!!','강력한 낚아채기'],['잘레라',4873,'!','섬세한 낚아채기']]){
+   p.$('#planSearch').value=name;p.$('#planRefresh').click();p.$('.plan-card [data-plan-detail]').click();let panel=p.$('.plan-inline-detail:not([hidden])');assert.equal(p.$('.plan-tug').textContent,'!!!');assert.ok(panel.querySelector('.compare-compact-heading').textContent.includes(hook+' · '+tug+' / !!!'));
+   const counterpart=panel.querySelector('[data-fish-detail="'+counter+'"]');assert.ok(counterpart.closest('tr').querySelector('small').textContent.startsWith(tug+' '+hook));
+   const select=panel.querySelector('[data-compare-exclude]');assert.ok([...select.options].some(o=>+o.value===counter));select.value=String(counter);select.dispatchEvent(new p.w.Event('change',{bubbles:true}));assert.ok(panel.querySelector('.compare-excluded [data-fish-detail="'+counter+'"]'));assert.ok(panel.querySelector('.compare-compact-heading').textContent.includes(tug+' / !!!'));
+   panel.querySelector('.plan-detail-tools [data-fish-detail]').click();assert.equal(p.$('#detailDialog').open,true);const full=p.$('#detailDialog .bite-comparison');assert.ok(full.querySelector('.compare-context').textContent.includes(hook+' · '+tug+' / !!!'));assert.equal(full.querySelector('.compare-target td:nth-child(2) strong').textContent,'!!!');assert.equal(full.querySelector('[data-fish-detail="'+counter+'"]').closest('tr').querySelector('td:nth-child(2) strong').textContent,tug);p.$('#detailDialog').close();
+  }
+ }finally{p.close();}
+});

@@ -3,6 +3,8 @@
   const INITIALS=[...'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'];
   const normalize=v=>String(v??'').normalize('NFC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu,'');
   const initials=v=>[...v].map(c=>{const n=c.charCodeAt(0)-0xac00;return n>=0&&n<=11171?INITIALS[Math.floor(n/588)]:c;}).join('');
+  // Teamcraft: tug 0 = !!, 1 = !!!, 2 = !; hookset 1 = Powerful, 2 = Precision.
+  const comparisonTugs=route=>route.tug===1&&route.hookset===1?[0,1]:route.tug===1&&route.hookset===2?[2,1]:route.tug===undefined?[]:[route.tug];
   function create(data,biteTimes={}){
     const byId=new Map(Object.values(data.related).map(f=>[f.id,f]));for(const f of data.fishes)byId.set(f.id,f);
     const cache=new Map();
@@ -39,15 +41,16 @@
     }
     function competitors(id,route){
       if(!route.bait||route.tug===undefined)return [];
+      const allowed=comparisonTugs(route),matchHookset=allowed.length>1;
       return [...byId.values()].filter(f=>f.fish&&f.id!==id).flatMap(f=>{
         const atSpot=(f.routes||[]).filter(r=>r.spotKey===route.spotKey),exact=atSpot.filter(r=>r.bait===route.bait),observed=biteTime(f.id,route);
         if(!atSpot.length&&!observed)return [];
-        const conditions=exact.length?exact:atSpot,tugs=[...new Set(conditions.map(r=>r.tug).filter(v=>v!==undefined))];
-        if(tugs.length&&!tugs.includes(route.tug))return [];
+        const conditions=exact.length?exact:atSpot;
+        if(conditions.length&&!conditions.some(r=>(r.tug===undefined||allowed.includes(r.tug))&&(!matchHookset||r.hookset===undefined||r.hookset===route.hookset)))return [];
         // A different preferred bait does not prove that this bait cannot work.
-        const baitKnown=!!(exact.length||observed),tugKnown=tugs.length===1&&tugs[0]===route.tug;
-        return [{fish:f,routes:conditions,time:observed,baitKnown,tugKnown}];
-      }).sort((a,b)=>Number(b.baitKnown)-Number(a.baitKnown)||Number(b.tugKnown)-Number(a.tugKnown)||a.fish.name.localeCompare(b.fish.name,'ko'));
+        const baitKnown=!!(exact.length||observed),tugKnown=conditions.length>0&&conditions.every(r=>r.tug!==undefined&&allowed.includes(r.tug)),hooksetKnown=!matchHookset||conditions.length>0&&conditions.every(r=>r.hookset===route.hookset);
+        return [{fish:f,routes:conditions,time:observed,baitKnown,tugKnown,hooksetKnown}];
+      }).sort((a,b)=>Number(b.baitKnown)-Number(a.baitKnown)||Number(b.tugKnown)-Number(a.tugKnown)||Number(b.hooksetKnown)-Number(a.hooksetKnown)||a.fish.name.localeCompare(b.fish.name,'ko'));
     }
     function routeMatches(r,options={}){const place=data.spots[r.spotKey];if(options.region&&options.region!=='all'&&place?.region!==options.region)return false;if(!options.bait||options.bait==='all')return true;if(options.bait==='unknown')return !r.verified||!paths(r).some(p=>p.complete);return paths(r).some(p=>p.complete&&p.ids[0]===+options.bait);}
     const routeList=(fish,options={})=>fish.routes.filter(r=>routeMatches(r,options));
@@ -74,10 +77,10 @@
   function clock(hour){const minutes=((Math.round(hour*60)%1440)+1440)%1440;return String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');}
   function timeWindow(route){if(!Number.isFinite(route.spawn)||!Number.isFinite(route.duration))return null;if(route.duration>=24)return 'ET 24시간';return `ET ${clock(route.spawn)}–${clock(route.spawn+route.duration)}${route.spawn+route.duration>24?' (다음 날)':''}`;}
   function clearBiteWindows(target,competitors){
-    if(!target||competitors.some(c=>!c.time||!c.baitKnown||!c.tugKnown))return null;
+    if(!target||competitors.some(c=>!c.time||!c.baitKnown||!c.tugKnown||c.hooksetKnown===false))return null;
     let windows=[[target.min,target.max]];
     for(const c of competitors)windows=windows.flatMap(([start,end])=>c.time.max<=start||c.time.min>=end?[[start,end]]:[[start,Math.max(start,c.time.min)],[Math.min(end,c.time.max),end]].filter(([a,b])=>a<b));
     return windows;
   }
-  return {normalize,initials,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows};
+  return {normalize,initials,comparisonTugs,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows};
 });
