@@ -51,8 +51,8 @@
   }
   function changeCatch(entryId, value) {
     const f=fish.find(f => f.entryId===entryId); if(!f) return;
-    const saved=captureFocus(), before=caught(f);
-    try { state=C.setCaught(localStorage,f.route,f.Fish,value); }
+    const saved=captureFocus();let before;
+    try {state=checkState();before=caught(f);state=C.setCaught(localStorage,f.route,f.Fish,value);}
     catch { notify('브라우저에 저장하지 못했어요. 저장 공간과 사이트 권한을 확인해 주세요.'); render(); restoreFocus(saved); return; }
     notify(`${f.FishTranslated} · ${value?'수집 기록을 남겼어요.':'수집 표시를 해제했어요.'}`, () => {
       state=C.setCaught(localStorage,f.route,f.Fish,before); render();
@@ -284,8 +284,8 @@
       const el=event.target;if(el.matches('input[data-entry]'))changeCatch(el.dataset.entry,el.checked);
       if(el.matches('[data-zone-option]')){const id=el.closest('[data-zone]').dataset.zone;zoneOptions.set(id,{...zoneOptions.get(id),[el.dataset.zoneOption]:el.type==='checkbox'?el.checked:el.value});renderFishing();}
     });
-    window.addEventListener('storage',event=>{if(event.key==='caughtFishLS-combined'||event.key===null){state=checkState();render();}});
-    window.addEventListener('pageshow',()=>{if(fish.length){state=checkState();render();}});
+    window.addEventListener('storage',event=>{if(window.FishingCollection.isStorageKey(event.key)){try{state=checkState();undo=null;render();notify('연동된 수집 기록을 반영했어요.');}catch{notify('연동 기록을 읽지 못했어요. 기존 기록은 보존됩니다.');}}});
+    window.addEventListener('pageshow',()=>{if(fish.length){try{state=checkState();render();}catch{notify('연동 기록을 읽지 못했어요. 기존 기록은 보존됩니다.');}}});
     if(isChecklist) {
       document.querySelectorAll('[data-check-route]').forEach(button=>button.addEventListener('click',()=>{route=button.dataset.checkRoute;write('checklistCombined-activeTab',route);loadPreferences();checkOpen=new Set();checklistInitialized=false;render();}));
       $('checklistSearch').addEventListener('input',event=>{query=event.target.value;renderChecklist();});
@@ -315,6 +315,7 @@
   }
   async function start() {
     try {
+      if(!window.FishingCollection)throw Error('수집 기록 연동 프로그램을 불러오지 못했습니다.');
       const response=await fetch('../data/fish.json?v='+encodeURIComponent(document.body.dataset.version));if(!response.ok)throw Error('자료 응답 '+response.status);
       const payload=await response.json();if(payload.version!==1||!Array.isArray(payload.fish)||payload.fish.length!==260)throw Error('자료 형식 오류');
       fish=payload.fish;names=new Map(fish.map(f=>[C.key(f.Fish),f.FishTranslated]));state=checkState();loadPreferences();

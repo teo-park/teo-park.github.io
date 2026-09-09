@@ -193,8 +193,13 @@
     }));
   }
   function read(storage) {
+    if(root.FishingCollection)return root.FishingCollection.readOcean(storage);
     try { const data = JSON.parse(storage.getItem('caughtFishLS-combined') || '{}'); return { indigo: data.indigo || {}, ruby: data.ruby || {} }; }
     catch { return { indigo: {}, ruby: {} }; }
+  }
+  function writeState(storage,state){
+    if(root.FishingCollection)return root.FishingCollection.writeOcean(storage,state);
+    storage.setItem('caughtFishLS-combined',JSON.stringify(state));return state;
   }
   function routeAchievements(rows, stops) {
     if (!Array.isArray(stops) || stops.length !== 3 || stops.some(stop => !stop.stop || !['Day', 'Sunset', 'Night'].includes(stop.time))) return [];
@@ -224,7 +229,7 @@
     const state = read(storage), id = key(fish);
     for (const entry of Object.keys(state[route])) if (key(entry.split('|')[0]) === id) state[route][entry] = value;
     state[route][name(fish)] = value;
-    storage.setItem('caughtFishLS-combined', JSON.stringify(state));
+    writeState(storage,state);
     return state;
   }
   function parseImport(text) {
@@ -258,7 +263,7 @@
       }
     }
     // No matching fish: leave the user's saved data byte-for-byte unchanged.
-    if (imported) storage.setItem('caughtFishLS-combined', JSON.stringify(state));
+    if (imported) writeState(storage,state);
     return {state, imported, added, ignored, duplicates: ids.length - unique.length, matched, format: 'teamcraft'};
   }
   function importCaught(storage, text, idMap = root.OceanTeamcraftIds) {
@@ -278,7 +283,7 @@
         if (!seen.has(id)) { seen.add(id); imported++; }
       }
     }
-    storage.setItem('caughtFishLS-combined', JSON.stringify(state));
+    writeState(storage,state);
     return { state, imported };
   }
   function exportTeamcraft(storage, idMap = root.OceanTeamcraftIds) {
