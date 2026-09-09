@@ -10,7 +10,7 @@
   function mount({data,model,getCaught}){
     if(!F||!window.FISHING_WEATHER)return;
     const forecast=F.create(data,window.FISHING_WEATHER),fishById=new Map(data.fishes.map(f=>[f.id,f]));
-    const opened=new Set();let spotFilter='all';
+    const opened=new Set(),countdowns=new Set();let spotFilter='all';
     let settings=F.defaults(),saved=false,stars=new Set(),mode='all',purpose='big',rarities={big:'big',collection:'all'},alwaysAlerts={big:false,collection:true},result=null,search=null,searchTimer,shown=30,active=false,timer;
     function preferences(v){settings=F.validate(v.settings);stars=new Set((v.stars||[]).filter(id=>fishById.has(id)));mode=v.mode==='stars'?'stars':'all';purpose=v.purpose==='collection'?'collection':'big';
       rarities={big:v.rarities?.big==='legendary'?'legendary':'big',collection:['all','normal','big','legendary'].includes(v.rarities?.collection)?v.rarities.collection:'all'};
@@ -64,10 +64,10 @@
     function biteTime(id,route){const range=route&&model.biteTime(id,route);return range?`<span class="plan-bite-time" title="같은 낚시터·미끼의 관측 ${range.samples.toLocaleString()}건 · 모으기·루어 사용 여부 미구분">약 ${range.min}–${range.max}초</span>`:'<span class="plan-bite-time is-unknown">시간 미확인</span>';}
     const dateText=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(result.now+F.KST).getUTCFullYear()?date:longDate).format(ms);
     const snagging=route=>route.snagging?'<span class="plan-snagging">갈고리 낚시 필요</span>':'';
-    function chain(route){
+    function chain(route,target){
       const paths=model.tacklePaths(route);if(!paths.length)return '미끼 자료 확인 필요';
       return paths.map(p=>`<div class="plan-bait-path">${p.complete?'':'<span class="plan-mooch-facts">시작 미끼 미확인 → </span>'}${p.steps.map(step=>{
-        const fish=model.byId.get(step.id),name=esc(fish?.name||step.id);if(!fish?.fish)return `<span>${name}</span>`;
+        const fish=model.byId.get(step.id),name=esc(fish?.name||step.id);if(!fish?.fish){const first=p.steps[1],observed=first?first.routes[0]&&model.biteTime(first.id,first.routes[0]):model.biteTime(target.id,route);return `<span>${name}${observed?` <small class="plan-bait-samples" title="${esc(first?'첫 생미끼 물고기 '+model.byId.get(first.id).name:'대상 물고기')} 관측 기록">${observed.samples.toLocaleString()}건</small>`:''}</span>`;}
         const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>`${tugs[r.tug]||'입질 미확인'} · ${hooksets[r.hookset]||'낚아채기 미확인'}${r.snagging?' · 갈고리 낚시 필요':''}`))];
         return `<span class="plan-mooch"><button class="plan-mooch-name" data-fish-detail="${step.id}">${name}</button><span class="plan-mooch-facts">${variants.map(esc).join(' / ')} · ${biteTime(step.id,step.routes[0])}</span></span>`;
       }).join('<span class="plan-bait-arrow"> → </span>')}</div>`).join('<span class="plan-path-or">또는</span>');
@@ -75,6 +75,16 @@
     function alternateBait(fish,route){return model.baitOptions(fish.id,route).map(o=>{
       const a=o.alternative,v=o.versatile;return '<span class="plan-alternate-bait" title="같은 낚시터 관측 기록 기준 · 관측 건수는 입질 확률이 아닙니다">'+(o.mooch?'시작 ':'')+(a?'대체 '+esc(a.bait.name):'대체 기록 미확인')+'</span><span class="plan-versatile '+(v||o.versatilePrimary?'is-observed':'')+'">만능 루어'+(o.mooch?'로 시작':'')+' · '+(o.versatilePrimary?'기본 미끼':v?'기록 있음':'미확인')+'</span>';
     }).join('');}
+    function remaining(ms){const seconds=Math.max(0,Math.ceil(ms/1000)),days=Math.floor(seconds/86400),hours=Math.floor(seconds%86400/3600),minutes=Math.floor(seconds%3600/60);return days?`${days}일 ${hours}시간 ${minutes}분`:hours?`${hours}시간 ${minutes}분`:minutes?`${minutes}분 ${seconds%60}초`:`${seconds}초`;}
+    function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
+    function windowCell(row){
+      const fish=row.fish;
+      if(row.always)return '<div class="plan-window"><strong>상시 낚시</strong><span>시간·날씨 제한 없음</span></div>';
+      if(row.start===null)return `<div class="plan-window"><strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span></div>`;
+      const counting=countdowns.has(fish.id);
+      return `<button class="plan-window plan-time-toggle" data-plan-countdown="${fish.id}" data-plan-start="${row.start}" data-plan-end="${row.end}" aria-pressed="${counting}" aria-label="${esc(fish.name)} ${counting?'도전 시각 보기':'남은 시간 보기'}" title="눌러서 ${counting?'도전 시각':'남은 시간'} 보기">${counting?countdownText(row.start,row.end,Date.now()):`<strong>${dateText(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.start<=result.now?' · 지금부터':''}</span>`}</button>`;
+    }
+    function updateCountdowns(){if(!active||document.hidden)return;const now=Date.now();for(const button of document.querySelectorAll('[data-plan-countdown][aria-pressed="true"]'))button.innerHTML=countdownText(+button.dataset.planStart,+button.dataset.planEnd,now);}
     function card(row){
       const fish=row.fish,route=fish.routes[row.route],spot=data.spots[route.spotKey],next=row.nextStart!==null&&row.nextStart!==undefined?dateText(row.nextStart):row.unavailableReason||'다음 기회 찾는 중';
       const special=(route.predators||[]).map(p=>`${model.byId.get(p.id)?.name||p.id} ×${p.amount}`).join(' · ');
@@ -84,11 +94,11 @@
         <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span>${row.always?'상시':'조건부'}</span>${now?'<b class="plan-now-badge" title="현재 도전 가능 · 직감 등 선행 조건 별도 준비">지금</b>':''}</div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
         <div class="plan-bite"><div class="plan-bite-summary"><strong class="plan-tug ${tug?'tug-'+tug.length:'tug-unknown'}" aria-label="${tug?'입질 강도 '+tug:'입질 미확인'}">${tug||'입질 미확인'}</strong>${biteTime(fish.id,route)}</div><span class="plan-hookset">${hookset||'낚아채기 미확인'}</span>${snagging(route)}</div>
         <div class="plan-place"><span>${esc(spot.area)}</span><div class="plan-spot-line"><strong>${esc(spot.name)}</strong><button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button></div></div>
-        <div class="plan-window">${row.always?'<strong>상시 낚시</strong><span>시간·날씨 제한 없음</span>':row.start===null?`<strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span>`:`<strong>${dateText(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.start<=result.now?' · 지금부터':''}</span>`}</div>
-        <div class="plan-tackle"><div class="plan-bait">${chain(route)}</div>${alternateBait(fish,route)}${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}</div>
+        ${windowCell(row)}
+        <div class="plan-tackle"><div class="plan-bait">${chain(route,fish)}</div>${alternateBait(fish,route)}${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}</div>
         <p class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회">${row.always?'상시 가능':next}</p>
         <div class="plan-card-actions"><button data-plan-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건" aria-expanded="${opened.has(fish.id)}" aria-controls="plan-detail-${fish.id}">조건</button><button data-caught="${fish.id}" aria-label="${esc(fish.name)} 수집 체크">수집</button></div>
-      </article><section id="plan-detail-${fish.id}" class="plan-inline-detail" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?`<div class="plan-detail-tools"><button data-plan-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건 접기">접기 ×</button></div>${window.FishingDetails?.render(fish.id,'plan-detail-title-'+fish.id)||''}`:''}</section></div>`;
+      </article><section id="plan-detail-${fish.id}" class="plan-inline-detail" data-plan-route="${fishById.get(fish.id).routes.indexOf(route)}" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?window.FishingDetails?.renderPlan(fish.id,route,'plan-detail-title-'+fish.id)||'':''}</section></div>`;
     }
     function prep(list){
       const baitMap=new Map();
@@ -98,7 +108,7 @@
       $('planPrep').innerHTML=[...baitMap].map(([id,targets])=>`<div><strong>${esc(model.byId.get(id)?.name||id)}</strong><p>${esc([...targets.values()].join(' · '))}</p></div>`).join('')||'<p>조회 결과가 없어요.</p>';
     }
     function render(){if(!result)return;const selectedSpot=data.spots[spotFilter];$('planActiveFilters').hidden=!selectedSpot;$('planActiveFilters').innerHTML=selectedSpot?`<button class="plan-filter-tag" data-plan-clear-spot aria-label="${esc(selectedSpot.name)} 낚시터 필터 해제"><span>낚시터 · ${esc(selectedSpot.name)}</span><span aria-hidden="true">×</span></button>`:'';const list=rows(),panels=new Map([...$('planResults').querySelectorAll('.plan-inline-detail:not([hidden])')].map(p=>[p.id,p]));$('planResults').innerHTML=list.slice(0,shown).map(card).join('')||'<p class="empty-state">선택한 조건의 미수집 물고기가 없어요. 검색·어종·낚시터 필터를 확인해 주세요.</p>';
-      for(const panel of $('planResults').querySelectorAll('.plan-inline-detail:not([hidden])'))if(panels.has(panel.id))panel.replaceWith(panels.get(panel.id));
+      for(const panel of $('planResults').querySelectorAll('.plan-inline-detail:not([hidden])'))if(panels.get(panel.id)?.dataset.planRoute===panel.dataset.planRoute)panel.replaceWith(panels.get(panel.id));
       $('planCount').textContent=`미수집 ${list.length}종 · 시간·날씨 조건 ${list.filter(r=>!r.always).length}종 / 상시 ${list.filter(r=>r.always).length}종 · 한국 시간(KST)`;
       $('planMore').hidden=list.length<=shown;$('planMore').textContent=`다음 ${Math.min(30,list.length-shown)}종 더 보기`;
       $('planCoverage').textContent=`기간 제한 없이 표시합니다.${result.pending?` 더 먼 다음 기회 조회 중 ${result.pending}종.`:''} 접속 설정 확인 ${result.rows.filter(r=>r.unavailableReason).length}종 · 별도 확인: 특수 지역·선행 조건·자료 미확인 ${result.excluded.length}종. 상시 어종은 접속 시간과 관계없이 표시합니다. ${time.format(result.now)} 계산.`;
@@ -122,6 +132,8 @@
     $('planSearch').oninput=()=>{clearTimeout(timer);timer=setTimeout(calculate,150);};
     for(const id of ['planSort','planAvailability'])$(id).onchange=()=>{shown=30;render();};
     $('planRefresh').onclick=calculate;$('planMore').onclick=()=>{shown+=30;render();};
+    document.addEventListener('click',e=>{const button=e.target.closest('[data-plan-countdown]');if(!button)return;const id=+button.dataset.planCountdown;if(countdowns.has(id))countdowns.delete(id);else countdowns.add(id);render();document.querySelector(`[data-plan-countdown="${id}"]`)?.focus({preventScroll:true});});
+    setInterval(updateCountdowns,1000);
     document.addEventListener('fishing-collection-changed',()=>{if(active)calculate();changed();});
     window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null){try{const raw=localStorage.getItem(KEY);if(!raw){saved=false;return;}preferences(JSON.parse(raw));modeControls();
       for(let i=0;i<7;i++){document.querySelector(`[data-day="${i}"]`).checked=settings.days[i].enabled;$('playStart'+i).value=settings.days[i].start;$('playEnd'+i).value=settings.days[i].end;}$('planLead').value=settings.lead;$('planMinimum').value=settings.minMinutes;$('notificationScope').value=mode;$('planMessage').textContent='다른 탭에서 바꾼 계획을 반영했습니다.';if(active)calculate();changed();}catch{$('planMessage').textContent='다른 탭의 계획을 읽지 못했습니다. 새로고침 후 확인해 주세요.';}}});

@@ -9,3 +9,5 @@
 @media(max-width:620px) { #detailDialog { --detail-padding:17px; } }
 
 .bait-alternatives{display:flex;flex-direction:column;gap:5px;font-size:10pt;line-height:1.6;margin:8px 0 12px;padding:8px 12px;border-left:2px solid #527b83;background:#162c3b}.bait-alternatives small{font-size:10pt;color:var(--ff-muted)}.bait-alternatives strong{font-weight:400;color:#c5e4e5}.bait-versatile{color:var(--fish)}.bait-unconfirmed{color:var(--ff-muted)}
+
+.primary-bait{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px}.primary-bait-samples{font-size:10pt;color:var(--ff-muted)}

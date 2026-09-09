@@ -4,7 +4,7 @@
   const tugs={0:'!!',1:'!!!',2:'!'},hooks={0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'};
   const rangeText=r=>r?`약 ${r.min}–${r.max}초`:'시간 미확인';
   function mount({model,reference}){
-    function render(route,fish,index,excludedId=0){
+    function render(route,fish,index,excludedId=0,compact=false){
       if(!route.bait||route.tug===undefined)return '';
       const competitors=model.competitors(fish.id,route),target=model.biteTime(fish.id,route),mooch=!!model.byId.get(route.bait)?.fish;
       const selectable=competitors.filter(c=>c.baitKnown&&c.tugKnown);
@@ -22,6 +22,23 @@
         return `<tr class="${isTarget?'compare-target':''} ${excluded?'compare-excluded':''}"><td>${isTarget?`<strong>${esc(f.name)}</strong>`:reference(f.id)}${conditions?`<small>${esc(conditions)}</small>`:''}</td><td><strong>${esc(tug)}</strong><small>${esc(hook)}</small></td><td${time?` title="관측 ${time.samples.toLocaleString()}건"`:''}>${rangeText(time)}</td><td><span class="compare-state ${isTarget?'is-target':excluded?'':overlap&&entry.baitKnown?'is-overlap':''}">${state}</span></td></tr>`;
       };
       const confirmed=competitors.filter(c=>c.baitKnown&&c.tugKnown),unconfirmed=competitors.filter(c=>!c.baitKnown||!c.tugKnown);
+      if(compact){
+        const smallRow=entry=>{
+          const excluded=entry.fish.id===excludedId,overlap=target&&entry.time&&Math.max(target.min,entry.time.min)<Math.min(target.max,entry.time.max);
+          const state=excluded?'제외 가정':!entry.baitKnown?'미끼 미확인':!entry.tugKnown?'입질 미확인':!entry.time||!target?'시간 미확인':overlap?'겹침':'분리';
+          const tackle=[...new Set(entry.routes.map(r=>(tugs[r.tug]||'?')+' '+(hooks[r.hookset]||'낚아채기 미확인')))].join(' / ');
+          const conditions=[entry.fish.timed?'시간 조건':'',entry.fish.weathered?'날씨 조건':'',entry.routes.some(r=>r.predators?.length)?'직감 필요':'',entry.routes.some(r=>r.snagging)?'갈고리 필요':''].filter(Boolean).join(' · ');
+          return `<tr class="${excluded?'compare-excluded':''}"><td>${reference(entry.fish.id)}<small>${esc(tackle)}${conditions?' · '+esc(conditions):''}</small></td><td>${rangeText(entry.time)}</td><td><span class="compare-state ${overlap?'is-overlap':''}">${state}</span></td></tr>`;
+        };
+        const entries=[...confirmed,...unconfirmed],table=items=>`<table><tbody>${items.map(smallRow).join('')}</tbody></table>`;
+        return `<section class="bite-comparison compare-compact" data-compare-compact="true" data-compare-fish="${fish.id}" data-compare-route="${index}" aria-label="${esc(fish.name)} 같은 입질 비교">
+          <div class="compare-compact-heading"><h4>같은 입질 비교 <span>${entries.length}종</span></h4><span>${esc(model.byId.get(route.bait)?.name||route.bait)} · ${tugs[route.tug]} · 대상 ${rangeText(target)}</span></div>
+          ${mooch?'<p class="compare-rule">생미끼 경로 · 교환 방생 적용 불가</p>':`<label class="compare-exclude">교환 방생 가정<select data-compare-exclude aria-label="${esc(fish.name)} 비교에서 제외할 물고기"><option value="0">제외하지 않음</option>${selectable.map(c=>`<option value="${c.fish.id}" ${c.fish.id===excludedId?'selected':''}>${esc(c.fish.name)}</option>`).join('')}</select></label>`}
+          ${entries.length?table(entries.slice(0,4)):'<p class="compare-rule">같은 입질의 다른 어종 기록 없음</p>'}
+          ${entries.length>4?`<details class="compare-more"><summary>나머지 ${entries.length-4}종 보기</summary>${table(entries.slice(4))}</details>`:''}
+          <p class="compare-summary">${excludedId?'제외 가정 후 · ':''}${summary}${uncertain.length?` <span>미확인 ${uncertain.length}종 포함</span>`:''}</p>
+        </section>`;
+      }
       return `<section class="bite-comparison" data-compare-fish="${fish.id}" data-compare-route="${index}" aria-label="${esc(fish.name)} 같은 입질 비교">
         <h4>같은 입질 비교</h4><p class="compare-context">${esc(model.byId.get(route.bait)?.name||route.bait)}${mooch?' 생미끼':''} · ${tugs[route.tug]} · 같은 낚시터 기준</p>
         <div class="compare-scroll" role="region" aria-label="입질 시간 비교 목록 · 좌우 스크롤 가능" tabindex="0"><table><thead><tr><th scope="col">물고기</th><th scope="col">입질 · 낚아채기</th><th scope="col">관측 시간</th><th scope="col">대상과 비교</th></tr></thead><tbody>${row({fish,routes:[route],time:target},true)}${confirmed.map(c=>row(c)).join('')}${unconfirmed.length?'<tr class="compare-unconfirmed"><th colspan="4" scope="rowgroup">낚시터 내 추가 어종 · 이 미끼 또는 입질 확인 필요</th></tr>'+unconfirmed.map(c=>row(c)).join(''):''}</tbody></table></div>
@@ -35,8 +52,8 @@
       const select=e.target.closest('[data-compare-exclude]');if(!select)return;
       const section=select.closest('.bite-comparison'),fish=model.byId.get(+section.dataset.compareFish),index=+section.dataset.compareRoute;
       if(!fish?.routes[index])return;
-      const holder=document.createElement('div');holder.innerHTML=render(fish.routes[index],fish,index,+select.value);
-      const next=holder.firstElementChild;section.replaceWith(next);next.querySelector('[data-compare-exclude]')?.focus({preventScroll:true});
+      const moreOpen=section.querySelector('.compare-more')?.open,holder=document.createElement('div');holder.innerHTML=render(fish.routes[index],fish,index,+select.value,section.dataset.compareCompact==='true');
+      const next=holder.firstElementChild;section.replaceWith(next);if(moreOpen&&next.querySelector('.compare-more'))next.querySelector('.compare-more').open=true;next.querySelector('[data-compare-exclude]')?.focus({preventScroll:true});
     });
     return {render};
   }

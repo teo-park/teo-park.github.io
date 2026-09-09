@@ -56,3 +56,27 @@ test('condition panels expand under each row, preserve comparisons on refresh, a
     assert.equal(p.$('#detailDialog').open,false);assert.equal(p.$('#totalCount').textContent,'0 / 1,806');
   }finally{p.close();}
 });
+
+test('compact plan details contain one route, hide extra competitors without excluding them and retain full detail access',()=>{
+ const p=open({plan:true});try{
+  p.$('#showPlanner').click();p.$('#planCollectionMode').click();p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();p.$('.plan-card [data-plan-detail]').click();
+  const panel=p.$('.plan-inline-detail:not([hidden])');assert.equal(panel.querySelector('.detail-hero'),null);assert.equal(panel.querySelector('[data-caught]'),null);assert.equal(panel.querySelectorAll('.bite-comparison').length,1);assert.ok(panel.querySelector('.plan-detail-grid'));assert.ok(panel.querySelector('.primary-bait-samples').textContent.includes('9,202'));assert.ok(p.$('.plan-bait-samples').textContent.includes('9,202'));assert.equal(panel.querySelector('.compare-compact>table tbody').children.length,3);
+  panel.querySelector('[data-fish-detail="12720"]').click();assert.equal(p.$('#detailDialog').open,true);assert.equal(p.all('#detailDialog .route').length,3);assert.equal(p.$('#detailDialog .compare-compact'),null);
+  const fish=p.w.FISHING_DATA.fishes.find(f=>f.id===12720),html=p.w.FishingDetails.renderPlan(fish.id,fish.routes[1],'test-title');assert.ok(html.includes('data-compare-route="1"'));assert.ok(html.includes(D.spots[fish.routes[1].spotKey].name));assert.ok(!html.includes(D.spots[fish.routes[0].spotKey].name));
+  p.$('#detailDialog').close();p.$('#planSearch').value='쪽빛청어';p.$('#planRefresh').click();p.$('.plan-card [data-plan-detail]').click();const expanded=p.$('.plan-inline-detail:not([hidden])');assert.equal(expanded.querySelector('.compare-compact>table tbody').children.length,4);
+  const more=expanded.querySelector('.compare-more');assert.ok(more);more.open=true;const select=expanded.querySelector('[data-compare-exclude]'),last=select.options[select.options.length-1].value;select.value=last;select.dispatchEvent(new p.w.Event('change',{bubbles:true}));assert.equal(expanded.querySelector('.compare-more').open,true);assert.ok(expanded.querySelector('.compare-excluded'));assert.ok(expanded.querySelector('.compare-compact'));
+  p.$('#planRefresh').click();assert.equal(p.$('.plan-inline-detail:not([hidden])'),expanded);assert.equal(expanded.querySelector('[data-compare-exclude]').value,last);
+
+ }finally{p.close();}
+});
+test('time cell toggles a live start/end countdown and leaves always fish untoggled',async()=>{
+ const p=open({plan:true});try{
+  Object.defineProperty(p.d,'hidden',{value:false,configurable:true});let now=Date.parse('2026-09-09T03:40:00Z');p.w.Date.now=()=>now;
+  p.$('#showPlanner').click();p.$('#planCollectionMode').click();p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();
+  let button=p.$('[data-plan-countdown]');const start=+button.dataset.planStart,end=+button.dataset.planEnd;now=start-65000;button.click();button=p.$('[data-plan-countdown]');assert.equal(button.getAttribute('aria-pressed'),'true');assert.match(button.textContent,/시작까지 1분 5초/);
+  now=start+1000;await new Promise(r=>setTimeout(r,1100));assert.match(button.textContent,/종료까지/);assert.match(button.textContent,/지금 도전 가능/);
+  now=end;await new Promise(r=>setTimeout(r,1100));assert.match(button.textContent,/이번 기회 종료/);button.click();assert.equal(p.$('[data-plan-countdown]').getAttribute('aria-pressed'),'false');assert.ok(!p.$('[data-plan-countdown]').textContent.includes('종료까지'));
+  p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();assert.equal(p.$('[data-plan-countdown]'),null);assert.match(p.$('.plan-window').textContent,/상시/);
+  p.$('#planSearch').value='심해아귀';p.$('#planRefresh').click();const f=p.w.FISHING_DATA.fishes.find(f=>f.id===4912),step=p.w.FishingBook.create(p.w.FISHING_DATA,p.w.FISHING_BITE_TIMES).tacklePaths(f.routes[0])[0].steps[1];assert.ok(p.$('.plan-bait-samples').getAttribute('title').includes(p.w.FISHING_DATA.fishes.find(f=>f.id===step.id).name));
+ }finally{p.close();}
+});
