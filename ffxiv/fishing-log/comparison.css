@@ -1,0 +1,12 @@
+.bite-comparison{margin:18px 0 8px;padding:14px;background:#101e2b;border:1px solid #3b596b;border-radius:8px;min-width:0}
+.bite-comparison h4{margin:0 0 5px;font-size:16px}.compare-context{margin:0 0 10px;font-size:10pt;color:#bdd9dd}
+.compare-scroll{overflow-x:auto;scrollbar-width:thin}.bite-comparison table{border-collapse:collapse;width:100%;min-width:530px;font-size:10pt;text-align:left;line-height:1.5}
+.bite-comparison th{padding:7px 8px;font-weight:700;color:#b4ced8;border-bottom:1px solid #526a7c;white-space:nowrap}
+.bite-comparison td{padding:8px;border-bottom:1px solid #2a4355;vertical-align:middle}.bite-comparison td:first-child{width:35%}.bite-comparison td:nth-child(2){min-width:123px}.bite-comparison td:nth-child(3){white-space:nowrap;font-variant-numeric:tabular-nums}
+.bite-comparison td small{display:block;font-size:10pt;color:var(--ff-muted);margin-top:3px}.bite-comparison .related-fish{padding:2px 5px;margin-left:-5px;min-height:28px;font-weight:700;text-align:left}
+.compare-target{background:#1a3a41}.compare-target td:first-child{color:var(--fish)}.compare-excluded td{color:var(--ff-muted);opacity:.65}.compare-excluded td:first-child{text-decoration:line-through}
+.compare-state{display:inline-block;color:var(--ff-muted);font-size:10pt;white-space:nowrap}.compare-state.is-target{color:var(--fish)}.compare-state.is-overlap{color:#f1d69c}
+.compare-unconfirmed th{background:#192b39;font-weight:400;white-space:normal}.detail-mooch{display:inline-flex;flex-direction:column;gap:3px;max-width:100%}.detail-mooch small{font-size:10pt;color:#bdd9dd;line-height:1.5}
+.compare-exclude{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:13px 0;font-size:10pt}.compare-exclude select{flex:1;min-width:150px;max-width:260px;min-height:34px;padding:5px 8px;font-size:10pt}
+.compare-rule,.compare-summary{margin:12px 0 8px;font-size:10pt;line-height:1.7;color:#bcd5dc}.compare-summary strong{color:var(--fish);font-weight:400}.compare-note{font-size:10pt;line-height:1.65;color:var(--ff-muted);margin:8px 0 0}
+@media(max-width:600px){.bite-comparison{padding:10px;margin-left:-10px}.compare-exclude{align-items:flex-start;flex-direction:column}.compare-exclude select{width:100%;max-width:none}}

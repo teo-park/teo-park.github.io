@@ -31,12 +31,19 @@
     $('playSettings').open=!saved;
     const regionNames=[...new Set(data.fishes.filter(f=>f.kind==='rod').flatMap(f=>f.routes.map(r=>data.spots[r.spotKey].region)))].sort((a,b)=>a.localeCompare(b,'ko'));
     $('planRegion').insertAdjacentHTML('beforeend',regionNames.map(n=>`<option>${esc(n)}</option>`).join(''));
+    function fillSpots(){const previous=$('planSpot').value,region=$('planRegion').value;
+      const spots=[...new Set(data.fishes.filter(f=>f.kind==='rod').flatMap(f=>f.routes.map(r=>r.spotKey)))].map(key=>data.spots[key]).filter(s=>region==='all'||s.region===region).sort((a,b)=>a.area.localeCompare(b.area,'ko')||a.name.localeCompare(b.name,'ko'));
+      $('planSpot').innerHTML='<option value="all">모든 낚시터</option>'+spots.map(s=>`<option value="${esc(s.key)}">${esc(s.area+' · '+s.name)}</option>`).join('');
+      if(spots.some(s=>s.key===previous))$('planSpot').value=previous;
+    }
+    fillSpots();
     function eligible(){return model.filter(getCaught(),{kind:'rod',status:'missing',rarity:rarities[purpose]}).filter(f=>(purpose!=='big'||f.big)&&(mode!=='stars'||stars.has(f.id))&&f.routes.some(r=>!forecast.reason(r)&&(alwaysAlerts[purpose]||forecast.limited(r))));}
     const snapshot=()=>({saved,settings,ids:eligible().map(f=>f.id),includeAlways:alwaysAlerts[purpose]});
     function targetCount(){$('notificationTargets').textContent=`${purpose==='big'?'터주 전용':'수첩작 전용'} · 현재 알림 대상 ${eligible().length}종 · 수집하면 대상에서 제외됩니다.`;}
     function changed(){document.dispatchEvent(new CustomEvent('fishing-plan-changed'));}
     function calculate(){
-      const fishes=model.filter(getCaught(),{kind:'rod',status:'missing',region:$('planRegion').value,rarity:rarities[purpose],query:$('planSearch').value}).map(f=>({...f,routes:model.routeList(f,{region:$('planRegion').value})}));
+      const spot=$('planSpot').value;
+      const fishes=model.filter(getCaught(),{kind:'rod',status:'missing',region:$('planRegion').value,rarity:rarities[purpose],query:$('planSearch').value}).map(f=>({...f,routes:model.routeList(f,{region:$('planRegion').value}).filter(r=>spot==='all'||r.spotKey===spot)})).filter(f=>spot==='all'||f.routes.length);
       const now=Date.now();result=forecast.plan(fishes,settings,now,30);result.now=now;shown=30;render();
     }
     function rows(){
@@ -49,17 +56,27 @@
       else list.sort((a,b)=>(purpose==='big'?Number(!!a.always)-Number(!!b.always):0)||a.start-b.start||a.fish.order-b.fish.order);
       return list;
     }
-    function chain(route){const paths=model.paths(route);return paths.length?paths.map(p=>(p.complete?'':'시작 미끼 미확인 → ')+p.ids.map(id=>model.byId.get(id)?.name||id).join(' → ')).join(' / '):'미끼 자료 확인 필요';}
+    function biteTime(id,route){const range=route&&model.biteTime(id,route);return range?`<span class="plan-bite-time" title="같은 낚시터·미끼의 관측 ${range.samples.toLocaleString()}건 · 모으기·루어 사용 여부 미구분">약 ${range.min}–${range.max}초</span>`:'<span class="plan-bite-time is-unknown">시간 미확인</span>';}
+    const snagging=route=>route.snagging?'<span class="plan-snagging">갈고리 낚시 필요</span>':'';
+    function chain(route){
+      const paths=model.tacklePaths(route);if(!paths.length)return '미끼 자료 확인 필요';
+      return paths.map(p=>`<div class="plan-bait-path">${p.complete?'':'<span class="plan-mooch-facts">시작 미끼 미확인 → </span>'}${p.steps.map(step=>{
+        const fish=model.byId.get(step.id),name=esc(fish?.name||step.id);if(!fish?.fish)return `<span>${name}</span>`;
+        const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>`${tugs[r.tug]||'입질 미확인'} · ${hooksets[r.hookset]||'낚아채기 미확인'}${r.snagging?' · 갈고리 낚시 필요':''}`))];
+        return `<span class="plan-mooch"><button class="plan-mooch-name" data-fish-detail="${step.id}">${name}</button><span class="plan-mooch-facts">${variants.map(esc).join(' / ')} · ${biteTime(step.id,step.routes[0])}</span></span>`;
+      }).join('<span class="plan-bait-arrow"> → </span>')}</div>`).join('<span class="plan-path-or">또는</span>');
+    }
     function card(row){
       const fish=row.fish,route=fish.routes[row.route],spot=data.spots[route.spotKey],next=row.nextStart?`${date.format(row.nextStart)}`:'30일 조회 범위 안에 없음';
       const special=(route.predators||[]).map(p=>`${model.byId.get(p.id)?.name||p.id} ×${p.amount}`).join(' · ');
       const tug=tugs[route.tug],hookset=hooksets[route.hookset];
-      return `<article class="plan-card" aria-label="${esc(fish.name)} 낚시 계획" data-plan-kind="${fish.big?'big':'normal'}" data-plan-availability="${row.always?'always':'timed'}">
-        <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span>${row.always?'상시':'조건부'}</span></div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
-        <div class="plan-bite"><strong class="plan-tug ${tug?'tug-'+tug.length:'tug-unknown'}" aria-label="${tug?'입질 강도 '+tug:'입질 미확인'}">${tug||'입질 미확인'}</strong><span class="plan-hookset">${hookset||'낚아채기 미확인'}</span></div>
-        <div class="plan-place"><span>${esc(spot.area)}</span><strong>${esc(spot.name)}</strong></div>
+      const now=!!row.always||row.start<=result.now&&result.now<row.end;
+      return `<article class="plan-card" aria-label="${esc(fish.name)} 낚시 계획" data-plan-kind="${fish.big?'big':'normal'}" data-plan-availability="${row.always?'always':'timed'}" data-plan-now="${now}">
+        <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span>${row.always?'상시':'조건부'}</span>${now?'<b class="plan-now-badge" title="현재 도전 가능 · 직감 등 선행 조건 별도 준비">지금</b>':''}</div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
+        <div class="plan-bite"><div class="plan-bite-summary"><strong class="plan-tug ${tug?'tug-'+tug.length:'tug-unknown'}" aria-label="${tug?'입질 강도 '+tug:'입질 미확인'}">${tug||'입질 미확인'}</strong>${biteTime(fish.id,route)}</div><span class="plan-hookset">${hookset||'낚아채기 미확인'}</span>${snagging(route)}</div>
+        <div class="plan-place"><span>${esc(spot.area)}</span><div class="plan-spot-line"><strong>${esc(spot.name)}</strong><button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${$('planSpot').value===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button></div></div>
         <div class="plan-window">${row.always?'<strong>상시 낚시</strong><span>시간·날씨 제한 없음</span>':`<strong>${date.format(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.start<=result.now?' · 지금부터':''}</span>`}</div>
-        <div class="plan-tackle"><p class="plan-bait">${esc(chain(route))}</p>${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}</div>
+        <div class="plan-tackle"><div class="plan-bait">${chain(route)}</div>${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}</div>
         <p class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회">${row.always?'상시 가능':next}</p>
         <div class="plan-card-actions"><button data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건">조건</button><button data-caught="${fish.id}" aria-label="${esc(fish.name)} 수집 체크">수집</button></div>
       </article>`;
@@ -89,8 +106,8 @@
       localStorage.setItem(KEY,serialized(next));settings=next;saved=true;$('playSummary').textContent='내 접속 시간 · 변경하기';$('playSettings').open=false;$('planMessage').textContent='접속 시간을 저장했습니다. 알림은 이 시간 안에서만 보냅니다.';calculate();changed();}catch(e){$('planMessage').textContent=e.message;}};
     $('notificationScope').onchange=()=>{const prev=mode;mode=$('notificationScope').value;try{if(saved)store();targetCount();changed();}catch{mode=prev;$('notificationScope').value=prev;$('planMessage').textContent='알림 대상 설정을 저장하지 못했습니다.';}};
     $('notifyAlways').onchange=()=>{const previous=alwaysAlerts[purpose];alwaysAlerts[purpose]=$('notifyAlways').checked;try{if(saved)store();targetCount();changed();}catch{alwaysAlerts[purpose]=previous;$('notifyAlways').checked=previous;$('planMessage').textContent='상시 알림 설정을 저장하지 못했습니다.';}};
-    document.addEventListener('click',e=>{const b=e.target.closest('[data-plan-star]');if(!b)return;const id=+b.dataset.planStar,had=stars.has(id);if(had)stars.delete(id);else stars.add(id);try{if(saved)store();render();changed();}catch{if(had)stars.add(id);else stars.delete(id);$('planMessage').textContent='관심 물고기를 저장하지 못했습니다.';}});
-    $('planRegion').onchange=calculate;
+    document.addEventListener('click',e=>{const place=e.target.closest('[data-plan-spot]');if(place){$('planSpot').value=place.dataset.planSpot;$('planSearch').value='';clearTimeout(timer);calculate();return;}const b=e.target.closest('[data-plan-star]');if(!b)return;const id=+b.dataset.planStar,had=stars.has(id);if(had)stars.delete(id);else stars.add(id);try{if(saved)store();render();changed();}catch{if(had)stars.add(id);else stars.delete(id);$('planMessage').textContent='관심 물고기를 저장하지 못했습니다.';}});
+    $('planRegion').onchange=()=>{fillSpots();calculate();};$('planSpot').onchange=calculate;
     $('planRarity').onchange=()=>{const previous=rarities[purpose];rarities[purpose]=$('planRarity').value;try{if(saved)store();calculate();changed();}catch{rarities[purpose]=previous;$('planRarity').value=previous;$('planMessage').textContent='어종 필터를 저장하지 못했습니다.';}};
     $('planSearch').oninput=()=>{clearTimeout(timer);timer=setTimeout(calculate,150);};
     for(const id of ['planHorizon','planSort','planAvailability'])$(id).onchange=()=>{shown=30;render();};
