@@ -155,6 +155,24 @@
       }
       return {result,states,signature,step};
     }
+    function preparations(fish,routes=fish.routes,seen=new Set([fish.id])){
+      const nodes=new Map();
+      for(const route of routes){
+        const dependencies=[...(route.predators||[]).map(p=>({...p,relation:'intuition'})),...(byId.get(route.bait)?.fish?[{id:route.bait,relation:'mooch'}]:[])];
+        for(const dependency of dependencies){
+          if(seen.has(dependency.id))continue;
+          const child=byId.get(dependency.id);if(!child)continue;
+          const local=(child.routes||[]).filter(r=>r.spotKey===route.spotKey);
+          // Mooching must stay at this fishing spot; intuition may require another spot.
+          const childRoutes=local.length||dependency.relation==='mooch'?local:child.routes||[];
+          const key=JSON.stringify([dependency.id,dependency.relation,dependency.amount,childRoutes]);
+          if(nodes.has(key))continue;
+          const children=preparations(child,childRoutes,new Set([...seen,child.id])),timed=childRoutes.some(limited);
+          if(timed||children.length)nodes.set(key,{...dependency,fish:{...child,routes:childRoutes},timed,children});
+        }
+      }
+      return [...nodes.values()];
+    }
     // An on-demand timeline for one fish. Keep the main list's two-chance search cheap.
     function startTimeline(fish,from,{settings=null,count=5}={}){
       const supported=fish.routes.filter(r=>!reason(r));
@@ -185,7 +203,7 @@
       step();
       return {result,step};
     }
-    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,clearCache:()=>weatherCache.clear()};
+    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,preparations,clearCache:()=>weatherCache.clear()};
   }
   return {MINUTE,DAY,ET_HOUR,ET_DAY,WEATHER,KST,defaults,validate,weatherTarget,merge,sessions,intersect,create};
 });

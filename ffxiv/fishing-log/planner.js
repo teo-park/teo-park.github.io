@@ -28,6 +28,7 @@
     window.FishingSpotMaps?.mount({data});
     window.FishingBaitDetails?.mount({model});
     const forecast=F.create(data,window.FISHING_WEATHER),fishById=new Map(data.fishes.map(f=>[f.id,f]));
+    const preparationView=window.FishingPreparations?.mount({data,model,forecast,getCaught});
     const opened=new Set(),countdowns=new Set();let spotFilter='all';
     let settings=F.defaults(),saved=false,stars=new Set(),mode='all',purpose='big',rarities={big:'big',collection:'all'},alwaysAlerts={big:false,collection:true},result=null,search=null,searchTimer,shown=30,active=false,timer;
     function preferences(v){settings=F.validate(v.settings);stars=new Set((v.stars||[]).filter(id=>fishById.has(id)));mode=v.mode==='stars'?'stars':'all';purpose=v.purpose==='collection'?'collection':'big';
@@ -61,7 +62,7 @@
         const start=performance.now();do{timeline.step();}while(timeline.result.pending&&performance.now()-start<12);
         paint();if(timeline.result.pending)timelineTimer=setTimeout(advance,50);
       }
-      paint();if(timeline.result.pending)timelineTimer=setTimeout(advance,0);
+      paint();preparationView?.refresh();if(timeline.result.pending)timelineTimer=setTimeout(advance,0);
     }
     window.FishingTimeline={
       markup:fish=>fish.kind==='rod'&&!model.isOceanFish(fish)?`<section id="fishTimeline" class="fish-timeline" data-fish-timeline="${fish.id}" aria-labelledby="timelineTitle"><div class="timeline-heading"><h3 id="timelineTitle">다가오는 출현 · 5회 <small>KST</small></h3><div class="timeline-scope" role="group" aria-label="출현 시간 기준"><button type="button" data-timeline-scope="all" aria-pressed="${timelineScope==='all'}">전체 출현</button><button type="button" data-timeline-scope="play" aria-pressed="${timelineScope==='play'}">내 접속 시간</button></div></div><p class="timeline-note"></p><ol class="timeline-list"></ol><p class="timeline-status" role="status"></p></section>`:'',
@@ -105,10 +106,12 @@
       const now=Date.now();search=forecast.startSearch(fishes,settings,now,search);result=search.result;result.now=now;shown=30;render();
       if(result.pending&&active)searchTimer=setTimeout(continueSearch,100);
     }
+    const hasTimedPreparation=fish=>fish.routes.some(r=>forecast.reason(r)==='생미끼·직감 선행 시간 별도 확인')&&forecast.preparations(fish).length>0;
     function rows(){
       if(!result)return [];
       const availability=$('planAvailability').value;
       const list=availability==='always'?[]:[...result.rows];
+      if(availability!=='always')for(const fish of result.excluded.filter(hasTimedPreparation))list.push({fish,route:fish.routes.findIndex(r=>forecast.reason(r)==='생미끼·직감 선행 시간 별도 확인'),preparationOnly:true,start:null,end:null,nextStart:null,unavailableReason:'준비 어종 시간 확인'});
       if(availability!=='timed')for(const fish of result.always)list.push({fish,route:fish.routes.findIndex(r=>!forecast.reason(r)&&!forecast.limited(r)),always:true,start:result.now});
       if($('planSort').value==='rare')list.sort((a,b)=>Number(!!a.always)-Number(!!b.always)||(b.nextGap??-Infinity)-(a.nextGap??-Infinity)||(a.start??Infinity)-(b.start??Infinity)||a.fish.order-b.fish.order);
       else if($('planSort').value==='book')list.sort((a,b)=>a.fish.order-b.fish.order);
@@ -138,6 +141,7 @@
     function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
     function windowCell(row){
       const fish=row.fish;
+      if(row.preparationOnly)return '<div class="plan-window"><strong>직감·생미끼 준비 필요</strong><span>하위 어종의 출현 시간 참고</span></div>';
       if(row.always)return '<div class="plan-window"><strong>상시 낚시</strong><span>시간·날씨 제한 없음</span></div>';
       if(row.start===null)return `<div class="plan-window"><strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span></div>`;
       const counting=countdowns.has(fish.id);
@@ -167,9 +171,9 @@
         <div class="plan-place"><span>${esc(spot.area)}</span><div class="plan-spot-line"><strong><a class="plan-spot-link" data-spot-map="${esc(route.spotKey)}" data-map-owner="${fish.id}" href="${esc(spotUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(spot.name)} · Teamcraft 낚시터 보기 (새 탭)">${esc(spot.name)}<span aria-hidden="true"> ↗</span></a></strong><button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button></div>${coords}</div>
         ${windowCell(row)}
         <div class="plan-tackle"><div class="plan-bait">${chain(route,fish)}</div>${lureBadges(route,fish.name)}${alternateBait(fish,route)}${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}${preparationLures}</div>
-        <div class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회"><span>${row.always?'상시 가능':next}</span>${row.always?'':`<button class="plan-timeline-link" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 출현 시간 5회 보기">출현 5회 보기 ↗</button>`}</div>
+        <div class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회"><span>${row.always?'상시 가능':next}</span>${row.always?'':`<button class="plan-timeline-link" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} ${row.preparationOnly?'준비 어종 시간 보기':'출현 시간 5회 보기'}">${row.preparationOnly?'준비 시간 보기':'출현 5회 보기'} ↗</button>`}</div>
         <div class="plan-card-actions"><button data-plan-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건" aria-expanded="${opened.has(fish.id)}" aria-controls="plan-detail-${fish.id}">조건</button><button data-caught="${fish.id}" aria-label="${esc(fish.name)} 수집 체크">수집</button></div>
-      </article><section id="plan-detail-${fish.id}" class="plan-inline-detail" data-plan-route="${fishById.get(fish.id).routes.indexOf(route)}" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?window.FishingDetails?.renderPlan(fish.id,route,'plan-detail-title-'+fish.id)||'':''}</section></div>`;
+      </article>${preparationView?.markup(fish,[route])||''}<section id="plan-detail-${fish.id}" class="plan-inline-detail" data-plan-route="${fishById.get(fish.id).routes.indexOf(route)}" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?window.FishingDetails?.renderPlan(fish.id,route,'plan-detail-title-'+fish.id)||'':''}</section></div>`;
     }
     function prep(list){
       const baitMap=new Map();
@@ -182,9 +186,9 @@
       for(const panel of $('planResults').querySelectorAll('.plan-inline-detail:not([hidden])'))if(panels.get(panel.id)?.dataset.planRoute===panel.dataset.planRoute)panel.replaceWith(panels.get(panel.id));
       $('planCount').textContent=`미수집 ${list.length}종 · 시간·날씨 조건 ${list.filter(r=>!r.always).length}종 / 상시 ${list.filter(r=>r.always).length}종 · 한국 시간(KST)`;
       $('planMore').hidden=list.length<=shown;$('planMore').textContent=`다음 ${Math.min(30,list.length-shown)}종 더 보기`;
-      $('planCoverage').textContent=`기간 제한 없이 표시합니다.${result.pending?` 더 먼 다음 기회 조회 중 ${result.pending}종.`:''} 접속 설정 확인 ${result.rows.filter(r=>r.unavailableReason).length}종 · 별도 확인: 특수 지역·선행 조건·자료 미확인 ${result.excluded.length}종. 상시 어종은 접속 시간과 관계없이 표시합니다. ${time.format(result.now)} 계산.`;
-      $('planUnscheduled').innerHTML=result.excluded.map(f=>`<button data-fish-detail="${f.id}" title="${esc(f.routes.map(r=>forecast.reason(r)).filter(Boolean).join(' · '))}">${esc(f.name)} <span>${esc(f.routes.map(r=>forecast.reason(r)).find(Boolean)||'조건 자료 확인 필요')}</span></button>`).join('');prep(list);
-      targetCount();window.FishingDetails?.sync();
+      $('planCoverage').textContent=`기간 제한 없이 표시합니다.${result.pending?` 더 먼 다음 기회 조회 중 ${result.pending}종.`:''} 접속 설정 확인 ${result.rows.filter(r=>r.unavailableReason).length}종 · 별도 확인: 특수 지역·선행 조건·자료 미확인 ${result.excluded.filter(f=>!hasTimedPreparation(f)).length}종. 상시 어종은 접속 시간과 관계없이 표시합니다. ${time.format(result.now)} 계산.`;
+      $('planUnscheduled').innerHTML=result.excluded.filter(f=>!hasTimedPreparation(f)).map(f=>`<button data-fish-detail="${f.id}" title="${esc(f.routes.map(r=>forecast.reason(r)).filter(Boolean).join(' · '))}">${esc(f.name)} <span>${esc(f.routes.map(r=>forecast.reason(r)).find(Boolean)||'조건 자료 확인 필요')}</span></button>`).join('');prep(list);
+      targetCount();window.FishingDetails?.sync();preparationView?.refresh();
     }
     function show(plan){active=plan;$('fishingPlanner').hidden=!plan;$('collectionPanel').hidden=plan;$('showPlanner').setAttribute('aria-pressed',String(plan));$('showBook').setAttribute('aria-pressed',String(!plan));if(plan)calculate();}
     $('showPlanner').onclick=()=>show(true);$('showBook').onclick=()=>show(false);

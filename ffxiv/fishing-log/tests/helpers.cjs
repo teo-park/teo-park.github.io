@@ -11,7 +11,7 @@ function open({storage=memory(),scan=false,analyze,plan=false}={}){
  let scanApply;w.FishingScanUI={mount:({apply})=>{scanApply=apply;}};
  for(const name of ['data.js','bait-catches.js','bait-ranking.js','bait-ranking-view.js','bite-times.js','engine.js','comparison.js','strategy-links-data.js','strategy-links.js'])w.eval(fs.readFileSync(path.join(root,name),'utf8'));
  if(scan){w.eval(fs.readFileSync(path.join(root,'scanner.js'),'utf8'));w.FishingScanner.analyze=analyze||(async()=>Array.from({length:100},(_,index)=>({index,state:index===4?'missing':'learned'})));w.createImageBitmap=async()=>({width:451,height:491,close(){}});w.eval(fs.readFileSync(path.join(root,'scanner-ui.js'),'utf8'));}
- let planSnapshot;if(plan){w.FishingNotifications={mount:({snapshot})=>{planSnapshot=snapshot;}};for(const name of ['weather-data.js','forecast.js','map-data.js','map-preview.js','bait-data.js','bait-details.js','planner.js'])w.eval(fs.readFileSync(path.join(root,name),'utf8'));}
+ let planSnapshot;if(plan){w.FishingNotifications={mount:({snapshot})=>{planSnapshot=snapshot;}};for(const name of ['weather-data.js','forecast.js','map-data.js','map-preview.js','bait-data.js','bait-details.js','preparations.js','planner.js'])w.eval(fs.readFileSync(path.join(root,name),'utf8'));}
  for(const name of ['ocean-fishing/scripts/teamcraft-ids.js','fishing-collection.js'])w.eval(fs.readFileSync(path.join(root,'..',name),'utf8'));
  w.eval(fs.readFileSync(path.join(root,'app.js'),'utf8'));
  w.eval(fs.readFileSync(path.join(root,'..','collection-layout.js'),'utf8'));
