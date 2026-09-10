@@ -9,7 +9,7 @@
     const visible=slot=>slot.isConnected&&!slot.closest('[hidden]')&&(!slot.closest('dialog')||slot.closest('dialog').open);
     function entry(fish){
       const signature=JSON.stringify([fish.id,fish.routes]);
-      if(!entries.has(signature)){const value={key:'prep-'+(++sequence),fish,from:0,search:null};entries.set(signature,value);byKey.set(value.key,value);}
+      if(!entries.has(signature)){const value={key:'prep-'+(++sequence),fish,from:0,search:null,counting:false};entries.set(signature,value);byKey.set(value.key,value);}
       return entries.get(signature);
     }
     function condition(routes){
@@ -21,21 +21,41 @@
       const fish=node.fish,relation=node.relation==='intuition'?`직감 ×${node.amount}`:'생미끼',places=[...new Set(fish.routes.map(r=>data.spots[r.spotKey]?.name).filter(Boolean))];
       const bait=[...new Set(fish.routes.flatMap(r=>model.paths(r).map(p=>p.ids.map(id=>model.byId.get(id)?.name||id).join(' → '))))];
       const bites=[...new Set(fish.routes.map(r=>`${{0:'!!',1:'!!!',2:'!'}[r.tug]||'입질 미확인'} · ${{0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'}[r.hookset]||'낚아채기 미확인'}`))];
-      return `<li data-preparation-fish="${fish.id}" data-preparation-relation="${node.relation}"><div class="preparation-row"><div class="preparation-fish">${fish.icon?`<img src="${esc(fish.icon)}" alt="" width="24" height="24" loading="lazy">`:''}<div><span class="preparation-role">${relation}</span><button type="button" data-fish-detail="${fish.id}">${esc(fish.name)}</button><span class="preparation-caught" data-preparation-caught="${fish.id}" ${getCaught().has(fish.id)?'':'hidden'}>수집 완료</span></div></div><div class="preparation-tackle"><span>${esc(bait.join(' / ')||'미끼 확인 필요')}</span><span>${esc(bites.join(' / '))}</span><span>${esc(places.join(' · '))}</span></div><div class="preparation-time"><span class="preparation-condition">${esc(condition(fish.routes))}</span>${node.timed?`<div data-preparation-times="${entry(fish).key}" aria-label="${esc(fish.name)} 출현 시간">출현 시간 계산 중</div><button type="button" class="preparation-more" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 출현 시간 5회 보기">출현 5회 ↗</button>`:'<span>준비 시간은 하위 어종 참고</span>'}</div></div>${node.children.length?tree(node.children):''}</li>`;
+      return `<li data-preparation-fish="${fish.id}" data-preparation-relation="${node.relation}"><div class="preparation-row"><div class="preparation-fish">${fish.icon?`<img src="${esc(fish.icon)}" alt="" width="24" height="24" loading="lazy">`:''}<div><span class="preparation-role">${relation}</span><button type="button" data-fish-detail="${fish.id}">${esc(fish.name)}</button><span class="preparation-caught" data-preparation-caught="${fish.id}" ${getCaught().has(fish.id)?'':'hidden'}>수집 완료</span></div></div><div class="preparation-tackle"><span>${esc(bait.join(' / ')||'미끼 확인 필요')}</span><span>${esc(bites.join(' / '))}</span><span>${esc(places.join(' · '))}</span></div><div class="preparation-time"><span class="preparation-condition">${esc(condition(fish.routes))}</span>${node.timed?`<button type="button" class="preparation-time-toggle" data-preparation-times="${entry(fish).key}" aria-label="${esc(fish.name)} 출현 시간" aria-pressed="false" disabled>출현 시간 계산 중</button><button type="button" class="preparation-more" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 출현 시간 5회 보기">출현 5회 ↗</button>`:'<span>준비 시간은 하위 어종 참고</span>'}</div></div>${node.children.length?tree(node.children):''}</li>`;
     }).join('')}</ul>`;}
     function markup(fish,routes=fish.routes){const nodes=forecast.preparations(fish,routes);return nodes.length?`<section class="fish-preparations" aria-label="${esc(fish.name)} 준비 어종"><div class="preparation-heading"><strong>준비 어종 · 출현 시간</strong><span>접속 시간과 관계없는 출현 · KST</span></div>${tree(nodes)}<p class="preparation-note">준비 어종은 수집했어도 표시합니다. 각 어종의 독립적인 출현 시간이며, 본 낚시의 가능 시간이나 준비 완료 여부를 뜻하지 않습니다.</p></section>`:'';}
+    function remaining(ms){const seconds=Math.max(0,Math.ceil(ms/1000)),days=Math.floor(seconds/86400),hours=Math.floor(seconds%86400/3600),minutes=Math.floor(seconds%3600/60);return [days?days+'일':'',hours?hours+'시간':'',minutes?minutes+'분':'',seconds%60+'초'].filter(Boolean).join(' ');}
     function paint(value,slots,now){
       const state=value.search.result,stamp=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(now+F.KST).getUTCFullYear()?date:longDate).format(ms);
       const range=c=>`${stamp(c.start)} – ${Math.floor((c.start+F.KST)/F.DAY)===Math.floor((c.end+F.KST)/F.DAY)?clock.format(c.end):stamp(c.end)}`;
-      const current=state.chances[0],next=state.chances[1];
-      const html=state.reason?esc(state.reason):state.always?'상시 낚시':`${current?`<strong>${current.start<=now&&now<current.end?'<b class="preparation-now">지금</b> ':''}${range(current)}</strong>`:'<span>다음 출현 찾는 중</span>'}${next?`<span>다음 ${range(next)}</span>`:state.pending?'<span>더 먼 출현 찾는 중</span>':''}`;
-      for(const slot of slots)if(slot.innerHTML!==html)slot.innerHTML=html;
+      const [current,next]=state.chances.filter(c=>c.end>now),counting=value.counting&&!!current;
+      const currentText=current&&(counting?`${now<current.start?'시작':'종료'}까지 ${remaining((now<current.start?current.start:current.end)-now)}`:range(current));
+      const nextText=next&&(counting?`다음 출현까지 ${remaining(next.start-now)}`:`다음 ${range(next)}`);
+      const html=state.reason?esc(state.reason):state.always?'상시 낚시':`${current?`<strong>${current.start<=now&&now<current.end?'<b class="preparation-now">지금</b> ':''}${currentText}</strong>`:'<span>다음 출현 찾는 중</span>'}${next?`<span>${nextText}</span>`:state.pending?'<span>더 먼 출현 찾는 중</span>':''}`;
+      for(const slot of slots){
+        if(slot.innerHTML!==html)slot.innerHTML=html;
+        slot.disabled=!current||!!state.reason||state.always;
+        slot.setAttribute('aria-pressed',String(counting));
+        slot.setAttribute('aria-label',value.fish.name+(slot.disabled?' 출현 시간':counting?' 출현 시각 보기':' 남은 시간 보기'));
+        slot.title=current?`${range(current)} (KST)${next?' · 다음 '+range(next):''} · 눌러서 ${counting?'출현 시각':'남은 시간'} 보기`:'';
+      }
+    }
+    function timeSlots(){
+      const groups=new Map();
+      for(const slot of document.querySelectorAll('[data-preparation-times]'))if(visible(slot)){const key=slot.dataset.preparationTimes;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(slot);}
+      return groups;
+    }
+    function tick(){
+      if(document.hidden)return;const now=Date.now();
+      for(const [key,slots] of timeSlots()){const value=byKey.get(key);if(!value?.search)continue;
+        if(value.search.result.chances[0]?.end<=now){refresh();return;}
+        paint(value,slots,now);
+      }
     }
     function refresh(){
       clearTimeout(timer);if(document.hidden)return;
-      const now=Date.now(),groups=new Map(),caught=getCaught();
+      const now=Date.now(),groups=timeSlots(),caught=getCaught();
       for(const label of document.querySelectorAll('[data-preparation-caught]'))label.hidden=!caught.has(+label.dataset.preparationCaught);
-      for(const slot of document.querySelectorAll('[data-preparation-times]'))if(visible(slot)){const key=slot.dataset.preparationTimes;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(slot);}
       const pending=[];
       for(const [key,slots] of groups){const value=byKey.get(key);if(!value)continue;
         // Do not restart a distant search while its first window is still in the future.
@@ -50,6 +70,8 @@
       if(pending.length)timer=setTimeout(advance,0);
     }
     const view={markup,refresh};window.FishingPreparationView=view;
+    document.addEventListener('click',event=>{const button=event.target.closest('button[data-preparation-times]');if(!button||button.disabled)return;const value=byKey.get(button.dataset.preparationTimes);if(value){value.counting=!value.counting;tick();}});
+    setInterval(tick,1000);
     setInterval(refresh,60000);
     document.addEventListener('visibilitychange',refresh);
     document.addEventListener('fishing-collection-changed',refresh);

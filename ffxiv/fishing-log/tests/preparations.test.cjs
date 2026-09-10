@@ -1,6 +1,27 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const F=require('../forecast.js'),W=require('../weather-data.js'),E=require('../engine.js'),{D,open,memory,KEY}=require('./helpers.cjs');
 const real=F.create(D,W),fish=id=>D.fishes.find(f=>f.id===id);
+const tick=()=>new Promise(resolve=>setTimeout(resolve,1100));
+
+test('preparation times toggle live countdowns, retain focus, cross start/end and synchronize all views without collecting',async()=>{
+  const p=open({plan:true});try{
+    Object.defineProperty(p.d,'hidden',{value:false,configurable:true});
+    let now=Date.parse('2026-09-10T13:00:00Z');p.w.Date.now=()=>now;
+    const chance=real.startTimeline(fish(21177),now,{count:2}).result.chances[0];now=chance.start-2000;
+    p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
+    const selector='[data-preparation-fish="21177"] button[data-preparation-times]',before=p.storage.getItem(KEY),preferences=JSON.stringify(p.planSnapshot());
+    let button=p.$('#planResults '+selector);assert.ok(button&&!button.disabled);assert.equal(button.getAttribute('aria-pressed'),'false');assert.match(button.textContent,/9\./);
+    button.focus();button.click();assert.match(button.textContent,/시작까지 2초/);assert.match(button.textContent,/다음 출현까지/);
+    now+=1000;await tick();assert.match(button.textContent,/시작까지 1초/);assert.equal(p.d.activeElement,button);
+    now+=1000;await tick();assert.match(button.textContent,/종료까지/);assert.ok(button.querySelector('.preparation-now'));
+    p.$('#planRefresh').click();button=p.$('#planResults '+selector);assert.equal(button.getAttribute('aria-pressed'),'true');assert.match(button.textContent,/종료까지/);
+    now=chance.end;await tick();assert.match(button.textContent,/시작까지/);assert.equal(button.querySelector('.preparation-now'),null);
+    p.$('.plan-name').click();const modal=p.$('#detailBody '+selector);assert.equal(modal.getAttribute('aria-pressed'),'true');modal.click();assert.equal(modal.getAttribute('aria-pressed'),'false');assert.match(modal.textContent,/9\./);assert.equal(button.getAttribute('aria-pressed'),'false');assert.equal(p.$('#detailTitle').textContent,'칠채천주');
+    p.$('#closeDetail').click();p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','칠채천주','input');
+    const catalog=p.$('#collectionListViewport '+selector);catalog.click();assert.match(catalog.textContent,/시작까지/);p.change('#search','칠채천주','input');assert.equal(p.$('#collectionListViewport '+selector).getAttribute('aria-pressed'),'true');
+    assert.equal(p.storage.getItem(KEY),before);assert.equal(JSON.stringify(p.planSnapshot()),preferences);
+  }finally{p.close();}
+});
 test('Warden preparation preserves intuition counts and follows timed mooch fish',()=>{
   const nodes=real.preparations(fish(24994));
   assert.deepEqual(nodes.map(n=>[n.id,n.amount,n.relation]),[[24203,3,'intuition'],[23056,3,'intuition'],[24204,5,'intuition']]);
