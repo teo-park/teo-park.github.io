@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path');
 const navigation=require('../../tools/site-navigation.cjs');
-const root=path.resolve(__dirname,'..'),version='20260910-purposes2';
+const root=path.resolve(__dirname,'..'),version='20260910-rat-tail';
 const routes={indigo:'근해 수첩',ruby:'원양 수첩',checklist:'물고기 도감'};
 const copyright='<p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>';
 function header(page){return navigation.header(page==='home'?'ocean-fishing/':`ocean-fishing/${page}/`);}
