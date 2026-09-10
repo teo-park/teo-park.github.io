@@ -14,7 +14,7 @@
     if(purpose!=='collection')return null;
     const opening=Number.isFinite(row.windowStart)?row.windowStart:row.start,left=opening-now;
     if(left<=0||left>30*F.MINUTE)return null;
-    const minutes=left<=15*F.MINUTE?15:30;
+    const minutes=left<=5*F.MINUTE?5:left<=15*F.MINUTE?15:30;
     return {state:String(minutes),label:minutes+'분 전',title:`출현까지 ${minutes}분 이내 · ${time.format(opening)} 출현 (KST) · 직감 등 선행 조건 별도 준비`};
   }
   function mount({data,model,getCaught}){
