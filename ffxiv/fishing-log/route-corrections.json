@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-09-10",
+  "fish": {
+    "52012": {
+      "name": "포테우카",
+      "reason": "Teamcraft fishing-sources에 경로가 없어 도감의 낚시터만 남고 낚시 계획에서 제외됨. 원본 경로가 추가되면 원본을 우선함.",
+      "sources": [
+        "https://na.finalfantasyxiv.com/lodestone/playguide/db/item/e8b2c097a0c/",
+        "https://gubal.ffxivteamcraft.com/graphql",
+        "https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json/fish-parameter.json"
+      ],
+      "evidence": {
+        "bait": "하누의 물가(301) 금속 스피너(28634): 공개 어획 집계 228건. Lodestone 이용자 어획 보고 2건과 일치.",
+        "hookset": "hooksets_per_fish_per_spot: hookset=1, 168건",
+        "tug": "tug_per_fish_per_spot: tug=0, 355건",
+        "availability": "게임 기반 FishParameter: timed=0, weathered=0; 일반 어류도감 물고기. 터주 또는 루어 메시지 조건으로 분류하지 않음."
+      },
+      "routes": [
+        {"spotKey": "rod:301", "verified": true, "bait": 28634, "hookset": 1, "tug": 0}
+      ]
+    },
+    "52014": {
+      "name": "이크에바지 가위",
+      "reason": "Teamcraft fishing-sources에 경로가 없어 도감의 낚시터만 남고 낚시 계획에서 제외됨. 원본 경로가 추가되면 원본을 우선함.",
+      "sources": [
+        "https://na.finalfantasyxiv.com/lodestone/playguide/db/item/12a7666ee04/",
+        "https://gubal.ffxivteamcraft.com/graphql",
+        "https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json/fish-parameter.json"
+      ],
+      "evidence": {
+        "bait": "이크브라샤 저수지(309) 금속 스피너(28634): aLure=0, mLure=0 공개 어획 집계 206건. Lodestone 이용자의 금속 스피너·! 직접 어획 보고와 일치.",
+        "hookset": "hooksets_per_fish_per_spot: hookset=2, 167건",
+        "tug": "tug_per_fish_per_spot: tug=2, 294건",
+        "availability": "게임 기반 FishParameter: timed=0, weathered=0; 일반 어류도감 물고기. 루어 미사용 어획도 확인되므로 루어 메시지 조건을 추가하지 않음."
+      },
+      "routes": [
+        {"spotKey": "rod:309", "verified": true, "bait": 28634, "hookset": 2, "tug": 2}
+      ]
+    },
+    "52015": {
+      "name": "요에콰 먹물머리",
+      "reason": "Teamcraft fishing-sources에 경로가 없어 도감의 낚시터만 남고 낚시 계획에서 제외됨. 원본 경로가 추가되면 원본을 우선함.",
+      "sources": [
+        "https://gubal.ffxivteamcraft.com/graphql",
+        "https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json/fish-parameter.json",
+        "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/9431b6ce34e0f5b79686f71b585769819f81ae2b/csv/FishParameter.csv"
+      ],
+      "evidence": {
+        "bait": "조고 해협 서쪽(321) 금속 스피너(28634): aLure=0, mLure=0 공개 어획 집계 155건. 한국어 게임 도감 낚시터(321)와 일치.",
+        "hookset": "hooksets_per_fish_per_spot: hookset=1, 197건",
+        "tug": "tug_per_fish_per_spot: tug=0, 509건",
+        "availability": "게임 기반 FishParameter: timed=0, weathered=0; 일반 어류도감 물고기. 루어 미사용 어획도 확인되므로 루어 메시지 조건을 추가하지 않음."
+      },
+      "routes": [
+        {"spotKey": "rod:321", "verified": true, "bait": 28634, "hookset": 1, "tug": 0}
+      ]
+    }
+  }
+}

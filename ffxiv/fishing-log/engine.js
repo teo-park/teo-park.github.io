@@ -5,6 +5,12 @@
   const initials=v=>[...v].map(c=>{const n=c.charCodeAt(0)-0xac00;return n>=0&&n<=11171?INITIALS[Math.floor(n/588)]:c;}).join('');
   // Teamcraft: tug 0 = !!, 1 = !!!, 2 = !; hookset 1 = Powerful, 2 = Precision.
   const comparisonTugs=route=>route.tug===1&&route.hookset===1?[0,1]:route.tug===1&&route.hookset===2?[2,1]:route.tug===undefined?[]:[route.tug];
+  function lureRequirements(route){
+    return [{key:'mLure',name:'소박한 루어',icon:'001147'},{key:'aLure',name:'거대한 루어',icon:'001146'}].flatMap(l=>{
+      const uses=route?.[l.key];if(!Number.isInteger(uses)||uses<1||uses>3)return [];
+      return [{...l,uses,label:`${l.name} ${uses}회 · 특수 메시지 필요`,hint:`${l.name} 사용 후 대상 어종의 특수 출현 메시지를 확인하세요. 자료상 ${uses}회 사용 조건이며, 횟수만 채워도 메시지나 어획이 확정되지는 않습니다. 일반 소형·대형 유인 메시지와 구별하세요.`}];
+    });
+  }
   function create(data,biteTimes={}){
     const byId=new Map(Object.values(data.related).map(f=>[f.id,f]));for(const f of data.fishes)byId.set(f.id,f);
     const cache=new Map();
@@ -89,5 +95,5 @@
     const r=observation,range=`약 ${r.min}–${r.max}초`,median=Number.isFinite(r.median)?`중앙값 약 ${r.median}초`:'',mean=Number.isFinite(r.mean)?`평균 약 ${r.mean}초`:'',central=[median,mean].filter(Boolean).join(' · '),detail=[central,range].filter(Boolean).join(' · ');
     return {range,primary:median?`중앙 ${r.median}초`:range,central,detail,title:`${detail} · 같은 낚시터·미끼의 관측 ${r.samples.toLocaleString()}건${central?' · 1초 구간별 건수로 추정한 중앙값·평균':''} · 밑밥·루어 사용 여부 미구분`};
   }
-  return {normalize,initials,comparisonTugs,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows,biteStats};
+  return {normalize,initials,comparisonTugs,lureRequirements,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows,biteStats};
 });

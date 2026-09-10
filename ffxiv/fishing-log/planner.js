@@ -82,13 +82,17 @@
     function biteTime(id,route){const range=route&&model.biteTime(id,route),stats=window.FishingBook.biteStats(range);return `<span class="plan-bite-time${range?'':' is-unknown'}" title="${esc(stats.title)}">${esc(stats.primary)}</span>`;}
     const dateText=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(result.now+F.KST).getUTCFullYear()?date:longDate).format(ms);
     const snagging=route=>route.snagging?'<span class="plan-snagging">갈고리 낚시 필요</span>':'';
+    function lureBadges(routes,subject=''){
+      const requirements=[...new Map((Array.isArray(routes)?routes:[routes]).flatMap(window.FishingBook.lureRequirements).map(l=>[l.key+':'+l.uses,l])).values()];
+      return requirements.map(l=>`<a class="plan-lure-badge" data-lure-kind="${l.key}" href="../fisher-skills/#lures" target="_blank" rel="noopener noreferrer" title="${esc((subject?subject+' · ':'')+l.hint)}" aria-label="${esc((subject?subject+' · ':'')+l.label)} · 사용법 (새 탭)"><img src="https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/${l.icon}.png" alt="" width="16" height="16" loading="lazy"><span>${esc(l.name)}</span><b>메시지 필요</b></a>`).join('');
+    }
     const baitLink=id=>`<button type="button" class="plan-bait-link" data-bait-detail="${id}" aria-haspopup="dialog" aria-controls="baitDialog" aria-label="${esc(model.byId.get(id)?.name||id)} 미끼 정보">${esc(model.byId.get(id)?.name||id)}</button>`;
     function chain(route,target){
       const paths=model.tacklePaths(route);if(!paths.length)return '미끼 자료 확인 필요';
       return paths.map(p=>`<div class="plan-bait-path">${p.complete?'':'<span class="plan-mooch-facts">시작 미끼 미확인 → </span>'}${p.steps.map(step=>{
         const fish=model.byId.get(step.id),name=esc(fish?.name||step.id);if(!fish?.fish){const first=p.steps[1],observed=first?first.routes[0]&&model.biteTime(first.id,first.routes[0]):model.biteTime(target.id,route);return `<span>${fish?baitLink(step.id):name}${observed?` <small class="plan-bait-samples" title="${esc(first?'첫 생미끼 물고기 '+model.byId.get(first.id).name:'대상 물고기')} 입질 시간 표본">입질 ${observed.samples.toLocaleString()}건</small>`:''}${window.FishingBaitRankingView?.badge(first?first.routes[0]?.baitChoice:route.baitChoice)||''}</span>`;}
         const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>`${tugs[r.tug]||'입질 미확인'} · ${hooksets[r.hookset]||'낚아채기 미확인'}${r.snagging?' · 갈고리 낚시 필요':''}`))];
-        return `<span class="plan-mooch"><button class="plan-mooch-name" data-fish-detail="${step.id}">${name}</button><span class="plan-mooch-facts">${variants.map(esc).join(' / ')} · ${biteTime(step.id,step.routes[0])}</span></span>`;
+        return `<span class="plan-mooch"><button class="plan-mooch-name" data-fish-detail="${step.id}">${name}</button><span class="plan-mooch-facts">${variants.map(esc).join(' / ')} · ${biteTime(step.id,step.routes[0])}</span>${lureBadges(step.routes,fish.name)}</span>`;
       }).join('<span class="plan-bait-arrow"> → </span>')}</div>`).join('<span class="plan-path-or">또는</span>');
     }
     function alternateBait(fish,route){return model.baitOptions(fish.id,route).map(o=>{
@@ -116,6 +120,7 @@
     function card(row){
       const fish=row.fish,route=fish.routes[row.route],spot=data.spots[route.spotKey],next=row.nextStart!==null&&row.nextStart!==undefined?dateText(row.nextStart):row.unavailableReason||'다음 기회 찾는 중';
       const special=(route.predators||[]).map(p=>`${model.byId.get(p.id)?.name||p.id} ×${p.amount}`).join(' · ');
+      const preparationLures=(route.predators||[]).map(p=>{const f=model.byId.get(p.id),badges=lureBadges((f?.routes||[]).filter(r=>r.spotKey===route.spotKey),f?.name);return badges?`<span class="plan-prep-lure"><span>직감 준비 · ${esc(f.name)}</span>${badges}</span>`:'';}).join('');
       const tug=tugs[route.tug],hookset=hooksets[route.hookset];
       const spotUrl=`https://ffxivteamcraft.com/db/ko/${spot.kind==='spear'?'spearfishing-spot':'fishing-spot'}/${spot.id}`;
       const coords=Number.isFinite(spot.coords?.x)&&Number.isFinite(spot.coords?.y)?`<button type="button" class="plan-spot-coords" data-spot-map="${esc(route.spotKey)}" data-map-owner="${fish.id}" aria-label="${esc(spot.name)} 지도 미리보기 · X:${spot.coords.x.toFixed(1)} Y:${spot.coords.y.toFixed(1)}" aria-controls="fishingSpotMap" aria-expanded="false" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16M15 5v16"/></svg>X:${spot.coords.x.toFixed(1)} · Y:${spot.coords.y.toFixed(1)}</button>`:'';
@@ -125,7 +130,7 @@
         <div class="plan-bite"><div class="plan-bite-summary"><strong class="plan-tug ${tug?'tug-'+tug.length:'tug-unknown'}" aria-label="${tug?'입질 강도 '+tug:'입질 미확인'}">${tug||'입질 미확인'}</strong>${biteTime(fish.id,route)}</div><span class="plan-hookset">${hookset||'낚아채기 미확인'}</span>${snagging(route)}</div>
         <div class="plan-place"><span>${esc(spot.area)}</span><div class="plan-spot-line"><strong><a class="plan-spot-link" data-spot-map="${esc(route.spotKey)}" data-map-owner="${fish.id}" href="${esc(spotUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(spot.name)} · Teamcraft 낚시터 보기 (새 탭)">${esc(spot.name)}<span aria-hidden="true"> ↗</span></a></strong><button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button></div>${coords}</div>
         ${windowCell(row)}
-        <div class="plan-tackle"><div class="plan-bait">${chain(route,fish)}</div>${alternateBait(fish,route)}${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}</div>
+        <div class="plan-tackle"><div class="plan-bait">${chain(route,fish)}</div>${lureBadges(route,fish.name)}${alternateBait(fish,route)}${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}${preparationLures}</div>
         <p class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회">${row.always?'상시 가능':next}</p>
         <div class="plan-card-actions"><button data-plan-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건" aria-expanded="${opened.has(fish.id)}" aria-controls="plan-detail-${fish.id}">조건</button><button data-caught="${fish.id}" aria-label="${esc(fish.name)} 수집 체크">수집</button></div>
       </article><section id="plan-detail-${fish.id}" class="plan-inline-detail" data-plan-route="${fishById.get(fish.id).routes.indexOf(route)}" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?window.FishingDetails?.renderPlan(fish.id,route,'plan-detail-title-'+fish.id)||'':''}</section></div>`;

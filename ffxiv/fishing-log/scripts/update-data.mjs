@@ -4,6 +4,7 @@ import {parseCsv,plain} from '../../triple-triad/scripts/update-data.mjs';
 const root=new URL('../',import.meta.url),cache=new URL('../../../.cache/fishing-log/',import.meta.url);
 const REV={teamcraft:'ceac70405b154d268bfc3bf6cda2776ac048a6d4',ko:'9431b6ce34e0f5b79686f71b585769819f81ae2b'};
 const refresh=process.argv.includes('--refresh');
+const corrections=JSON.parse(await fs.readFile(new URL('route-corrections.json',root),'utf8'));
 async function get(name,url){if(!refresh)try{return await fs.readFile(new URL(name,cache),'utf8');}catch{}const r=await fetch(url,{signal:AbortSignal.timeout(60000)});if(!r.ok)throw Error(`${r.status}: ${url}`);const text=await r.text();await fs.mkdir(cache,{recursive:true});await fs.writeFile(new URL(name,cache),text);return text;}
 const tc=path=>`https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/${REV.teamcraft}/${path}`;
 const tcData=async path=>JSON.parse(await get(path.split('/').at(-1),tc('libs/data/src/lib/json/'+path)));
@@ -25,6 +26,8 @@ function routesFor(id,kind){
  const raw=kind==='rod'?sources[id]:spearSources[id],log=kind==='rod'?rodLog:spearLog;
  let routes=kind==='rod'?(raw||[]).map(s=>({...s,spotKey:'rod:'+s.spot,verified:true})):[...new Set(log.filter(x=>x.itemId===id).map(x=>x.id))].flatMap(spot=>(raw||[{}]).map(s=>({...s,spotKey:'spear:'+spot,verified:!!raw})));
  if(!routes.length)routes=[...new Set(log.filter(x=>x.itemId===id).map(x=>kind+':'+(x.spot?.id??x.id)))].map(spotKey=>({spotKey,verified:false}));
+ // Only fill missing source routes; a later upstream record takes precedence.
+ if(kind==='rod'&&!routes.some(r=>r.verified)&&corrections.fish[id])routes=corrections.fish[id].routes;
  return routes.map(s=>{
   const r={spotKey:s.spotKey,verified:s.verified};
   for(const k of ['bait','hookset','tug','spawn','duration','snagging','minGathering','aLure','mLure','oceanFishingTime','speed','shadowSize'])if(s[k]!==undefined)r[k]=s[k];

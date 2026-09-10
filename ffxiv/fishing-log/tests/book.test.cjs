@@ -10,7 +10,7 @@ test('layout icons keep fish IDs, checks, pagination and the spear book intact',
  }finally{p.close();}
 });
 test('catalog keeps all log-visible fish, including hidden-name big fish, with separate ordered spear pages',()=>{
- assert.equal(D.count,1806);assert.deepEqual(D.counts,{rod:1517,spear:289});assert.equal(known.size,D.count);assert.equal(D.missingConditions.length,39);
+ assert.equal(D.count,1806);assert.deepEqual(D.counts,{rod:1517,spear:289});assert.equal(known.size,D.count);assert.equal(D.missingConditions.length,36);
  for(const kind of ['rod','spear'])assert.deepEqual(D.fishes.filter(f=>f.kind===kind).map(f=>f.order),Array.from({length:D.counts[kind]},(_,i)=>i+1));
  const page6=D.fishes.filter(f=>f.kind==='rod').slice(500,510);assert.equal(page6[0].id,20072);assert.equal(page6[0].name,'아다만 폴립테루스');assert.equal(page6[9].name,'피머금게');assert.ok(D.fishes.find(f=>f.id===7678).big);
  for(const f of D.fishes){assert.match(f.name,/[가-힣]|^E\.B\.E\.?-\d+$/);assert.match(f.icon,/^https:\/\/v2.xivapi.com\/api\/asset/);for(const r of f.routes){assert.ok(D.spots[r.spotKey]);if(r.bait)assert.ok(D.related[r.bait]||known.has(r.bait));for(const p of r.predators||[])assert.ok(p.amount>0&&(D.related[p.id]||known.has(p.id)));for(const w of [...(r.weathers||[]),...(r.weathersFrom||[])])assert.ok(D.weathers[w]);}}

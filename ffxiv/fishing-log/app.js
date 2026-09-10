@@ -35,7 +35,7 @@
     const paths=M.tacklePaths(route).filter(p=>!base||p.complete&&String(p.ids[0])===base);if(!paths.length)return '<span class="missing-data">시작 미끼 자료 확인 필요</span>';
     return paths.map(p=>`<span class="bait-path">${p.complete?'':'<b class="missing-data">이전 미끼 미확인 · </b>'}${p.steps.map(step=>{
       const f=M.byId.get(step.id);if(!f)return '<span>물고기 '+step.id+'</span>';if(!f.fish){const first=p.steps[1],observed=first?first.routes[0]&&M.biteTime(first.id,first.routes[0]):fish&&M.biteTime(fish.id,route);return '<span class="primary-bait">'+link(tcFish(f),f.name)+(observed?'<small class="primary-bait-samples" title="'+esc(first?'첫 생미끼 물고기 '+M.byId.get(first.id).name:'대상 물고기')+' 입질 시간 표본">입질 표본 '+observed.samples.toLocaleString()+'건</small>':'<small class="primary-bait-samples">입질 표본 미확인</small>')+(window.FishingBaitRankingView?.badge(first?first.routes[0]?.baitChoice:route.baitChoice)||'')+'</span>';}
-      const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>(['!!','!!!','!'][r.tug]||'입질 미확인')+' · '+(['일반 낚아채기','강력한 낚아채기','섬세한 낚아채기'][r.hookset]||'낚아채기 미확인')+(r.snagging?' · 갈고리 낚시 필요':'')))];
+      const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>(['!!','!!!','!'][r.tug]||'입질 미확인')+' · '+(['일반 낚아채기','강력한 낚아채기','섬세한 낚아채기'][r.hookset]||'낚아채기 미확인')+(r.snagging?' · 갈고리 낚시 필요':'')+E.lureRequirements(r).map(l=>' · '+l.label).join('')))];
       const time=step.routes[0]&&M.biteTime(step.id,step.routes[0]);return `<span class="detail-mooch">${reference(step.id)}<small>${esc(variants.join(' / '))} · ${biteObservation(time)}</small></span>`;
     }).join('<span aria-hidden="true"> → </span>')}</span>`).join('<span class="path-or">또는</span>');
   }
@@ -47,7 +47,7 @@
     }).join('')+(window.FishingBaitRankingView?.render(M,fish,route)||'');
   }
   function facts(route,fish,compact=false){const tags=[],time=E.timeWindow(route);if(time)tags.push(time);else if(fish.timed)tags.push('시간 조건 확인 필요');else if(compact)tags.push('시간 제한 없음');if(route.weathersFrom?.length)tags.push('이전 날씨: '+route.weathersFrom.map(id=>D.weathers[id]).join(' / '));if(route.weathers?.length)tags.push('현재 날씨: '+route.weathers.map(id=>D.weathers[id]).join(' / '));else if(fish.weathered)tags.push('날씨 조건 확인 필요');else if(compact)tags.push('날씨 제한 없음');if(route.oceanFishingTime)tags.push('먼바다 '+({1:'노을',2:'낮',3:'밤'}[route.oceanFishingTime]||'시간 확인 필요'));
-    if(!compact&&route.tug!==undefined)tags.push('입질 '+['!!','!!!','!'][route.tug]);if(!compact&&route.hookset!==undefined)tags.push(['일반 낚아채기','강력한 낚아채기','섬세한 낚아채기'][route.hookset]);if(route.snagging)tags.push('갈고리 낚시 필요');if(route.minGathering>0)tags.push('획득력 '+route.minGathering+' 이상');if(route.aLure>0)tags.push('거대한 루어 '+route.aLure+'회');if(route.mLure>0)tags.push('소박한 루어 '+route.mLure+'회');
+    if(!compact&&route.tug!==undefined)tags.push('입질 '+['!!','!!!','!'][route.tug]);if(!compact&&route.hookset!==undefined)tags.push(['일반 낚아채기','강력한 낚아채기','섬세한 낚아채기'][route.hookset]);if(route.snagging)tags.push('갈고리 낚시 필요');if(route.minGathering>0)tags.push('획득력 '+route.minGathering+' 이상');tags.push(...E.lureRequirements(route).map(l=>l.label));
     const bite=M.biteTime(fish.id,route);if(bite&&!compact){const stats=E.biteStats(bite);tags.push(...[stats.central,'입질 범위 '+stats.range].filter(Boolean));}
     if(route.shadowSize!==undefined)tags.push('어영 '+['소형','중형','대형'][route.shadowSize]);if(route.speed!==undefined)tags.push('속도 '+['매우 느림','느림','보통','빠름','더 빠름','매우 빠름'][route.speed]);
     return tags.filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join('');
