@@ -55,7 +55,7 @@
           return `<li data-timeline-start="${chance.start}" data-timeline-end="${chance.end}"${ongoing?' class="is-current"':''}><span class="timeline-number">${i+1}</span><div><strong>${stamp(chance.start)} – ${endText(chance.start,chance.end)}</strong><span>${esc(places.join(' · '))}</span></div><span class="timeline-remaining">${ongoing?'지금 · 종료까지 '+remaining(chance.end-now):remaining(chance.start-now)+' 후'}</span></li>`;
         }).join('');
         const status=host.querySelector('.timeline-status');status.hidden=!state.pending&&!state.reason&&!state.always;
-        status.textContent=state.always?'상시 낚시 · 시간·날씨 제한이 없습니다.':state.reason||`출현 ${state.chances.length}/5회 확인 · 더 먼 기회를 찾고 있습니다.`;
+        status.textContent=state.always?'상시 낚시 · 시간·날씨 제한이 없습니다.':state.reason==='생미끼·직감 선행 시간 별도 확인'?(fish.routes.some(r=>r.predators?.length)?'직감 준비 필요 · 준비 어종의 출현 시간은 아래에서 확인하세요. 미리 준비한 뒤 지역에서 대기할 수 있어, 그 시간으로 대상의 도전 구간을 제한하지 않습니다.':'생미끼 준비 필요 · 아래의 준비 시간 → 도전 구간을 확인하세요.'):state.reason||`출현 ${state.chances.length}/5회 확인 · 더 먼 기회를 찾고 있습니다.`;
       }
       function advance(){
         if(!host.isConnected||!$('detailDialog').open||document.hidden)return;
@@ -158,7 +158,7 @@
     function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
     function windowCell(row){
       const fish=row.fish;
-      if(row.preparationOnly)return '<div class="plan-window"><strong>직감·생미끼 준비 필요</strong><span>하위 어종의 출현 시간 참고</span></div>';
+      if(row.preparationOnly){const intuition=fish.routes[row.route]?.predators?.length;return `<div class="plan-window"><strong>${intuition?'직감':'생미끼'} 준비 필요</strong><span>${intuition?'미리 준비 후 지역 대기 가능':'준비 시간 → 도전 구간 참고'}</span></div>`;}
       if(row.always)return '<div class="plan-window"><strong>상시 낚시</strong><span>시간·날씨 제한 없음</span></div>';
       if(row.start===null)return `<div class="plan-window"><strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span></div>`;
       const counting=countdowns.has(fish.id);

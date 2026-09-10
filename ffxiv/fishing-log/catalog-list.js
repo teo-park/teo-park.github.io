@@ -21,7 +21,8 @@
       if(item.fish.kind==='spear')return {reason:'작살질',note:item.route?.predators?.length?'숨은 어장 준비 필요':'어장 조건은 조건 버튼에서 확인'};
       if(model.isOceanFish(item.fish))return {reason:'먼바다 전용',note:'항로·환해류 조건 확인',ocean:true};
       const reason=item.route?parts.forecast.reason(item.route):'조건 자료 확인 필요';
-      return reason?{reason:reason==='생미끼·직감 선행 시간 별도 확인'?'직감·생미끼 준비 필요':reason,note:reason==='생미끼·직감 선행 시간 별도 확인'?'하위 어종의 출현 시간 참고':'조건 버튼에서 상세 확인'}:null;
+      const intuition=item.route?.predators?.length;
+      return reason?{reason:reason==='생미끼·직감 선행 시간 별도 확인'?(intuition?'직감 준비 필요':'생미끼 준비 필요'):reason,note:reason==='생미끼·직감 선행 시간 별도 확인'?(intuition?'미리 준비 후 지역 대기 가능':'준비 시간 → 도전 구간 참고'):'조건 버튼에서 상세 확인'}:null;
     }
     function panel(item){return item.route?window.FishingDetails.renderCatalog(item.fish.id,item.route,'catalog-detail-title-'+item.fish.id):'<p>낚시 조건 자료 확인 필요</p>';}
     function row(item){

@@ -173,6 +173,47 @@
       }
       return [...nodes.values()];
     }
+    // Classify by the bait used for the TARGET itself. Intuition predators never
+    // become mooch sources, even when catching those predators involves mooching.
+    function moochSources(fish){
+      return fish.routes.flatMap((route,index)=>{
+        const source=byId.get(route.bait),why=reason(route);
+        if(!source?.fish||source.id===fish.id||why&&why!=='생미끼·직감 선행 시간 별도 확인')return [];
+        const local=(source.routes||[]).filter(r=>r.spotKey===route.spotKey);
+        if(local.some(r=>!reason(r)&&!limited(r)))return [];
+        const supported=local.filter(r=>!reason(r)&&limited(r)&&!r.predators?.length);
+        return supported.length?[{route,index,source:{...source,routes:supported}}]:[];
+      });
+    }
+    function startMoochPreparation(fish,from){
+      const sources=moochSources(fish),result={plan:null,pending:!!sources.length,reason:sources.length?null:'시간을 연결할 생미끼 조건이 없습니다.'};
+      let horizon=from;
+      function step(){
+        if(!result.pending)return;
+        const to=horizon+30*DAY,plans=[];
+        for(const {route,index,source} of sources){
+          const prep=merge(source.routes.flatMap(r=>windows(r,from,to)));
+          if(!prep.length)continue;
+          if(!limited(route)){
+            plans.push({route:index,source:source.id,preparation:{start:Math.max(from,prep[0].start),end:prep[0].end},challenge:null,hold:false,intuition:!!route.predators?.length});
+            continue;
+          }
+          const target=windows(route,from,to).find(w=>w.end>Math.max(from,prep[0].start));
+          if(!target)continue;
+          // Prefer the closest preparation window before opening, or one within the
+          // target window. The source's closing time is NOT the target's closing time:
+          // a held mooch may still be usable afterwards.
+          const before=prep.filter(w=>w.start<=target.start),window=before.at(-1)||prep.find(w=>w.start<target.end);
+          if(!window)continue;
+          plans.push({route:index,source:source.id,preparation:{start:Math.max(from,window.start),end:Math.min(window.end,target.end)},challenge:{start:Math.max(from,target.start,window.start),end:target.end},hold:window.end<=target.start,intuition:!!route.predators?.length});
+        }
+        plans.sort((a,b)=>(a.challenge?.start??a.preparation.start)-(b.challenge?.start??b.preparation.start));
+        result.plan=plans[0]||null;horizon=to;
+        result.pending=!result.plan||(result.plan.challenge?.end??result.plan.preparation.end)>=to;
+        if(weatherCache.size>100000)weatherCache.clear();
+      }
+      step();return {result,step};
+    }
     // An on-demand timeline for one fish. Keep the main list's two-chance search cheap.
     function startTimeline(fish,from,{settings=null,count=5}={}){
       const supported=fish.routes.filter(r=>!reason(r));
@@ -203,7 +244,7 @@
       step();
       return {result,step};
     }
-    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,preparations,clearCache:()=>weatherCache.clear()};
+    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,startMoochPreparation,moochSources,preparations,clearCache:()=>weatherCache.clear()};
   }
   return {MINUTE,DAY,ET_HOUR,ET_DAY,WEATHER,KST,defaults,validate,weatherTarget,merge,sessions,intersect,create};
 });
