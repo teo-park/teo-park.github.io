@@ -13,8 +13,8 @@
       return entries.get(signature);
     }
     function condition(routes){
-      const labels=routes.map(r=>Number.isFinite(r.spawn)&&r.duration<24?`ET ${et(r.spawn)}–${et((r.spawn+r.duration)%24)}${r.weathers?.length||r.weathersFrom?.length?' · 날씨 조건':''}`:r.weathers?.length||r.weathersFrom?.length?'날씨 조건':'선행 준비 필요');
-      return [...new Set(labels)].join(' / ');
+      const labels=routes.map(r=>Number.isFinite(r.spawn)&&r.duration<24?`ET ${et(r.spawn)}–${et((r.spawn+r.duration)%24)}${r.weathers?.length||r.weathersFrom?.length?' · 날씨 조건':''}`:r.weathers?.length||r.weathersFrom?.length?'날씨 조건':forecast.reason(r)||'시간·날씨 제한 없음');
+      return [...new Set(labels)].join(' / ')||'조건 자료 확인 필요';
     }
     const et=hour=>String(Math.floor(hour)).padStart(2,'0')+':'+String(Math.round((hour%1)*60)).padStart(2,'0');
     // The target has no clock/weather window; only its intuition ingredients do.
@@ -29,7 +29,8 @@
       const fish=node.fish,relation=node.relation==='intuition'?`직감 ×${node.amount}`:'생미끼',places=[...new Set(fish.routes.map(r=>data.spots[r.spotKey]?.name).filter(Boolean))];
       const bait=[...new Set(fish.routes.flatMap(r=>model.paths(r).map(p=>p.ids.map(id=>model.byId.get(id)?.name||id).join(' → '))))];
       const bites=[...new Set(fish.routes.map(r=>`${{0:'!!',1:'!!!',2:'!'}[r.tug]||'입질 미확인'} · ${{0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'}[r.hookset]||'낚아채기 미확인'}`))];
-      return `<li data-preparation-fish="${fish.id}" data-preparation-relation="${node.relation}"><div class="preparation-row"><div class="preparation-fish">${fish.icon?`<img src="${esc(fish.icon)}" alt="" width="24" height="24" loading="lazy">`:''}<div><span class="preparation-role">${relation}</span><button type="button" data-fish-detail="${fish.id}">${esc(fish.name)}</button><span class="preparation-caught" data-preparation-caught="${fish.id}" ${getCaught().has(fish.id)?'':'hidden'}>수집 완료</span></div></div><div class="preparation-tackle"><span>${esc(bait.join(' / ')||'미끼 확인 필요')}</span><span>${esc(bites.join(' / '))}</span><span>${esc(places.join(' · '))}</span></div><div class="preparation-time"><span class="preparation-condition">${esc(condition(fish.routes))}</span>${node.timed?`<button type="button" class="preparation-time-toggle" data-preparation-times="${entry(fish).key}" aria-label="${esc(fish.name)} 출현 시간" aria-pressed="false" disabled>출현 시간 계산 중</button><button type="button" class="preparation-more" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 출현 시간 5회 보기">출현 5회 ↗</button>`:'<span>준비 시간은 하위 어종 참고</span>'}</div></div>${node.children.length?tree(node.children):''}</li>`;
+      const untimed=fish.routes.some(r=>!forecast.limited(r)&&!forecast.reason(r))?'상시 준비 가능':node.children.length?'준비 시간은 하위 어종 참고':'조건 자료 확인 필요';
+      return `<li data-preparation-fish="${fish.id}" data-preparation-relation="${node.relation}"><div class="preparation-row"><div class="preparation-fish">${fish.icon?`<img src="${esc(fish.icon)}" alt="" width="24" height="24" loading="lazy">`:''}<div><span class="preparation-role">${relation}</span><button type="button" data-fish-detail="${fish.id}">${esc(fish.name)}</button><span class="preparation-caught" data-preparation-caught="${fish.id}" ${getCaught().has(fish.id)?'':'hidden'}>수집 완료</span></div></div><div class="preparation-tackle"><span>${esc(bait.join(' / ')||'미끼 확인 필요')}</span><span>${esc(bites.join(' / '))}</span><span>${esc(places.join(' · '))}</span></div><div class="preparation-time"><span class="preparation-condition">${esc(condition(fish.routes))}</span>${node.timed?`<button type="button" class="preparation-time-toggle" data-preparation-times="${entry(fish).key}" aria-label="${esc(fish.name)} 출현 시간" aria-pressed="false" disabled>출현 시간 계산 중</button><button type="button" class="preparation-more" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 출현 시간 5회 보기">출현 5회 ↗</button>`:`<span>${untimed}</span>`}</div></div>${node.children.length?tree(node.children):''}</li>`;
     }).join('')}</ul>`;}
     function markup(fish,routes=fish.routes){
       const nodes=forecast.preparations(fish,routes);if(!nodes.length)return '';

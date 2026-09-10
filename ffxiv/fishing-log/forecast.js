@@ -168,7 +168,7 @@
           const key=JSON.stringify([dependency.id,dependency.relation,dependency.amount,childRoutes]);
           if(nodes.has(key))continue;
           const children=preparations(child,childRoutes,new Set([...seen,child.id])),timed=childRoutes.some(limited);
-          if(timed||children.length)nodes.set(key,{...dependency,fish:{...child,routes:childRoutes},timed,children});
+          if(dependency.relation==='intuition'||timed||children.length)nodes.set(key,{...dependency,fish:{...child,routes:childRoutes},timed,children});
         }
       }
       return [...nodes.values()];

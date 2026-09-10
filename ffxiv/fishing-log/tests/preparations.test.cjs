@@ -36,6 +36,60 @@ test('Triple Threat includes both timed and weather-only intuition fish',()=>{
   assert.deepEqual(nodes.map(n=>[n.id,n.amount,n.timed]),[[43795,2,true],[52006,1,true]]);
   assert.ok(nodes.every(n=>n.fish.routes.every(r=>r.spotKey==='rod:332')));
 });
+
+test('Sidereal Whale includes all three intuition requirements, including unrestricted fish',()=>{
+  const whale=fish(41412),before=JSON.stringify(whale),nodes=real.preparations(whale);
+  assert.deepEqual(nodes.map(n=>[n.id,n.amount,n.timed]),[[36521,1,true],[36520,2,false],[36519,3,false]]);
+  assert.ok(nodes.every(n=>n.relation==='intuition'&&n.fish.routes.every(r=>r.spotKey==='rod:285')));
+  assert.equal(JSON.stringify(whale),before);
+  const model=E.create(D);
+  for(const target of D.fishes.filter(f=>f.kind==='rod'&&f.big&&!model.isOceanFish(f))){
+    for(const route of target.routes){
+      const required=real.preparations(target,[route]).filter(n=>n.relation==='intuition');
+      for(const p of route.predators||[])assert.ok(required.some(n=>n.id===p.id&&n.amount===p.amount),`${target.name}: missing ${p.id} ×${p.amount}`);
+    }
+  }
+});
+
+test('all views retain collected unrestricted intuition fish without changing target forecasts or records',()=>{
+  const p=open({plan:true,storage:memory({[KEY]:E.backup(new Set([36520,36519]))})});try{
+    Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.w.Date.now=()=>Date.parse('2026-09-10T13:00:00Z');
+    p.$('#showPlanner').click();p.$('#planSearch').value='별고래';p.$('#planRefresh').click();
+    const before=p.storage.getItem(KEY),preferences=JSON.stringify(p.planSnapshot());
+    function check(container){
+      const group=container.querySelector('[aria-label="별고래 준비 어종"]');assert.ok(group);
+      assert.deepEqual([...group.querySelectorAll('[data-preparation-fish]')].map(n=>+n.dataset.preparationFish),[36521,36520,36519]);
+      assert.match(group.querySelector('[data-preparation-fish="36521"] .preparation-role').textContent,/직감 ×1/);
+      assert.ok(group.querySelector('[data-preparation-fish="36521"] [data-preparation-times]'));
+      for(const [id,amount] of [[36520,2],[36519,3]]){
+        const row=group.querySelector(`[data-preparation-fish="${id}"]`);
+        assert.match(row.querySelector('.preparation-role').textContent,new RegExp('직감 ×'+amount));
+        assert.match(row.querySelector('.preparation-time').textContent,/시간·날씨 제한 없음.*상시 준비 가능/);
+        assert.equal(row.querySelector('[data-preparation-caught]').hidden,false);
+        assert.equal(row.querySelector('[data-preparation-times]'),null);
+      }
+      assert.equal(group.querySelector('[data-intuition-plan]'),null);
+    }
+    check(p.$('#planResults'));
+    p.$('#planResults .plan-name[data-fish-detail="41412"]').click();check(p.$('#detailBody'));
+    assert.equal(p.all('#detailBody .timeline-list li').length,5);
+    p.$('#closeDetail').click();p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','별고래','input');check(p.$('#collectionListViewport'));
+    assert.equal(p.storage.getItem(KEY),before);assert.equal(JSON.stringify(p.planSnapshot()),preferences);
+  }finally{p.close();}
+});
+
+test('missing or unverified intuition routes remain visible without being described as always available',()=>{
+  const p=open({plan:true});try{
+    const data=JSON.parse(JSON.stringify(D));
+    for(const id of [36520,36519])data.fishes.find(f=>f.id===id).routes=id===36520?[]:[{spotKey:'rod:285',verified:false}];
+    const view=p.w.FishingPreparations.mount({data,model:E.create(data),forecast:F.create(data,W),getCaught:()=>new Set()});
+    const container=p.d.createElement('div');container.innerHTML=view.markup(data.fishes.find(f=>f.id===41412));
+    for(const id of [36520,36519]){
+      const row=container.querySelector(`[data-preparation-fish="${id}"]`);assert.ok(row);
+      assert.match(row.textContent,/조건 자료 확인 필요/);assert.doesNotMatch(row.textContent,/상시 준비 가능|시간·날씨 제한 없음/);
+    }
+  }finally{p.close();}
+});
 test('preparations avoid cycles, duplicate edges and unrelated mooch fishing spots',()=>{
   const a={id:1,fish:true,routes:[{spotKey:'a',bait:2,predators:[{id:3,amount:2}]}]},b={id:2,fish:true,routes:[{spotKey:'a',bait:2,spawn:1,duration:2},{spotKey:'b',spawn:8,duration:2}]},c={id:3,fish:true,routes:[{spotKey:'b',spawn:4,duration:1}]};
   const m=F.create({fishes:[a,b,c],spots:{},related:{}},{byMap:{},specialMaps:[]});
