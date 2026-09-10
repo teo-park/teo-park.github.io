@@ -98,6 +98,16 @@ Teamcraft의 미끼별 입질 통계와 동일하게 1초 초과·600초 미만�
 
 입질 통계 갱신: 저장소 루트에서 `node ffxiv/fishing-log/scripts/update-bite-times.mjs --refresh`. 로컬 캐시는 `.cache/fishing-log/bite-times/`이며 `--refresh` 없이 실행하면 캐시를 재사용합니다. 실패 시 기존 배포용 파일을 교체하지 않습니다.
 
+## 터주 유형별 공략 링크
+
+낚시 계획의 **조건**, 물고기 상세정보와 장소·미끼별 목록에서 해당하는 [유형별 공략](../fisher-skills/big-fish/)을 새 탭으로 엽니다. 준비와 본 낚시를 구분하며 여러 유형을 함께 표시합니다. 단일 생미끼의 2·3번은 **생미끼 확보 · 방법 비교**로 연결하고 어느 쪽이 최적이라고 자동 판정하지 않습니다. 일반 물고기·먼바다 어종에는 이 링크를 표시하지 않습니다.
+
+2026-09-10에 일반 낚시터 터주 335종을 점검했습니다. 직접 낚시 223종, 단일 생미끼 96종, 연속 생미끼 16종이며 직감 재료의 종류에 따라 준비 유형을 추가합니다. 저글링은 공략에서 확인한 본 낚시 16종·준비 단계 2종만 반영합니다. 일반 어종이지만 확보가 어려운 조각가·팔라이나를 요구하는 스테타칸투스·별고래에는 6·7번을 함께 표시합니다. 관측 기록만 있는 저글링 후보는 반영하지 않습니다.
+
+기본 연결은 기존 Teamcraft 자료를 사용하며, [Carbuncle Plushy 고정 리비전](https://github.com/icykoneko/ff14-fish-tracker-app/blob/8a5012b276f815d5b6c5034b175b49df61dc2b64/private/fishData.yaml)의 생미끼 순서·직감 재료 및 수량과 대조했습니다. 저글링·희귀 직감의 판정 근거는 [strategy-review.json](./strategy-review.json)에 해당 [Fruity Snacks 공략](https://afishersguidetoeorzea.carrd.co/) 주소와 요약을 기록합니다. 전체 공략 원문은 배포하지 않습니다.
+
+데이터 갱신 뒤 저장소 루트에서 `node ffxiv/fishing-log/scripts/build-strategy-links.cjs`를 실행하여 `strategy-links-data.js`를 생성합니다. 생미끼 연결이 불완전하거나 확인된 저글링이 현재 경로와 달라지면 생성을 중단하고 재검토합니다.
+
 ## 데이터 범위와 한계
 
 2026-09-08에 아래 리비전으로 생성한 스냅샷입니다. 한국 게임 데이터의 `FishParameter.IsInLog`와 `SpearfishingItem.IsVisible`로 도감 범위를 정합니다. `IsHidden`인 희귀 어종도 어류도감에 포함하며, 게임 행 순서대로 배치합니다.

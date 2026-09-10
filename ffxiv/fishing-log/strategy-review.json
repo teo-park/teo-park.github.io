@@ -1,0 +1,147 @@
+{
+  "checked": "2026-09-10",
+  "revisions": {
+    "teamcraft": "ceac70405b154d268bfc3bf6cda2776ac048a6d4",
+    "ko": "9431b6ce34e0f5b79686f71b585769819f81ae2b"
+  },
+  "loops": [
+    {
+      "id": 8761,
+      "bait": 5002,
+      "stage": "target",
+      "note": "암살어를 다시 낚으면 재사용하는 흐름을 닌자어 공략에서 확인.",
+      "source": "https://docs.google.com/document/d/1rynlJ8rQMxnQQb5yLz8uGekIwgYJZt0mpHJSp9acezA/edit#heading=h.4hfza7kxf68e"
+    },
+    {
+      "id": 8763,
+      "bait": 5002,
+      "stage": "target",
+      "note": "자나바르 직감 이후 암살어를 반복 생미끼로 사용.",
+      "source": "https://docs.google.com/document/d/1rynlJ8rQMxnQQb5yLz8uGekIwgYJZt0mpHJSp9acezA/edit#heading=h.67jhw19ffcpk"
+    },
+    {
+      "id": 16754,
+      "bait": 12780,
+      "stage": "target",
+      "note": "향어 → 향어 반복 경로를 해당 낚시터 공략에서 확인.",
+      "source": "https://docs.google.com/document/d/1IQBxfvxG9qsbyevnoTRb4KZv4cGGDRH99jlRcB_DNqs/edit#heading=h.fk253ng4x5fw"
+    },
+    {
+      "id": 24993,
+      "bait": 24214,
+      "stage": "target",
+      "note": "쿠얼 → 쿠얼 → 홍룡.",
+      "source": "https://docs.google.com/document/d/1UZWLSFGt8FQvwPPMtzJgPqGQG5cQvnUnhCc3z6WRnOU/edit#heading=h.dvqkguhgr36l"
+    },
+    {
+      "id": 28069,
+      "bait": 27460,
+      "stage": "target",
+      "note": "뿔머리 → 뿔머리 → 관머리.",
+      "source": "https://docs.google.com/document/d/121zz7nb0u4zoybZVBQsFD81VnGai9ZXFSSzWVWaxVGc/edit"
+    },
+    {
+      "id": 32053,
+      "bait": 27492,
+      "stage": "target",
+      "note": "다이아몬드 피피라 반복. 다른 피피라가 연결을 끊을 수 있음.",
+      "source": "https://docs.google.com/document/d/121zz7nb0u4zoybZVBQsFD81VnGai9ZXFSSzWVWaxVGc/edit"
+    },
+    {
+      "id": 33320,
+      "bait": 27464,
+      "stage": "target",
+      "note": "사막톱 → 사막톱 → 나바스 톱.",
+      "source": "https://docs.google.com/document/d/121zz7nb0u4zoybZVBQsFD81VnGai9ZXFSSzWVWaxVGc/edit"
+    },
+    {
+      "id": 39881,
+      "bait": 36454,
+      "stage": "target",
+      "note": "파파야고기 → 도루돈 이후 도루돈 반복.",
+      "source": "https://docs.google.com/document/d/1E_tBV_DheJNJB15qsYvLF54MfnnzsmhjIwICScFkzo0/edit"
+    },
+    {
+      "id": 41401,
+      "bait": 36412,
+      "stage": "target",
+      "note": "아스타쿠스 에테리우스 반복. 다른 어종에 끊길 수 있음.",
+      "source": "https://docs.google.com/document/d/1E_tBV_DheJNJB15qsYvLF54MfnnzsmhjIwICScFkzo0/edit"
+    },
+    {
+      "id": 41402,
+      "bait": 36426,
+      "stage": "target",
+      "note": "그림자정어리를 다시 낚으면 재사용. 준비 시 인내를 권하는 사례.",
+      "source": "https://docs.google.com/document/d/1E_tBV_DheJNJB15qsYvLF54MfnnzsmhjIwICScFkzo0/edit"
+    },
+    {
+      "id": 41407,
+      "bait": 36412,
+      "stage": "target",
+      "note": "직감 이후 아스타쿠스 에테리우스 반복 기회를 활용.",
+      "source": "https://docs.google.com/document/d/1E_tBV_DheJNJB15qsYvLF54MfnnzsmhjIwICScFkzo0/edit"
+    },
+    {
+      "id": 41408,
+      "bait": 36454,
+      "stage": "preparation",
+      "note": "도루돈 반복은 직감 재료 12마리 준비 단계. 본체는 고등어 살 직접 낚시.",
+      "source": "https://docs.google.com/document/d/1E_tBV_DheJNJB15qsYvLF54MfnnzsmhjIwICScFkzo0/edit"
+    },
+    {
+      "id": 44342,
+      "bait": 43746,
+      "stage": "preparation",
+      "note": "상어코 망둥이 반복은 야크텔 게 확보 단계. 본체는 야크텔 게 생미끼.",
+      "source": "https://docs.google.com/document/d/1HB2R8e2ZS6kW3v-7xSYuBbTEA3AZSLj4j2jrA2YcPFs/edit"
+    },
+    {
+      "id": 49798,
+      "bait": 43736,
+      "stage": "target",
+      "note": "모눈 태래어 → 모눈 태래어 → 모슈투랄 큰동갈치.",
+      "source": "https://docs.google.com/document/d/1HB2R8e2ZS6kW3v-7xSYuBbTEA3AZSLj4j2jrA2YcPFs/edit"
+    },
+    {
+      "id": 52002,
+      "bait": 43740,
+      "stage": "target",
+      "note": "완벽한 잔받침 반복으로 이지러진 잔받침에 도전.",
+      "source": "https://docs.google.com/document/d/1HB2R8e2ZS6kW3v-7xSYuBbTEA3AZSLj4j2jrA2YcPFs/edit"
+    },
+    {
+      "id": 52008,
+      "bait": 43697,
+      "stage": "target",
+      "note": "유목메기 재어획 시 연결 가능. 공략에서도 선택 가능한 방법으로 설명.",
+      "source": "https://docs.google.com/document/d/1HB2R8e2ZS6kW3v-7xSYuBbTEA3AZSLj4j2jrA2YcPFs/edit"
+    },
+    {
+      "id": 52009,
+      "bait": 43740,
+      "stage": "target",
+      "note": "직감 이후에도 완벽한 잔받침 반복.",
+      "source": "https://docs.google.com/document/d/1HB2R8e2ZS6kW3v-7xSYuBbTEA3AZSLj4j2jrA2YcPFs/edit"
+    },
+    {
+      "id": 52010,
+      "bait": 47993,
+      "stage": "target",
+      "note": "니퀘레피 송어 → 도카토 이후 도카토 반복.",
+      "source": "https://docs.google.com/document/d/1HB2R8e2ZS6kW3v-7xSYuBbTEA3AZSLj4j2jrA2YcPFs/edit"
+    }
+  ],
+  "rareIntuition": [
+    {
+      "id": 24992,
+      "source": "https://docs.google.com/document/d/1UZWLSFGt8FQvwPPMtzJgPqGQG5cQvnUnhCc3z6WRnOU/edit#heading=h.1ugd12epx4ln",
+      "note": "조각가는 일반 어종이지만 시간·날씨·생미끼와 까다로운 확보 과정 때문에 7번 사례에 해당."
+    },
+    {
+      "id": 41412,
+      "source": "https://docs.google.com/document/d/1E_tBV_DheJNJB15qsYvLF54MfnnzsmhjIwICScFkzo0/edit",
+      "note": "팔라이나는 일반 어종이지만 제한된 시간·생미끼·드문 입질을 가진 직감 준비의 난관. 6번의 일반 어종 조건과 7번의 어려운 재료 조건이 겹침."
+    }
+  ]
+}
