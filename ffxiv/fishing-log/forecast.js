@@ -214,6 +214,55 @@
       }
       step();return {result,step};
     }
+    // Fresh intuition preparation for targets without their own clock/weather limit.
+    // Ingredients can be accumulated in separate windows at the same fishing spot.
+    // This is an opportunity estimate, not a prediction of catch duration or success.
+    function startIntuitionPreparation(fish,from){
+      const eligible=fish.big&&fish.kind==='rod'&&fish.routes.length&&fish.routes.every(r=>r.predators?.length&&!limited(r)&&reason(r)==='생미끼·직감 선행 시간 별도 확인');
+      const result={plan:null,pending:!!eligible,reason:eligible?null:'본체의 출현 시간을 확인하세요.'};
+      let horizon=from;
+      function step(){
+        if(!result.pending)return;
+        const to=horizon+30*DAY,plans=[],memo=new Map();let supported=0;
+        function ingredient(id,spotKey,seen){
+          if(seen.has(id))return null;
+          const key=id+':'+spotKey;if(memo.has(key))return memo.get(key);
+          const source=byId.get(id),ranges=[];let valid=false;
+          for(const route of source?.routes||[]){
+            const why=reason(route);
+            if(route.spotKey!==spotKey||route.predators?.length||why&&why!=='생미끼·직감 선행 시간 별도 확인')continue;
+            const bait=byId.get(route.bait),mooch=bait?.fish?ingredient(bait.id,spotKey,new Set([...seen,id])):null;
+            if(bait?.fish&&!mooch)continue;
+            const own=windows({...route,bait:null,predators:[]},from,to);
+            // Fresh mooch acquisition only. Held mooches and fishing already done
+            // are deliberately not inferred from the permanent collection record.
+            ranges.push(...(mooch?own.flatMap(a=>mooch.map(b=>intersect(a,b)).filter(Boolean)):own));valid=true;
+          }
+          const value=valid?merge(ranges):null;memo.set(key,value);return value;
+        }
+        for(const [index,route] of fish.routes.entries()){
+          const requirements=route.predators.map(p=>({...p,windows:ingredient(p.id,route.spotKey,new Set([fish.id]))}));
+          if(requirements.some(p=>!p.windows))continue;supported++;
+          if(requirements.some(p=>!p.windows.length))continue;
+          const start=Math.max(...requirements.map(p=>Math.max(from,p.windows[0].start)));
+          // Once the earliest completion opportunity is known, use the closest
+          // preparation windows before it instead of prescribing hours of idle waiting.
+          const selected=requirements.map(p=>{const w=p.windows.filter(w=>w.start<=start).at(-1);return {id:p.id,amount:p.amount,start:Math.max(from,w.start),end:w.end};});
+          // All earlier ingredients have had an opportunity by this point. Choose
+          // the last ingredient that stays available longest, retaining its actual
+          // closing time rather than intersecting all ingredient windows.
+          const last=selected.filter(p=>p.end>start).sort((a,b)=>b.end-a.end||a.id-b.id)[0];
+          if(!last)continue;
+          const earlier=selected.filter(p=>p!==last).sort((a,b)=>a.end-b.end||a.start-b.start);
+          plans.push({route:index,preparationStart:Math.min(...selected.map(p=>p.start)),start,end:last.end,lastId:last.id,steps:[...earlier,last]});
+        }
+        plans.sort((a,b)=>a.start-b.start||b.end-a.end);result.plan=plans[0]||null;horizon=to;
+        result.pending=!result.plan||result.plan.end>=to;
+        if(!supported){result.pending=false;result.reason='준비 경로 자료를 확인해야 해요. 아래 어종별 시간을 참고하세요.';}
+        if(weatherCache.size>100000)weatherCache.clear();
+      }
+      step();return {result,step};
+    }
     // An on-demand timeline for one fish. Keep the main list's two-chance search cheap.
     function startTimeline(fish,from,{settings=null,count=5}={}){
       const supported=fish.routes.filter(r=>!reason(r));
@@ -244,7 +293,7 @@
       step();
       return {result,step};
     }
-    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,startMoochPreparation,moochSources,preparations,clearCache:()=>weatherCache.clear()};
+    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,startMoochPreparation,startIntuitionPreparation,moochSources,preparations,clearCache:()=>weatherCache.clear()};
   }
   return {MINUTE,DAY,ET_HOUR,ET_DAY,WEATHER,KST,defaults,validate,weatherTarget,merge,sessions,intersect,create};
 });

@@ -32,7 +32,7 @@ test('planner excludes ocean fish from rows, review list and alerts, and links t
   const before=p.storage.getItem(KEY);p.$('#showPlanner').click();p.$('#planCollectionMode').click();
   assert.ok(p.all('.plan-card [data-caught]').every(b=>!M.isOceanFish(M.byId.get(+b.dataset.caught))));
   const excluded=p.all('#planUnscheduled [data-fish-detail]').map(b=>+b.dataset.fishDetail);assert.deepEqual(excluded,[],'timed prerequisites now have their own plan rows');
-  p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();assert.match(p.$('.plan-window').textContent,/준비 어종 시간/);assert.equal(p.all('#planResults [data-preparation-fish]').length,5);
+  p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();assert.match(p.$('.plan-window').textContent,/준비 시작 → 직감 가능/);assert.equal(p.all('#planResults [data-preparation-fish]').length,5);
   assert.ok(p.planSnapshot().ids.every(id=>!M.isOceanFish(M.byId.get(id))));assert.ok(![...p.$('#planRegion').options].some(o=>o.value==='???'));
   p.$('#planSearch').value='송린가자미';p.$('#planRefresh').click();assert.equal(p.$('.plan-card'),null);assert.equal(p.$('#planUnscheduled [data-fish-detail]'),null);
   p.$('#planToOcean').click();assert.equal(p.$('#fishingPlanner').hidden,true);assert.equal(p.$('#collectionScope').value,'ocean');assert.equal(p.$('#search').value,'');assert.match(p.$('#resultCount').textContent,/259종/);

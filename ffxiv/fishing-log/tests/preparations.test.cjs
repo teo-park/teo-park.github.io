@@ -49,7 +49,7 @@ test('planner and dialog show timed prerequisites below targets despite collecti
   try{
     Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.w.Date.now=()=>Date.parse('2026-09-10T13:00:00Z');
     p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
-    assert.equal(p.all('.plan-card').length,1);assert.equal(p.$('.plan-name').textContent,'칠채천주');assert.match(p.$('.plan-window').textContent,/준비 어종 시간/);
+    assert.equal(p.all('.plan-card').length,1);assert.equal(p.$('.plan-name').textContent,'칠채천주');assert.match(p.$('.plan-window').textContent,/준비 시작 → 직감 가능/);
     const group=p.$('.plan-entry>.fish-preparations');assert.ok(group);assert.equal(group.querySelectorAll('[data-preparation-fish]').length,5);
     assert.match(group.querySelector('[data-preparation-fish="24203"] .preparation-role').textContent,/직감 ×3/);
     assert.equal(group.querySelector('[data-preparation-caught="24203"]').hidden,false);

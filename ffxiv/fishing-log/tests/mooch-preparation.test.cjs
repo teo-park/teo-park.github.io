@@ -52,13 +52,13 @@ test('plan, catalog and dialog keep intuition waiting separate from mooch prepar
     p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
     const saved=p.storage.getItem(KEY),settings=JSON.stringify(p.planSnapshot());
     assert.equal(p.$('#planResults [data-mooch-plan]'),null);
-    assert.match(p.$('.plan-window').textContent,/준비 어종 시간/);
+    assert.match(p.$('.plan-window').textContent,/준비 시작 → 직감 가능/);
     assert.match(p.$('.preparation-note').textContent,/지역에서 대기/);
     p.$('#planResults .plan-name').click();assert.equal(p.$('#detailBody [data-mooch-plan]'),null);
     assert.equal(p.$('#fishTimeline'),null);assert.equal(p.$('#detailBody .preparation-heading strong').textContent,'준비 어종 시간');
     p.$('#closeDetail').click();
     p.$('#planSearch').value='쿠노';p.$('#planRefresh').click();
-    assert.match(p.$('#planResults .plan-window').textContent,/준비 어종 시간.*자나바르/);
+    assert.match(p.$('#planResults .plan-window').textContent,/준비 시작 → 직감 가능.*자나바르/);
     p.$('#planResults .plan-name[data-fish-detail="8763"]').click();
     assert.equal(p.$('#fishTimeline'),null);assert.equal(p.$('#detailBody .preparation-heading strong').textContent,'준비 어종 시간');
     assert.ok(!p.$('#detailBody [data-preparation-fish="8762"] [data-preparation-times]').disabled);
@@ -72,7 +72,7 @@ test('plan, catalog and dialog keep intuition waiting separate from mooch prepar
     assert.match(flow.textContent,/준비 시간 → 도전 구간/);assert.match(flow.textContent,/준비 시간 · 쿠얼/);assert.match(flow.textContent,/도전 구간 · 홍룡/);
     p.$('#planResults .plan-name[data-fish-detail="24993"]').click();assert.ok(p.$('#detailBody [data-mooch-target="24993"]'));p.$('#closeDetail').click();
     p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','칠채천주','input');
-    assert.equal(p.$('#collectionListViewport [data-mooch-plan]'),null);assert.match(p.$('#collectionListViewport .plan-window').textContent,/준비 어종 시간/);
+    assert.equal(p.$('#collectionListViewport [data-mooch-plan]'),null);assert.match(p.$('#collectionListViewport .plan-window').textContent,/준비 시작 → 직감 가능/);
     p.change('#search','남채어','input');
     const indigo=p.$('#collectionListViewport [data-mooch-target="24203"]');assert.ok(indigo);assert.match(indigo.textContent,/생미끼 확보 후 · 유지 중 도전/);
     assert.equal(p.storage.getItem(KEY),saved);assert.equal(JSON.stringify(p.planSnapshot()),settings);

@@ -21,6 +21,10 @@
     // Currently Kuno and Warden. Do not inherit this label from a mooched ingredient.
     const timeOnly=(fish,routes=fish.routes)=>!!fish.big&&fish.kind==='rod'&&!model.isOceanFish(fish)&&routes.length>0&&routes.every(r=>r.predators?.length&&!forecast.limited(r)&&forecast.reason(r)==='생미끼·직감 선행 시간 별도 확인');
     const timeNames=(fish,routes=fish.routes)=>forecast.preparations(fish,routes).filter(n=>n.relation==='intuition').map(n=>n.fish.name).join(' · ');
+    function intuitionSummary(fish,routes=fish.routes,compact=false){
+      if(!timeOnly(fish,routes))return '';
+      return `<div class="${compact?'plan-window intuition-summary':'mooch-plan intuition-plan'}" data-intuition-plan="${entry({...fish,routes}).key}" data-intuition-target="${fish.id}" data-intuition-compact="${compact}"><strong>준비 시작 → 직감 가능</strong><span>준비 시간 계산 중</span></div>`;
+    }
     function tree(nodes){return `<ul class="preparation-list">${nodes.map(node=>{
       const fish=node.fish,relation=node.relation==='intuition'?`직감 ×${node.amount}`:'생미끼',places=[...new Set(fish.routes.map(r=>data.spots[r.spotKey]?.name).filter(Boolean))];
       const bait=[...new Set(fish.routes.flatMap(r=>model.paths(r).map(p=>p.ids.map(id=>model.byId.get(id)?.name||id).join(' → '))))];
@@ -30,7 +34,7 @@
     function markup(fish,routes=fish.routes){
       const nodes=forecast.preparations(fish,routes);if(!nodes.length)return '';
       const scoped={...fish,routes},mooch=forecast.moochSources(scoped).length>0,intuition=routes.some(r=>r.predators?.length),preparationOnly=timeOnly(fish,routes);
-      const flow=mooch?`<div class="mooch-plan" data-mooch-plan="${entry(scoped).key}" data-mooch-target="${fish.id}"><strong>준비 시간 → 도전 구간</strong><span>생미끼 시간 계산 중</span></div>`:'';
+      const flow=preparationOnly?intuitionSummary(fish,routes):mooch?`<div class="mooch-plan" data-mooch-plan="${entry(scoped).key}" data-mooch-target="${fish.id}"><strong>준비 시간 → 도전 구간</strong><span>생미끼 시간 계산 중</span></div>`:'';
       return `<section class="fish-preparations" aria-label="${esc(fish.name)} 준비 어종">${flow}<div class="preparation-heading"><strong>${preparationOnly?'준비 어종 시간':intuition?'직감 준비 어종 · 출현 시간':'생미끼 준비 어종 · 출현 시간'}</strong><span>접속 시간과 관계없는 출현 · KST</span></div>${tree(nodes)}<p class="preparation-note">${preparationOnly?'본체는 직감이 켜진 동안 별도 시간·날씨 제한 없이 도전할 수 있습니다. 위 시간은 준비 어종의 출현 시간입니다. 미리 준비한 뒤 지역에서 대기할 수 있으며, 수집 완료는 현재 직감 준비 완료를 뜻하지 않습니다.':intuition?'직감은 미리 준비한 뒤 지역에서 대기할 수 있습니다. 아래 어종의 출현 시간으로 대상의 도전 구간을 제한하지 않습니다. 수집 완료는 현재 직감 준비 완료를 뜻하지 않습니다.':'준비 어종은 수집했어도 표시합니다. 생미끼를 실제로 확보·유지해야 도전할 수 있으며, 준비 완료 여부는 자동으로 알 수 없습니다.'}</p></section>`;
     }
     function paintMooch(value,slots,now){
@@ -39,6 +43,19 @@
       const range=c=>`${stamp(c.start)} – ${Math.floor((c.start+F.KST)/F.DAY)===Math.floor((c.end+F.KST)/F.DAY)?clock.format(c.end):stamp(c.end)}`;
       const html=`<strong class="mooch-title">준비 시간 → 도전 구간 <span>생미끼 · KST</span></strong>`+(plan?`<div class="mooch-flow"><div><span>준비 시간 · ${esc(model.byId.get(plan.source)?.name)}</span><strong>${range(plan.preparation)}</strong></div><span class="mooch-arrow" aria-hidden="true">→</span><div><span>도전 구간 · ${esc(value.fish.name)}</span><strong>${plan.challenge?range(plan.challenge):'생미끼 확보 후 · 유지 중 도전'}</strong>${plan.challenge?'':'<span>대상 자체의 시간·날씨 제한 없음</span>'}</div></div><p>${plan.hold?'생미끼를 확보한 뒤 도전 시작까지 유지해야 합니다. ':''}지금부터 새로 준비 · 생미끼 확보·유지 전제.${plan.intuition?' 직감 조건은 별도로 준비해야 합니다.':''}</p>`:`<span>${esc(state.reason||'준비 시간과 이어지는 도전 구간을 찾는 중')}</span>`);
       for(const slot of slots)if(slot.innerHTML!==html)slot.innerHTML=html;
+    }
+    function paintIntuition(value,slots,now){
+      const state=value.intuitionSearch.result,plan=state.plan;
+      const stamp=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(now+F.KST).getUTCFullYear()?date:longDate).format(ms);
+      const range=c=>`${stamp(c.start)} – ${Math.floor((c.start+F.KST)/F.DAY)===Math.floor((c.end+F.KST)/F.DAY)?clock.format(c.end):stamp(c.end)}`;
+      const last=plan&&model.byId.get(plan.lastId)?.name,conditions='각 준비 구간에 필요한 마릿수를 확보하고 같은 낚시터에서 대기하는 경우입니다. 실제 직감은 마지막 조건을 채운 순간 발동합니다.';
+      for(const slot of slots){
+        const compact=slot.dataset.intuitionCompact==='true';
+        const header=`<strong${compact?'':' class="mooch-title"'}>준비 시작 → 직감 가능${compact?'':' <span>예상 · KST</span>'}</strong>`;
+        const html=header+(!plan?`<span>${esc(state.reason||'이어지는 준비 구간을 찾는 중')}</span>`:compact?`<strong>${stamp(plan.preparationStart)}</strong><span>→ ${range(plan)}</span><span>마지막 준비 · ${esc(last)}</span>`:`<div class="mooch-flow"><div><span>준비 시작</span><strong>${stamp(plan.preparationStart)}</strong></div><span class="mooch-arrow" aria-hidden="true">→</span><div><span>직감 가능</span><strong>${range(plan)}</strong></div></div><ol class="intuition-steps">${plan.steps.map((p,i)=>`<li><span>${i+1}. ${esc(model.byId.get(p.id)?.name)} ×${p.amount}${p.id===plan.lastId?' · 마지막 준비':''}</span><span>${range(p)}</span></li>`).join('')}</ol><p>지금부터 새로 준비하는 기준입니다. ${conditions} 표시된 종료 시각은 마지막 준비 어종의 출현 종료이며 직감 종료 시각은 아닙니다.</p>`);
+        if(slot.innerHTML!==html)slot.innerHTML=html;
+        slot.title=plan?`예상 · KST · ${conditions}`:'';
+      }
     }
     function remaining(ms){const seconds=Math.max(0,Math.ceil(ms/1000)),days=Math.floor(seconds/86400),hours=Math.floor(seconds%86400/3600),minutes=Math.floor(seconds%3600/60);return [days?days+'일':'',hours?hours+'시간':'',minutes?minutes+'분':'',seconds%60+'초'].filter(Boolean).join(' ');}
     function paint(value,slots,now){
@@ -64,6 +81,10 @@
     function moochSlots(){
       const groups=new Map();for(const slot of document.querySelectorAll('[data-mooch-plan]'))if(visible(slot)){const key=slot.dataset.moochPlan;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(slot);}return groups;
     }
+    function intuitionSlots(){
+      const groups=new Map();for(const slot of document.querySelectorAll('[data-intuition-plan]'))if(visible(slot)){const key=slot.dataset.intuitionPlan;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(slot);}return groups;
+    }
+    const intuitionExpired=(value,now)=>value?.intuitionSearch?.result.plan?.steps.some(p=>p.end<=now);
     function tick(){
       if(document.hidden)return;const now=Date.now();
       for(const [key,slots] of timeSlots()){const value=byKey.get(key);if(!value?.search)continue;
@@ -71,6 +92,7 @@
         paint(value,slots,now);
       }
       for(const [key] of moochSlots()){const value=byKey.get(key),plan=value?.moochSearch?.result.plan;if(plan&&(plan.challenge?.end??plan.preparation.end)<=now){refresh();return;}}
+      for(const [key] of intuitionSlots())if(intuitionExpired(byKey.get(key),now)){refresh();return;}
     }
     function refresh(){
       clearTimeout(timer);if(document.hidden)return;
@@ -87,14 +109,19 @@
         if(!value.moochSearch||plan&&(plan.challenge?.end??plan.preparation.end)<=now||!value.moochSearch.result.pending&&now-value.moochFrom>=F.MINUTE){value.moochSearch=forecast.startMoochPreparation(value.fish,now);value.moochFrom=now;}
         paintMooch(value,slots,now);if(value.moochSearch.result.pending)pending.push({value,slots,mooch:true});
       }
+      for(const [key,slots] of intuitionSlots()){
+        const value=byKey.get(key);if(!value)continue;
+        if(!value.intuitionSearch||intuitionExpired(value,now)||!value.intuitionSearch.result.pending&&now-value.intuitionFrom>=F.MINUTE){value.intuitionSearch=forecast.startIntuitionPreparation(value.fish,now);value.intuitionFrom=now;}
+        paintIntuition(value,slots,now);if(value.intuitionSearch.result.pending)pending.push({value,slots,intuition:true});
+      }
       function advance(){
         if(document.hidden)return;const start=performance.now();
-        while(pending.length&&performance.now()-start<12){const item=pending.shift();item.slots=item.slots.filter(visible);if(!item.slots.length)continue;const search=item.mooch?item.value.moochSearch:item.value.search;search.step();(item.mooch?paintMooch:paint)(item.value,item.slots,Date.now());if(search.result.pending)pending.push(item);}
+        while(pending.length&&performance.now()-start<12){const item=pending.shift();item.slots=item.slots.filter(visible);if(!item.slots.length)continue;const search=item.intuition?item.value.intuitionSearch:item.mooch?item.value.moochSearch:item.value.search;search.step();(item.intuition?paintIntuition:item.mooch?paintMooch:paint)(item.value,item.slots,Date.now());if(search.result.pending)pending.push(item);}
         if(pending.length)timer=setTimeout(advance,50);
       }
       if(pending.length)timer=setTimeout(advance,0);
     }
-    const view={markup,refresh,timeOnly,timeNames};window.FishingPreparationView=view;
+    const view={markup,refresh,timeOnly,timeNames,intuitionSummary};window.FishingPreparationView=view;
     document.addEventListener('click',event=>{const button=event.target.closest('button[data-preparation-times]');if(!button||button.disabled)return;const value=byKey.get(button.dataset.preparationTimes);if(value){value.counting=!value.counting;tick();}});
     setInterval(tick,1000);
     setInterval(refresh,60000);

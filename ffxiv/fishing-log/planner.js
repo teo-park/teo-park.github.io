@@ -158,7 +158,7 @@
     function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
     function windowCell(row){
       const fish=row.fish;
-      if(preparationView?.timeOnly(fish,[fish.routes[row.route]]))return `<div class="plan-window"><strong>준비 어종 시간</strong><span>${esc(preparationView.timeNames(fish,[fish.routes[row.route]]))}</span><span>아래 시간표 참고</span></div>`;
+      if(preparationView?.timeOnly(fish,[fish.routes[row.route]]))return preparationView.intuitionSummary(fish,[fish.routes[row.route]],true);
       if(row.preparationOnly){const intuition=fish.routes[row.route]?.predators?.length;return `<div class="plan-window"><strong>${intuition?'직감':'생미끼'} 준비 필요</strong><span>${intuition?'미리 준비 후 지역 대기 가능':'준비 시간 → 도전 구간 참고'}</span></div>`;}
       if(row.always)return '<div class="plan-window"><strong>상시 낚시</strong><span>시간·날씨 제한 없음</span></div>';
       if(row.start===null)return `<div class="plan-window"><strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span></div>`;
