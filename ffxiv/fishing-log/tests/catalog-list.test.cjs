@@ -42,7 +42,7 @@ test('collection rows use planner tackle and map markup and switch only between 
 test('timed preparation subrows include caught fish and unknown ocean/spear conditions are not marked always',async()=>{
   const p=open({plan:true,storage:memory({[KEY]:E.backup(new Set([24203,21177]))})});try{
     list(p);p.change('#search','칠채천주','input');await wait();assert.equal(p.all('#collectionListViewport [data-preparation-fish]').length,5);assert.equal(p.$('#collectionListViewport [data-preparation-caught="24203"]').hidden,false);
-    assert.match(p.$('.catalog-card .plan-window').textContent,/준비 필요/);assert.equal(p.$('.catalog-card').dataset.planNow,'false');
+    assert.match(p.$('.catalog-card .plan-window').textContent,/준비 어종 시간/);assert.equal(p.$('.catalog-card').dataset.planNow,'false');
     p.change('#search',String(D.missingConditions[0]),'input');await wait();assert.match(p.$('.catalog-card .plan-window').textContent,/먼바다 전용/);assert.equal(p.$('.catalog-card').dataset.planNow,'false');assert.equal(p.$('.catalog-card [data-catalog-countdown]'),null);
     p.$('#spearMode').click();p.change('#search','','input');assert.equal(p.all('.catalog-card').length,100);assert.match(p.$('.catalog-card .plan-bite').textContent,/어영/);assert.match(p.$('.catalog-card .plan-tackle').textContent,/미끼 없음/);assert.equal(p.$('.catalog-card [data-catalog-countdown]'),null);
     p.$('#paginationTop [aria-label="3페이지"]').click();assert.equal(p.all('.catalog-card').length,89);p.$('[data-catalog-detail]').click();assert.match(p.$('[data-catalog-panel]').textContent,/어영/);

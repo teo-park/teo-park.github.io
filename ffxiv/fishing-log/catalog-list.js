@@ -20,6 +20,7 @@
     function status(item){
       if(item.fish.kind==='spear')return {reason:'작살질',note:item.route?.predators?.length?'숨은 어장 준비 필요':'어장 조건은 조건 버튼에서 확인'};
       if(model.isOceanFish(item.fish))return {reason:'먼바다 전용',note:'항로·환해류 조건 확인',ocean:true};
+      if(item.route&&window.FishingPreparationView?.timeOnly(item.fish,[item.route]))return {reason:'준비 어종 시간',note:window.FishingPreparationView.timeNames(item.fish,[item.route]),preparation:true};
       const reason=item.route?parts.forecast.reason(item.route):'조건 자료 확인 필요';
       const intuition=item.route?.predators?.length;
       return reason?{reason:reason==='생미끼·직감 선행 시간 별도 확인'?(intuition?'직감 준비 필요':'생미끼 준비 필요'):reason,note:reason==='생미끼·직감 선행 시간 별도 확인'?(intuition?'미리 준비 후 지역 대기 가능':'준비 시간 → 도전 구간 참고'):'조건 버튼에서 상세 확인'}:null;
@@ -32,9 +33,9 @@
         <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${id}">${esc(fish.name)}</button><div class="plan-labels"><span>No.${fish.order}</span><span>${fish.legendary?'전설어':fish.big?'터주':fish.kind==='spear'?'작살질':'일반'}</span><span class="catalog-collected">수집 완료</span><span data-catalog-timing></span></div></div></div>
         ${route?parts.bite(fish,route):'<div class="plan-bite">입질 자료 확인 필요</div>'}
         ${route?parts.place(fish,route,'',choices):'<div class="plan-place">낚시터 자료 확인 필요</div>'}
-        ${unknown?`<div class="plan-window"><strong>${esc(unknown.reason)}</strong><span>${esc(unknown.note)}</span></div>`:`<button class="plan-window plan-time-toggle" data-catalog-countdown="${id}" aria-label="${esc(fish.name)} 남은 시간 보기" aria-pressed="${countdowns.has(id)}" disabled><strong>출현 시간 계산 중</strong></button>`}
+        ${unknown?`<div class="plan-window"><strong>${esc(unknown.reason)}</strong><span>${esc(unknown.note)}</span>${unknown.preparation?'<span>아래 시간표 참고</span>':''}</div>`:`<button class="plan-window plan-time-toggle" data-catalog-countdown="${id}" aria-label="${esc(fish.name)} 남은 시간 보기" aria-pressed="${countdowns.has(id)}" disabled><strong>출현 시간 계산 중</strong></button>`}
         ${route?parts.tackle(fish,route):'<div class="plan-tackle">미끼·조건 자료 확인 필요</div>'}
-        <div class="plan-next"><span data-catalog-next>${unknown?'—':'다음 출현 계산 중'}</span>${unknown?.ocean?'<a class="plan-timeline-link" href="../ocean-fishing/">먼바다 보기 ↗</a>':fish.kind==='rod'?`<button class="plan-timeline-link" data-fish-detail="${id}">${unknown?'준비·조건 보기':'출현 5회 보기'} ↗</button>`:''}</div>
+        <div class="plan-next"><span data-catalog-next>${unknown?.preparation?'직감 발동 후 도전':unknown?'—':'다음 출현 계산 중'}</span>${unknown?.ocean?'<a class="plan-timeline-link" href="../ocean-fishing/">먼바다 보기 ↗</a>':fish.kind==='rod'?`<button class="plan-timeline-link" data-fish-detail="${id}">${unknown?.preparation?'준비 어종 시간 보기':unknown?'준비·조건 보기':'출현 5회 보기'} ↗</button>`:''}</div>
         <div class="plan-card-actions"><button data-catalog-detail="${id}" aria-label="${esc(fish.name)} 낚시 조건" aria-expanded="${opened.has(item.key)}" aria-controls="catalog-detail-${id}">조건</button><button data-caught="${id}" aria-label="${esc(fish.name)} 수집" aria-pressed="false">수집</button></div>
       </article>${fish.kind==='rod'&&route&&!model.isOceanFish(fish)?window.FishingPreparationView?.markup(fish,[route])||'':''}<section class="plan-inline-detail" id="catalog-detail-${id}" data-catalog-panel="${item.key}" aria-labelledby="catalog-detail-title-${id}" ${opened.has(item.key)?'':'hidden'}>${opened.has(item.key)?panel(item):''}</section></div>`;
     }

@@ -17,6 +17,10 @@
       return [...new Set(labels)].join(' / ');
     }
     const et=hour=>String(Math.floor(hour)).padStart(2,'0')+':'+String(Math.round((hour%1)*60)).padStart(2,'0');
+    // The target has no clock/weather window; only its intuition ingredients do.
+    // Currently Kuno and Warden. Do not inherit this label from a mooched ingredient.
+    const timeOnly=(fish,routes=fish.routes)=>!!fish.big&&fish.kind==='rod'&&!model.isOceanFish(fish)&&routes.length>0&&routes.every(r=>r.predators?.length&&!forecast.limited(r)&&forecast.reason(r)==='생미끼·직감 선행 시간 별도 확인');
+    const timeNames=(fish,routes=fish.routes)=>forecast.preparations(fish,routes).filter(n=>n.relation==='intuition').map(n=>n.fish.name).join(' · ');
     function tree(nodes){return `<ul class="preparation-list">${nodes.map(node=>{
       const fish=node.fish,relation=node.relation==='intuition'?`직감 ×${node.amount}`:'생미끼',places=[...new Set(fish.routes.map(r=>data.spots[r.spotKey]?.name).filter(Boolean))];
       const bait=[...new Set(fish.routes.flatMap(r=>model.paths(r).map(p=>p.ids.map(id=>model.byId.get(id)?.name||id).join(' → '))))];
@@ -25,9 +29,9 @@
     }).join('')}</ul>`;}
     function markup(fish,routes=fish.routes){
       const nodes=forecast.preparations(fish,routes);if(!nodes.length)return '';
-      const scoped={...fish,routes},mooch=forecast.moochSources(scoped).length>0,intuition=routes.some(r=>r.predators?.length);
+      const scoped={...fish,routes},mooch=forecast.moochSources(scoped).length>0,intuition=routes.some(r=>r.predators?.length),preparationOnly=timeOnly(fish,routes);
       const flow=mooch?`<div class="mooch-plan" data-mooch-plan="${entry(scoped).key}" data-mooch-target="${fish.id}"><strong>준비 시간 → 도전 구간</strong><span>생미끼 시간 계산 중</span></div>`:'';
-      return `<section class="fish-preparations" aria-label="${esc(fish.name)} 준비 어종">${flow}<div class="preparation-heading"><strong>${intuition?'직감 준비 어종 · 출현 시간':'생미끼 준비 어종 · 출현 시간'}</strong><span>접속 시간과 관계없는 출현 · KST</span></div>${tree(nodes)}<p class="preparation-note">${intuition?'직감은 미리 준비한 뒤 지역에서 대기할 수 있습니다. 아래 어종의 출현 시간으로 대상의 도전 구간을 제한하지 않습니다. 수집 완료는 현재 직감 준비 완료를 뜻하지 않습니다.':'준비 어종은 수집했어도 표시합니다. 생미끼를 실제로 확보·유지해야 도전할 수 있으며, 준비 완료 여부는 자동으로 알 수 없습니다.'}</p></section>`;
+      return `<section class="fish-preparations" aria-label="${esc(fish.name)} 준비 어종">${flow}<div class="preparation-heading"><strong>${preparationOnly?'준비 어종 시간':intuition?'직감 준비 어종 · 출현 시간':'생미끼 준비 어종 · 출현 시간'}</strong><span>접속 시간과 관계없는 출현 · KST</span></div>${tree(nodes)}<p class="preparation-note">${preparationOnly?'본체는 직감이 켜진 동안 별도 시간·날씨 제한 없이 도전할 수 있습니다. 위 시간은 준비 어종의 출현 시간입니다. 미리 준비한 뒤 지역에서 대기할 수 있으며, 수집 완료는 현재 직감 준비 완료를 뜻하지 않습니다.':intuition?'직감은 미리 준비한 뒤 지역에서 대기할 수 있습니다. 아래 어종의 출현 시간으로 대상의 도전 구간을 제한하지 않습니다. 수집 완료는 현재 직감 준비 완료를 뜻하지 않습니다.':'준비 어종은 수집했어도 표시합니다. 생미끼를 실제로 확보·유지해야 도전할 수 있으며, 준비 완료 여부는 자동으로 알 수 없습니다.'}</p></section>`;
     }
     function paintMooch(value,slots,now){
       const state=value.moochSearch.result,plan=state.plan;
@@ -90,7 +94,7 @@
       }
       if(pending.length)timer=setTimeout(advance,0);
     }
-    const view={markup,refresh};window.FishingPreparationView=view;
+    const view={markup,refresh,timeOnly,timeNames};window.FishingPreparationView=view;
     document.addEventListener('click',event=>{const button=event.target.closest('button[data-preparation-times]');if(!button||button.disabled)return;const value=byKey.get(button.dataset.preparationTimes);if(value){value.counting=!value.counting;tick();}});
     setInterval(tick,1000);
     setInterval(refresh,60000);

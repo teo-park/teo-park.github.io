@@ -65,7 +65,7 @@
       paint();preparationView?.refresh();if(timeline.result.pending)timelineTimer=setTimeout(advance,0);
     }
     window.FishingTimeline={
-      markup:fish=>fish.kind==='rod'&&!model.isOceanFish(fish)?`<section id="fishTimeline" class="fish-timeline" data-fish-timeline="${fish.id}" aria-labelledby="timelineTitle"><div class="timeline-heading"><h3 id="timelineTitle">다가오는 출현 · 5회 <small>KST</small></h3><div class="timeline-scope" role="group" aria-label="출현 시간 기준"><button type="button" data-timeline-scope="all" aria-pressed="${timelineScope==='all'}">전체 출현</button><button type="button" data-timeline-scope="play" aria-pressed="${timelineScope==='play'}">내 접속 시간</button></div></div><p class="timeline-note"></p><ol class="timeline-list"></ol><p class="timeline-status" role="status"></p></section>`:'',
+      markup:fish=>fish.kind==='rod'&&!model.isOceanFish(fish)&&!preparationView?.timeOnly(fish)?`<section id="fishTimeline" class="fish-timeline" data-fish-timeline="${fish.id}" aria-labelledby="timelineTitle"><div class="timeline-heading"><h3 id="timelineTitle">다가오는 출현 · 5회 <small>KST</small></h3><div class="timeline-scope" role="group" aria-label="출현 시간 기준"><button type="button" data-timeline-scope="all" aria-pressed="${timelineScope==='all'}">전체 출현</button><button type="button" data-timeline-scope="play" aria-pressed="${timelineScope==='play'}">내 접속 시간</button></div></div><p class="timeline-note"></p><ol class="timeline-list"></ol><p class="timeline-status" role="status"></p></section>`:'',
       refresh:refreshTimeline,
     };
     document.addEventListener('click',event=>{const button=event.target.closest('[data-timeline-scope]');if(button){timelineScope=button.dataset.timelineScope;refreshTimeline();}});
@@ -158,6 +158,7 @@
     function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
     function windowCell(row){
       const fish=row.fish;
+      if(preparationView?.timeOnly(fish,[fish.routes[row.route]]))return `<div class="plan-window"><strong>준비 어종 시간</strong><span>${esc(preparationView.timeNames(fish,[fish.routes[row.route]]))}</span><span>아래 시간표 참고</span></div>`;
       if(row.preparationOnly){const intuition=fish.routes[row.route]?.predators?.length;return `<div class="plan-window"><strong>${intuition?'직감':'생미끼'} 준비 필요</strong><span>${intuition?'미리 준비 후 지역 대기 가능':'준비 시간 → 도전 구간 참고'}</span></div>`;}
       if(row.always)return '<div class="plan-window"><strong>상시 낚시</strong><span>시간·날씨 제한 없음</span></div>';
       if(row.start===null)return `<div class="plan-window"><strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span></div>`;
@@ -176,6 +177,7 @@
     }
     function card(row){
       const fish=row.fish,route=fish.routes[row.route],spot=data.spots[route.spotKey],next=row.nextStart!==null&&row.nextStart!==undefined?dateText(row.nextStart):row.unavailableReason||'다음 기회 찾는 중';
+      const preparationOnly=preparationView?.timeOnly(fish,[route]);
       const timingState=timing(row,result.now,purpose),now=timingState?.state==='now';
       return `<div class="plan-entry"><article class="plan-card" aria-label="${esc(fish.name)} 낚시 계획" data-plan-kind="${fish.big?'big':'normal'}" data-plan-availability="${row.always?'always':'timed'}" data-plan-now="${now}">
         <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span class="plan-availability-label">${row.always?'상시':'조건부'}</span><span data-plan-timing data-always="${!!row.always}" data-start="${row.start??''}" data-end="${row.end??''}" data-opening="${row.windowStart??''}">${timingBadge(timingState)}</span></div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
@@ -183,7 +185,7 @@
         ${rowPlace(fish,route,`<button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button>`)}
         ${windowCell(row)}
         ${rowTackle(fish,route)}
-        <div class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회"><span>${row.always?'상시 가능':next}</span>${row.always?'':`<button class="plan-timeline-link" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} ${row.preparationOnly?'준비 어종 시간 보기':'출현 시간 5회 보기'}">${row.preparationOnly?'준비 시간 보기':'출현 5회 보기'} ↗</button>`}</div>
+        <div class="plan-next" title="${preparationOnly?'본체의 출현 구간 대신 직감 준비 어종의 시간을 확인합니다.':'이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회'}"><span>${preparationOnly?'직감 발동 후 도전':row.always?'상시 가능':next}</span>${row.always?'':`<button class="plan-timeline-link" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} ${row.preparationOnly?'준비 어종 시간 보기':'출현 시간 5회 보기'}">${preparationOnly?'준비 어종 시간 보기':row.preparationOnly?'준비 시간 보기':'출현 5회 보기'} ↗</button>`}</div>
         <div class="plan-card-actions"><button data-plan-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건" aria-expanded="${opened.has(fish.id)}" aria-controls="plan-detail-${fish.id}">조건</button><button data-caught="${fish.id}" aria-label="${esc(fish.name)} 수집 체크">수집</button></div>
       </article>${preparationView?.markup(fish,[route])||''}<section id="plan-detail-${fish.id}" class="plan-inline-detail" data-plan-route="${fishById.get(fish.id).routes.indexOf(route)}" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?window.FishingDetails?.renderPlan(fish.id,route,'plan-detail-title-'+fish.id)||'':''}</section></div>`;
     }

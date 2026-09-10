@@ -48,20 +48,31 @@ test('unverified and other-spot source routes cannot create a preparation interv
 test('plan, catalog and dialog keep intuition waiting separate from mooch preparation without changing saved state',()=>{
   const p=open({plan:true});try{
     Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.w.Date.now=()=>now;
+    assert.deepEqual(Array.from(p.w.FISHING_DATA.fishes.filter(f=>p.w.FishingPreparationView.timeOnly(f)),f=>f.id),[8763,24994]);
     p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
     const saved=p.storage.getItem(KEY),settings=JSON.stringify(p.planSnapshot());
     assert.equal(p.$('#planResults [data-mooch-plan]'),null);
-    assert.match(p.$('.plan-window').textContent,/직감 준비 필요/);
+    assert.match(p.$('.plan-window').textContent,/준비 어종 시간/);
     assert.match(p.$('.preparation-note').textContent,/지역에서 대기/);
     p.$('#planResults .plan-name').click();assert.equal(p.$('#detailBody [data-mooch-plan]'),null);
-    assert.doesNotMatch(p.$('#fishTimeline').textContent,/준비 시간 → 도전 구간/);
+    assert.equal(p.$('#fishTimeline'),null);assert.equal(p.$('#detailBody .preparation-heading strong').textContent,'준비 어종 시간');
     p.$('#closeDetail').click();
+    p.$('#planSearch').value='쿠노';p.$('#planRefresh').click();
+    assert.match(p.$('#planResults .plan-window').textContent,/준비 어종 시간.*자나바르/);
+    p.$('#planResults .plan-name[data-fish-detail="8763"]').click();
+    assert.equal(p.$('#fishTimeline'),null);assert.equal(p.$('#detailBody .preparation-heading strong').textContent,'준비 어종 시간');
+    assert.ok(!p.$('#detailBody [data-preparation-fish="8762"] [data-preparation-times]').disabled);
+    p.$('#closeDetail').click();
+    for(const [id,name] of [[33244,'수분어'],[41412,'별고래']]){
+      p.$('#planSearch').value=name;p.$('#planRefresh').click();p.$(`#planResults .plan-name[data-fish-detail="${id}"]`).click();
+      assert.ok(p.$('#fishTimeline'));assert.equal(p.all('#fishTimeline .timeline-list li').length,5);p.$('#closeDetail').click();
+    }
     p.$('#planSearch').value='홍룡';p.$('#planRefresh').click();
     const flow=p.$('#planResults [data-mooch-target="24993"]');assert.ok(flow);
     assert.match(flow.textContent,/준비 시간 → 도전 구간/);assert.match(flow.textContent,/준비 시간 · 쿠얼/);assert.match(flow.textContent,/도전 구간 · 홍룡/);
     p.$('#planResults .plan-name[data-fish-detail="24993"]').click();assert.ok(p.$('#detailBody [data-mooch-target="24993"]'));p.$('#closeDetail').click();
     p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','칠채천주','input');
-    assert.equal(p.$('#collectionListViewport [data-mooch-plan]'),null);assert.match(p.$('#collectionListViewport .plan-window').textContent,/직감 준비 필요/);
+    assert.equal(p.$('#collectionListViewport [data-mooch-plan]'),null);assert.match(p.$('#collectionListViewport .plan-window').textContent,/준비 어종 시간/);
     p.change('#search','남채어','input');
     const indigo=p.$('#collectionListViewport [data-mooch-target="24203"]');assert.ok(indigo);assert.match(indigo.textContent,/생미끼 확보 후 · 유지 중 도전/);
     assert.equal(p.storage.getItem(KEY),saved);assert.equal(JSON.stringify(p.planSnapshot()),settings);
