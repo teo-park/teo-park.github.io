@@ -15,6 +15,8 @@
 
 - [세계를 누비는 어부](https://teo-park.github.io/ffxiv/fishing-log/) — 어류·작살도감 10×10 수집 체크·캡처 등록·Teamcraft 기록 호환·미끼와 장소별 보기·내 접속 시간의 낚시 예보·페이지 접속 중 알림 ([데이터와 이용 안내](./fishing-log/README.md))
 
+- [어부 스킬 안내](https://teo-park.github.io/ffxiv/fisher-skills/) — 숙련 낚시꾼의 생미끼 프록 유지·쿠얼 저글링, 생미끼·저격·직감 스킬 사용법 ([설명 기준과 출처](./fisher-skills/README.md))
+
 - [마수도감](https://teo-park.github.io/ffxiv/beastmaster/) — 마수 50종 5×5 수집 체크·장소별 포획·항아리 교환 가격과 선행 퀘스트 ([데이터와 이용 안내](./beastmaster/README.md))
 
 수집형 도감(카드·꼬마친구·청마법·마수·어류/작살도감)은 창문 모양 **그리드 아이콘**과 **목록 아이콘**으로 배치를 전환합니다. 현재 페이지·필터·수집 체크는 유지하고 각 도감의 보기 방식은 브라우저에 기억합니다. 기존 페이지 크기는 유지합니다. 청마법 장소별, 낚시 미끼·장소별 보기는 자체 목록을 사용합니다.

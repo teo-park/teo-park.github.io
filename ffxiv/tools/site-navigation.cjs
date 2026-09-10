@@ -18,6 +18,7 @@ const categories = [
   { id: 'fishing', label: '낚시', tools: [
     ['fishing-log/', '세계를 누비는 어부'],
     ['ocean-fishing/', '항해일지'],
+    ['fisher-skills/', '어부 스킬 안내'],
   ] },
 ];
 const journalPages = [

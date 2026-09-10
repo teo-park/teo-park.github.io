@@ -10,6 +10,7 @@
   function mount({data,model,getCaught}){
     if(!F||!window.FISHING_WEATHER)return;
     window.FishingSpotMaps?.mount({data});
+    window.FishingBaitDetails?.mount({model});
     const forecast=F.create(data,window.FISHING_WEATHER),fishById=new Map(data.fishes.map(f=>[f.id,f]));
     const opened=new Set(),countdowns=new Set();let spotFilter='all';
     let settings=F.defaults(),saved=false,stars=new Set(),mode='all',purpose='big',rarities={big:'big',collection:'all'},alwaysAlerts={big:false,collection:true},result=null,search=null,searchTimer,shown=30,active=false,timer;
@@ -65,16 +66,17 @@
     function biteTime(id,route){const range=route&&model.biteTime(id,route);return range?`<span class="plan-bite-time" title="같은 낚시터·미끼의 관측 ${range.samples.toLocaleString()}건 · 모으기·루어 사용 여부 미구분">약 ${range.min}–${range.max}초</span>`:'<span class="plan-bite-time is-unknown">시간 미확인</span>';}
     const dateText=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(result.now+F.KST).getUTCFullYear()?date:longDate).format(ms);
     const snagging=route=>route.snagging?'<span class="plan-snagging">갈고리 낚시 필요</span>':'';
+    const baitLink=id=>`<button type="button" class="plan-bait-link" data-bait-detail="${id}" aria-haspopup="dialog" aria-controls="baitDialog" aria-label="${esc(model.byId.get(id)?.name||id)} 미끼 정보">${esc(model.byId.get(id)?.name||id)}</button>`;
     function chain(route,target){
       const paths=model.tacklePaths(route);if(!paths.length)return '미끼 자료 확인 필요';
       return paths.map(p=>`<div class="plan-bait-path">${p.complete?'':'<span class="plan-mooch-facts">시작 미끼 미확인 → </span>'}${p.steps.map(step=>{
-        const fish=model.byId.get(step.id),name=esc(fish?.name||step.id);if(!fish?.fish){const first=p.steps[1],observed=first?first.routes[0]&&model.biteTime(first.id,first.routes[0]):model.biteTime(target.id,route);return `<span>${name}${observed?` <small class="plan-bait-samples" title="${esc(first?'첫 생미끼 물고기 '+model.byId.get(first.id).name:'대상 물고기')} 관측 기록">${observed.samples.toLocaleString()}건</small>`:''}</span>`;}
+        const fish=model.byId.get(step.id),name=esc(fish?.name||step.id);if(!fish?.fish){const first=p.steps[1],observed=first?first.routes[0]&&model.biteTime(first.id,first.routes[0]):model.biteTime(target.id,route);return `<span>${fish?baitLink(step.id):name}${observed?` <small class="plan-bait-samples" title="${esc(first?'첫 생미끼 물고기 '+model.byId.get(first.id).name:'대상 물고기')} 관측 기록">${observed.samples.toLocaleString()}건</small>`:''}</span>`;}
         const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>`${tugs[r.tug]||'입질 미확인'} · ${hooksets[r.hookset]||'낚아채기 미확인'}${r.snagging?' · 갈고리 낚시 필요':''}`))];
         return `<span class="plan-mooch"><button class="plan-mooch-name" data-fish-detail="${step.id}">${name}</button><span class="plan-mooch-facts">${variants.map(esc).join(' / ')} · ${biteTime(step.id,step.routes[0])}</span></span>`;
       }).join('<span class="plan-bait-arrow"> → </span>')}</div>`).join('<span class="plan-path-or">또는</span>');
     }
     function alternateBait(fish,route){return model.baitOptions(fish.id,route).map(o=>{
-      const a=o.alternative,v=o.versatile;return '<span class="plan-alternate-bait" title="같은 낚시터 관측 기록 기준 · 관측 건수는 입질 확률이 아닙니다">'+(o.mooch?'시작 ':'')+(a?'대체 '+esc(a.bait.name):'대체 기록 미확인')+'</span><span class="plan-versatile '+(v||o.versatilePrimary?'is-observed':'')+'">만능 루어'+(o.mooch?'로 시작':'')+' · '+(o.versatilePrimary?'기본 미끼':v?'기록 있음':'미확인')+'</span>';
+      const a=o.alternative,v=o.versatile;return '<span class="plan-alternate-bait" title="같은 낚시터 관측 기록 기준 · 관측 건수는 입질 확률이 아닙니다">'+(o.mooch?'시작 ':'')+(a?'대체 '+baitLink(a.bait.id):'대체 기록 미확인')+'</span><span class="plan-versatile '+(v||o.versatilePrimary?'is-observed':'')+'">'+baitLink(29717)+(o.mooch?'로 시작':'')+' · '+(o.versatilePrimary?'기본 미끼':v?'기록 있음':'미확인')+'</span>';
     }).join('');}
     function remaining(ms){const seconds=Math.max(0,Math.ceil(ms/1000)),days=Math.floor(seconds/86400),hours=Math.floor(seconds%86400/3600),minutes=Math.floor(seconds%3600/60);return days?`${days}일 ${hours}시간 ${minutes}분`:hours?`${hours}시간 ${minutes}분`:minutes?`${minutes}분 ${seconds%60}초`:`${seconds}초`;}
     function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
@@ -108,7 +110,7 @@
       function add(route,fish,condition=false){for(const p of model.paths(route).filter(p=>p.complete)){const base=p.ids[0];if(!baitMap.has(base))baitMap.set(base,new Map());baitMap.get(base).set(fish.id+(condition?':prep':''),fish.name+(condition?' (직감 준비)':''));}}
       for(const row of list){const route=row.fish.routes[row.route];add(route,row.fish);for(const p of route.predators||[]){const f=model.byId.get(p.id);if(f)for(const r of f.routes.filter(r=>r.spotKey===route.spotKey))add(r,f,true);}}
       $('planPrepSummary').textContent=`미끼 준비 목록 · ${baitMap.size}종 / 현재 결과 ${list.length}종 기준`;
-      $('planPrep').innerHTML=[...baitMap].map(([id,targets])=>`<div><strong>${esc(model.byId.get(id)?.name||id)}</strong><p>${esc([...targets.values()].join(' · '))}</p></div>`).join('')||'<p>조회 결과가 없어요.</p>';
+      $('planPrep').innerHTML=[...baitMap].map(([id,targets])=>`<div><strong>${baitLink(id)}</strong><p>${esc([...targets.values()].join(' · '))}</p></div>`).join('')||'<p>조회 결과가 없어요.</p>';
     }
     function render(){if(!result)return;const selectedSpot=data.spots[spotFilter];$('planActiveFilters').hidden=!selectedSpot;$('planActiveFilters').innerHTML=selectedSpot?`<button class="plan-filter-tag" data-plan-clear-spot aria-label="${esc(selectedSpot.name)} 낚시터 필터 해제"><span>낚시터 · ${esc(selectedSpot.name)}</span><span aria-hidden="true">×</span></button>`:'';const list=rows(),panels=new Map([...$('planResults').querySelectorAll('.plan-inline-detail:not([hidden])')].map(p=>[p.id,p]));$('planResults').innerHTML=list.slice(0,shown).map(card).join('')||'<p class="empty-state">선택한 조건의 미수집 물고기가 없어요. 검색·어종·낚시터 필터를 확인해 주세요.</p>';
       for(const panel of $('planResults').querySelectorAll('.plan-inline-detail:not([hidden])'))if(panels.get(panel.id)?.dataset.planRoute===panel.dataset.planRoute)panel.replaceWith(panels.get(panel.id));

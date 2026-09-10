@@ -17,7 +17,7 @@ test('all public pages have consistent navigation, valid relative destinations a
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
       assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '낚시']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 13);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 14);
       for (const link of d.querySelectorAll('[data-navigation] a')) {
         const url = new URL(link.href);
         assert.equal(url.origin, 'https://example.test');

@@ -1,5 +1,15 @@
 # 세계를 누비는 어부
 
+## 미끼 아이콘과 구매처
+
+낚시 계획의 시작 미끼, 대체 미끼, 만능 루어와 미끼 준비 목록에서 이름을 누르면 큰 아이콘·구매/교환 가격·NPC·지역·좌표를 표시합니다. 생미끼 물고기는 기존 물고기 상세정보로 연결합니다. 팝업을 열어도 수집 기록은 변경하지 않습니다.
+
+`bait-data.js`는 도감과 같은 Teamcraft 커밋의 `shops.json`, `npcs.json`, `recipes-per-item.json` 및 한국어 NPC·지역·아이템 명칭을 사용합니다. 전승록을 제외한 미끼 98종 중 87종에 NPC 판매/교환 자료가 있고, 22종에 제작법이 있습니다. 상점 자료가 없는 11종은 모두 제작법을 안내합니다. 판매처가 많으면 처음 5곳과 나머지를 펼치는 메뉴로 나눕니다. 상점 개방·우호도·교환 화폐의 실시간 이용 가능 여부를 판정하지 않으므로 한국 서버 게임 내 목록을 확인해야 합니다.
+
+갱신: `node ffxiv/fishing-log/scripts/update-baits.mjs` (`--refresh`로 고정 커밋 원본을 다시 받기). 원본은 `.cache/fishing-baits/<커밋>/`에만 보관하며 필요한 항목만 배포합니다. 데이터의 Teamcraft MIT 라이선스는 기존 `licenses/Teamcraft-MIT.txt`, 게임 아이콘은 Square Enix 소유이며 XIVAPI에서 제공합니다.
+
+기술 사용법은 [어부 스킬 안내](../fisher-skills/)에서 확인할 수 있습니다.
+
 [어부 수첩 열기](https://teo-park.github.io/ffxiv/fishing-log/) · [한국 공식 어부 가이드](https://guide.ff14.co.kr/job/Fisher/31?type=L)
 
 어류도감 **1,517종**, 작살도감 **289종**의 수집 기록과 낚시 조건을 확인하는 무료·비영리 팬 도구입니다. 광고·후원·유료 기능이 없습니다. 수첩·예보·접속 중 알림은 정적 HTML/CSS/JavaScript로 실행하며 회원가입·알림 서버가 없습니다.
