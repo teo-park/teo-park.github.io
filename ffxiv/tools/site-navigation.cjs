@@ -16,9 +16,9 @@ const categories = [
     ['beastmaster/', '마수도감'],
   ] },
   { id: 'fishing', label: '낚시', tools: [
+    ['fisher-skills/', '어부 스킬 안내'],
     ['fishing-log/', '세계를 누비는 어부'],
     ['ocean-fishing/', '항해일지'],
-    ['fisher-skills/', '어부 스킬 안내'],
   ] },
 ];
 const journalPages = [
