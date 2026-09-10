@@ -113,10 +113,13 @@
     }
     return { ...bait, bite: row.Bite || '', conditions, overlaps: [...overlaps], unknown };
   }
-  function recommend(rows, { gp = 700, objective = 'efficiency', allowTriple = true } = {}) {
+  function recommend(rows, { gp = 700, objective = 'efficiency', allowTriple = true, prizeCatch = true } = {}) {
     gp = Number(gp);
     if (!Number.isFinite(gp) || gp < 0) gp = 0;
-    const burst = objective === 'burst';
+    // Community strategy: conserve GP for currents; spend it on large, high-yield
+    // catches there. See sources/#scoring. These are successful-catch scores,
+    // not expected values: no catch probabilities or future GP are fabricated.
+    const community = objective === 'community', burst = community || objective === 'burst';
     const metric = option => burst ? option.total.min : option.efficiency;
     const result = new Map(), pools = new Map();
     for (const row of rows) {
@@ -129,7 +132,14 @@
         if (!count || count.min < 1 || !Number.isInteger(count.min) || !Number.isInteger(count.max)) continue;
         const total = { min: base * count.min, max: base * count.max };
         const extra = { min: total.min - base, max: total.max - base };
-        options.push({ action, cost, count, total, extra, efficiency: extra.min / cost * 100, affordable: cost <= gp });
+        options.push({ action, cost, count, total, extra, prize: false, efficiency: extra.min / cost * 100, affordable: cost <= gp });
+        // Prize Catch must be used before casting and cancels an active mooch.
+        if (community && prizeCatch && hints.field !== 'Mooch' && count.min > 1) {
+          const large = { min: total.min * 2, max: total.max * 2 };
+          const largeExtra = { min: large.min - base, max: large.max - base };
+          options.push({ action, cost: cost + 200, count, total: large, extra: largeExtra,
+            prize: true, efficiency: largeExtra.min / (cost + 200) * 100, affordable: cost + 200 <= gp });
+        }
       }
       const affordable = options.filter(option => option.affordable && option.extra.min > 0)
         .sort((a, b) => metric(b) - metric(a) || a.cost - b.cost || b.total.min - a.total.min);
@@ -138,6 +148,18 @@
         conditional: hints.conditions.length > 0,
         reason: best ? '' : !options.length ? '수량 자료 없음' : !options.some(option => option.extra.min > 0) ? '일반 낚아채기로 GP 보존' : 'GP 부족 · 일반 낚아채기로 GP 보존' };
       result.set(row, entry);
+      if (community && !row.TimeFrameDay) {
+        entry.best = null;
+        entry.role = row.spectralTrigger ? 'trigger' : 'prepare';
+        entry.rank = row.spectralTrigger ? 1 : null;
+        entry.reason = row.spectralTrigger ? '환해류 유도 · GP 준비' : '환해류 대비 GP 보존';
+        continue;
+      }
+      if (community) {
+        // A target for AFTER resource recovery, not an affordable action now.
+        entry.recoveryTarget = options.filter(option => option.extra.min > 0)
+          .sort((a, b) => metric(b) - metric(a) || a.cost - b.cost)[0] || null;
+      }
       if (!best) continue;
       const pool = JSON.stringify([row.Stop || '', !!row.TimeFrameDay, entry.conditional]);
       if (!pools.has(pool)) pools.set(pool, []);
@@ -151,6 +173,13 @@
     }
     return result;
   }
+  function compareRecommendations(a, b) {
+    const ar = a.LocalRecommendation, br = b.LocalRecommendation;
+    const aRank = ar?.rank ?? Infinity, bRank = br?.rank ?? Infinity;
+    if (aRank !== bRank) return aRank < bRank ? -1 : 1;
+    // Equal ranks: directly catchable fish precede the separate conditional pool.
+    return Number(!!ar?.conditional) - Number(!!br?.conditional);
+  }
   function plan(rows, catalog, caught, hideCaught, species = '', scoreMode = '', strategy = null) {
     const groupFiltering = Array.isArray(species) || !!species;
     const selectedGroups = new Set(Array.isArray(species) ? species : species ? [species] : []);
@@ -160,7 +189,7 @@
     if (scoring) {
       // Older callers can still request the original haul-only comparison.
       if (recommendations) {
-        for (const [row, entry] of recommendations) if (entry.rank && entry.rank <= 3) scoreTargets.add(key(row.Fish));
+        for (const [row, entry] of recommendations) if (entry.best && entry.rank && entry.rank <= 3) scoreTargets.add(key(row.Fish));
       } else {
         for (const spectral of [false, true]) {
           const candidates = rows.filter(row => !!row.TimeFrameDay === spectral && haulScore(row, scoreMode).min > 0)
@@ -273,7 +302,7 @@
       .map(([id]) => Number(id)).sort((a, b) => a - b);
     return { completed };
   }
-  const api = { name, key, alwaysVisible, haulScore, numberRange, baitInfo, biteTimeText, recommend, dependencies, createCatalog, voyageBaits, plan, read, caught, setCaught, parseImport, importCaught, importTeamcraft, exportTeamcraft };
+  const api = { name, key, alwaysVisible, haulScore, numberRange, baitInfo, biteTimeText, recommend, compareRecommendations, dependencies, createCatalog, voyageBaits, plan, read, caught, setCaught, parseImport, importCaught, importTeamcraft, exportTeamcraft };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.OceanCollection = api;
 })(typeof window === 'undefined' ? globalThis : window);

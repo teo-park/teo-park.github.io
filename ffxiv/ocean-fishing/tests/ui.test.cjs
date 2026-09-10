@@ -161,6 +161,40 @@ async function open(page,storage=memory(),failData=false) {
   const submit=value=>{input('#importText',value);$('#pasteImport').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));};
   return {w,d,$,input,submit,storage,downloads,errors,requests,close:()=>w.close()};
 }
+for(const route of ['indigo','ruby'])test(`${route}: score view defaults to ranked community strategy and keeps all fish and preferences`,async()=>{
+  const storage=memory({'ocean:strategy':JSON.stringify({gp:900,objective:'efficiency'})});
+  let ui=await open(route,storage);
+  try{
+    ui.$('[name=purpose][value=all]').click();
+    ui.input('[data-zone="0-regular"] [data-zone-option="sort"]','name','change');
+    const ids=()=>[...ui.d.querySelectorAll('#fishPanels tr[data-fish-id]')].map(el=>el.dataset.fishId).sort();
+    const all=ids();
+    ui.$('[name=purpose][value=score]').click();
+    assert.equal(ui.$('#strategyObjective').value,'community');assert.equal(ui.$('#strategyGP').value,'900');
+    assert.equal(ui.$('#scoreGuide').hidden,false);assert.deepEqual(ids(),all);
+    assert.equal(ui.$('[data-zone="0-regular"] [data-zone-option="scoreSort"]').value,'recommendation');
+    for(const zone of ui.d.querySelectorAll('.fishing-zone')){
+      const tags=[...zone.querySelectorAll('tbody .recommendation')];
+      const ranks=tags.map(t=>+(t.textContent.match(/(\d+)순위/)?.[1]||Infinity));
+      assert.deepEqual(ranks,[...ranks].sort((a,b)=>a-b),zone.dataset.zone);
+      assert.equal(ranks[0],1,zone.dataset.zone);
+    }
+    assert.match(ui.$('.spectral .target-details').textContent,/한결같은 챔질/);
+    assert.match(ui.$('.spectral .recommendation').textContent,/대물/);
+    ui.input('#strategyPrize',false,'change');
+    for(const tag of ui.d.querySelectorAll('.spectral .recommendation'))assert.doesNotMatch(tag.textContent,/대물/);
+    ui.input('#strategyObjective','efficiency','change');
+    assert.equal(ui.$('#strategyPrize').closest('label').hidden,true);
+    ui.$('[name=purpose][value=all]').click();
+    assert.equal(ui.$('#scoreGuide').hidden,true);
+    assert.equal(ui.$('[data-zone="0-regular"] [data-zone-option="sort"]').value,'name');
+    assert.deepEqual(ids(),all);assert.deepEqual(ui.errors,[]);
+    ui.close();ui=await open(route,storage);
+    ui.$('[name=purpose][value=score]').click();
+    assert.equal(ui.$('#strategyObjective').value,'efficiency');assert.equal(ui.$('#strategyPrize').checked,false);
+    assert.equal(ui.$('#strategyGP').value,'900');assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
 for(const route of ['indigo','ruby'])test(`${route}: native route UI, expanded departures, missions, GP and catch undo`,async()=>{
   const ui=await open(route);const {$,d,input,errors,requests}=ui;
   try {

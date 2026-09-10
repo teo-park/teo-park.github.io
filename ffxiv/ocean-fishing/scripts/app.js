@@ -16,9 +16,11 @@
   let achievements;
   const achievementOpen = new Set();
   let query = '', uncaught = false, checkOpen = new Set(), checklistInitialized = false, timer, undo;
-  let strategy = {gp:700, objective:'efficiency', ...json('ocean:strategy', {})};
+  let strategy = {gp:700, prizeCatch:true, ...json('ocean:strategy', {})};
   strategy.gp = Number.isFinite(Number(strategy.gp)) ? Math.max(0,Math.min(9999,Number(strategy.gp))) : 700;
-  strategy.objective = strategy.objective === 'burst' ? 'burst' : 'efficiency';
+  strategy.objective = strategy.version === 2 && ['community','burst','efficiency'].includes(strategy.objective) ? strategy.objective : 'community';
+  strategy.prizeCatch = strategy.prizeCatch !== false;
+  strategy.version = 2;
   let scoreMode = 'TH';
   const zoneOptions = new Map();
   const checkState = () => C.read(localStorage);
@@ -111,14 +113,19 @@
   }
   function recommendation(entry) {
     if(!entry) return '';
-    if(!entry.best) return `<span class="recommendation neutral">${esc(entry.reason)}</span>`;
-    const best=entry.best, action=best.action==='DH'?'이중':'삼중';
-    return `<span class="recommendation ${entry.rank<=3?'priority':''}">${entry.conditional?'조건부 ':''}${entry.rank<=3?entry.rank+'순위 · ':''}${action} 추천</span><small class="efficiency">${best.cost} GP · 추가 ${range(best.extra)}점 · 100 GP당 +${best.efficiency.toFixed(1)}점</small><details class="target-details"><summary>저격 조건</summary><p>${esc(entry.hints.label)} · ${esc(C.biteTimeText(entry.hints.rawTime))} · ${esc(entry.hints.bite)}</p><p>${entry.hints.overlaps.length?'같은 미끼·입질·시간이 겹치는 물고기: '+entry.hints.overlaps.map(esc).join(', '):'자료상 같은 입질 구간과 겹치는 물고기 없음'}</p>${entry.hints.unknown?'<p>일부 입질 시간은 미확인입니다. 정확한 구분을 보장하지 않아요.</p>':''}<p>날씨와 직감 조건은 게임에서 확인해 주세요.</p></details>`;
+    if(entry.role) return `<span class="recommendation ${entry.role==='trigger'?'priority':'neutral'}">${entry.rank?'1순위 · ':''}${esc(entry.reason)}</span>`;
+    const best=entry.best, target=entry.recoveryTarget, community=strategy.objective==='community';
+    const action=o=>(o.prize?'대물 + ':'')+(o.action==='DH'?'이중':'삼중');
+    const recovery=target&&(!best||target.total.min>best.total.min)?`<small class="efficiency">회복 후 목표: ${action(target)} · ${target.cost} GP · ${range(target.total)}점</small>`:'';
+    if(!best) return `<span class="recommendation neutral">${esc(entry.reason)}</span>${recovery}`;
+    const rotation=community?`<p>${best.prize?'투척 전 대물 낚시 → ':''}${entry.hints.field==='Mooch'?'생미끼 낚시':'낚싯대 던지기'} → 목표 입질에 ${best.action==='DH'?'이중':'삼중'} 낚아채기</p>${!entry.conditional&&target?`<p>확인 후 반복: 한결같은 챔질 → ${target.prize?'대물 낚시 → ':''}낚싯대 던지기 → ${target.action==='DH'?'이중':'삼중'} 낚아채기.</p><p>반복 1회 ${range(target.total)}점 · ${target.cost+350} GP (첫 어획 별도·중간 회복 필요)</p>`:'<p>직감·생미끼 준비가 필요한 조건부 대상입니다. 활성 생미끼에는 대물 낚시·한결같은 챔질을 쓰지 마세요.</p>'}`:'';
+    return `<span class="recommendation ${entry.rank<=3?'priority':''}">${entry.conditional?'조건부 ':''}${entry.rank<=3?entry.rank+'순위 · ':''}${action(best)} 추천</span><small class="efficiency">${community?`${best.cost} GP · ${best.prize?'월척 ':''}${range(best.total)}점`:`${best.cost} GP · 추가 ${range(best.extra)}점 · 100 GP당 +${best.efficiency.toFixed(1)}점`}</small>${recovery}<details class="target-details"><summary>${community?'저격 조건·사용 순서':'저격 조건'}</summary>${rotation}<p>${esc(entry.hints.label)} · ${esc(C.biteTimeText(entry.hints.rawTime))} · ${esc(entry.hints.bite)}</p><p>${entry.hints.overlaps.length?'같은 미끼·입질·시간이 겹치는 물고기: '+entry.hints.overlaps.map(esc).join(', '):'자료상 같은 입질 구간과 겹치는 물고기 없음'}</p>${entry.hints.unknown?'<p>일부 입질 시간은 미확인입니다. 정확한 구분을 보장하지 않아요.</p>':''}<p>날씨와 직감 조건은 게임에서 확인해 주세요.</p></details>`;
   }
   function table(rows, id, options={}) {
     const score=purpose==='score' && !isChecklist;
-    const sort=options.sort || 'order';
+    const sort=score?(options.scoreSort||'recommendation'):(options.sort||'order');
     rows=[...rows];
+    if(sort==='recommendation') rows.sort(C.compareRecommendations);
     if(sort==='name') rows.sort((a,b)=>a.FishTranslated.localeCompare(b.FishTranslated,'ko'));
     if(sort==='points') rows.sort((a,b)=>Number(b.Points)-Number(a.Points));
     if(sort==='triple') rows.sort((a,b)=>(points(b,'TH')?.min||0)-(points(a,'TH')?.min||0));
@@ -127,7 +134,7 @@
     return `<div class="fish-table-scroll" role="region" aria-label="물고기 표 · 작은 화면에서는 가로로 스크롤" tabindex="0"><table id="${esc(id)}" class="fish-table ${score?'score-table':''}"><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(f=>{
       const rec=f.LocalRecommendation, preferred=rec?.best?.action;
       const badges=[f.LocalAlwaysVisible?`<span class="fish-tag">${f.spectralTrigger?'환해류 유도 · ':''}항상 표시</span>`:'',f.LocalGroupMatch?`<span class="fish-tag">${purpose==='achievement'?'업적':'과제'} 대상</span>`:'',f.LocalRequiredBy?.length?`<span class="fish-tag condition" title="${esc(f.LocalRequiredBy.join(', '))}에 필요한 조건 물고기">조건용</span>`:''];
-      return `<tr data-fish-id="${f.id}" class="${caught(f)?'is-caught':''}"><td><div class="fish-heading">${image(f)}<div><strong>${esc(f.FishTranslated)}</strong><span class="fish-stars" aria-label="별 ${esc(f.Stars)}개">${'★'.repeat(Math.min(5,Number(f.Stars)||0))}</span></div></div><div class="collection-control">${catchToggle(f)}${badges.join('')}</div>${conditions(f)}${f.DataNotes?`<details class="data-note"><summary>자료 참고</summary><p>${esc(f.DataNotes)}</p></details>`:''}${score?recommendation(rec):''}</td><td><strong class="bite bite-${f.Bite.length}">${esc(f.Bite||'?')}</strong><small>${esc(f.hooksetName || (f.Hookset==='Precision'?'섬세한 낚아채기':'강력한 낚아채기'))}</small></td><td><strong class="bait-label">${esc(baitText(f))}</strong><small>${esc(C.biteTimeText(C.baitInfo(f).rawTime))}</small></td><td class="points">${f.Points?Number(f.Points).toLocaleString():'미확인'}</td>${['DH','TH'].map(mode=>`<td class="points ${score&&preferred===mode?'score-emphasis':''}">${range(points(f,mode))}<small>${C.numberRange(f[mode])?range(C.numberRange(f[mode]))+'마리':'수량 미확인'}</small>${score&&preferred===mode?'<span class="recommended-cell">추천</span>':''}</td>`).join('')}<td><div>${f.spectral?['Day','Sunset','Night'].filter(p=>f['TimeFrame'+p]==='Yes').map(period).join(' '):'모든 시간'}</div><small>${esc(weatherText(f))}</small></td><td>${esc(f.SpeciesTranslated||'—')}</td><td class="bait-times">${f.baits.map(b=>`<div><span>${esc(b.kind==='Mooch'?'생미끼 · '+label(b.name):b.label)}</span> ${esc(C.biteTimeText(b.time))}</div>`).join('')||'자료 없음'}</td></tr>`;
+      return `<tr data-fish-id="${f.id}" class="${caught(f)?'is-caught':''}"><td><div class="fish-heading">${image(f)}<div><strong>${esc(f.FishTranslated)}</strong><span class="fish-stars" aria-label="별 ${esc(f.Stars)}개">${'★'.repeat(Math.min(5,Number(f.Stars)||0))}</span></div></div><div class="collection-control">${catchToggle(f)}${badges.join('')}</div>${conditions(f)}${f.DataNotes?`<details class="data-note"><summary>자료 참고</summary><p>${esc(f.DataNotes)}</p></details>`:''}${score?recommendation(rec):''}</td><td><strong class="bite bite-${f.Bite.length}">${esc(f.Bite||'?')}</strong><small>${esc(f.hooksetName || (f.Hookset==='Precision'?'섬세한 낚아채기':'강력한 낚아채기'))}</small></td><td><strong class="bait-label">${esc(baitText(f))}</strong><small>${esc(C.biteTimeText(C.baitInfo(f).rawTime))}</small></td><td class="points">${f.Points?Number(f.Points).toLocaleString():'미확인'}</td>${['DH','TH'].map(mode=>`<td class="points ${score&&preferred===mode?'score-emphasis':''}">${range(points(f,mode))}<small>${C.numberRange(f[mode])?range(C.numberRange(f[mode]))+'마리':'수량 미확인'}</small>${score&&preferred===mode?`<span class="recommended-cell">${rec.best.prize?'월척 '+range(rec.best.total)+'점':'추천'}</span>`:''}</td>`).join('')}<td><div>${f.spectral?['Day','Sunset','Night'].filter(p=>f['TimeFrame'+p]==='Yes').map(period).join(' '):'모든 시간'}</div><small>${esc(weatherText(f))}</small></td><td>${esc(f.SpeciesTranslated||'—')}</td><td class="bait-times">${f.baits.map(b=>`<div><span>${esc(b.kind==='Mooch'?'생미끼 · '+label(b.name):b.label)}</span> ${esc(C.biteTimeText(b.time))}</div>`).join('')||'자료 없음'}</td></tr>`;
     }).join('')}</tbody></table></div>`;
   }
   function loadPreferences() {
@@ -237,6 +244,7 @@
     if(!$('achievementChoices').children.length) $('achievementChoices').innerHTML=groups.filter(([id])=>achievements.goals.has(id)).map(([id,text])=>`<label class="species-option"><input type="checkbox" name="achievementGroup" value="${esc(id)}">${esc(text)}</label>`).join('');
     document.querySelectorAll('[name=achievementGroup]').forEach(input=>{input.checked=achievementSpecies.includes(input.value);});
     $('scoreMode').value=scoreMode; $('strategyGP').value=strategy.gp; $('strategyObjective').value=strategy.objective;
+    $('strategyPrize').checked=strategy.prizeCatch;
     $('purposeHelp').textContent={all:'모든 물고기를 표시해요. 수집 상태와 관계없이 미끼를 확인할 수 있어요.',collection:'미수집 물고기와 필요한 직감·생미끼 조건을 보여줘요. 일반 구간의 유령·환해 물고기는 항상 남겨요.',mission:species.length?`선상과제 ${species.length}개 물고기군과 필요한 조건 물고기를 함께 보여줘요. 환해류 유도 물고기는 항상 표시해요.`:'선상과제에 나온 물고기군을 선택하세요. 두 종류 이상 함께 선택할 수 있어요.',achievement:achievementSpecies.length?'선택한 업적의 목표 수량·추천 항로·구간별 공략과 대상 물고기를 보여줘요.':'전체 업적을 보여줘요. 목표를 선택하면 해당 업적의 항로와 물고기로 좁혀져요.',score:'모든 점수를 표시하고, 현재 GP로 가능한 기술을 추천해요. 목표 물고기를 낚는 데 성공한다는 전제입니다.'}[purpose];
   }
   function renderFishing() {
@@ -244,6 +252,8 @@
     const plannedFish=planned();
     renderAchievements();
     renderVoyageBaits(plannedFish);
+    $('scoreGuide').hidden=purpose!=='score';
+    $('strategyPrize').closest('label').hidden=strategy.objective!=='community';
     $('selectedTime').textContent=time(selected.start)+' 출항';
     $('selectedStops').textContent=selected.stops.map(stop=>stop.name).join(' → ');
     $('returnFirst').hidden=selected.start===voyages[0].start;
@@ -253,7 +263,7 @@
     }).join('');
     $('fishPanels').innerHTML=selected.stops.map((stop,i)=>`<section role="tabpanel" id="stopPanel${i}" aria-labelledby="stopTab${i}" ${i!==activeStop?'hidden':''}>${[false,true].map(spectral=>{
       const id=`${i}-${spectral?'spectral':'regular'}`, options=zoneOptions.get(id)||{}, visible=plannedFish.filter(f=>V.available(f,selected,i)&&f.spectral===spectral);
-      return `<section class="fishing-zone ${spectral?'spectral':''}" data-zone="${id}"><header><h2>${spectral?'환해류':'일반 구간'} <small>${visible.length}종</small></h2><label class="subtle-option"><input type="checkbox" data-zone-option="fabled" ${options.fabled?'checked':''}> 전설어 조건 중심</label></header>${baitSummary(visible)}<div class="zone-tools"><label>정렬 <select data-zone-option="sort"><option value="order">도감 순서</option><option value="name" ${options.sort==='name'?'selected':''}>이름</option><option value="points" ${options.sort==='points'?'selected':''}>기본 점수 높은 순</option><option value="triple" ${options.sort==='triple'?'selected':''}>삼중 점수 높은 순</option></select></label><label>미끼 <select data-zone-option="bait"><option value="">모든 미끼</option>${[['Ragworm','바위털갯지렁이'],['Krill','크릴'],['PlumpWorm','굵은지렁이'],['VersatileLure','만능 루어'],['Special','특수 미끼'],['Mooch','생미끼']].map(([value,label])=>`<option value="${value}" ${options.bait===value?'selected':''}>${label}</option>`).join('')}</select></label></div>${purpose==='score'?'<p class="score-explanation">추가 점수 = 여러 마리 점수 − 일반 한 마리 점수. 이중 400 GP · 삼중 700 GP. 직감·생미끼 준비 비용, GP 회복, 월척·항해 보너스는 계산에 포함하지 않아요.</p>':''}${table(visible,'fish-'+id,options)}</section>`;
+      return `<section class="fishing-zone ${spectral?'spectral':''}" data-zone="${id}"><header><h2>${spectral?'환해류':'일반 구간'} <small>${visible.length}종</small></h2><label class="subtle-option"><input type="checkbox" data-zone-option="fabled" ${options.fabled?'checked':''}> 전설어 조건 중심</label></header>${baitSummary(visible)}<div class="zone-tools"><label>정렬 <select data-zone-option="${purpose==='score'?'scoreSort':'sort'}">${purpose==='score'?`<option value="recommendation" ${!options.scoreSort||options.scoreSort==='recommendation'?'selected':''}>추천 1순위 우선</option>`:''}<option value="order" ${(purpose==='score'?options.scoreSort:options.sort)==='order'?'selected':''}>도감 순서</option><option value="name" ${(purpose==='score'?options.scoreSort:options.sort)==='name'?'selected':''}>이름</option><option value="points" ${(purpose==='score'?options.scoreSort:options.sort)==='points'?'selected':''}>기본 점수 높은 순</option><option value="triple" ${(purpose==='score'?options.scoreSort:options.sort)==='triple'?'selected':''}>삼중 점수 높은 순</option></select></label><label>미끼 <select data-zone-option="bait"><option value="">모든 미끼</option>${[['Ragworm','바위털갯지렁이'],['Krill','크릴'],['PlumpWorm','굵은지렁이'],['VersatileLure','만능 루어'],['Special','특수 미끼'],['Mooch','생미끼']].map(([value,label])=>`<option value="${value}" ${options.bait===value?'selected':''}>${label}</option>`).join('')}</select></label></div>${purpose==='score'?`<p class="score-explanation">${strategy.objective==='community'?(spectral?'다음 투척 기준 · 현재 GP로 가능한 최고 점수 조합. 대물 낚시는 월척 2배, 생미끼는 별도 준비.':'환해류 전 준비 기준 · 유도 물고기 우선, GP는 환해류에 집중. 환해류 종료 후에는 다른 추천 기준을 사용할 수 있어요.'):'추가 점수 = 여러 마리 점수 − 일반 한 마리 점수. 이중 400 GP · 삼중 700 GP.'} 표의 기본·이중·삼중 점수는 보통 크기 기준입니다. 추천은 수량 범위의 최솟값을 비교하며, 포획 확률·향후 GP 회복·항해 보너스는 계산하지 않아요.</p>`:''}${table(visible,'fish-'+id,options)}</section>`;
     }).join('')}</section>`).join('');
     if(focusZone&&focusOption)document.querySelector(`[data-zone="${focusZone}"] [data-zone-option="${focusOption}"]`)?.focus({preventScroll:true});
   }
@@ -341,6 +351,7 @@
       });
       $('scoreMode').addEventListener('change',event=>{scoreMode=event.target.value;write('ocean:score:'+route,scoreMode);renderFishing();});
       $('strategyGP').addEventListener('input',event=>{strategy.gp=Math.max(0,Math.min(9999,Number(event.target.value)||0));write('ocean:strategy',JSON.stringify(strategy));renderFishing();});
+      $('strategyPrize').addEventListener('change',event=>{strategy.prizeCatch=event.target.checked;write('ocean:strategy',JSON.stringify(strategy));renderFishing();});
       $('strategyObjective').addEventListener('change',event=>{strategy.objective=event.target.value;write('ocean:strategy',JSON.stringify(strategy));renderFishing();});
       $('scheduleToggle').addEventListener('click',()=>{expanded=!expanded;renderSchedule();});
       $('moreVoyages').addEventListener('click',()=>{scheduleCount=Math.min(144,scheduleCount+12);refreshVoyages();renderSchedule();});

@@ -98,3 +98,49 @@ test('optional mooching keeps alternatives in prerequisites without making bait 
   const target=fish('From B',{BestBait:'M!B',BaitMoochType:'M!B',BaitMooch:'4 - 5'});
   assert.equal(api.recommend([target,row]).get(target).hints.unknown,true,'unmeasured alternate mooch is not assumed to have an exact window');
 });
+
+test('community strategy conserves normal-water GP and prioritizes the spectral trigger', () => {
+  const rows=[fish('Expensive normal', {Points:1000}),fish('Trigger',{spectralTrigger:true}),fish('Spectral',{TimeFrameDay:'Yes'})];
+  const planned=api.plan(rows,api.createCatalog(rows),()=>true,true,'','TH',{gp:900,objective:'community'});
+  assert.equal(planned[0].LocalRecommendation.best,null);
+  assert.equal(planned[1].LocalRecommendation.role,'trigger');
+  assert.equal(planned[1].LocalRecommendation.rank,1);
+  assert.equal(planned[1].LocalScore,null,'preparation does not claim a multi-hook score');
+  assert.equal(planned[2].LocalRecommendation.best.action,'TH');
+  assert.equal(planned.length,rows.length);
+});
+
+test('community strategy budgets Prize Catch before casting and exposes an unfunded recovery target separately', () => {
+  const row=fish('Spectral',{TimeFrameDay:'Yes',DH:4,TH:7});
+  const get=gp=>recommendation(row,{gp,objective:'community'});
+  assert.equal(get(399).best,null);
+  assert.equal(get(599).best.action,'DH');assert.equal(get(599).best.prize,false);
+  for(const gp of [600,699,700,899]){
+    const best=get(gp).best;
+    assert.equal(best.action,'DH');assert.equal(best.prize,true);assert.equal(best.cost,600);
+    assert.deepEqual(best.total,{min:800,max:800});
+    assert.equal(get(gp).recoveryTarget.cost,900);
+  }
+  const full=get(900).best;assert.equal(full.action,'TH');assert.equal(full.prize,true);
+  assert.deepEqual(full.total,{min:1400,max:1400});
+  const noPrize=recommendation(row,{gp:700,objective:'community',prizeCatch:false});
+  assert.equal(noPrize.best.action,'TH');assert.equal(noPrize.best.prize,false);
+  assert.equal(recommendation(row,{gp:900,objective:'community',allowTriple:false}).best.action,'DH');
+  const ranged=recommendation({...row,DH:'2 - 4',TH:'3 - 7'},{gp:900,objective:'community'});
+  assert.deepEqual(ranged.best.total,{min:600,max:1400});
+});
+
+test('community never spends Prize Catch on an active mooch or guesses missing counts', () => {
+  const row=fish('Mooch',{TimeFrameDay:'Yes',BestBait:'M!Prey',BaitMoochType:'Prey'});
+  const rec=recommendation(row,{gp:2000,objective:'community'});
+  assert.ok(rec.conditional);assert.ok(rec.options.every(o=>!o.prize));
+  assert.equal(recommendation({...row,DH:'',TH:''},{gp:2000,objective:'community'}).best,null);
+  assert.equal(recommendation({...row,DH:'1',TH:'1'},{gp:2000,objective:'community'}).best,null);
+});
+
+test('recommendation ordering puts first ranks first, direct before conditional ties, and unranked last', () => {
+  const row=(label,rank,conditional=false)=>({label,LocalRecommendation:{rank,conditional}});
+  const rows=[row('unranked',null),row('second',2),row('conditional first',1,true),row('first',1),row('tie',1),{label:'missing'}];
+  assert.deepEqual([...rows].sort(api.compareRecommendations).map(r=>r.label),['first','tie','conditional first','second','unranked','missing']);
+  assert.equal(rows[0].label,'unranked');
+});
