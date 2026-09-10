@@ -6,13 +6,29 @@ import {fileURLToPath} from 'node:url';
 export const endpoint='https://gubal.ffxivteamcraft.com/graphql';
 export const key=(id,spotKey,bait)=>`${id}|${spotKey}|${bait}`;
 export function summarize(rows,allowed){
-  const ranges={};
+  const ranges={},bins=new Map();
   for(const row of rows){
     const k=key(row.itemId,'rod:'+row.spot,row.baitId),t=row.flooredBiteTime,n=row.occurences;
     if(!allowed.has(k)||!Number.isInteger(t)||t<=1||t>=600||!Number.isInteger(n)||n<3)continue;
     const r=ranges[k]??={min:t,max:t+1,samples:0};
     // A floored second bin t includes [t, t+1), so preserve its upper edge.
     r.min=Math.min(r.min,t);r.max=Math.max(r.max,t+1);r.samples+=n;
+    if(!bins.has(k))bins.set(k,new Map());
+    const histogram=bins.get(k);histogram.set(t,(histogram.get(t)||0)+n);
+  }
+  for(const [k,r] of Object.entries(ranges)){
+    const histogram=[...bins.get(k)].sort(([a],[b])=>a-b);
+    const ranks=[Math.floor((r.samples+1)/2),Math.floor(r.samples/2)+1];
+    let count=0,sum=0;const middle=[];
+    for(const [t,n] of histogram){
+      // Exact subsecond observations are unavailable. Use each bin's midpoint,
+      // weighted by its catch count, never the midpoint of the entire range.
+      sum+=(t+0.5)*n;
+      for(let i=0;i<ranks.length;i++)if(ranks[i]>count&&ranks[i]<=count+n)middle[i]=t+0.5;
+      count+=n;
+    }
+    r.median=Math.round((middle[0]+middle[1])/2*10)/10;
+    r.mean=Math.round(sum/r.samples*10)/10;
   }
   return ranges;
 }
@@ -50,7 +66,7 @@ async function main(){
   const allowed=new Set(rows.filter(r=>byId.has(r.itemId)&&data.spots['rod:'+r.spot]).map(r=>key(r.itemId,'rod:'+r.spot,r.baitId)));
   const ranges=summarize(rows,allowed);
   if(!Object.keys(ranges).length)throw Error('Empty snapshot; existing bite times were not replaced.');
-  const dates=all.map(x=>x.fetchedAt).sort(),result={schemaVersion:1,source:endpoint,sourceRevision:data.revisions.teamcraft,fetchedFrom:dates[0],fetchedThrough:dates.at(-1),routeCount:routes.size,coveredRoutes:[...routes.keys()].filter(k=>ranges[k]).length,observedCombinations:Object.keys(ranges).length,ranges:Object.fromEntries(Object.entries(ranges).sort(([a],[b])=>a.localeCompare(b)))};
+  const dates=all.map(x=>x.fetchedAt).sort(),result={schemaVersion:2,statisticsMethod:'count-weighted-bin-midpoints',binWidthSeconds:1,source:endpoint,sourceRevision:data.revisions.teamcraft,fetchedFrom:dates[0],fetchedThrough:dates.at(-1),routeCount:routes.size,coveredRoutes:[...routes.keys()].filter(k=>ranges[k]).length,observedCombinations:Object.keys(ranges).length,ranges:Object.fromEntries(Object.entries(ranges).sort(([a],[b])=>a.localeCompare(b)))};
   await fs.writeFile(new URL('bite-times.js',root),'/* Teamcraft aggregate observations; see README.md for scope and rounding. */\nwindow.FISHING_BITE_TIMES='+JSON.stringify(result)+';\n');
   console.log(JSON.stringify({routeCount:result.routeCount,coveredRoutes:result.coveredRoutes,fishCount:new Set(Object.keys(ranges).map(k=>k.split('|')[0])).size}));
 }

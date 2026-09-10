@@ -79,7 +79,7 @@
       else list.sort((a,b)=>(purpose==='big'?Number(!!a.always)-Number(!!b.always):0)||(a.start??Infinity)-(b.start??Infinity)||a.fish.order-b.fish.order);
       return list;
     }
-    function biteTime(id,route){const range=route&&model.biteTime(id,route);return range?`<span class="plan-bite-time" title="같은 낚시터·미끼의 관측 ${range.samples.toLocaleString()}건 · 모으기·루어 사용 여부 미구분">약 ${range.min}–${range.max}초</span>`:'<span class="plan-bite-time is-unknown">시간 미확인</span>';}
+    function biteTime(id,route){const range=route&&model.biteTime(id,route),stats=window.FishingBook.biteStats(range);return `<span class="plan-bite-time${range?'':' is-unknown'}" title="${esc(stats.title)}">${esc(stats.primary)}</span>`;}
     const dateText=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(result.now+F.KST).getUTCFullYear()?date:longDate).format(ms);
     const snagging=route=>route.snagging?'<span class="plan-snagging">갈고리 낚시 필요</span>':'';
     const baitLink=id=>`<button type="button" class="plan-bait-link" data-bait-detail="${id}" aria-haspopup="dialog" aria-controls="baitDialog" aria-label="${esc(model.byId.get(id)?.name||id)} 미끼 정보">${esc(model.byId.get(id)?.name||id)}</button>`;

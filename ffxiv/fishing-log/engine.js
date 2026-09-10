@@ -84,5 +84,10 @@
     for(const c of competitors)windows=windows.flatMap(([start,end])=>c.time.max<=start||c.time.min>=end?[[start,end]]:[[start,Math.max(start,c.time.min)],[Math.min(end,c.time.max),end]].filter(([a,b])=>a<b));
     return windows;
   }
-  return {normalize,initials,comparisonTugs,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows};
+  function biteStats(observation){
+    if(!observation)return {range:'시간 미확인',primary:'시간 미확인',central:'',detail:'시간 미확인',title:'같은 낚시터·미끼의 입질 기록 없음'};
+    const r=observation,range=`약 ${r.min}–${r.max}초`,median=Number.isFinite(r.median)?`중앙값 약 ${r.median}초`:'',mean=Number.isFinite(r.mean)?`평균 약 ${r.mean}초`:'',central=[median,mean].filter(Boolean).join(' · '),detail=[central,range].filter(Boolean).join(' · ');
+    return {range,primary:median?`중앙 ${r.median}초`:range,central,detail,title:`${detail} · 같은 낚시터·미끼의 관측 ${r.samples.toLocaleString()}건${central?' · 1초 구간별 건수로 추정한 중앙값·평균':''} · 밑밥·루어 사용 여부 미구분`};
+  }
+  return {normalize,initials,comparisonTugs,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows,biteStats};
 });

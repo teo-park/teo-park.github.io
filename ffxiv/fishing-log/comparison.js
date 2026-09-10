@@ -2,7 +2,7 @@
   'use strict';
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const tugs={0:'!!',1:'!!!',2:'!'},hooks={0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'};
-  const rangeText=r=>r?`약 ${r.min}–${r.max}초`:'시간 미확인';
+  const rangeText=(r,compact=false)=>{const stats=window.FishingBook.biteStats(r);return `<span class="bite-observation" title="${esc(stats.title)}">${stats.central?`<span class="bite-central">${esc(compact?stats.primary:stats.central)}</span> `:''}<span class="bite-range">${esc(stats.range)}</span></span>`;};
   function mount({model,reference}){
     function render(route,fish,index,excludedId=0,compact=false){
       if(!route.bait||route.tug===undefined)return '';
@@ -30,7 +30,7 @@
           const state=excluded?'제외 가정':!entry.baitKnown?'미끼 미확인':!entry.tugKnown?'입질 미확인':entry.hooksetKnown===false?'낚아채기 미확인':!entry.time||!target?'시간 미확인':overlap?'겹침':'분리';
           const tackle=[...new Set(entry.routes.map(r=>(tugs[r.tug]||'?')+' '+(hooks[r.hookset]||'낚아채기 미확인')))].join(' / ');
           const conditions=[entry.fish.timed?'시간 조건':'',entry.fish.weathered?'날씨 조건':'',entry.routes.some(r=>r.predators?.length)?'직감 필요':'',entry.routes.some(r=>r.snagging)?'갈고리 필요':''].filter(Boolean).join(' · ');
-          return `<tr class="${excluded?'compare-excluded':''}"><td>${reference(entry.fish.id)}<small>${esc(tackle)}${conditions?' · '+esc(conditions):''}</small></td><td>${rangeText(entry.time)}</td><td><span class="compare-state ${overlap?'is-overlap':''}">${state}</span></td></tr>`;
+          return `<tr class="${excluded?'compare-excluded':''}"><td>${reference(entry.fish.id)}<small>${esc(tackle)}${conditions?' · '+esc(conditions):''}</small></td><td>${rangeText(entry.time,true)}</td><td><span class="compare-state ${overlap?'is-overlap':''}">${state}</span></td></tr>`;
         };
         const entries=[...confirmed,...unconfirmed],table=items=>`<table><tbody>${items.map(smallRow).join('')}</tbody></table>`;
         return `<section class="bite-comparison compare-compact" data-compare-compact="true" data-compare-fish="${fish.id}" data-compare-route="${index}" aria-label="${esc(fish.name)} ${title}">
@@ -46,7 +46,7 @@
         <div class="compare-scroll" role="region" aria-label="입질 시간 비교 목록 · 좌우 스크롤 가능" tabindex="0"><table><thead><tr><th scope="col">물고기</th><th scope="col">입질 · 낚아채기</th><th scope="col">관측 시간</th><th scope="col">대상과 비교</th></tr></thead><tbody>${row({fish,routes:[route],time:target},true)}${confirmed.map(c=>row(c)).join('')}${unconfirmed.length?'<tr class="compare-unconfirmed"><th colspan="4" scope="rowgroup">낚시터 내 추가 어종 · 미끼·입질·낚아채기 확인 필요</th></tr>'+unconfirmed.map(c=>row(c)).join(''):''}</tbody></table></div>
         ${mooch?'<p class="compare-rule">생미끼 낚시로 잡은 물고기는 교환 방생을 적용할 수 없어요.</p>':`<label class="compare-exclude">교환 방생 가정 · 한 종<select data-compare-exclude aria-label="${esc(fish.name)} 비교에서 제외할 물고기"><option value="0">제외하지 않음</option>${selectable.map(c=>`<option value="${c.fish.id}" ${c.fish.id===excludedId?'selected':''}>${esc(c.fish.name)}</option>`).join('')}</select></label>`}
         <p class="compare-summary">${excludedId?'제외 가정 후 ':''}같은 미끼 · ${expanded?'낚아채기':'입질'} 경쟁 ${knownCount}종${uncertain.length?` · 자료 확인 필요 ${uncertain.length}종`:''}<br><strong>${summary}</strong></p>
-        <p class="compare-note">수집 여부와 관계없이 비교합니다. 미끼·입질·낚아채기가 미확인인 어종도 함께 표시하며, 시간·날씨·직감에 따라 실제 후보가 달라집니다. 입질 시간은 모으기·루어 사용 여부를 구분하지 않은 관측 범위로, 확정 포획을 보장하지 않습니다.</p>
+        <p class="compare-note">수집 여부와 관계없이 비교합니다. 미끼·입질·낚아채기가 미확인인 어종도 함께 표시하며, 시간·날씨·직감에 따라 실제 후보가 달라집니다. 중앙값·평균은 1초 구간별 관측 건수로 추정합니다. 밑밥·루어 사용 여부는 구분하지 않으며, 시간 겹침은 중앙값이 아닌 전체 관측 범위로 비교합니다. 확정 포획을 보장하지 않습니다.</p>
         <p class="compare-note">교환 방생은 생미끼 낚시로 잡은 물고기 등 일부 어종에 적용되지 않습니다. 위 선택은 비교용 가정입니다. <a href="https://guide.ff14.co.kr/job/Fisher/31?type=L" target="_blank" rel="noopener noreferrer">공식 기술 안내 ↗</a></p>
       </section>`;
     }

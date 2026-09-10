@@ -21,7 +21,7 @@ test('each mooch step retains only its preceding bait and spot, including indepe
 });
 test('bite observations exclude out-of-scope or sparse bins and retain the full floored-second interval',async()=>{
  const {summarize}=await import('../scripts/update-bite-times.mjs'),row=(t,n=3,spot=1)=>({itemId:10,spot,baitId:1,flooredBiteTime:t,occurences:n});
- assert.deepEqual(summarize([row(1),row(4,2),row(10,5),row(14,3),row(30,4,2),row(600),row(null),row(8.5)],new Set(['10|rod:1|1'])),{'10|rod:1|1':{min:10,max:15,samples:8}});
+ assert.deepEqual(summarize([row(1),row(4,2),row(10,5),row(14,3),row(30,4,2),row(600),row(null),row(8.5)],new Set(['10|rod:1|1'])),{'10|rod:1|1':{min:10,max:15,samples:8,median:10.5,mean:12}});
  const m=E.create(fixture(),{ranges:{'10|rod:1|1':{min:10,max:15,samples:8}}});assert.equal(m.biteTime(10,{spotKey:'rod:2',bait:1}),null);assert.equal(m.biteTime(10,{spotKey:'rod:1',bait:2}),null);
  assert.equal(E.create(fixture()).biteTime(10,{spotKey:'rod:1',bait:1}),null);
 });
@@ -48,11 +48,11 @@ test('snapshot ranges have real catalog fish and places, and cover the reported 
 test('planner shows target and chained bite details, snagging, short collection labels and preserves collected mooch fish',()=>{
  const p=open({plan:true});try{
   p.$('#showPlanner').click();p.$('#planCollectionMode').click();
-  p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();assert.equal(p.$('.plan-snagging').textContent,'갈고리 낚시 필요');assert.match(p.$('.plan-bite-time').textContent,/약 \d+–\d+초/);
+  p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();assert.equal(p.$('.plan-snagging').textContent,'갈고리 낚시 필요');assert.match(p.$('.plan-bite-time').textContent,/중앙 \d+(?:\.\d+)?초/);assert.match(p.$('.plan-bite-time').title,/평균 약/);
   assert.equal(p.$('.plan-card [data-caught]').textContent,'수집');p.$('#showBook').click();p.scanApply([4869]);p.$('#showPlanner').click();
   p.$('#planSearch').value='심해아귀';p.$('#planRefresh').click();assert.equal(p.$('.plan-tug').textContent,'!!');assert.equal(p.$('.plan-hookset').textContent,'강력한 낚아채기');
   const steps=p.all('.plan-mooch');assert.deepEqual(steps.map(e=>e.querySelector('button').textContent),['멜토르 망둥이','줄삼치']);assert.match(steps[0].textContent,/! · 섬세한 낚아채기/);assert.match(steps[1].textContent,/!! · 강력한 낚아채기/);
-  const m=E.create(D,B),target=m.byId.get(4912),step=m.tacklePaths(target.routes[0])[0].steps[1],range=m.biteTime(step.id,step.routes[0]);assert.match(steps[0].textContent,new RegExp(`약 ${range.min}–${range.max}초`));
+  const m=E.create(D,B),target=m.byId.get(4912),step=m.tacklePaths(target.routes[0])[0].steps[1],range=m.biteTime(step.id,step.routes[0]);assert.ok(steps[0].textContent.includes(`중앙 ${range.median}초`));assert.ok(steps[0].querySelector('.plan-bite-time').title.includes(`약 ${range.min}–${range.max}초`));
   p.$('.plan-card [data-caught]').click();assert.equal(p.$('.plan-card'),null);p.$('#undo').click();assert.equal(p.$('.plan-card [data-caught]').textContent,'수집');
  }finally{p.close();}
 });

@@ -1,3 +1,4 @@
+.bite-observation{font-variant-numeric:tabular-nums}.bite-central{display:block;white-space:normal;color:#c5e4e5}.bite-range{white-space:nowrap}.bite-central+.bite-range{color:var(--ff-muted)}.compare-compact-heading .bite-central{display:inline}.compare-compact-heading .bite-central:after{content:' · '}
 .bite-comparison{margin:18px 0 8px;padding:14px;background:#101e2b;border:1px solid #3b596b;border-radius:8px;min-width:0}
 .bite-comparison h4{margin:0 0 5px;font-size:16px}.compare-context{margin:0 0 10px;font-size:10pt;color:#bdd9dd}
 .compare-scroll{overflow-x:auto;scrollbar-width:thin}.bite-comparison table{border-collapse:collapse;width:100%;min-width:530px;font-size:10pt;text-align:left;line-height:1.5}
