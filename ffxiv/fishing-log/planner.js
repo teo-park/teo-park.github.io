@@ -7,6 +7,16 @@
   const time=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false});
   // Teamcraft encodes Medium, Big, Light as 0, 1, 2. Hookset is independent.
   const tugs={0:'!!',1:'!!!',2:'!'},hooksets={0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'};
+  function timing(row,now,purpose){
+    if(row.always)return {state:'now',label:'지금',title:'현재 도전 가능 · 직감 등 선행 조건 별도 준비'};
+    if(!Number.isFinite(row.start)||!Number.isFinite(row.end)||now>=row.end)return null;
+    if(row.start<=now)return {state:'now',label:'지금',title:'현재 도전 가능 · 직감 등 선행 조건 별도 준비'};
+    if(purpose!=='collection')return null;
+    const opening=Number.isFinite(row.windowStart)?row.windowStart:row.start,left=opening-now;
+    if(left<=0||left>30*F.MINUTE)return null;
+    const minutes=left<=15*F.MINUTE?15:30;
+    return {state:String(minutes),label:minutes+'분 전',title:`출현까지 ${minutes}분 이내 · ${time.format(opening)} 출현 (KST) · 직감 등 선행 조건 별도 준비`};
+  }
   function mount({data,model,getCaught}){
     if(!F||!window.FISHING_WEATHER)return;
     window.FishingSpotMaps?.mount({data});
@@ -26,7 +36,7 @@
       const choices=purpose==='big'?[['big','터주 전체'],['legendary','전설어만']]:[['all','일반 + 터주 전체'],['normal','일반 물고기만'],['big','터주만'],['legendary','전설어만']];
       $('planRarity').innerHTML=choices.map(([v,label])=>`<option value="${v}">${label}</option>`).join('');$('planRarity').value=rarities[purpose];
       $('notificationScope').options[0].textContent=purpose==='big'?'터주 전용 · 선택 어종 전체':'수첩작 전용 · 선택 어종 전체';
-      $('notifyAlways').checked=alwaysAlerts[purpose];
+      $('notifyAlways').checked=alwaysAlerts[purpose];$('planUpcomingHint').hidden=purpose!=='collection';
     }
     modeControls();
     $('playDays').innerHTML=[1,2,3,4,5,6,0].map(i=>`<div class="play-day"><label><input type="checkbox" data-day="${i}" ${settings.days[i].enabled?'checked':''}>${'일월화수목금토'[i]}요일</label><input type="time" id="playStart${i}" aria-label="${'일월화수목금토'[i]}요일 접속 시작" value="${settings.days[i].start}"><span>–</span><input type="time" id="playEnd${i}" aria-label="${'일월화수목금토'[i]}요일 접속 종료" value="${settings.days[i].end}"></div>`).join('');
@@ -87,16 +97,25 @@
       const counting=countdowns.has(fish.id);
       return `<button class="plan-window plan-time-toggle" data-plan-countdown="${fish.id}" data-plan-start="${row.start}" data-plan-end="${row.end}" aria-pressed="${counting}" aria-label="${esc(fish.name)} ${counting?'도전 시각 보기':'남은 시간 보기'}" title="눌러서 ${counting?'도전 시각':'남은 시간'} 보기">${counting?countdownText(row.start,row.end,Date.now()):`<strong>${dateText(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.start<=result.now?' · 지금부터':''}</span>`}</button>`;
     }
-    function updateCountdowns(){if(!active||document.hidden)return;const now=Date.now();for(const button of document.querySelectorAll('[data-plan-countdown][aria-pressed="true"]'))button.innerHTML=countdownText(+button.dataset.planStart,+button.dataset.planEnd,now);}
+    function timingBadge(state){return state?`<b class="${state.state==='now'?'plan-now-badge':'plan-soon-badge plan-soon-'+state.state}" title="${esc(state.title)}" aria-label="${esc(state.title)}">${state.label}</b>`:'';}
+    function updateCountdowns(){
+      if(!active||document.hidden)return;const now=Date.now();
+      for(const button of document.querySelectorAll('[data-plan-countdown][aria-pressed="true"]'))button.innerHTML=countdownText(+button.dataset.planStart,+button.dataset.planEnd,now);
+      for(const slot of document.querySelectorAll('[data-plan-timing]')){
+        const number=v=>v===''?null:Number(v),row={always:slot.dataset.always==='true',start:number(slot.dataset.start),end:number(slot.dataset.end),windowStart:number(slot.dataset.opening)},state=timing(row,now,purpose),html=timingBadge(state);
+        if(slot.innerHTML!==html)slot.innerHTML=html;
+        slot.closest('.plan-card').dataset.planNow=String(state?.state==='now');
+      }
+    }
     function card(row){
       const fish=row.fish,route=fish.routes[row.route],spot=data.spots[route.spotKey],next=row.nextStart!==null&&row.nextStart!==undefined?dateText(row.nextStart):row.unavailableReason||'다음 기회 찾는 중';
       const special=(route.predators||[]).map(p=>`${model.byId.get(p.id)?.name||p.id} ×${p.amount}`).join(' · ');
       const tug=tugs[route.tug],hookset=hooksets[route.hookset];
       const spotUrl=`https://ffxivteamcraft.com/db/ko/${spot.kind==='spear'?'spearfishing-spot':'fishing-spot'}/${spot.id}`;
       const coords=Number.isFinite(spot.coords?.x)&&Number.isFinite(spot.coords?.y)?`<button type="button" class="plan-spot-coords" data-spot-map="${esc(route.spotKey)}" data-map-owner="${fish.id}" aria-label="${esc(spot.name)} 지도 미리보기 · X:${spot.coords.x.toFixed(1)} Y:${spot.coords.y.toFixed(1)}" aria-controls="fishingSpotMap" aria-expanded="false" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16M15 5v16"/></svg>X:${spot.coords.x.toFixed(1)} · Y:${spot.coords.y.toFixed(1)}</button>`:'';
-      const now=!!row.always||row.start!==null&&row.start<=result.now&&result.now<row.end;
+      const timingState=timing(row,result.now,purpose),now=timingState?.state==='now';
       return `<div class="plan-entry"><article class="plan-card" aria-label="${esc(fish.name)} 낚시 계획" data-plan-kind="${fish.big?'big':'normal'}" data-plan-availability="${row.always?'always':'timed'}" data-plan-now="${now}">
-        <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span>${row.always?'상시':'조건부'}</span>${now?'<b class="plan-now-badge" title="현재 도전 가능 · 직감 등 선행 조건 별도 준비">지금</b>':''}</div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
+        <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span class="plan-availability-label">${row.always?'상시':'조건부'}</span><span data-plan-timing data-always="${!!row.always}" data-start="${row.start??''}" data-end="${row.end??''}" data-opening="${row.windowStart??''}">${timingBadge(timingState)}</span></div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
         <div class="plan-bite"><div class="plan-bite-summary"><strong class="plan-tug ${tug?'tug-'+tug.length:'tug-unknown'}" aria-label="${tug?'입질 강도 '+tug:'입질 미확인'}">${tug||'입질 미확인'}</strong>${biteTime(fish.id,route)}</div><span class="plan-hookset">${hookset||'낚아채기 미확인'}</span>${snagging(route)}</div>
         <div class="plan-place"><span>${esc(spot.area)}</span><div class="plan-spot-line"><strong><a class="plan-spot-link" data-spot-map="${esc(route.spotKey)}" data-map-owner="${fish.id}" href="${esc(spotUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(spot.name)} · Teamcraft 낚시터 보기 (새 탭)">${esc(spot.name)}<span aria-hidden="true"> ↗</span></a></strong><button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button></div>${coords}</div>
         ${windowCell(row)}
@@ -147,5 +166,5 @@
     window.FishingNotifications?.mount({snapshot,data,model});
     const linked=Number(new URL(location.href).searchParams.get('fish'));if(fishById.has(linked)){show(true);const b=document.createElement('button');b.dataset.fishDetail=linked;b.hidden=true;document.body.append(b);b.click();b.remove();}
   }
-  window.FishingPlanner={mount};
+  window.FishingPlanner={mount,timing};
 })();
