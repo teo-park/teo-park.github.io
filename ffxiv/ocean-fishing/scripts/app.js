@@ -12,7 +12,7 @@
   let route = isChecklist ? (read('checklistCombined-activeTab') === 'ruby' ? 'ruby' : 'indigo') : page;
   let fish = [], routeFish = [], catalog, names, state, voyages = [], selected = null, activeStop = 0;
   let expanded = false, scheduleCount = 12, hideCompleted = read('ocean:hide-completed-routes') === 'true';
-  let purpose = 'collection', species = [];
+  let purpose = 'collection', species = [], achievementSpecies = [];
   let achievements;
   const achievementOpen = new Set();
   let query = '', uncaught = false, checkOpen = new Set(), checklistInitialized = false, timer, undo;
@@ -88,7 +88,7 @@
     return out.length?`<div class="fish-conditions">${out.map(line=>`<div>${line}</div>`).join('')}</div>`:'';
   }
   function renderVoyageBaits(rows) {
-    const summary=C.voyageBaits(rows), purposeLabel={all:'전체 보기',collection:'도감 채우기',mission:'선상과제/업적',score:'고득점'}[purpose];
+    const summary=C.voyageBaits(rows), purposeLabel={all:'전체 보기',collection:'도감 채우기',mission:'선상과제',achievement:'업적작',score:'고득점'}[purpose];
     const scoreBaits=new Set();
     if(purpose==='score')for(const f of rows.filter(f=>f.LocalScore)) {
       if(f.BaitAny==='Yes')continue;
@@ -126,23 +126,28 @@
     const headers=['물고기','입질','권장 미끼','기본 점수','이중 점수','삼중 점수','시간·날씨','물고기군','미끼별 입질 시간'];
     return `<div class="fish-table-scroll" role="region" aria-label="물고기 표 · 작은 화면에서는 가로로 스크롤" tabindex="0"><table id="${esc(id)}" class="fish-table ${score?'score-table':''}"><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(f=>{
       const rec=f.LocalRecommendation, preferred=rec?.best?.action;
-      const badges=[f.LocalAlwaysVisible?`<span class="fish-tag">${f.spectralTrigger?'환해류 유도 · ':''}항상 표시</span>`:'',f.LocalGroupMatch?'<span class="fish-tag">과제 대상</span>':'',f.LocalRequiredBy?.length?`<span class="fish-tag condition" title="${esc(f.LocalRequiredBy.join(', '))}에 필요한 조건 물고기">조건용</span>`:''];
+      const badges=[f.LocalAlwaysVisible?`<span class="fish-tag">${f.spectralTrigger?'환해류 유도 · ':''}항상 표시</span>`:'',f.LocalGroupMatch?`<span class="fish-tag">${purpose==='achievement'?'업적':'과제'} 대상</span>`:'',f.LocalRequiredBy?.length?`<span class="fish-tag condition" title="${esc(f.LocalRequiredBy.join(', '))}에 필요한 조건 물고기">조건용</span>`:''];
       return `<tr data-fish-id="${f.id}" class="${caught(f)?'is-caught':''}"><td><div class="fish-heading">${image(f)}<div><strong>${esc(f.FishTranslated)}</strong><span class="fish-stars" aria-label="별 ${esc(f.Stars)}개">${'★'.repeat(Math.min(5,Number(f.Stars)||0))}</span></div></div><div class="collection-control">${catchToggle(f)}${badges.join('')}</div>${conditions(f)}${f.DataNotes?`<details class="data-note"><summary>자료 참고</summary><p>${esc(f.DataNotes)}</p></details>`:''}${score?recommendation(rec):''}</td><td><strong class="bite bite-${f.Bite.length}">${esc(f.Bite||'?')}</strong><small>${esc(f.hooksetName || (f.Hookset==='Precision'?'섬세한 낚아채기':'강력한 낚아채기'))}</small></td><td><strong class="bait-label">${esc(baitText(f))}</strong><small>${esc(C.biteTimeText(C.baitInfo(f).rawTime))}</small></td><td class="points">${f.Points?Number(f.Points).toLocaleString():'미확인'}</td>${['DH','TH'].map(mode=>`<td class="points ${score&&preferred===mode?'score-emphasis':''}">${range(points(f,mode))}<small>${C.numberRange(f[mode])?range(C.numberRange(f[mode]))+'마리':'수량 미확인'}</small>${score&&preferred===mode?'<span class="recommended-cell">추천</span>':''}</td>`).join('')}<td><div>${f.spectral?['Day','Sunset','Night'].filter(p=>f['TimeFrame'+p]==='Yes').map(period).join(' '):'모든 시간'}</div><small>${esc(weatherText(f))}</small></td><td>${esc(f.SpeciesTranslated||'—')}</td><td class="bait-times">${f.baits.map(b=>`<div><span>${esc(b.kind==='Mooch'?'생미끼 · '+label(b.name):b.label)}</span> ${esc(C.biteTimeText(b.time))}</div>`).join('')||'자료 없음'}</td></tr>`;
     }).join('')}</tbody></table></div>`;
   }
   function loadPreferences() {
     routeFish=fish.filter(f=>f.route===route); catalog=C.createCatalog(routeFish);
     const saved=read('ocean:purpose:'+route);
-    purpose=['all','collection','mission','score'].includes(saved)?saved:'collection';
+    purpose=['all','collection','mission','achievement','score'].includes(saved)?saved:'collection';
     const groups=json('ocean:species-groups:'+route,null), legacy=read('ocean:species:'+route);
     species=Array.isArray(groups)?groups.filter(x=>typeof x==='string'):legacy?[legacy]:[];
+    const savedAchievements=json('ocean:achievement-groups:'+route,null);
+    // Carry the former combined selection across once; later changes stay independent.
+    achievementSpecies=Array.isArray(savedAchievements)?savedAchievements.filter(x=>typeof x==='string'):[...species];
+    if(!Array.isArray(savedAchievements))write('ocean:achievement-groups:'+route,JSON.stringify(achievementSpecies));
     scoreMode=read('ocean:score:'+route)==='DH'?'DH':'TH';
   }
   function planned() {
     // Plan the whole voyage before splitting its stops and currents: a spectral
     // target can need an already-caught fish from the regular current or an earlier stop.
     const available=voyageFish(selected);
-    const result=C.plan(available,catalog,f=>C.caught(state,route,f),purpose==='collection',purpose==='mission'?species:'',purpose==='score'?scoreMode:'',strategy);
+    const groups=purpose==='mission'?species:purpose==='achievement'?(achievementSpecies.length?achievementSpecies:achievements.data.goals.filter(g=>g.route===route).map(g=>g.id)):'';
+    const result=C.plan(available,catalog,f=>C.caught(state,route,f),purpose==='collection',groups,purpose==='score'?scoreMode:'',strategy);
     const keep=new Set(), required=new Map();
     for(const f of result) {
       const i=selected.stops.findIndex((_,i)=>V.available(f,selected,i));
@@ -180,18 +185,19 @@
     return `<span class="stop-starter" title="${esc(triggers.map(f=>f.FishTranslated).join(' · '))}를 노리는 시작 미끼"><span>환해류 유도</span><b>${esc(baits)}</b></span>`;
   }
   function achievement(v) {
-    const plans=achievements.forVoyage(v).filter(g=>g.status==='recommended'&&(purpose!=='mission'||!species.length||species.includes(g.id)));
+    if(purpose==='mission')return '';
+    const plans=achievements.forVoyage(v).filter(g=>g.status==='recommended'&&(purpose!=='achievement'||!achievementSpecies.length||achievementSpecies.includes(g.id)));
     return plans.map(g=>`<span class="route-achievement">업적 추천 · ${esc(g.label)} · ${g.scope==='party'?'파티':'개인'} ${g.count}마리</span>`).join('');
   }
   function renderAchievements() {
-    const board=$('achievementPlans');board.hidden=purpose!=='mission';if(board.hidden)return;
-    const plans=achievements.forVoyage(selected).filter(g=>!species.length||species.includes(g.id));
+    const board=$('achievementPlans');board.hidden=purpose!=='achievement';if(board.hidden)return;
+    const plans=achievements.forVoyage(selected).filter(g=>!achievementSpecies.length||achievementSpecies.includes(g.id));
     const sources=achievements.data.sources;
     const conflicts=selected.stops.flatMap((stop,index)=>{
       const actions=plans.filter(g=>g.sections[index].step&&['seek','avoid'].includes(g.sections[index].step.current));
       return new Set(actions.map(g=>g.sections[index].step.current)).size>1?[`${stop.name}: ${actions.map(g=>g.label+' '+(g.sections[index].step.current==='seek'?'유도':'회피')).join(' / ')}`]:[];
     });
-    board.innerHTML=`<header class="achievement-heading"><h3 id="achievementTitle">업적작 계획</h3><span>${achievements.data.verifiedAt} 확인 · ${routeLabel()} ${achievements.data.goals.filter(g=>g.route===route).length}종</span></header><p class="achievement-help">한 번의 항해 기준 · 파티 업적은 소속 파티 합산, 개인 업적은 본인 기록만 계산해요. 도감 수집 체크는 이번 항해의 포획 수가 아니에요.</p>${species.length>1?`<p class="achievement-caution">여러 물고기군을 선택해도 업적을 동시에 노리기 좋다는 뜻은 아니에요.${conflicts.length?' 환해류 운영이 달라요: '+esc(conflicts.join(' · ')):''}</p>`:''}<div class="achievement-list">${plans.map(g=>{
+    board.innerHTML=`<header class="achievement-heading"><h3 id="achievementTitle">업적작 계획</h3><span>${achievements.data.verifiedAt} 확인 · ${routeLabel()} ${achievements.data.goals.filter(g=>g.route===route).length}종</span></header><p class="achievement-help">한 번의 항해 기준 · 파티 업적은 소속 파티 합산, 개인 업적은 본인 기록만 계산해요. 도감 수집 체크는 이번 항해의 포획 수가 아니에요.</p>${plans.length>1?`<p class="achievement-caution">여러 업적을 함께 표시해도 동시에 노리기 좋다는 뜻은 아니에요.${conflicts.length?' 환해류 운영이 달라요: '+esc(conflicts.join(' · ')):''}</p>`:''}<div class="achievement-list">${plans.map(g=>{
       const next=achievements.nextDeparture(g.id), upcoming=next?time(next.start)+' 출항':'예정 시간 없음';
       const sourceLinks=g.sourceIds.map(id=>sources.find(s=>s.id===id)).filter(Boolean);
       return `<details class="achievement-plan" data-achievement="${g.id}" ${achievementOpen.has(g.id)?'open':''}><summary><strong>${esc(g.label)}</strong><span class="achievement-target">${g.scope==='party'?'파티':'개인'} ${g.count}마리</span><span class="achievement-status ${g.status}">${g.statusLabel}</span><span class="achievement-chevron" aria-hidden="true"></span></summary><div class="achievement-body"><p class="achievement-note">${esc(g.note)}</p>${g.status!=='recommended'?`<p class="achievement-caution">${{alternative:'공략상 대체 가능한 항로예요. 아래는 현재 시간대의 출현 어종이며, 구간 운영은 추천 항로에서 안내해요.',appearance:'대상 어종은 있지만 추천 항로로 확인된 조합은 아니에요. 아래 출현 목록만으로 업적 달성을 판단하지 마세요.',absent:'현재 항로에 이 업적의 대상 어종이 없어요.'}[g.status]}</p>`:''}<div class="achievement-next"><span>가장 가까운 추천 시간 · <b>${esc(upcoming)}</b></span>${next?`<button type="button" data-achievement-departure="${g.id}">이 업적 추천 시간으로</button>`:''}</div>${g.sections.map(s=>`<section class="achievement-stop"><h4>${s.index+1}. ${esc(s.name)} ${period(s.time)}${s.step?`<span class="current-policy ${s.step.current}">${A.currentLabels[s.step.current]}</span>`:''}</h4>${s.step?`<p>${esc(s.step.note)}${['seek','weather'].includes(s.step.current)&&s.trigger?` <span class="achievement-trigger">유도 미끼: ${esc(baitText(s.trigger))} · ${esc(s.trigger.FishTranslated)}</span>`:''}</p>`:''}${s.targets.length?`<div class="achievement-fish-list">${s.targets.map(({fish:f,priority})=>`<div class="achievement-fish" data-achievement-fish="${f.id}"><span class="achievement-water ${f.spectral?'spectral':''}">${f.spectral?'환해류':'일반'}</span><span class="achievement-fish-name">${image(f)}<strong>${esc(f.FishTranslated)}</strong>${priority?'<b class="achievement-priority">주력</b>':''}${(f.intuition.fish.length||/^M!/.test(f.BestBait))?'<span class="fish-tag condition">조건 있음</span>':''}</span><span>${esc(baitText(f))}</span><span><b class="bite">${esc(f.Bite||'?')}</b> · ${esc(C.biteTimeText(C.baitInfo(f).rawTime))}<small>${esc(f.hooksetName||'낚아채기 미확인')}${weatherText(f)!=='모든 날씨'?' · '+esc(weatherText(f)):''}</small></span><span class="achievement-yield">이중 <b>${range(C.numberRange(f.DH))}</b> · 삼중 <b>${range(C.numberRange(f.TH))}</b>마리</span>${(f.intuition.fish.length||/^M!/.test(f.BestBait))?`<div class="achievement-dependencies">${conditions(f)}</div>`:''}</div>`).join('')}</div>`:'<p class="achievement-empty">이 구간에는 대상 어종이 없어요.</p>'}</section>`).join('')}<div class="achievement-sources">${sourceLinks.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.label)} ↗</a>`).join('')}</div></div></details>`;
@@ -204,6 +210,7 @@
     const mins=Math.ceil((v.start-now)/60000); return mins<60?`${mins}분 후`:`${Math.floor(mins/60)}시간${mins%60?' '+mins%60+'분':''} 후`;
   }
   function renderSchedule() {
+    $('scheduleAchievementHelp').hidden=purpose==='mission';
     const focused=document.activeElement?.dataset.voyage;
     $('scheduleToggle').textContent=expanded?'접기':'다음 시간 보기'; $('scheduleToggle').setAttribute('aria-expanded',String(expanded));
     $('hideCompleted').closest('label').hidden=purpose!=='collection'; $('hideCompleted').checked=hideCompleted;
@@ -224,11 +231,13 @@
   function renderOptions() {
     document.querySelectorAll('[name=purpose]').forEach(input=>{input.checked=input.value===purpose;});
     const groups=[...new Map(routeFish.filter(f=>f.Species).map(f=>[f.Species,f.SpeciesTranslated])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ko'));
-    $('speciesOptions').hidden=purpose!=='mission'; $('scoreOptions').hidden=purpose!=='score';
+    $('speciesOptions').hidden=purpose!=='mission'; $('achievementOptions').hidden=purpose!=='achievement'; $('scoreOptions').hidden=purpose!=='score';
     if(!$('speciesChoices').children.length) $('speciesChoices').innerHTML=groups.map(([id,text])=>`<label class="species-option"><input type="checkbox" name="species" value="${esc(id)}" ${species.includes(id)?'checked':''}>${esc(text)}</label>`).join('');
     document.querySelectorAll('[name=species]').forEach(input=>{input.checked=species.includes(input.value);});
+    if(!$('achievementChoices').children.length) $('achievementChoices').innerHTML=groups.filter(([id])=>achievements.goals.has(id)).map(([id,text])=>`<label class="species-option"><input type="checkbox" name="achievementGroup" value="${esc(id)}">${esc(text)}</label>`).join('');
+    document.querySelectorAll('[name=achievementGroup]').forEach(input=>{input.checked=achievementSpecies.includes(input.value);});
     $('scoreMode').value=scoreMode; $('strategyGP').value=strategy.gp; $('strategyObjective').value=strategy.objective;
-    $('purposeHelp').textContent={all:'모든 물고기를 표시해요. 수집 상태와 관계없이 미끼를 확인할 수 있어요.',collection:'미수집 물고기와 필요한 직감·생미끼 조건을 보여줘요. 일반 구간의 유령·환해 물고기는 항상 남겨요.',mission:species.length?`${species.length}개 물고기군과 필요한 조건 물고기를 함께 보여줘요. 환해류 유도 물고기는 항상 표시해요.`:'물고기군을 하나 이상 선택해 주세요. 여러 종류를 함께 선택할 수 있어요.',score:'모든 점수를 표시하고, 현재 GP로 가능한 기술을 추천해요. 목표 물고기를 낚는 데 성공한다는 전제입니다.'}[purpose];
+    $('purposeHelp').textContent={all:'모든 물고기를 표시해요. 수집 상태와 관계없이 미끼를 확인할 수 있어요.',collection:'미수집 물고기와 필요한 직감·생미끼 조건을 보여줘요. 일반 구간의 유령·환해 물고기는 항상 남겨요.',mission:species.length?`선상과제 ${species.length}개 물고기군과 필요한 조건 물고기를 함께 보여줘요. 환해류 유도 물고기는 항상 표시해요.`:'선상과제에 나온 물고기군을 선택하세요. 두 종류 이상 함께 선택할 수 있어요.',achievement:achievementSpecies.length?'선택한 업적의 목표 수량·추천 항로·구간별 공략과 대상 물고기를 보여줘요.':'전체 업적을 보여줘요. 목표를 선택하면 해당 업적의 항로와 물고기로 좁혀져요.',score:'모든 점수를 표시하고, 현재 GP로 가능한 기술을 추천해요. 목표 물고기를 낚는 데 성공한다는 전제입니다.'}[purpose];
   }
   function renderFishing() {
     const focused=document.activeElement, focusZone=focused?.closest('[data-zone]')?.dataset.zone, focusOption=focused?.dataset.zoneOption;
@@ -317,14 +326,15 @@
       });
     } else {
       document.querySelectorAll('[name=purpose]').forEach(input=>input.addEventListener('change',()=>{purpose=input.value;write('ocean:purpose:'+route,purpose);renderOptions();render();}));
-      $('speciesChoices').addEventListener('change',event=>{species=[...document.querySelectorAll('[name=species]:checked')].map(el=>el.value);if(event.target.checked)achievementOpen.add(event.target.value);write('ocean:species-groups:'+route,JSON.stringify(species));renderOptions();render();});
+      $('speciesChoices').addEventListener('change',()=>{species=[...document.querySelectorAll('[name=species]:checked')].map(el=>el.value);write('ocean:species-groups:'+route,JSON.stringify(species));renderOptions();render();});
+      $('achievementChoices').addEventListener('change',event=>{achievementSpecies=[...document.querySelectorAll('[name=achievementGroup]:checked')].map(el=>el.value);if(event.target.checked)achievementOpen.add(event.target.value);write('ocean:achievement-groups:'+route,JSON.stringify(achievementSpecies));renderOptions();render();});
       $('achievementPlans').addEventListener('click',event=>{
         const summary=event.target.closest('summary');
         if(summary?.parentElement.matches('[data-achievement]')){event.preventDefault();const details=summary.parentElement;details.open=!details.open;if(details.open)achievementOpen.add(details.dataset.achievement);else achievementOpen.delete(details.dataset.achievement);return;}
         const button=event.target.closest('[data-achievement-departure]');if(!button)return;
         const id=button.dataset.achievementDeparture, next=achievements.nextDeparture(id);if(!next)return;
-        purpose='mission';species=[id];achievementOpen.add(id);zoneOptions.clear();
-        write('ocean:purpose:'+route,purpose);write('ocean:species-groups:'+route,JSON.stringify(species));
+        purpose='achievement';achievementSpecies=[id];achievementOpen.add(id);zoneOptions.clear();
+        write('ocean:purpose:'+route,purpose);write('ocean:achievement-groups:'+route,JSON.stringify(achievementSpecies));
         const all=V.upcoming(route,Date.now(),144),index=all.findIndex(v=>v.start===next.start);
         scheduleCount=Math.min(144,Math.max(scheduleCount,Math.ceil((index+1)/12)*12));refreshVoyages();selected=next;activeStop=0;
         renderOptions();render();$('achievementPlans').querySelector('summary')?.focus({preventScroll:true});

@@ -8,12 +8,59 @@ const achievementData=require('../data/achievements.json');
 const payload=require('../data/fish.json'),root=path.resolve(__dirname,'..');
 const first=Date.parse(require('./fixtures/voyages.json').firstDeparture);
 const storageKey='caughtFishLS-combined';
+for(const route of ['indigo','ruby'])test(`${route}: missions and achievements retain independent selections across departure changes and reloads`,async()=>{
+ const goals=achievementData.goals.filter(g=>g.route===route),a=goals[0].id,b=goals[1].id;
+ const storage=memory({['ocean:purpose:'+route]:'mission',['ocean:species-groups:'+route]:JSON.stringify([a])});
+ let ui=await open(route,storage);
+ const checked=name=>[...ui.d.querySelectorAll(`[name=${name}]:checked`)].map(el=>el.value).sort();
+ try{
+  const records=storage.getItem('teo-ffxiv.fishing.collection.v2'),legacy=storage.getItem(storageKey);
+  assert.equal(ui.$('[name=purpose][value=mission]').checked,true);
+  assert.equal(ui.$('#speciesOptions').hidden,false);assert.equal(ui.$('#achievementOptions').hidden,true);
+  assert.equal(ui.$('#achievementPlans').hidden,true);assert.equal(ui.$('#scheduleAchievementHelp').hidden,true);
+  assert.equal(ui.$('.route-achievement'),null);
+  assert.deepEqual(checked('species'),[a]);
+  ui.$(`[name=species][value=${b}]`).click();
+  assert.deepEqual(checked('species'),[a,b].sort());
+  ui.$('[name=purpose][value=achievement]').click();
+  assert.equal(ui.$('#speciesOptions').hidden,true);assert.equal(ui.$('#achievementOptions').hidden,false);
+  assert.equal(ui.$('#achievementPlans').hidden,false);assert.equal(ui.$('#scheduleAchievementHelp').hidden,false);
+  assert.deepEqual(checked('achievementGroup'),[a],'legacy selection copied once, before mission edits');
+  ui.$(`[name=achievementGroup][value=${a}]`).click();
+  assert.equal(ui.d.querySelectorAll('[data-achievement]').length,goals.length,'no selection shows all achievements');
+  ui.$(`[name=achievementGroup][value=${b}]`).click();
+  ui.$(`[data-achievement-departure=${b}]`).click();
+  assert.equal(ui.d.querySelectorAll('[data-achievement]').length,1);
+  assert.equal(ui.$(`[data-achievement=${b}] .achievement-status`).textContent,'추천 항로');
+  assert.match(ui.$('#voyageBaits').textContent,/업적작/);
+  assert.match(ui.$('#fishPanels').textContent,/업적 대상/);
+  assert.doesNotMatch(ui.$('#fishPanels').textContent,/과제 대상/);
+  for(const row of ui.d.querySelectorAll('#fishPanels tr[data-fish-id]')){
+   const f=payload.fish.find(f=>f.id===Number(row.dataset.fishId));
+   assert.ok(f.Species===b||C.alwaysVisible(f)||row.textContent.includes('조건용'),f.Fish);
+  }
+  ui.$('[name=purpose][value=mission]').click();
+  assert.deepEqual(checked('species'),[a,b].sort(),'recommended departure does not replace mission selection');
+  assert.equal(ui.$('#achievementPlans').hidden,true);
+  assert.match(ui.$('#fishPanels').textContent,/과제 대상/);
+  assert.doesNotMatch(ui.$('#fishPanels').textContent,/업적 대상/);
+  ui.$('[name=purpose][value=achievement]').click();
+  assert.deepEqual(checked('achievementGroup'),[b]);
+  assert.deepEqual(ui.errors,[]);ui.close();ui=await open(route,storage);
+  assert.equal(ui.$('[name=purpose][value=achievement]').checked,true);
+  assert.deepEqual(checked('achievementGroup'),[b]);
+  ui.$('[name=purpose][value=mission]').click();assert.deepEqual(checked('species'),[a,b].sort());
+  assert.equal(storage.getItem('teo-ffxiv.fishing.collection.v2'),records);
+  assert.equal(storage.getItem(storageKey),legacy);
+  assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
 test('achievement plans show scope, expand inline, retain multiple groups and jump to a recommended departure',async()=>{
  const ui=await open('ruby');
  try {
-  ui.$('[name=purpose][value=mission]').click();
+  ui.$('[name=purpose][value=achievement]').click();
   assert.equal(ui.d.querySelectorAll('[data-achievement]').length,5);
-  ui.$('[name=species][value=Mantis]').click();
+  ui.$('[name=achievementGroup][value=Mantis]').click();
   assert.equal(ui.d.querySelectorAll('[data-achievement]').length,1);
   assert.ok(ui.$('[data-achievement=Mantis]').open);assert.match(ui.$('[data-achievement=Mantis]').textContent,/개인 50마리/);
   const catches=ui.storage.getItem(storageKey);
@@ -22,21 +69,21 @@ test('achievement plans show scope, expand inline, retain multiple groups and ju
   assert.ok(ui.$('[data-achievement=Mantis]').open);
   assert.equal(ui.storage.getItem(storageKey),catches,'planning never changes collection');
   const mantis=payload.fish.find(f=>f.Fish==='Tiger Mantis');assert.ok(ui.$(`[data-achievement-fish="${mantis.id}"]`));
-  ui.$('[name=species][value=Prehistoric]').click();
-  assert.equal(ui.d.querySelectorAll('[name=species]:checked').length,2);assert.equal(ui.d.querySelectorAll('[data-achievement]').length,2);
+  ui.$('[name=achievementGroup][value=Prehistoric]').click();
+  assert.equal(ui.d.querySelectorAll('[name=achievementGroup]:checked').length,2);assert.equal(ui.d.querySelectorAll('[data-achievement]').length,2);
   ui.$('[data-achievement=Mantis]>summary').click();assert.equal(ui.$('[data-achievement=Mantis]').open,false);
   ui.$('[name=purpose][value=all]').click();assert.equal(ui.$('#achievementPlans').hidden,true);
-  ui.$('[name=purpose][value=mission]').click();assert.equal(ui.$('[data-achievement=Mantis]').open,false);
+  ui.$('[name=purpose][value=achievement]').click();assert.equal(ui.$('[data-achievement=Mantis]').open,false);
   assert.deepEqual(ui.errors,[]);
  }finally{ui.close();}
 });
 test('manta and fugu on a shared route display conflicting current tactics rather than promising both',async()=>{
  const ui=await open('indigo');
  try{
-  ui.$('[name=purpose][value=mission]').click();ui.$('[data-achievement-departure=Fugu]').click();
+  ui.$('[name=purpose][value=achievement]').click();ui.$('[data-achievement-departure=Fugu]').click();
   ui.$('#scheduleToggle').click();ui.$('#moreVoyages').click();
   const target=[...ui.d.querySelectorAll('[data-voyage]')].find(b=>V.at('indigo',Number(b.dataset.voyage)).number===12);assert.ok(target);target.click();
-  ui.$('[name=species][value=Manta]').click();
+  ui.$('[name=achievementGroup][value=Manta]').click();
   assert.match(ui.$('#achievementPlans>.achievement-caution').textContent,/로타노 해: 복어 유도 \/ 가오리 회피/);
   assert.equal(ui.$('[data-achievement=Manta] .achievement-status').textContent,'추천 항로');
   assert.doesNotMatch(ui.$('#scheduleRows').textContent,/업적작 가능/);
@@ -72,7 +119,7 @@ for(const route of ['indigo','ruby'])test(`${route}: supplies cover all three st
   ui.$('[name=purpose][value=all]').click();check();ui.$('#scheduleToggle').click();ui.d.querySelectorAll('[data-voyage]')[5].click();check();
   ui.$('[name=purpose][value=score]').click();assert.ok(ui.$('#voyageBaits .bait-chip-score'));ui.input('#strategyGP','399');assert.equal(ui.$('#voyageBaits .bait-chip-score'),null);check();
   ui.$('[name=purpose][value=mission]').click();assert.equal(ui.$('#voyageBaits [data-bait-group="mooch"]'),null);
-  ui.d.querySelectorAll('[name=species]')[0].click();ui.d.querySelectorAll('[name=species]')[1].click();assert.match(ui.$('#voyageBaits').textContent,/선상과제\/업적/);
+  ui.d.querySelectorAll('[name=species]')[0].click();ui.d.querySelectorAll('[name=species]')[1].click();assert.match(ui.$('#voyageBaits').textContent,/선상과제/);
   const rows=[...ui.d.querySelectorAll('#fishPanels tr[data-fish-id]')].map(el=>payload.fish.find(f=>f.id===+el.dataset.fishId));
   for(const f of rows.filter(f=>!/^M!/.test(f.BestBait)&&f.BaitAny!=='Yes'))assert.ok(ui.$(`#voyageBaits [data-bait="${C.key(f.BestBait)}"]`),f.Fish);
   assert.deepEqual(ui.errors,[]);
