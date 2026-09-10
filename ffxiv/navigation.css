@@ -84,7 +84,9 @@ body .site-header[data-navigation] .nav-dropdown a:hover { background: var(--ff-
 body .site-header[data-navigation] .nav-dropdown a[aria-current="page"] { background: #1b3c4e; color: #a6e9f7; }
 body .site-header[data-navigation] .nav-dropdown a::after { content: none; }
 [data-navigation] .nav-current-label { font-size: 13.334px; white-space: nowrap; color: var(--ff-cyan); }
-[data-navigation] .nav-journal-pages { border-top: 1px solid var(--ff-line); margin-top: 4px; padding-top: 4px; }
+[data-navigation] .nav-tool-group + .nav-tool-group { border-top: 1px solid var(--ff-line); margin-top: 6px; padding-top: 6px; }
+[data-navigation] .nav-group-label { display: block; padding: 6px 12px 4px; color: var(--ff-gold); font: 700 13.334px/1.5 var(--ff-sans); }
+[data-navigation] .nav-dropdown .nav-journal-pages { border-left: 1px solid var(--ff-line); margin: 0 0 4px 16px; }
 body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24px; color: var(--ff-muted); }
 [data-navigation] .site-nav :focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: -2px; }
 @media (max-width: 900px) {
@@ -93,7 +95,7 @@ body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24
   body .site-header[data-navigation] .site-nav {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     order: 3;
     width: 100%;
     margin: 0;
@@ -103,8 +105,4 @@ body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24
   [data-navigation] .nav-category { position: static; min-width: 0; }
   [data-navigation] .nav-category > summary { padding: 8px 4px; gap: 5px; }
   [data-navigation] .nav-dropdown { top: 100%; left: 0; right: 0; width: auto; max-height: calc(100dvh - 132px); }
-}
-@media (max-width: 460px) {
-  body .site-header[data-navigation] .site-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  [data-navigation] .nav-dropdown { max-height: calc(100dvh - 180px); }
 }

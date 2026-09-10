@@ -1,10 +1,17 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const version = '20260910-guides1';
+const version = '20260910-fisher2';
 const guidePages = [
   ['fisher-skills/', '어부 스킬 안내'],
   ['fisher-skills/big-fish/', '터주 유형별 공략'],
+];
+const fishingGroups = [
+  { id: 'fisher-guide', label: '어부 가이드', tools: guidePages },
+  { id: 'fishing-log', label: '낚시 도감', tools: [
+    ['fishing-log/', '세계를 누비는 어부'],
+    ['ocean-fishing/', '먼바다'],
+  ] },
 ];
 const categories = [
   { id: 'general', label: '진행·검색', tools: [
@@ -19,11 +26,7 @@ const categories = [
     ['weapons/', '무기 수첩'],
     ['beastmaster/', '마수도감'],
   ] },
-  { id: 'fishing', label: '낚시', tools: [
-    ['fishing-log/', '세계를 누비는 어부'],
-    ['ocean-fishing/', '항해일지'],
-  ] },
-  { id: 'fisher-guide', label: '어부 가이드', tools: guidePages },
+  { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
 ];
 const journalPages = [
   ['ocean-fishing/indigo/', '근해 수첩'],
@@ -38,10 +41,13 @@ function assets(page) {
 }
 function header(page) {
   const base = baseFor(page);
-  const link = ([url, label], nested = false) => `<li><a href="${base}${url}"${nested ? ' class="nav-subpage"' : ''}${page === url ? ' aria-current="page"' : ''}>${label}${page === url ? '<span class="nav-current-label">현재</span>' : ''}</a></li>`;
+  const link = ([url, label], nested = false) => `<li><a href="${base}${url}"${nested ? ' class="nav-subpage"' : ''}${page === url ? ' aria-current="page"' : ''}>${label}${page === url ? '<span class="nav-current-label">현재</span>' : ''}</a>${url === 'ocean-fishing/' ? `<ul class="nav-journal-pages" aria-label="먼바다 페이지">${journalPages.map(tool => link(tool, true)).join('')}</ul>` : ''}</li>`;
   const groups = categories.map(category => {
     const active = category.tools.some(([url]) => page.startsWith(url));
-    return `<details class="nav-category"${active ? ' data-current-category' : ''}><summary aria-controls="nav-${category.id}">${category.label}<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-${category.id}"><ul>${category.tools.map(tool => link(tool) + (tool[0] === 'ocean-fishing/' ? `<li class="nav-journal-pages"><ul aria-label="항해일지 페이지">${journalPages.map(tool => link(tool, true)).join('')}</ul></li>` : '')).join('')}</ul></div></details>`;
+    const contents = category.groups
+      ? category.groups.map(group => `<li class="nav-tool-group"><span class="nav-group-label" id="nav-${group.id}-label">${group.label}</span><ul aria-labelledby="nav-${group.id}-label">${group.tools.map(tool => link(tool)).join('')}</ul></li>`).join('')
+      : category.tools.map(tool => link(tool)).join('');
+    return `<details class="nav-category"${active ? ' data-current-category' : ''}><summary aria-controls="nav-${category.id}">${category.label}<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-${category.id}"><ul>${contents}</ul></div></details>`;
   }).join('');
   return `<header class="site-header" data-navigation><a class="brand" href="${base}"${page === '' ? ' aria-current="page"' : ''}><img class="brand-emblem" src="${base}favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="도구 카테고리">${groups}</nav><span class="header-note">FFXIV · KR</span></header>`;
 }

@@ -1,4 +1,4 @@
-// 항해일지 application. Native DOM rendering; no original-site runtime or UI library.
+// 먼바다 application. Native DOM rendering; no original-site runtime or UI library.
 (() => {
   'use strict';
   const C = window.OceanCollection, V = window.JournalVoyages, A = window.OceanAchievements;
@@ -293,7 +293,7 @@
   }
   function download() {
     const data=JSON.stringify(checkState(),null,2), url=URL.createObjectURL(new Blob([data],{type:'application/json'})), a=document.createElement('a');
-    a.href=url;a.download='항해일지-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    a.href=url;a.download='먼바다-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     write('ocean:last-export',new Date().toISOString());backupStatus();$('recordMessage').textContent='근해·원양 기록을 JSON 파일로 내보냈어요.';
   }
   async function copyTeamcraft() {

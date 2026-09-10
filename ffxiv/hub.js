@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   const search=document.getElementById('toolSearch'),clear=document.getElementById('clearToolSearch'),list=document.getElementById('toolList');
-  const buttons=[...document.querySelectorAll('[data-category]')],groups=[...document.querySelectorAll('[data-tool-group]')],cards=[...list.querySelectorAll('.tool-link')];
+  const buttons=[...document.querySelectorAll('[data-category]')],groups=[...document.querySelectorAll('[data-tool-group], [data-tool-subgroup]')],cards=[...list.querySelectorAll('.tool-link')];
   const initials=[...'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'];
   const normalize=text=>text.normalize('NFKC').toLocaleLowerCase('ko').replace(/\s+/g,'');
   const initialText=text=>[...text].map(c=>{const n=c.charCodeAt(0)-0xac00;return n>=0&&n<11172?initials[Math.floor(n/588)]:c;}).join('');
@@ -11,7 +11,6 @@
     const query=normalize(search.value);let count=0;
     for(const card of cards){const term=terms.get(card);card.hidden=!(category==='all'||card.dataset.group===category)||!!query&&!term.text.includes(query)&&!term.initials.includes(query);if(!card.hidden)count++;}
     for(const group of groups)group.hidden=![...group.querySelectorAll('.tool-link')].some(card=>!card.hidden);
-    for(const column of list.querySelectorAll('.tool-column'))column.hidden=![...column.querySelectorAll('[data-tool-group]')].some(group=>!group.hidden);
     for(const button of buttons)button.setAttribute('aria-pressed',String(button.dataset.category===category));
     clear.hidden=!search.value;
     document.getElementById('noTools').hidden=count>0;

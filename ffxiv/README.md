@@ -87,7 +87,7 @@ PvP 시리즈 계산기 검증: `node --test pvp-series-calculator/tests/pvp-ser
 
 공통 색상·하단 영역은 `theme.css`, 상단 카테고리 메뉴는 `navigation.css`와 `navigation.js`, 도구 목록은 `hub.css`, 각 앱의 작업 화면은 해당 폴더의 `styles.css`에서 관리합니다.
 
-상단 메뉴는 모든 페이지에서 진행·검색 / 수집·육성 / 낚시 / 어부 가이드로 통일합니다. 어부 스킬 안내와 터주 유형별 공략은 어부 가이드 안에 같은 단계로 배치하고, 홈에서는 낚시 도구 아래 별도 그룹으로 보여줍니다. 메뉴 항목은 `tools/site-navigation.cjs`에서 관리하며, 저장소 루트에서 `node ffxiv/tools/site-navigation.cjs`를 실행하면 17개 페이지의 정적 메뉴와 공통 파일 참조를 갱신합니다. JavaScript 없이도 카테고리를 열어 이동할 수 있고, JavaScript는 바깥 클릭·Esc 닫기와 방향키 이동을 보완합니다. 검증: `node --test ffxiv/tests/navigation.test.cjs` (항해일지의 개발 의존성 설치 필요).
+상단 메뉴와 홈은 진행·검색 / 수집·육성 / 어부로 통일합니다. 어부 아래에는 어부 가이드(어부 스킬 안내, 터주 유형별 공략)와 낚시 도감(세계를 누비는 어부, 먼바다)을 둡니다. 먼바다의 근해·원양·물고기 도감 바로가기는 그 아래에 유지합니다. 메뉴 항목은 `tools/site-navigation.cjs`에서 관리하며, 저장소 루트에서 `node ffxiv/tools/site-navigation.cjs`를 실행하면 17개 페이지의 정적 메뉴와 공통 파일 참조를 갱신합니다. JavaScript 없이도 카테고리를 열어 이동할 수 있고, JavaScript는 바깥 클릭·Esc 닫기와 방향키 이동을 보완합니다. 검증: `node --test ffxiv/tests/navigation.test.cjs` (먼바다의 개발 의존성 설치 필요).
 
 선택지가 고정된 4항목 이하의 필터·설정은 `select-options.js`와 `select-options.css`의 라디오 그룹으로 표시합니다. 적용할 `select`에만 `data-radio-options`를 붙이며, 원래 select의 값·change 이벤트·양식 제출은 유지합니다. 데이터나 다른 조건에 따라 목록·선택 가능 항목이 바뀌는 지역·미끼·시작 도시 등에는 적용하지 않습니다. 화면이 늦게 생성되는 청마 역할·무투회 필터도 선택지 자체는 고정되어 있어 적용합니다. 검증: `node --test ffxiv/tests/select-options.test.cjs`.
 

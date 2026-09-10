@@ -16,12 +16,12 @@ test('all public pages have consistent navigation, valid relative destinations a
     const dom = open(page), d = dom.window.document;
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
-      assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '낚시', '어부 가이드']);
+      assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부']);
       assert.equal(d.querySelectorAll('.site-nav a').length, 15);
-      const guides=d.querySelectorAll('#nav-fisher-guide > ul > li > a');
+      const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
       assert.deepEqual([...guides].map(a=>a.textContent.replace('현재','')),['어부 스킬 안내','터주 유형별 공략']);
-      assert.equal(d.querySelector('#nav-fisher-guide .nav-subpage'),null);
-      assert.equal(d.querySelector('#nav-fishing a[href*="fisher-skills"]'),null);
+      assert.deepEqual([...d.querySelectorAll('#nav-fishing .nav-group-label')].map(el=>el.textContent),['어부 가이드','낚시 도감']);
+      assert.deepEqual([...d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fishing-log-label"] > li > a')].map(el=>el.textContent.replace('현재','')),['세계를 누비는 어부','먼바다']);
       for (const link of d.querySelectorAll('[data-navigation] a')) {
         const url = new URL(link.href);
         assert.equal(url.origin, 'https://example.test');
@@ -48,7 +48,7 @@ test('opening another category or clicking outside dismisses the previous dropdo
     assert.equal(groups[0].open, true);
     assert.equal(groups[0].querySelector('summary').getAttribute('aria-expanded'), 'true');
     groups[1].querySelector('summary').click(); await tick();
-    assert.deepEqual(groups.map(el => el.open), [false, true, false, false]);
+    assert.deepEqual(groups.map(el => el.open), [false, true, false]);
     dom.window.dispatchEvent(new dom.window.PageTransitionEvent('pageshow'));
     assert.equal(groups[1].open, true, 'finishing the initial load must not close a menu already opened by the user');
     dom.window.dispatchEvent(new dom.window.PageTransitionEvent('pageshow', { persisted: true }));
