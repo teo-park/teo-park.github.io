@@ -33,9 +33,11 @@
       // Offer substitutes only for the first direct catch in the same mooch chain.
       const targets=byId.get(route.bait)?.fish?paths(route).filter(p=>p.complete&&p.ids.length>1).map(p=>({id:p.ids[1],base:p.ids[0],mooch:true})):[{id,base:route.bait,mooch:false}];
       const result=[...new Map(targets.map(t=>[t.id+'|'+t.base,t])).values()].map(target=>{
-        const observed=observedBaits.get(target.id+'|'+route.spotKey)||[],other=observed.filter(o=>o.bait.id!==target.base&&o.bait.id!==VERSATILE).sort((a,b)=>b.samples-a.samples||a.bait.id-b.bait.id);
+        const source=target.mooch?byId.get(target.id)?.routes?.find(r=>r.spotKey===route.spotKey&&r.bait===target.base):route,choice=source?.baitChoice;
+        const positions=new Map((choice?.candidates||[]).map((c,i)=>[c.id,i]));
+        const observed=observedBaits.get(target.id+'|'+route.spotKey)||[],other=observed.filter(o=>o.bait.id!==target.base&&o.bait.id!==VERSATILE).sort((a,b)=>(positions.get(a.bait.id)??Infinity)-(positions.get(b.bait.id)??Infinity)||b.samples-a.samples||a.bait.id-b.bait.id);
         const versatile=observed.find(o=>o.bait.id===VERSATILE)||null;
-        return {...target,fish:byId.get(target.id),alternative:other[0]||null,versatile,versatilePrimary:target.base===VERSATILE};
+        return {...target,fish:byId.get(target.id),choice,alternative:other[0]||null,versatile,versatilePrimary:target.base===VERSATILE};
       });
       baitOptionsCache.set(key,result);return result;
     }

@@ -1,0 +1,11 @@
+.bait-choice-badge{display:inline-block;vertical-align:baseline;border:1px solid #427781;border-radius:4px;padding:0 5px;margin-left:5px;color:#b5e5e6;background:#193744;font-size:10pt;line-height:1.6;white-space:nowrap;font-weight:400}
+.bait-ranking{margin:9px 0 0;border-top:1px solid #304858;padding-top:7px;font-size:10pt;line-height:1.5;min-width:0}
+.bait-ranking summary{cursor:pointer;color:var(--fish);font-weight:700;padding:3px 0}
+.bait-ranking summary:focus-visible{outline:2px solid var(--fish);outline-offset:3px}
+.bait-ranking p{font-size:10pt!important;margin:8px 0;color:var(--ff-muted);line-height:1.6}
+.bait-ranking table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:10pt}
+.bait-ranking th,.bait-ranking td{padding:6px 4px;text-align:right;vertical-align:top;border-bottom:1px solid #304858;font-weight:400;overflow-wrap:anywhere}
+.bait-ranking th:first-child{text-align:left;width:36%}.bait-ranking th:nth-child(2){width:39%}.bait-ranking th:nth-child(3){width:25%}
+.bait-ranking thead th{color:#c4dedf;font-weight:700}.bait-ranking small{display:block;font-size:10pt;color:var(--ff-muted)}
+.bait-ranking .is-selected{background:#193744}.bait-ranking .is-selected th{color:#b5e5e6;font-weight:700}
+.bait-ranking caption{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

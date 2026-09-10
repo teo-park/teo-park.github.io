@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const $=id=>document.getElementById(id),D=window.FISHING_DATA,E=window.FishingBook,S=window.FishingCollection;
+  const $=id=>document.getElementById(id),D=window.FishingBaitRanking?.prepare(window.FISHING_DATA,window.FISHING_BAIT_CATCHES)||window.FISHING_DATA,E=window.FishingBook,S=window.FishingCollection;
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const known=new Set(D?.fishes.map(f=>f.id)||[]),kinds={rod:'어류도감',spear:'작살도감'};
   let M,comparison,caught=new Set(),kind='rod',page=1,filtered=[],pageFish=[],groups=[],history=[],detailId=null,lastCollectionStamp='';
@@ -32,7 +32,7 @@
   function baitPaths(route,base,fish){
     const paths=M.tacklePaths(route).filter(p=>!base||p.complete&&String(p.ids[0])===base);if(!paths.length)return '<span class="missing-data">시작 미끼 자료 확인 필요</span>';
     return paths.map(p=>`<span class="bait-path">${p.complete?'':'<b class="missing-data">이전 미끼 미확인 · </b>'}${p.steps.map(step=>{
-      const f=M.byId.get(step.id);if(!f)return '<span>물고기 '+step.id+'</span>';if(!f.fish){const first=p.steps[1],observed=first?first.routes[0]&&M.biteTime(first.id,first.routes[0]):fish&&M.biteTime(fish.id,route);return '<span class="primary-bait">'+link(tcFish(f),f.name)+(observed?'<small class="primary-bait-samples" title="'+esc(first?'첫 생미끼 물고기 '+M.byId.get(first.id).name:'대상 물고기')+' 관측 기록">관측 '+observed.samples.toLocaleString()+'건</small>':'<small class="primary-bait-samples">관측 미확인</small>')+'</span>';}
+      const f=M.byId.get(step.id);if(!f)return '<span>물고기 '+step.id+'</span>';if(!f.fish){const first=p.steps[1],observed=first?first.routes[0]&&M.biteTime(first.id,first.routes[0]):fish&&M.biteTime(fish.id,route);return '<span class="primary-bait">'+link(tcFish(f),f.name)+(observed?'<small class="primary-bait-samples" title="'+esc(first?'첫 생미끼 물고기 '+M.byId.get(first.id).name:'대상 물고기')+' 입질 시간 표본">입질 표본 '+observed.samples.toLocaleString()+'건</small>':'<small class="primary-bait-samples">입질 표본 미확인</small>')+(window.FishingBaitRankingView?.badge(first?first.routes[0]?.baitChoice:route.baitChoice)||'')+'</span>';}
       const variants=[...new Set((step.routes.length?step.routes:[{}]).map(r=>(['!!','!!!','!'][r.tug]||'입질 미확인')+' · '+(['일반 낚아채기','강력한 낚아채기','섬세한 낚아채기'][r.hookset]||'낚아채기 미확인')+(r.snagging?' · 갈고리 낚시 필요':'')))];
       const time=step.routes[0]&&M.biteTime(step.id,step.routes[0]);return `<span class="detail-mooch">${reference(step.id)}<small>${esc(variants.join(' / '))} · ${time?'약 '+time.min+'–'+time.max+'초':'시간 미확인'}</small></span>`;
     }).join('<span aria-hidden="true"> → </span>')}</span>`).join('<span class="path-or">또는</span>');
@@ -40,9 +40,9 @@
   function baitAlternatives(fish,route){
     return M.baitOptions(fish.id,route).map(option=>{
       const a=option.alternative,v=option.versatile;
-      const observed=o=>link(tcFish(o.bait),o.bait.name)+' <small>약 '+o.time.min+'–'+o.time.max+'초 · 관측 '+o.samples.toLocaleString()+'건</small>';
-      return '<div class="bait-alternatives">'+(option.mooch?'<strong>'+esc(option.fish.name)+' · 시작 미끼 대체</strong>':'')+(a?'<div>대체 미끼 · '+observed(a)+'</div>':'<div class="bait-unconfirmed">대체 미끼 기록 미확인</div>')+'<div class="'+(v||option.versatilePrimary?'bait-versatile':'bait-unconfirmed')+'">'+(option.versatilePrimary?'만능 루어 · 기본 미끼':v?'만능 루어 · 사용 기록 있음 <small>약 '+v.time.min+'–'+v.time.max+'초 · 관측 '+v.samples.toLocaleString()+'건</small>':'만능 루어 · 기록 미확인')+'</div></div>';
-    }).join('');
+      const observed=o=>link(tcFish(o.bait),o.bait.name)+' <small>약 '+o.time.min+'–'+o.time.max+'초 · 입질 표본 '+o.samples.toLocaleString()+'건</small>';
+      return '<div class="bait-alternatives">'+(option.mooch?'<strong>'+esc(option.fish.name)+' · 시작 미끼 대체</strong>':'')+(a?'<div>대체 미끼 · '+observed(a)+'</div>':'<div class="bait-unconfirmed">대체 미끼 기록 미확인</div>')+'<div class="'+(v||option.versatilePrimary?'bait-versatile':'bait-unconfirmed')+'">'+(option.versatilePrimary?'만능 루어 · 기본 미끼':v?'만능 루어 · 사용 기록 있음 <small>약 '+v.time.min+'–'+v.time.max+'초 · 입질 표본 '+v.samples.toLocaleString()+'건</small>':'만능 루어 · 기록 미확인')+'</div></div>';
+    }).join('')+(window.FishingBaitRankingView?.render(M,fish,route)||'');
   }
   function facts(route,fish,compact=false){const tags=[],time=E.timeWindow(route);if(time)tags.push(time);else if(fish.timed)tags.push('시간 조건 확인 필요');else if(compact)tags.push('시간 제한 없음');if(route.weathersFrom?.length)tags.push('이전 날씨: '+route.weathersFrom.map(id=>D.weathers[id]).join(' / '));if(route.weathers?.length)tags.push('현재 날씨: '+route.weathers.map(id=>D.weathers[id]).join(' / '));else if(fish.weathered)tags.push('날씨 조건 확인 필요');else if(compact)tags.push('날씨 제한 없음');if(route.oceanFishingTime)tags.push('먼바다 '+({1:'노을',2:'낮',3:'밤'}[route.oceanFishingTime]||'시간 확인 필요'));
     if(!compact&&route.tug!==undefined)tags.push('입질 '+['!!','!!!','!'][route.tug]);if(!compact&&route.hookset!==undefined)tags.push(['일반 낚아채기','강력한 낚아채기','섬세한 낚아채기'][route.hookset]);if(route.snagging)tags.push('갈고리 낚시 필요');if(route.minGathering>0)tags.push('획득력 '+route.minGathering+' 이상');if(route.aLure>0)tags.push('거대한 루어 '+route.aLure+'회');if(route.mLure>0)tags.push('소박한 루어 '+route.mLure+'회');
