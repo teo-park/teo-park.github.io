@@ -1,0 +1,63 @@
+/* Shared reading layout for the two sibling fisher guides. */
+body.fisher-guide {
+  --bg: var(--ff-bg); --panel: var(--ff-panel); --line: var(--ff-line);
+  --text: var(--ff-text); --muted: var(--ff-muted); --cyan: var(--ff-cyan); --mint: #9cdeca;
+  margin: 0; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.75;
+}
+.fisher-guide .guide-main { max-width: 1240px; margin: auto; padding: 30px 24px 48px; }
+.fisher-guide .guide-masthead { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+.fisher-guide .guide-masthead h1 { font-size: 30px; line-height: 1.35; margin: 3px 0 7px; }
+.fisher-guide .guide-masthead p { margin: 0; color: var(--muted); }
+.fisher-guide .guide-masthead .eyebrow { font-size: 13.5px; color: var(--mint); }
+.fisher-guide .planner-link { border: 1px solid var(--line); border-radius: 5px; padding: 8px 13px; font-size: 14px; flex-shrink: 0; text-decoration: none; }
+.fisher-guide .guide-tabs { display: flex; border-bottom: 1px solid var(--line); gap: 0; margin-bottom: 24px; }
+.fisher-guide .guide-tabs a { padding: 9px 17px; font-size: 14px; border-bottom: 3px solid transparent; color: var(--muted); text-decoration: none; }
+.fisher-guide .guide-tabs a:hover { color: var(--text); background: #182e3d; }
+.fisher-guide .guide-tabs a[aria-current=page] { border-color: var(--mint); color: #b5f0df; font-weight: 700; }
+.fisher-guide .guide-layout { display: grid; grid-template-columns: 205px minmax(0,1fr); align-items: start; gap: 26px; }
+.fisher-guide .guide-content { min-width: 0; }
+.fisher-guide .guide-sidebar { position: sticky; top: 102px; max-height: calc(100dvh - 125px); overflow: auto; font-size: 14px; }
+.fisher-guide .guide-sidebar nav { display: grid; gap: 3px; }
+.fisher-guide .guide-sidebar p { margin: 0 0 8px; font-size: 13.5px; color: var(--muted); }
+.fisher-guide .guide-sidebar a { display: flex; align-items: center; gap: 9px; padding: 7px 9px; border-radius: 4px; color: #c5d5e5; text-decoration: none; }
+.fisher-guide .guide-sidebar a:hover { background: #1a3140; color: var(--mint); }
+.fisher-guide .guide-sidebar a span { color: var(--mint); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.fisher-guide .guide-sidebar .extra-nav { border-top: 1px solid var(--line); border-radius: 0; margin-top: 5px; }
+.fisher-guide .guide-card { border: 1px solid #344c61; background: var(--panel); border-radius: 7px; padding: 22px; scroll-margin-top: 130px; }
+.fisher-guide .guide-card:target { border-color: var(--mint); box-shadow: 0 0 0 1px var(--mint); }
+.fisher-guide .skill-card.featured { border-top: 3px solid var(--mint); }
+.fisher-guide .skill-heading h3,.fisher-guide .type-heading h2 { font-size: 21px; line-height: 1.5; }
+.fisher-guide .skill-example h4,.fisher-guide .type-instructions h3 { color: #a6dce8; }
+.fisher-guide .guide-sources { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+.fisher-guide .guide-sources h2 { margin: 0 0 8px; font-size: 21px; color: var(--text); }
+.fisher-guide .guide-main p,.fisher-guide .guide-main li { overflow-wrap: anywhere; }
+.fisher-guide .guide-main [id] { scroll-margin-top: 130px; }
+body.fisher-guide footer.site-footer { width: calc(100% - 48px); max-width: 1192px; margin: 0 auto; padding: 24px 0; font-size: 13.5px; }
+@media(max-width:1050px) {
+  .fisher-guide .guide-layout { grid-template-columns: 180px minmax(0,1fr); gap: 18px; }
+  .fisher-guide .guide-card { padding: 18px; }
+  .fisher-guide .skill-explanation { grid-template-columns: 1fr; gap: 16px; }
+  .fisher-guide .skill-example { border-left: 0; border-top: 1px solid var(--line); padding: 14px 0 0; }
+}
+@media(max-width:950px) { .fisher-guide .guide-sidebar { top: 140px; max-height: calc(100dvh - 155px); } }
+@media(max-width:700px) {
+  .fisher-guide .guide-main { padding: 22px 14px 36px; }
+  .fisher-guide .guide-masthead { display: block; }
+  .fisher-guide .guide-masthead h1 { font-size: 26px; }
+  .fisher-guide .planner-link { display: inline-block; margin-top: 13px; }
+  .fisher-guide .guide-tabs a { padding: 9px 12px; }
+  .fisher-guide .guide-layout { display: block; }
+  .fisher-guide .guide-sidebar { position: static; max-height: none; overflow: visible; margin-bottom: 20px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
+  .fisher-guide .guide-sidebar nav { grid-template-columns: 1fr 1fr; gap: 3px 5px; }
+  .fisher-guide .guide-sidebar p { grid-column: 1/-1; }
+  .fisher-guide .guide-sidebar a { font-size: 13.5px; padding: 5px 3px; gap: 5px; }
+  .fisher-guide .guide-sidebar .extra-nav { border: 0; margin: 3px 0 0; }
+  .fisher-guide .guide-card { padding: 16px; }
+  .fisher-guide .skill-heading h3,.fisher-guide .type-heading h2 { font-size: 19px; }
+}
+@media(max-width:460px) { .fisher-guide .guide-main [id] { scroll-margin-top: 190px; } }
+@media print {
+  .fisher-guide .guide-sidebar,.fisher-guide .guide-tabs { display: none; }
+  .fisher-guide .guide-layout { display: block; }
+  .fisher-guide .guide-card { background: white; color: black; box-shadow: none; }
+}

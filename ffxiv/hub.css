@@ -28,6 +28,9 @@ body .site-header .header-note { font-size: 13.334px; }
 .search-status { margin: -4px 0 10px; color: var(--ff-cyan); font-size: 13.334px; }
 .tool-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
 .tool-group { min-width: 0; }
+.tool-column { display: grid; gap: 22px; min-width: 0; }
+.tool-controls { flex-wrap: wrap; }
+.category-picker { flex-wrap: wrap; flex-shrink: 1; }
 .group-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-top: 12px; border-top: 1px solid var(--ff-line); }
 .group-heading h2 { margin: 0; font-size: 15px; font-weight: 700; white-space: nowrap; }
 .group-heading > span { color: var(--ff-muted); font-size: 13.334px; }
@@ -73,7 +76,7 @@ body footer.hub-footer { min-height: 0; margin-top: 26px; padding: 16px 0 24px; 
 @media (max-width: 650px) {
   body .site-header .header-note { display: none; }
   .hub-main { padding-top: 18px; }.hub-masthead { margin-bottom: 16px; gap: 10px; }.hub-masthead h1 { font-size: 25px; }.hub-masthead p { font-size: 13.334px; max-width: 245px; }.hub-meta { padding-top: 3px; }.collection-count { display: none; }
-  .tool-controls { flex-direction: column-reverse; align-items: stretch; gap: 10px; margin-bottom: 14px; }.tool-search { width: 100%; }.category-picker { display: grid; grid-template-columns: repeat(4, auto); gap: 5px; }.category-picker button { font-size: 13.334px; padding: 7px 6px; }.category-picker button span { margin-left: 3px; }
+  .tool-controls { flex-direction: column-reverse; align-items: stretch; gap: 10px; margin-bottom: 14px; }.tool-search { width: 100%; }.category-picker { display: flex; flex-wrap: wrap; gap: 5px; }.category-picker button { font-size: 13.334px; padding: 7px 9px; }.category-picker button span { margin-left: 3px; }
   .tool-list { grid-template-columns: 1fr; gap: 20px; }.group-heading { padding-top: 10px; }.group-heading > span { margin-left: auto; }.group-tools { gap: 7px; }.tool-link { min-height: 79px; padding: 12px; }.tool-icon { width: 34px; height: 34px; }.tool-link h3 { margin-bottom: 2px; }
   body footer.hub-footer { margin-top: 22px; }.hub-footer .footer-top { align-items: flex-start; }.hub-footer .footer-top > span { flex-basis: 100%; }
 }
