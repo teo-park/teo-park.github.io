@@ -36,6 +36,42 @@
     try{const raw=localStorage.getItem(KEY);if(raw)preferences(JSON.parse(raw));}catch{$('planMessage').textContent='저장된 계획을 읽지 못했습니다. 시간을 확인하고 다시 저장해 주세요.';}
     const serialized=(next=settings)=>JSON.stringify({settings:next,stars:[...stars],mode,purpose,rarities,alwaysAlerts});
     const store=()=>{localStorage.setItem(KEY,serialized());saved=true;};
+    let timelineScope='all',timelineTimer;
+    function refreshTimeline(){
+      clearTimeout(timelineTimer);
+      const host=$('fishTimeline'),fish=fishById.get(+host?.dataset.fishTimeline);
+      if(!host||!fish||!$('detailDialog').open)return;
+      const now=Date.now(),timeline=forecast.startTimeline(fish,now,{settings:timelineScope==='play'?settings:null,count:5});
+      const stamp=ms=>(new Date(ms+F.KST).getUTCFullYear()===new Date(now+F.KST).getUTCFullYear()?date:longDate).format(ms);
+      const endText=(start,end)=>Math.floor((start+F.KST)/F.DAY)===Math.floor((end+F.KST)/F.DAY)?time.format(end):stamp(end);
+      function paint(){
+        if(!host.isConnected)return;
+        const state=timeline.result;
+        for(const button of host.querySelectorAll('[data-timeline-scope]'))button.setAttribute('aria-pressed',String(button.dataset.timelineScope===timelineScope));
+        host.querySelector('.timeline-note').textContent=(timelineScope==='play'?'내 접속 시간·최소 도전 시간에 맞는 구간입니다.':'접속 시간과 관계없는 실제 출현 구간입니다.')+' 현재 열린 구간도 포함하며, 직감·생미끼 등 선행 조건은 별도 준비해야 합니다.';
+        host.querySelector('.timeline-list').innerHTML=state.chances.map((chance,i)=>{
+          const ongoing=chance.start<=now,places=[...new Set(chance.routes.map(index=>data.spots[fish.routes[index].spotKey]?.name).filter(Boolean))];
+          return `<li data-timeline-start="${chance.start}" data-timeline-end="${chance.end}"${ongoing?' class="is-current"':''}><span class="timeline-number">${i+1}</span><div><strong>${stamp(chance.start)} – ${endText(chance.start,chance.end)}</strong><span>${esc(places.join(' · '))}</span></div><span class="timeline-remaining">${ongoing?'지금 · 종료까지 '+remaining(chance.end-now):remaining(chance.start-now)+' 후'}</span></li>`;
+        }).join('');
+        const status=host.querySelector('.timeline-status');status.hidden=!state.pending&&!state.reason&&!state.always;
+        status.textContent=state.always?'상시 낚시 · 시간·날씨 제한이 없습니다.':state.reason||`출현 ${state.chances.length}/5회 확인 · 더 먼 기회를 찾고 있습니다.`;
+      }
+      function advance(){
+        if(!host.isConnected||!$('detailDialog').open||document.hidden)return;
+        const start=performance.now();do{timeline.step();}while(timeline.result.pending&&performance.now()-start<12);
+        paint();if(timeline.result.pending)timelineTimer=setTimeout(advance,50);
+      }
+      paint();if(timeline.result.pending)timelineTimer=setTimeout(advance,0);
+    }
+    window.FishingTimeline={
+      markup:fish=>fish.kind==='rod'&&!model.isOceanFish(fish)?`<section id="fishTimeline" class="fish-timeline" data-fish-timeline="${fish.id}" aria-labelledby="timelineTitle"><div class="timeline-heading"><h3 id="timelineTitle">다가오는 출현 · 5회 <small>KST</small></h3><div class="timeline-scope" role="group" aria-label="출현 시간 기준"><button type="button" data-timeline-scope="all" aria-pressed="${timelineScope==='all'}">전체 출현</button><button type="button" data-timeline-scope="play" aria-pressed="${timelineScope==='play'}">내 접속 시간</button></div></div><p class="timeline-note"></p><ol class="timeline-list"></ol><p class="timeline-status" role="status"></p></section>`:'',
+      refresh:refreshTimeline,
+    };
+    document.addEventListener('click',event=>{const button=event.target.closest('[data-timeline-scope]');if(button){timelineScope=button.dataset.timelineScope;refreshTimeline();}});
+    $('detailDialog').addEventListener('close',()=>clearTimeout(timelineTimer));
+    document.addEventListener('fishing-plan-changed',refreshTimeline);
+    setInterval(refreshTimeline,60000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTimeline();});
     function modeControls(){
       $('planBigMode').setAttribute('aria-pressed',String(purpose==='big'));$('planCollectionMode').setAttribute('aria-pressed',String(purpose==='collection'));
       $('planPurposeNote').textContent=purpose==='big'?'터주만 모아 보고 알림을 받습니다.':'일반 물고기와 터주를 함께 모아 보고 알림을 받습니다.';
@@ -131,7 +167,7 @@
         <div class="plan-place"><span>${esc(spot.area)}</span><div class="plan-spot-line"><strong><a class="plan-spot-link" data-spot-map="${esc(route.spotKey)}" data-map-owner="${fish.id}" href="${esc(spotUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(spot.name)} · Teamcraft 낚시터 보기 (새 탭)">${esc(spot.name)}<span aria-hidden="true"> ↗</span></a></strong><button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button></div>${coords}</div>
         ${windowCell(row)}
         <div class="plan-tackle"><div class="plan-bait">${chain(route,fish)}</div>${lureBadges(route,fish.name)}${alternateBait(fish,route)}${special?`<p class="plan-condition">직감: ${esc(special)}</p>`:''}${preparationLures}</div>
-        <p class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회">${row.always?'상시 가능':next}</p>
+        <div class="plan-next" title="이 도전 구간을 놓친 경우, 내 접속 시간 안의 다음 기회"><span>${row.always?'상시 가능':next}</span>${row.always?'':`<button class="plan-timeline-link" data-fish-detail="${fish.id}" aria-label="${esc(fish.name)} 출현 시간 5회 보기">출현 5회 보기 ↗</button>`}</div>
         <div class="plan-card-actions"><button data-plan-detail="${fish.id}" aria-label="${esc(fish.name)} 낚시 조건" aria-expanded="${opened.has(fish.id)}" aria-controls="plan-detail-${fish.id}">조건</button><button data-caught="${fish.id}" aria-label="${esc(fish.name)} 수집 체크">수집</button></div>
       </article><section id="plan-detail-${fish.id}" class="plan-inline-detail" data-plan-route="${fishById.get(fish.id).routes.indexOf(route)}" aria-labelledby="plan-detail-title-${fish.id}" ${opened.has(fish.id)?'':'hidden'}>${opened.has(fish.id)?window.FishingDetails?.renderPlan(fish.id,route,'plan-detail-title-'+fish.id)||'':''}</section></div>`;
     }

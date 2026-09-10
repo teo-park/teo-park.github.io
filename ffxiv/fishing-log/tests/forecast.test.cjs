@@ -56,3 +56,26 @@ test('disabled sessions, too-short windows and unsupported weather cannot cause 
   settings.minMinutes=1;settings.days.forEach(d=>d.enabled=false);const disabled=m.startSearch([fish],settings,Date.now());assert.equal(disabled.result.pending,0);assert.equal(disabled.result.rows[0].start,null);assert.match(disabled.result.rows[0].unavailableReason,/접속 요일/);
   const invalid=m.startSearch([{id:2,routes:[route({weathers:[999]})]}],F.defaults(),Date.now());assert.equal(invalid.result.pending,0);assert.equal(invalid.result.excluded.length,1);
 });
+test('five-chance timeline merges duplicate routes and preserves active and midnight-spanning windows',()=>{
+  const r=route({spawn:23,duration:3}),fish={id:1,routes:[r,{...r}]},from=24*F.ET_HOUR;
+  const search=m.startTimeline(fish,from);
+  assert.equal(search.result.pending,false);assert.equal(search.result.chances.length,5);
+  for(const [i,c] of search.result.chances.entries()){
+    assert.equal(c.start,(23+i*24)*F.ET_HOUR);assert.equal(c.end,(26+i*24)*F.ET_HOUR);assert.deepEqual(c.routes,[0,1]);
+  }
+});
+test('five-chance timeline crosses distant search chunks and matches full-range play opportunities',()=>{
+  const from=Date.parse('2026-09-09T04:00:00Z'),real=F.create(D,W),fish=D.fishes.find(f=>f.id===49794),settings=F.defaults();
+  const search=real.startTimeline(fish,from,{settings});assert.ok(search.result.pending);
+  let steps=0;while(search.result.pending&&steps++<100)search.step();
+  assert.equal(search.result.pending,false);assert.equal(search.result.chances.length,5);assert.ok(search.result.chances[0].start>from+120*F.DAY);
+  const expected=F.merge(real.opportunities(fish,settings,from,from+3000*F.DAY)).slice(0,5);
+  assert.deepEqual(search.result.chances.map(c=>[c.start,c.end]),expected.map(c=>[c.start,c.end]));
+});
+test('timeline handles always, unsupported and impossible play settings without fake dates',()=>{
+  assert.equal(m.startTimeline({id:1,routes:[route()]},0).result.always,true);
+  assert.match(m.startTimeline({id:2,routes:[route({verified:false})]},0).result.reason,/확인/);
+  const settings=daily('20:00','23:00'),fish={id:3,routes:[route({spawn:1,duration:1})]};settings.days.forEach(d=>d.enabled=false);
+  const result=m.startTimeline(fish,0,{settings}).result;assert.equal(result.pending,false);assert.equal(result.chances.length,0);assert.match(result.reason,/접속 요일/);
+  assert.equal(m.startTimeline(fish,0).result.chances.length,5,'actual openings remain available outside disabled play sessions');
+});

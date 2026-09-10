@@ -1,4 +1,24 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),{open,D,memory}=require('./helpers.cjs');
+test('fish details show five openings with a separate playtime view, without changing collection or alert preferences',()=>{
+  const p=open({plan:true});try{
+    p.w.Date.now=()=>Date.parse('2026-09-09T10:00:00Z');
+    p.$('#showPlanner').click();p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();
+    const preferences=JSON.stringify(p.planSnapshot()),collection=p.storage.getItem('teo-ffxiv.fishing.collection.v2');
+    p.$('.plan-timeline-link').click();assert.ok(p.$('#detailDialog').open);
+    assert.equal(p.all('.timeline-list li').length,5);assert.equal(p.$('[data-timeline-scope="all"]').getAttribute('aria-pressed'),'true');
+    assert.match(p.$('.timeline-note').textContent,/실제 출현/);assert.equal(p.$('.timeline-status').hidden,true);
+    const all=p.all('.timeline-list li').map(el=>[+el.dataset.timelineStart,+el.dataset.timelineEnd]);
+    assert.ok(all.every((c,i)=>c[1]>c[0]&&(!i||c[0]>all[i-1][1])));
+    p.$('[data-timeline-scope="play"]').click();assert.equal(p.all('.timeline-list li').length,5);assert.match(p.$('.timeline-note').textContent,/내 접속 시간/);
+    const play=p.all('.timeline-list li').map(el=>+el.dataset.timelineStart);assert.ok(play.every(t=>{const hour=new Date(t+9*3600000).getUTCHours();return hour>=20&&hour<23;}));
+    assert.equal(JSON.stringify(p.planSnapshot()),preferences);assert.equal(p.storage.getItem('teo-ffxiv.fishing.collection.v2'),collection);
+    p.$('#closeDetail').click();assert.equal(p.$('#detailDialog').open,false);
+    p.$('.plan-name').click();assert.equal(p.all('.timeline-list li').length,5,'fish name opens the same timeline');
+    p.$('#closeDetail').click();p.all('[data-day]').forEach(el=>el.checked=false);p.$('#savePlay').click();p.$('.plan-name').click();
+    assert.equal(p.all('.timeline-list li').length,0);assert.match(p.$('.timeline-status').textContent,/접속 요일/);
+    p.$('[data-timeline-scope="all"]').click();assert.equal(p.all('.timeline-list li').length,5);
+  }finally{p.close();}
+});
 test('planner keeps the book accessible, saves overnight playtime and removes caught fish from alert targets',()=>{
   const p=open({plan:true});try{
     assert.equal(p.planSnapshot().saved,false);p.$('#showPlanner').click();assert.equal(p.$('#collectionPanel').hidden,true);assert.ok(p.all('.plan-card').length);

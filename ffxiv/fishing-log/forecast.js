@@ -155,7 +155,37 @@
       }
       return {result,states,signature,step};
     }
-    return {at,reason,limited,windows,opportunities,plan,startSearch,clearCache:()=>weatherCache.clear()};
+    // An on-demand timeline for one fish. Keep the main list's two-chance search cheap.
+    function startTimeline(fish,from,{settings=null,count=5}={}){
+      const supported=fish.routes.filter(r=>!reason(r));
+      const result={chances:[],pending:false,always:false,reason:null};
+      if(!supported.length)result.reason=fish.routes.map(reason).find(Boolean)||'조건 자료 확인 필요';
+      else if(supported.some(r=>!limited(r)))result.always=true;
+      else if(settings&&!supported.some(r=>playable(r,settings,from)))result.reason=settings.days.some(d=>d.enabled)?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';
+      else result.pending=true;
+      let cursor=from;
+      function step(){
+        if(!result.pending)return;
+        if(weatherCache.size>100000)weatherCache.clear();
+        const begin=Math.max(from,cursor-DAY),to=cursor+30*DAY;
+        const chances=settings?opportunities(fish,settings,begin,to+DAY):fish.routes.flatMap((route,index)=>
+          reason(route)?[]:windows(route,begin,to+DAY).map(w=>({...w,route:index,windowStart:w.start,windowEnd:w.end})));
+        // Revisit chunk boundaries, preserving complete windows and merging alternate
+        // routes so a single continuous opportunity cannot occupy several slots.
+        const merged=[];
+        for(const chance of [...result.chances,...chances.filter(c=>c.start<to)].sort((a,b)=>a.start-b.start||b.end-a.end)){
+          const previous=merged.at(-1),routes=chance.routes||[chance.route];
+          if(previous&&chance.start<=previous.end){previous.end=Math.max(previous.end,chance.end);previous.routes=[...new Set([...previous.routes,...routes])];}
+          else merged.push({...chance,routes:[...routes]});
+        }
+        result.chances=merged.slice(0,count);cursor=to;
+        // Complete the last displayed range before stopping at a chunk edge.
+        result.pending=result.chances.length<count||result.chances.at(-1).end>=to;
+      }
+      step();
+      return {result,step};
+    }
+    return {at,reason,limited,windows,opportunities,plan,startSearch,startTimeline,clearCache:()=>weatherCache.clear()};
   }
   return {MINUTE,DAY,ET_HOUR,ET_DAY,WEATHER,KST,defaults,validate,weatherTarget,merge,sessions,intersect,create};
 });
