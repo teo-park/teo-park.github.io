@@ -2,116 +2,155 @@
   {
     "name": "중단",
     "anchor": "anchor_1744",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001102.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001102.png",
+    "level": 1
   },
   {
     "name": "낚싯대 거두기",
     "anchor": "anchor_1746",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001143.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001143.png",
+    "level": 1
   },
   {
     "name": "밑밥",
     "anchor": "anchor_1747",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001111.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001111.png",
+    "level": 5
   },
   {
     "name": "인내",
     "anchor": "anchor_1749",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001113.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001113.png",
+    "level": 15
   },
   {
     "name": "강력한 낚아채기",
     "anchor": "anchor_17410",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001115.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001115.png",
+    "level": 15
   },
   {
     "name": "섬세한 낚아채기",
     "anchor": "anchor_17411",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001116.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001116.png",
+    "level": 15
   },
   {
     "name": "살리아크의 은총",
     "anchor": "anchor_17412",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001139.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001139.png",
+    "level": 15
   },
   {
     "name": "생미끼 낚시",
     "anchor": "anchor_17415",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001104.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001104.png",
+    "level": 25
   },
   {
     "name": "갈고리 낚시",
     "anchor": "anchor_17416",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001109.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001109.png",
+    "level": 36
   },
   {
     "name": "숙련 낚시꾼",
     "anchor": "anchor_17417",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001136.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001136.png",
+    "level": 48
   },
   {
     "name": "소장품 채집",
     "anchor": "anchor_17418",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001110.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001110.png",
+    "level": 50,
+    "quest": {
+      "label": "부가 퀘스트",
+      "url": "https://guide.ff14.co.kr/lodestone/db/quest/0e1179f01b3"
+    }
   },
   {
     "name": "물고기의 눈",
     "anchor": "anchor_17419",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001112.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001112.png",
+    "level": 57
   },
   {
     "name": "인내 2",
     "anchor": "anchor_17420",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001114.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001114.png",
+    "level": 60,
+    "quest": {
+      "label": "클래스 퀘스트",
+      "url": "https://guide.ff14.co.kr/lodestone/db/quest/cf78095f4b4"
+    }
   },
   {
     "name": "생미끼 낚시 2",
     "anchor": "anchor_17422",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001117.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001117.png",
+    "level": 63,
+    "quest": {
+      "label": "클래스 퀘스트",
+      "url": "https://guide.ff14.co.kr/lodestone/db/quest/02387042b62"
+    }
   },
   {
     "name": "이중 낚아채기",
     "anchor": "anchor_17425",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001118.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001118.png",
+    "level": 65,
+    "quest": {
+      "label": "클래스 퀘스트",
+      "url": "https://guide.ff14.co.kr/lodestone/db/quest/0e1de5a5310"
+    }
   },
   {
     "name": "교환 방생",
     "anchor": "anchor_17428",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001123.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001123.png",
+    "level": 71
   },
   {
     "name": "한결같은 챔질",
     "anchor": "anchor_17430",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001124.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001124.png",
+    "level": 79
   },
   {
     "name": "대물 낚시",
     "anchor": "anchor_17431",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001137.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001137.png",
+    "level": 81
   },
   {
     "name": "삼중 낚아채기",
     "anchor": "anchor_17433",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001138.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001138.png",
+    "level": 90
   },
   {
     "name": "낚시꾼의 묘안",
     "anchor": "anchor_17434",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001144.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001144.png",
+    "level": 91
   },
   {
     "name": "거대한 루어",
     "anchor": "anchor_17436",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001146.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001146.png",
+    "level": 100
   },
   {
     "name": "소박한 루어",
     "anchor": "anchor_17437",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001147.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/001147.png",
+    "level": 100
   },
   {
     "name": "월척 낚시꾼",
     "anchor": "anchor_1792",
-    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/005485.png"
+    "icon": "https://image.ff14.co.kr/guide/resources/images/jobicon/fisher/005485.png",
+    "level": 15
   }
 ]
