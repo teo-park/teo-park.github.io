@@ -14,6 +14,9 @@
   function create(data,biteTimes={}){
     const byId=new Map(Object.values(data.related).map(f=>[f.id,f]));for(const f of data.fishes)byId.set(f.id,f);
     const cache=new Map();
+    // Map 604 is the Endeavor. Do not classify other special maps as ocean fishing.
+    const isOceanFish=fish=>fish.kind==='rod'&&fish.routes.length>0&&fish.routes.every(r=>data.spots[r.spotKey]?.map===604);
+    const scopeMatches=(fish,scope)=>!scope||scope==='all'||(scope==='ocean'?isOceanFish(fish):!isOceanFish(fish));
     function chains(bait,spot,seen=new Set()){
       const f=byId.get(bait);if(!f?.fish)return [{ids:[bait],complete:!!f}];if(seen.has(bait))return [{ids:[bait],complete:false}];
       const next=new Set(seen);next.add(bait);const routes=(f.routes||[]).filter(r=>r.spotKey===spot&&r.bait);
@@ -64,7 +67,7 @@
     const routeList=(fish,options={})=>fish.routes.filter(r=>routeMatches(r,options));
     const terms=new Map(data.fishes.map(f=>{const s=[f.name,f.original,...f.routes.flatMap(r=>[data.spots[r.spotKey]?.name,data.spots[r.spotKey]?.area,data.spots[r.spotKey]?.region,...paths(r).flatMap(p=>p.ids.map(id=>byId.get(id)?.name)),...(r.predators||[]).map(p=>byId.get(p.id)?.name)])].join(' ');return [f.id,{text:normalize(s),initials:normalize(initials(s))}];}));
     function filter(caught,options={}){const q=normalize(options.query),number=/^(?:no)?\d+$/.test(q)?+q.replace(/^no/,''):null;
-      return data.fishes.filter(f=>(!options.kind||f.kind===options.kind)&&(!options.status||options.status==='all'||caught.has(f.id)===(options.status==='caught'))&&(!options.rarity||options.rarity==='all'||(options.rarity==='normal'?!f.big:options.rarity==='big'?f.big:f.legendary))&&(!q||(number!==null?f.order===number||f.id===number:terms.get(f.id).text.includes(q)||terms.get(f.id).initials.includes(q)))&&((options.region==='all'||!options.region)&&((options.bait==='all'||!options.bait)||options.bait==='unknown'&&!f.routes.length)||routeList(f,options).length));
+      return data.fishes.filter(f=>scopeMatches(f,options.scope)&&(!options.kind||f.kind===options.kind)&&(!options.status||options.status==='all'||caught.has(f.id)===(options.status==='caught'))&&(!options.rarity||options.rarity==='all'||(options.rarity==='normal'?!f.big:options.rarity==='big'?f.big:f.legendary))&&(!q||(number!==null?f.order===number||f.id===number:terms.get(f.id).text.includes(q)||terms.get(f.id).initials.includes(q)))&&((options.region==='all'||!options.region)&&((options.bait==='all'||!options.bait)||options.bait==='unknown'&&!f.routes.length)||routeList(f,options).length));
     }
     function groups(fishes,mode,options={}){
       const found=new Map();
@@ -75,7 +78,7 @@
       function put(key,name,fish,routes,area){if(!found.has(key))found.set(key,{key,name,area,entries:new Map()});const g=found.get(key);if(!g.entries.has(fish.id))g.entries.set(fish.id,{fish,routes:[]});const row=g.entries.get(fish.id);for(const route of routes)if(!row.routes.includes(route))row.routes.push(route);}
       return [...found.values()].map(g=>({...g,entries:[...g.entries.values()]})).sort((a,b)=>a.key==='unknown'?1:b.key==='unknown'?-1:a.name.localeCompare(b.name,'ko'));
     }
-    return {byId,paths,tacklePaths,biteTime,baitOptions,competitors,routeMatches,routeList,filter,groups};
+    return {byId,isOceanFish,paths,tacklePaths,biteTime,baitOptions,competitors,routeMatches,routeList,filter,groups};
   }
   const validIds=ids=>Array.isArray(ids)&&ids.length<=30000&&ids.every(id=>Number.isSafeInteger(id)&&id>0);
   function parseBackup(text){let v;try{v=JSON.parse(text);}catch{throw Error('JSON 기록을 읽을 수 없어요.');}if(!v||v.type!=='ffxiv-fishing-log'||v.schemaVersion!==1||!validIds(v.caught))throw Error('어부 수첩의 백업 파일이 아닙니다.');return new Set(v.caught);}

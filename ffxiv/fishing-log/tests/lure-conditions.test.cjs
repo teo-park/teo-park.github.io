@@ -42,6 +42,6 @@ test('Poteuka appears in collection planning with verified tackle, but respects 
   p.$('#planCollectionMode').click();let row=p.$('.plan-card');assert.ok(row);assert.equal(row.dataset.planAvailability,'always');
   assert.equal(row.querySelector('.plan-tug').textContent,'!!');assert.equal(row.querySelector('.plan-hookset').textContent,'강력한 낚아채기');assert.ok(row.querySelector('.plan-place').textContent.includes('하누의 물가'));assert.equal(row.querySelector('.plan-bait-link').textContent,'금속 스피너');assert.equal(row.querySelector('.plan-lure-badge'),null);assert.ok(p.planSnapshot().ids.includes(52012));
   p.$('[data-caught="52012"]').click();assert.equal(p.$('.plan-card'),null);assert.ok(!p.planSnapshot().ids.includes(52012));p.$('#undo').click();assert.ok(p.$('.plan-card'));
-  p.$('#planSearch').value='';p.$('#planRefresh').click();const excluded=p.all('#planUnscheduled [data-fish-detail]').map(b=>+b.dataset.fishDetail);assert.ok(!excluded.includes(52012));assert.ok(D.missingConditions.filter(id=>D.fishes.find(f=>f.id===id).kind==='rod').every(id=>excluded.includes(id)));
+  p.$('#planSearch').value='';p.$('#planRefresh').click();const excluded=p.all('#planUnscheduled [data-fish-detail]').map(b=>+b.dataset.fishDetail);assert.ok(!excluded.includes(52012));assert.ok(D.missingConditions.every(id=>!excluded.includes(id)));
  }finally{p.close();}
 });

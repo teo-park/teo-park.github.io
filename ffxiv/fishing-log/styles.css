@@ -11,3 +11,5 @@
 .bait-alternatives{display:flex;flex-direction:column;gap:5px;font-size:10pt;line-height:1.6;margin:8px 0 12px;padding:8px 12px;border-left:2px solid #527b83;background:#162c3b}.bait-alternatives small{font-size:10pt;color:var(--ff-muted)}.bait-alternatives strong{font-weight:400;color:#c5e4e5}.bait-versatile{color:var(--fish)}.bait-unconfirmed{color:var(--ff-muted)}
 
 .primary-bait{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px}.primary-bait-samples{font-size:10pt;color:var(--ff-muted)}
+
+.book-scope{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px;margin:0 0 18px}.book-scope>label{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.book-scope p{margin:0;color:var(--ff-muted);font-size:10pt}.book-scope a,.ocean-plan-note a{color:var(--fish);text-decoration:underline;text-underline-offset:3px}.ocean-plan-note button{min-height:30px;padding:3px 8px;font-size:10pt}
