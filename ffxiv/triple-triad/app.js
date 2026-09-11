@@ -51,8 +51,13 @@
     const npc = source.npc;
     return `<section class="source-entry"><span class="badge">${esc(source.typeName)}</span><h4>${esc(source.name)}</h4><p>${esc(source.method)}</p>${source.location ? `<p class="source-location">${esc(source.location)}${npc?.x && npc?.y ? ` · X:${esc(npc.x)} Y:${esc(npc.y)}` : ''}</p>` : ''}${source.pack ? `<p>${source.pack.cost ? `${Number(source.pack.cost).toLocaleString()} MGP로 카드팩 구매` : '대회 보상으로 얻는 카드팩'}</p>` : ''}${npc?.quest ? `<p class="condition"><strong>선행 퀘스트</strong><br />${link('https://guide.ff14.co.kr/lodestone/search?keyword=' + encodeURIComponent(npc.quest.name), npc.quest.name)}</p>` : ''}${npc?.rules.length ? `<p class="muted">대결 규칙 · ${esc(npc.rules.join(' / '))}</p><button data-npc="${npc.id}">이 NPC 규칙으로 덱 추천</button>` : ''}${link(source.link, source.linkLabel || (npc ? 'NPC 정보 · FFXIV Collect' : '획득 정보 · FFXIV Collect'))}</section>`;
   }
+  function reportLink(card) {
+    const path=window.TRIAD_REPORT_LINKS?.paths?.[card.id];
+    const exact=typeof path==='string'&&/^\/en\/card-(?:[a-z0-9,_-]|%[0-9a-f]{2})+$/i.test(path);
+    return link(exact?'https://arrtripletriad.com'+path:'https://arrtripletriad.com/en/cards',exact?'획득률·제보 확인 · ARR:TT':'획득률·제보 확인 · 전체 목록','text-link report-link');
+  }
   function detailHtml(card) {
-    return `<div class="detail-hero">${art(card)}<div><p class="muted">${esc(card.number)} · 패치 ${esc(card.patch)}</p><h2>${esc(card.name)}</h2><p>${stars(card)} <span class="muted">· ${esc(card.type)}</span></p>${stats(card)}</div></div><label class="detail-check"><input type="checkbox" data-owned="${card.id}" aria-label="${esc(card.name)} 수집 완료" ${owned.has(card.id) ? 'checked' : ''} />${owned.has(card.id) ? '수집한 카드예요' : '이 카드를 수집했어요'}</label><div class="detail-links">${link(card.official, card.officialExact ? '한국 공식 가이드' : '한국 공식 가이드 검색')}${link(card.link, 'FFXIV Collect')}</div><h3 class="sources-heading">어디서 얻나요? <span class="muted">${card.sources.length}곳</span></h3>${card.sources.map(sourceHtml).join('')}`;
+    return `<div class="detail-hero">${art(card)}<div><p class="muted">${esc(card.number)} · 패치 ${esc(card.patch)}</p><h2>${esc(card.name)}</h2><p>${stars(card)} <span class="muted">· ${esc(card.type)}</span></p>${stats(card)}</div></div><label class="detail-check"><input type="checkbox" data-owned="${card.id}" aria-label="${esc(card.name)} 수집 완료" ${owned.has(card.id) ? 'checked' : ''} />${owned.has(card.id) ? '수집한 카드예요' : '이 카드를 수집했어요'}</label><div class="detail-links">${link(card.official, card.officialExact ? '한국 공식 가이드' : '한국 공식 가이드 검색')}${link(card.link, 'FFXIV Collect')}${reportLink(card)}</div><h3 class="sources-heading">어디서 얻나요? <span class="muted">${card.sources.length}곳</span></h3>${card.sources.map(sourceHtml).join('')}`;
   }
   function renderDetail() {
     const card = byId.get(selectedId);

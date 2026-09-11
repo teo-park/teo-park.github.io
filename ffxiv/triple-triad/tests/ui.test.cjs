@@ -17,7 +17,7 @@ function app(options = {}) {
   if (options.ids) w.localStorage.setItem(KEY, T.backup(new Set(options.ids)));
   let scanApply;
   w.TriadScanUI = {mount: options => { scanApply = options.apply; }};
-  for (const file of ['data.js', 'engine.js', 'app.js']) w.eval(read(file));
+  for (const file of ['data.js', 'report-links.js', 'engine.js', 'app.js']) w.eval(read(file));
   w.eval(read('../collection-layout.js'));
   const $ = selector => w.document.querySelector(selector);
   const change = (selector, value) => { const el = $(selector); if (el.type === 'checkbox') el.checked = value; else el.value = value; el.dispatchEvent(new w.Event('change', {bubbles: true})); };

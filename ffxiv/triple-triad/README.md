@@ -21,6 +21,12 @@
 - [한국 공식 가이드 카드 분류](https://guide.ff14.co.kr/lodestone/db/item?category2=7&category3=90)
 - [한국 공식 트리플 트라이어드 안내](https://guide.ff14.co.kr/Goldsaucer/tripletriad), [글로벌 공식 규칙 설명](https://na.finalfantasyxiv.com/lodestone/playguide/contentsguide/goldsaucer/tripletriad/)
 
+### 획득률·제보 확인 링크
+
+카드 상세의 **획득률·제보 확인 · ARR:TT**는 해당 카드의 외부 원문 페이지를 새 탭으로 엽니다. 확률 수치·제보·댓글을 복제하거나 페이지 안에 삽입하지 않습니다.
+
+`report-links.js`는 2026-09-11 [ARR: Triple Triad 카드 목록](https://arrtripletriad.com/en/cards)에서 확인한 카드별 링크 454개를 기존 카드의 고유 ID에 연결합니다. 목록에서 찾지 못한 최신 카드 21종은 **전체 목록** 링크로 표시합니다. 원문 경로를 확인한 뒤 매핑을 갱신하며, 카드명으로 주소를 추측하지 않습니다. 외부 사이트는 사용자가 링크를 누를 때 열립니다.
+
 ## 추천 방식과 한계
 
 5장 중복 금지, ★5 최대 1장, ★4와 ★5 합계 최대 2장 제한을 지킵니다. 기본적으로 체크한 보유 카드만 사용하고, ‘미수집 카드도 포함’은 전체 목록에서 목표 덱을 제안합니다.
