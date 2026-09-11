@@ -94,6 +94,23 @@ function memory(values={}) {
   const map=new Map(Object.entries(values));
   return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)};
 }
+
+for(const [route,goal,targetName,peerName] of [['indigo','Shark','Quicksilver Blade','Fishmonger'],['ruby','Mantis','Jade Mantis Shrimp','Mermaid Scale']])test(`${route}: achievement comparisons remain visible for collected competitors in plans and fish tables`,async()=>{
+ const target=payload.fish.find(f=>f.Fish===targetName),peer=payload.fish.find(f=>f.Fish===peerName);
+ const ui=await open(route,memory({[storageKey]:JSON.stringify({indigo:{},ruby:{},[route]:{[peerName]:true}})}));
+ try{
+  ui.$('[name=purpose][value=achievement]').click();ui.$(`[name=achievementGroup][value=${goal}]`).click();ui.$(`[data-achievement-departure=${goal}]`).click();
+  const records=ui.storage.getItem('teo-ffxiv.fishing.collection.v2');
+  for(const root of ['#achievementPlans','#fishPanels']){
+   const comparison=ui.$(`${root} [data-bite-comparison="${target.id}"]`);assert.ok(comparison);
+   const row=comparison.querySelector(`[data-bite-peer="${peer.id}"]`);assert.ok(row);assert.match(row.textContent,/시간 겹침/);assert.match(row.textContent,/초/);
+   assert.equal(row.querySelector('input'),null,'comparison must not toggle collection');
+  }
+  ui.$('[name=purpose][value=mission]').click();assert.equal(ui.$('#fishPanels [data-bite-comparison]'),null);
+  ui.$('[name=purpose][value=achievement]').click();assert.ok(ui.$(`#fishPanels [data-bite-comparison="${target.id}"]`));
+  assert.equal(ui.storage.getItem('teo-ffxiv.fishing.collection.v2'),records);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
 test('voyage supplies react to collection changes, undo and imports without losing caught prerequisites',async()=>{
  const caught=Object.fromEntries(payload.fish.filter(f=>f.route==='indigo').map(f=>[C.name(f.Fish),true]));caught.Sothis=false;
  const ui=await open('indigo',memory({[storageKey]:JSON.stringify({indigo:caught,ruby:{}})}));

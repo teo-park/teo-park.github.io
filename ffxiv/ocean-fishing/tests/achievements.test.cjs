@@ -4,6 +4,38 @@ const A=require('../scripts/achievements.js'),V=require('../scripts/voyages.js')
 const data=require('../data/achievements.json'),fish=require('../data/fish.json').fish;
 const planner=A.create(data,fish);
 const voyage=(route,number)=>({route,number,stops:V.stops(route,number)});
+
+test('bite comparison uses the target bait and separates overlapping, unknown and distinct observations',()=>{
+  const target={Fish:'Target',FishTranslated:'대상',route:'indigo',Stop:'Galadion',spectral:false,Bite:'!',BestBait:'Krill',BestBaitTranslated:'크릴',BaitKrill:'4 - 8',weather:[{name:'맑음',available:true}]};
+  const peer=(Fish,rest={})=>({...target,Fish,FishTranslated:Fish,...rest});
+  const rows=[target,peer('Overlap',{BestBait:'Ragworm',BaitKrill:'6 - 10'}),peer('Boundary',{BaitKrill:'8 - 10'}),peer('Separated',{BaitKrill:'9 - 12'}),peer('Unmeasured',{BaitKrill:'~7 - 9'}),peer('Missing',{BaitKrill:''}),peer('Other bait',{BestBait:'Ragworm',BaitKrill:''}),peer('Other bite',{Bite:'!!'}),peer('Other current',{spectral:true}),peer('Other stop',{Stop:'Southern'}),peer('Other route',{route:'ruby'}),peer('Other weather',{weather:[{name:'비',available:true}]})];
+  const before=JSON.stringify(rows),[result]=A.biteComparison(target,rows);
+  assert.equal(result.label,'크릴');assert.equal(result.unknown,1);
+  assert.deepEqual(result.peers.map(p=>[p.fish.Fish,p.rawTime,p.overlap]),[['Overlap','6 - 10',true],['Boundary','8 - 10',true],['Missing','',null],['Unmeasured','~7 - 9',null],['Separated','9 - 12',false]]);
+  assert.equal(JSON.stringify(rows),before);
+});
+
+test('special and mooch comparisons keep bait identities and any-bait targets compare each basic bait separately',()=>{
+  const target={Fish:'Target',FishTranslated:'대상',route:'ruby',Stop:'Thavnair',spectral:true,Bite:'!',BestBait:'M!Source',BaitMoochType:'Source',BaitMooch:'4 - 6'};
+  const peer=(Fish,rest={})=>({...target,Fish,FishTranslated:Fish,...rest});
+  const rows=[target,peer('Same'),peer('Other',{BestBait:'M!Different',BaitMoochType:'Different'}),peer('Alternative',{BestBait:'M!Different',BaitMoochType:'Different',BaitMoochAlternatives:'Source',BaitMooch:'1 - 2'})];
+  assert.deepEqual(A.biteComparison(target,rows)[0].peers.map(p=>[p.fish.Fish,p.rawTime,p.overlap]),[['Same','4 - 6',true],['Alternative','',null]]);
+  const special={...target,BestBait:'Rat Tail',BaitSpecialType:'Rat Tail',BaitSpecial:'4 - 6'};
+  assert.deepEqual(A.biteComparison(special,[special,{...special,Fish:'Same'},{...special,Fish:'Different',BaitSpecialType:'Heavy Steel Jig'}])[0].peers.map(p=>p.fish.Fish),['Same']);
+  const any={...target,BestBait:'Krill',BaitAny:'Yes',BaitRagworm:'2 - 4',BaitKrill:'4 - 6',BaitPlumpWorm:'6 - 8'},other={...any,Fish:'Other',BaitAny:'',BaitRagworm:'5 - 6',BaitKrill:'5 - 6',BaitPlumpWorm:'5 - 6'};
+  assert.deepEqual(A.biteComparison(any,[any,other]).map(g=>[g.field,g.rawTime,g.peers[0].overlap]),[['Ragworm','2 - 4',false],['Krill','4 - 6',true],['PlumpWorm','6 - 8',true]]);
+});
+
+test('achievement comparisons use all available fish, including other groups, without mixing departure periods',()=>{
+  for(const [route,max] of [['indigo',12],['ruby',9]])for(let n=1;n<=max;n++){
+    const v=voyage(route,n);
+    for(const goal of planner.forVoyage(v))for(const section of goal.sections)for(const target of section.targets)for(const group of target.comparison)for(const {fish:peer} of group.peers){
+      assert.equal(peer.route,route);assert.equal(peer.Stop,section.stop);assert.equal(peer.spectral,target.fish.spectral);assert.equal(peer.Bite,target.fish.Bite);assert.ok(V.available(peer,v,section.index));
+    }
+  }
+  const mantis=planner.forVoyage(voyage('ruby',4)).find(g=>g.id==='Mantis').sections[1].targets.find(t=>t.fish.Fish==='Jade Mantis Shrimp');
+  assert.deepEqual(mantis.comparison[0].peers.map(p=>[p.fish.Fish,p.overlap]),[['Mermaid Scale',true],['Impostopus',false]]);
+});
 test('12 one-voyage goals distinguish individual catches from party totals, including 7.5',()=>{
   const expected={Jellyfish:['party',150],Seadragon:['party',100],Shark:['party',200],Octopus:['party',150],Fugu:['party',250],Crab:['party',250],Manta:['individual',25],Shellfish:['party',350],Squid:['party',400],Shrimp:['individual',50],Prehistoric:['party',300],Mantis:['individual',50]};
   assert.equal(planner.goals.size,12);
