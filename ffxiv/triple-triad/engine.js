@@ -73,7 +73,20 @@
     const delta = rules.includes(12) ? count : rules.includes(13) ? -count : 0;
     return Math.max(1, Math.min(10, value + delta));
   }
-  function recommend(catalog, owned, ruleIds = [], allCards = false) {
+  function opponentModel(catalog, opponent) {
+    if (!opponent) return null;
+    const {fixed, variable} = opponent;
+    const byId = new Map(catalog.map(card => [card.id, card]));
+    if (!Array.isArray(fixed) || !Array.isArray(variable)) return null;
+    const ids = [...fixed, ...variable], picks = 5 - fixed.length;
+    if (picks < 0 || picks > variable.length || new Set(ids).size !== ids.length || ids.some(id => !byId.has(id))) return null;
+    // Fixed cards always appear. Random candidates share the remaining slots;
+    // equal selection is a modeling assumption, not observed draw probabilities.
+    const entries = fixed.map(id => ({card: byId.get(id), weight: 1, fixed: true}));
+    if (picks) entries.push(...variable.map(id => ({card: byId.get(id), weight: picks / variable.length, fixed: false})));
+    return {id: opponent.id, name: opponent.name, fixed: [...fixed], variable: [...variable], picks, entries};
+  }
+  function recommend(catalog, owned, ruleIds = [], allCards = false, opponent = null) {
     const error = validateRules(ruleIds);
     if (error) return {error};
     if (ruleIds.includes(7) || ruleIds.includes(15)) return {error: '이 규칙에서는 미리 짠 덱을 사용하지 않아요. 무작위 패·카드 선발을 해제하면 보유 카드로 추천할 수 있어요.', unavailable: true};
@@ -82,12 +95,13 @@
     if (candidates.length < 5) return {error: '보유 카드를 5장 이상 체크해 주세요. 전체 카드로 목표 덱을 먼저 살펴볼 수도 있어요.'};
     if (candidates.filter(c => c.stars <= 3).length < 3 || candidates.filter(c => c.stars <= 4).length < 4) return {error: '별 4~5개 카드는 합쳐 2장, 별 5개 카드는 1장까지만 편성할 수 있어요. 낮은 등급의 보유 카드를 더 체크해 주세요.'};
 
-    // Empirical side frequencies supply a neutral opponent model, not a win rate.
-    // NPC-specific decks, board state, combos and move search are not simulated.
+    const model = opponentModel(catalog, opponent);
+    // Compare against the NPC's fixed/random card pool when known. Otherwise
+    // use the catalog's neutral distribution. This is not a match simulation.
     const histogram = Array.from({length: 4}, () => Array(11).fill(0));
     let weight = 0;
-    for (const card of catalog) {
-      const w = card.stars >= 4 ? 0.5 : 1;
+    const opposition = model ? model.entries : catalog.map(card => ({card, weight: card.stars >= 4 ? 0.5 : 1}));
+    for (const {card, weight: w} of opposition) {
       weight += w;
       SIDES.forEach((side, i) => { histogram[i][card.stats[side]] += w; });
     }
@@ -198,9 +212,20 @@
       const reason = [`${CORNER_NAMES[corner]} 모서리에서 ${CORNERS[corner].map(i => ({top: '위', right: '오른쪽', bottom: '아래', left: '왼쪽'})[SIDES[i]] + ' ' + (card.stats[SIDES[i]] === 10 ? 'A' : card.stats[SIDES[i]])).join(' · ')} 활용`];
       if (card.typeId && (ruleIds.includes(12) || ruleIds.includes(13))) reason.push(`${card.type} ${counts[card.typeId]}장 구성 · 같은 유형이 놓일 때의 수치 변화 평가`);
       if (ruleIds.includes(11) && Object.values(card.stats).some(n => n === 1 || n === 10)) reason.push(ruleIds.includes(10) ? 'A가 1을 잡는 예외 관계 반영' : '1이 A를 잡는 예외 관계 반영');
+      if (model) {
+        const names = ['위', '오른쪽', '아래', '왼쪽'], number = n => n === 10 ? 'A' : n;
+        const targets = CORNERS[corner].flatMap(side => model.entries.filter(entry => beats(card.stats[SIDES[side]], entry.card.stats[SIDES[(side + 2) % 4]], ruleIds)).map(entry => ({...entry, side})));
+        const opposingValue = target => target.card.stats[SIDES[(target.side + 2) % 4]];
+        targets.sort((a, b) => Number(b.fixed) - Number(a.fixed) || (ruleIds.includes(10) ? opposingValue(a) - opposingValue(b) : opposingValue(b) - opposingValue(a)) || b.weight - a.weight || a.card.id - b.card.id);
+        const target = targets[0];
+        if (target) {
+          const otherSide = (target.side + 2) % 4;
+          reason.push(`내 ${names[target.side]} ${number(card.stats[SIDES[target.side]])} → ${target.card.name}의 ${names[otherSide]} ${number(target.card.stats[SIDES[otherSide]])} 포획 가능${ruleIds.includes(12) || ruleIds.includes(13) ? ' · 유형 변화 전 수치' : ''}${target.fixed ? ' · 상대 고정 카드' : ' · 상대 무작위 후보'}`);
+        } else reason.push(`${model.name || '상대 NPC'}의 카드 수치에 맞춰 방향별 방어력 비교`);
+      }
       return {id: card.id, corner, reason};
     });
-    return {deck, details, candidateCount: candidates.length, rules: [...ruleIds], allCards};
+    return {deck, details, candidateCount: candidates.length, rules: [...ruleIds], allCards, opponent: model ? {id: model.id, name: model.name, fixedCount: model.fixed.length, variableCount: model.variable.length, picks: model.picks} : null, opponentUnavailable: !!opponent && !model};
   }
-  return {SIDES, CORNERS, CORNER_NAMES, RULES, normalize, initials, matches, backup, parseBackup, legal, validateRules, beats, adjusted, recommend};
+  return {SIDES, CORNERS, CORNER_NAMES, RULES, normalize, initials, matches, backup, parseBackup, legal, validateRules, beats, adjusted, opponentModel, recommend};
 });

@@ -17,7 +17,7 @@ function app(options = {}) {
   if (options.ids) w.localStorage.setItem(KEY, T.backup(new Set(options.ids)));
   let scanApply;
   w.TriadScanUI = {mount: options => { scanApply = options.apply; }};
-  for (const file of ['data.js', 'report-links.js', 'engine.js', 'app.js']) w.eval(read(file));
+  for (const file of ['data.js', 'report-links.js', 'npc-decks.js', 'engine.js', 'app.js']) w.eval(read(file));
   w.eval(read('../collection-layout.js'));
   const $ = selector => w.document.querySelector(selector);
   const change = (selector, value) => { const el = $(selector); if (el.type === 'checkbox') el.checked = value; else el.value = value; el.dispatchEvent(new w.Event('change', {bubbles: true})); };
@@ -82,6 +82,31 @@ test('mobile card detail opens a dialog and checks sync back to collection', t =
   a.change('#dialogBody [data-owned="2"]', true);
   assert.equal(a.$('#cardGrid [data-owned="2"]').checked, true);
   assert.equal(a.$('#dialogBody [data-owned="2"]').checked, true);
+});
+
+test('NPC source and selector use the opponent pool, rule changes retain it, and clearing returns to generic recommendations', async t => {
+  const a = app({mobile: true, ids: [1, 3, 6, 7, 10]}); t.after(() => a.dom.window.close());
+  const record = a.w.localStorage.getItem(KEY);
+  a.$('#cardGrid [data-open="2"]').click();
+  a.$('#dialogBody [data-npc="2293762"]').click();
+  assert.equal(a.$('#detailDialog').open, false);
+  assert.equal(a.$('#npcSelect').value, '2293762');
+  assert.equal(a.$('#npcOpponent').hidden, false);
+  assert.equal(a.w.document.querySelectorAll('#npcOpponent .opponent-card').length, 7);
+  assert.match(a.$('#npcOpponent').textContent, /고정 3장/);
+  assert.match(a.$('#npcOpponent').textContent, /후보 4장 중 2장/);
+  a.$('[data-preset="10"]').click();
+  assert.equal(a.$('#npcSelect').value, '2293762');
+  a.$('#recommendButton').click(); await new Promise(resolve => setTimeout(resolve, 80));
+  assert.match(a.$('#deckResult .deck-summary').textContent, /메메룬 상대/);
+  a.change('#npcSelect', '2293763');
+  assert.equal(a.$('#deckResult .recommended-cards'), null);
+  a.$('#clearOpponent').click();
+  assert.equal(a.$('#npcOpponent').hidden, true);
+  assert.equal(a.$('#npcSelect').value, '');
+  a.$('#recommendButton').click(); await new Promise(resolve => setTimeout(resolve, 80));
+  assert.doesNotMatch(a.$('#deckResult .deck-summary').textContent, /상대/);
+  assert.equal(a.w.localStorage.getItem(KEY), record);
 });
 test('imports preview before applying, merge by default, replace only when selected, reject invalid atomically', async t => {
   const a = app({ids: [1]}); t.after(() => a.dom.window.close());

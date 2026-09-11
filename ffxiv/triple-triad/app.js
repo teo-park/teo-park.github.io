@@ -9,6 +9,8 @@
   if (!data?.cards?.length || !T) { fatal('카드 자료를 불러오지 못했어요. 페이지를 새로고침해 주세요.'); return; }
   const byId = new Map(data.cards.map(c => [c.id, c]));
   const npcs = new Map(data.cards.flatMap(c => c.sources.filter(s => s.npc).map(s => [s.npc.id, s.npc])));
+  const npcDecks = new Map((window.TRIAD_NPC_DECKS?.npcs || []).map(npc => [npc.id, npc]));
+  let selectedNpcId = null;
   let owned = new Set(), page = 1, selectedId = data.cards[0].id, filtered = [], currentView = 'collection';
   let importIds = null, toastTimer, result = null, requestVersion = 0;
   function readStored() {
@@ -49,7 +51,7 @@
   }
   function sourceHtml(source) {
     const npc = source.npc;
-    return `<section class="source-entry"><span class="badge">${esc(source.typeName)}</span><h4>${esc(source.name)}</h4><p>${esc(source.method)}</p>${source.location ? `<p class="source-location">${esc(source.location)}${npc?.x && npc?.y ? ` · X:${esc(npc.x)} Y:${esc(npc.y)}` : ''}</p>` : ''}${source.pack ? `<p>${source.pack.cost ? `${Number(source.pack.cost).toLocaleString()} MGP로 카드팩 구매` : '대회 보상으로 얻는 카드팩'}</p>` : ''}${npc?.quest ? `<p class="condition"><strong>선행 퀘스트</strong><br />${link('https://guide.ff14.co.kr/lodestone/search?keyword=' + encodeURIComponent(npc.quest.name), npc.quest.name)}</p>` : ''}${npc?.rules.length ? `<p class="muted">대결 규칙 · ${esc(npc.rules.join(' / '))}</p><button data-npc="${npc.id}">이 NPC 규칙으로 덱 추천</button>` : ''}${link(source.link, source.linkLabel || (npc ? 'NPC 정보 · FFXIV Collect' : '획득 정보 · FFXIV Collect'))}</section>`;
+    return `<section class="source-entry"><span class="badge">${esc(source.typeName)}</span><h4>${esc(source.name)}</h4><p>${esc(source.method)}</p>${source.location ? `<p class="source-location">${esc(source.location)}${npc?.x && npc?.y ? ` · X:${esc(npc.x)} Y:${esc(npc.y)}` : ''}</p>` : ''}${source.pack ? `<p>${source.pack.cost ? `${Number(source.pack.cost).toLocaleString()} MGP로 카드팩 구매` : '대회 보상으로 얻는 카드팩'}</p>` : ''}${npc?.quest ? `<p class="condition"><strong>선행 퀘스트</strong><br />${link('https://guide.ff14.co.kr/lodestone/search?keyword=' + encodeURIComponent(npc.quest.name), npc.quest.name)}</p>` : ''}${npc?.rules.length ? `<p class="muted">대결 규칙 · ${esc(npc.rules.join(' / '))}</p><button data-npc="${npc.id}">이 NPC 상대로 덱 추천</button>` : ''}${link(source.link, source.linkLabel || (npc ? 'NPC 정보 · FFXIV Collect' : '획득 정보 · FFXIV Collect'))}</section>`;
   }
   function reportLink(card) {
     const path=window.TRIAD_REPORT_LINKS?.paths?.[card.id];
@@ -110,13 +112,42 @@
     document.querySelectorAll('#ruleOptions input').forEach(el => { el.checked = ids.includes(Number(el.value)); });
     invalidateDeck(); renderTips();
   }
+  function selectedOpponent() {
+    const npc = npcs.get(selectedNpcId);
+    return npc ? {...npcDecks.get(npc.id), id: npc.id, name: npc.name} : null;
+  }
+  function renderOpponent() {
+    const npc = npcs.get(selectedNpcId), opponent = selectedOpponent();
+    $('npcSelect').value = npc ? String(npc.id) : '';
+    $('npcOpponent').hidden = !npc;
+    $('npcRuleContext').hidden = !npc;
+    if (!npc) { $('npcOpponent').innerHTML = ''; return; }
+    const model = T.opponentModel(data.cards, opponent);
+    $('npcRuleContext').textContent = `${npc.name}의 고정 규칙을 가져왔어요. ${npcDecks.get(npc.id)?.regionalRules ? '게임에 표시되는 지역 규칙도 추가해 주세요.' : '추첨·추가 규칙이 있다면 실제 대결에 맞춰 수정해 주세요.'}`;
+    const cards = ids => ids.map(id => {
+      const card = byId.get(id);
+      return `<button class="opponent-card" data-open="${card.id}" aria-label="${esc(card.name)} 카드 상세"><img src="${esc(card.image)}" alt="" width="38" height="50" loading="lazy" />${stats(card)}<span>${esc(card.name)}</span></button>`;
+    }).join('');
+    $('npcOpponent').innerHTML = `<div class="opponent-heading"><div><h3>${esc(npc.name)}의 덱</h3><p class="muted">${esc(npc.location)} · ${link(npc.link, '상대 덱 원문')}</p></div><button id="clearOpponent" class="quiet">상대 해제 ×</button></div>${model ? `${model.fixed.length ? `<section class="opponent-group"><h4>고정 ${model.fixed.length}장</h4><div class="opponent-cards">${cards(model.fixed)}</div></section>` : ''}${model.picks ? `<section class="opponent-group"><h4>무작위 후보 ${model.variable.length}장 중 ${model.picks}장</h4><div class="opponent-cards">${cards(model.variable)}</div></section>` : ''}<p class="small muted">${model.picks ? '고정 카드는 항상 포함하고, 무작위 후보는 남은 장수에 맞춰 같은 비중으로 비교해요.' : '고정된 5장을 상대로 비교해요.'} 실제 승률을 뜻하지는 않아요.</p>` : '<p class="muted">상대 카드 자료를 불러오지 못해 규칙만 반영합니다.</p>'}`;
+  }
+  function selectNpc(id) {
+    selectedNpcId = npcs.has(id) ? id : null;
+    const npc = npcs.get(selectedNpcId);
+    if (npc) applyRules([...new Set(npc.ruleIds)]);
+    else invalidateDeck('상대를 해제했어요. 선택한 규칙으로 다시 추천할 수 있어요.');
+    renderOpponent();
+  }
   function showResult(recommendation) {
     result = recommendation;
     $('deckResult').className = 'panel ' + (result.error ? 'deck-placeholder' : 'deck-result');
     if (result.error) { $('deckResult').innerHTML = `<h3>${result.unavailable ? '이 규칙은 현장에서 준비해요' : '덱을 구성하려면'}</h3><p role="status">${esc(result.error)}</p>`; return; }
     const missing = result.deck.filter(c => !owned.has(c.id)).length;
     $('deckResult').innerHTML = `<div class="deck-summary"><h3>${result.allCards ? '모아볼 목표 덱' : '내 카드로 만든 추천 덱'}</h3><p>${result.candidateCount}장 중 5장 · 편성 제한 충족${result.allCards ? ` · 미수집 ${missing}장` : ''}<br />${result.rules.includes(8) ? '초반 모서리 배치용 카드를 앞에 둔 순서예요. 게임의 덱 순서도 확인하세요.' : '아래 순서는 낼 순서를 뜻하지 않아요. 실제 판에 맞춰 사용하세요.'}</p></div><div class="recommended-cards">${result.deck.map((card, i) => `<article class="recommended-card"><button class="card-open" data-open="${card.id}" aria-label="${esc(card.name)} 획득처 보기"><span class="card-topline">${result.rules.includes(8) ? (i + 1) + '번째 · ' : ''}${esc(card.number)}</span>${art(card)}${stats(card)}<strong class="card-name">${esc(card.name)}</strong>${stars(card)}<br /><span class="badge">${owned.has(card.id) ? '보유' : '미수집'}</span></button></article>`).join('')}</div><ol class="recommend-reasons">${result.details.map(d => `<li><strong>${esc(byId.get(d.id).name)}</strong><p>${d.reason.map(esc).join('<br />')}</p></li>`).join('')}</ol><p class="small muted">현재 판과 상대의 실제 패에 따라 좋은 선택은 달라져요. 카드를 누르면 획득처를 볼 수 있어요.</p>`;
+    if (result.opponent) $('deckResult').querySelector('.deck-summary h3').textContent += ` · ${result.opponent.name} 상대`;
+    if (result.opponentUnavailable) $('deckResult').insertAdjacentHTML('afterbegin', '<p class="notice">상대 덱 자료를 확인할 수 없어 규칙만 반영했어요.</p>');
   }
+  $('npcSelect').insertAdjacentHTML('beforeend', [...npcs.values()].sort((a, b) => a.name.localeCompare(b.name, 'ko')).map(npc => `<option value="${npc.id}">${esc(npc.name)} · ${esc(npc.location)}</option>`).join(''));
+  $('npcSelect').addEventListener('change', () => selectNpc(Number($('npcSelect').value)));
   $('sourceFilter').insertAdjacentHTML('beforeend', data.groups.map(([id, name]) => `<option value="${esc(id)}">${esc(name)}</option>`).join(''));
   $('ruleOptions').insertAdjacentHTML('beforeend', T.RULES.map(r => `<label title="${esc(r.tip)}"><input type="checkbox" value="${r.id}" />${esc(r.name)}</label>`).join(''));
   $('dataNote').textContent = `자료 확인 ${data.updatedAt} · FFXIV Collect 카드 ${data.count}종 / NPC ${data.npcCount}명 · 한국 공식 카드 페이지 ${data.officialCount}종 연결. 공식 페이지를 찾지 못한 카드는 공식 검색으로 연결해요. 한국 서버의 현재 획득 가능 여부는 공식 가이드에서 확인해 주세요.`;
@@ -138,12 +169,12 @@
     if (next && !next.disabled) { page = Number(next.dataset.page); renderCollection(); $('cardGrid').scrollIntoView({block: 'start'}); $('cardGrid').querySelector('button')?.focus({preventScroll: true}); }
     const npcButton = event.target.closest('[data-npc]');
     if (npcButton) {
-      const npc = npcs.get(Number(npcButton.dataset.npc)); applyRules([...new Set(npc.ruleIds)]);
-      $('npcRuleContext').textContent = `${npc.name} · 고정 대결 규칙을 가져왔어요. 게임에 표시되는 지역 규칙이 있다면 추가해 주세요.`; $('npcRuleContext').hidden = false;
+      selectNpc(Number(npcButton.dataset.npc));
       if ($('detailDialog').open) $('detailDialog').close(); setView('deck', true); $('deckTab').scrollIntoView({block: 'start'});
     }
     const preset = event.target.closest('[data-preset]');
-    if (preset) { applyRules(preset.dataset.preset ? preset.dataset.preset.split(',').map(Number) : []); $('npcRuleContext').hidden = true; }
+    if (preset) { applyRules(preset.dataset.preset ? preset.dataset.preset.split(',').map(Number) : []); }
+    if (event.target.closest('#clearOpponent')) selectNpc(null);
   });
   document.addEventListener('change', event => {
     const input = event.target.closest('[data-owned]');
@@ -170,11 +201,11 @@
     invalidateDeck(); document.querySelector('.deck-output > .list-heading > span').textContent = $('allCards').checked ? '전체 카드 기준 · 목표 덱' : '보유 카드 기준';
   });
   $('recommendButton').addEventListener('click', () => {
-    const version = ++requestVersion, rules = ruleIds(), all = $('allCards').checked;
+    const version = ++requestVersion, rules = ruleIds(), all = $('allCards').checked, opponent = selectedOpponent();
     $('recommendButton').disabled = true; $('recommendButton').textContent = '다섯 장을 고르고 있어요…';
     setTimeout(() => {
       if (version !== requestVersion) return;
-      try { showResult(T.recommend(data.cards, owned, rules, all)); }
+      try { showResult(T.recommend(data.cards, owned, rules, all, opponent)); }
       catch { showResult({error: '추천을 계산하지 못했어요. 조건을 바꿔 다시 시도해 주세요.'}); }
       $('recommendButton').disabled = false; $('recommendButton').textContent = all ? '전체 카드로 목표 덱 추천' : '내 카드로 덱 추천';
       $('deckResult').tabIndex = -1;

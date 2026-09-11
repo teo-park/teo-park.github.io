@@ -8,6 +8,54 @@ const context = {window: {}};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../data.js'), 'utf8'), context);
 const data = JSON.parse(JSON.stringify(context.window.TRIPLE_TRIAD_DATA));
 const all = new Set(data.cards.map(c => c.id));
+vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../npc-decks.js'), 'utf8'), context);
+const npcData = JSON.parse(JSON.stringify(context.window.TRIAD_NPC_DECKS));
+
+test('all NPC pools reference playable cards and fill five slots without player rarity restrictions', () => {
+  assert.equal(npcData.count, data.npcCount);
+  assert.equal(new Set(npcData.npcs.map(npc => npc.id)).size, data.npcCount);
+  for (const npc of npcData.npcs) {
+    const model = T.opponentModel(data.cards, npc);
+    assert.ok(model, String(npc.id));
+    assert.ok(Math.abs(model.entries.reduce((sum, entry) => sum + entry.weight, 0) - 5) < 1e-9);
+    assert.ok(model.entries.filter(entry => entry.fixed).every(entry => entry.weight === 1));
+  }
+  const memeroon = npcData.npcs.find(npc => npc.id === 2293762);
+  assert.deepEqual(memeroon.fixed, [37, 14, 1]);
+  assert.deepEqual(memeroon.variable, [21, 2, 7, 12]);
+  assert.equal(T.opponentModel(data.cards, memeroon).picks, 2);
+  assert.ok(T.opponentModel(data.cards, memeroon).entries.filter(entry => !entry.fixed).every(entry => entry.weight === 0.5));
+  const fives = data.cards.filter(card => card.stars === 5).slice(0, 5).map(card => card.id);
+  assert.ok(T.opponentModel(data.cards, {fixed: fives, variable: []}));
+  for (const npc of [{fixed: [1], variable: []}, {fixed: [1, 1, 2, 3, 4], variable: []}, {fixed: [1, 2, 3, 4, 999999], variable: []}]) assert.equal(T.opponentModel(data.cards, npc), null);
+});
+
+test('NPC card pools change recommendations under identical rules and preserve ownership and rarity limits', () => {
+  const first = {...npcData.npcs[0], name: '메메룬'}, second = {...npcData.npcs[1], name: '트라하토움'};
+  const a = T.recommend(data.cards, all, [], false, first), b = T.recommend(data.cards, all, [], false, second);
+  assert.notDeepEqual(a.deck.map(card => card.id).sort(), b.deck.map(card => card.id).sort());
+  assert.ok(T.legal(a.deck) && T.legal(b.deck));
+  assert.equal(a.opponent.id, first.id);
+  assert.ok(a.details.every(detail => detail.reason.some(reason => /상대 (고정 카드|무작위 후보)|방어력 비교/.test(reason))));
+  const owned = new Set([1, 3, 6, 7, 10]);
+  assert.deepEqual(new Set(T.recommend(data.cards, owned, [10, 11], false, first).deck.map(card => card.id)), owned);
+  const invalid = T.recommend(data.cards, all, [], false, {id: 1, fixed: [999999], variable: []});
+  assert.equal(invalid.opponent, null); assert.equal(invalid.opponentUnavailable, true);
+  assert.deepEqual(invalid.deck.map(card => card.id), T.recommend(data.cards, all).deck.map(card => card.id));
+});
+
+test('NPC importer reads Korean export headers and refuses mismatched or unknown card pools', async () => {
+  const {deckRows, buildNpcDecks} = await import('../scripts/update-npc-decks.mjs');
+  const header = ['#', ...Array.from({length: 5}, (_, i) => `TripleTriadCard{Fixed}[${i}]`), ...Array.from({length: 5}, (_, i) => `TripleTriadCard{Variable}[${i}]`), 'TripleTriadRule[0]', 'TripleTriadRule[1]', 'UsesRegionalRules'].join(',');
+  const row = '42,1,3,6,7,10,0,0,0,0,0,1,1,True';
+  const text = 'key,0,1\n' + header + '\nint32,int32\n' + row;
+  assert.equal(deckRows(text).get(42)['TripleTriadCardFixed[0]'], '1');
+  const catalog = {cards: data.cards.map(card => ({...card, sources: [{npc: {id: 42, ruleIds: [1]}}]}))};
+  assert.equal(buildNpcDecks(catalog, text, text)[0].regionalRules, true);
+  assert.throws(() => buildNpcDecks(catalog, text, text.replace(row, row.replace(',10,', ',11,'))), /mismatch/);
+  const unknown = text.replace(row, row.replace(',10,', ',999999,'));
+  assert.throws(() => buildNpcDecks(catalog, unknown, unknown), /Invalid NPC card pool/);
+});
 
 test('updater parses quoted commas, embedded newlines and doubled quotes without shifting sheet IDs', async () => {
   const {parseCsv} = await import('../scripts/update-data.mjs');
