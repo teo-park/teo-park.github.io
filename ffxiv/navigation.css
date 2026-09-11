@@ -95,7 +95,7 @@ body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24
   body .site-header[data-navigation] .site-nav {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     order: 3;
     width: 100%;
     margin: 0;
@@ -105,4 +105,8 @@ body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24
   [data-navigation] .nav-category { position: static; min-width: 0; }
   [data-navigation] .nav-category > summary { padding: 8px 4px; gap: 5px; }
   [data-navigation] .nav-dropdown { top: 100%; left: 0; right: 0; width: auto; max-height: calc(100dvh - 132px); }
+}
+@media (max-width: 520px) {
+  body .site-header[data-navigation] .site-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-navigation] .nav-dropdown { max-height: calc(100dvh - 180px); }
 }

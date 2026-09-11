@@ -175,6 +175,16 @@ export function mount(win,data,locationData=null,captureData=null){
   $('undo').onclick=undo;$('closeNotice').onclick=()=>$('notice').hidden=true;
   win.addEventListener('storage',e=>{if(e.key!==KEY&&e.key!==null)return;try{owned=read();undoChange=null;updateCounts();if($('status').value!=='all')$('refreshResults').hidden=false;announce('다른 탭의 수집 기록을 반영했어요.');}catch{announce('다른 탭의 수집 기록을 읽지 못했어요. 현재 표시는 유지됩니다.');}});
   populatePlaces();render();$('loading').hidden=true;$('appContent').hidden=false;$('openRecords').disabled=false;
+  // Guide links open acquisition details without touching collection or filters.
+  function openLinkedBeast(){
+    const match=/^#beast-(\d+)$/.exec(win.location.hash);
+    if(match&&model.byId.has(Number(match[1])))showDetail(Number(match[1]));
+  }
+  win.addEventListener('hashchange',openLinkedBeast);
+  $('detailDialog').addEventListener('close',()=>{
+    if(/^#beast-\d+$/.test(win.location.hash))win.history.replaceState(null,'',win.location.pathname+win.location.search);
+  });
+  openLinkedBeast();
   if(storageError)announce('기존 수집 기록을 읽지 못했어요. 목록은 볼 수 있지만 저장 전에 브라우저 설정이나 백업을 확인해 주세요.');
   return {model,render,showDetail};
 }

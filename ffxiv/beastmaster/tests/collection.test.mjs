@@ -8,8 +8,8 @@ import {mount} from '../app.js';
 const data=JSON.parse(readFileSync(new URL('../data.json',import.meta.url))),html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const model=create(data),valid=new Set(model.byId.keys());
 const locations=JSON.parse(readFileSync(new URL('../locations.json',import.meta.url)));
-function setup(seed,locationData=locations){
-  const dom=new JSDOM(html,{url:'https://example.test/ffxiv/beastmaster/',pretendToBeVisual:true,runScripts:'outside-only'}),w=dom.window,d=w.document;
+function setup(seed,locationData=locations,hash=''){
+  const dom=new JSDOM(html,{url:'https://example.test/ffxiv/beastmaster/'+hash,pretendToBeVisual:true,runScripts:'outside-only'}),w=dom.window,d=w.document;
   w.HTMLElement.prototype.scrollIntoView=function(){};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
   w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
@@ -186,7 +186,22 @@ test('corrupt or unavailable storage cannot be overwritten by a check',()=>{
 
 test('portal and sitemap link both the bestiary and the public ocean journal',()=>{
   const portal=new JSDOM(readFileSync(new URL('../../index.html',import.meta.url),'utf8')).window.document;
-  assert.equal(portal.querySelectorAll('.tool-link').length,9);assert.equal(portal.querySelector('.collection-count strong').textContent,'09');
+  assert.equal(portal.querySelectorAll('.tool-link').length,13);assert.equal(portal.querySelector('.collection-count strong').textContent,'13');
   assert.ok(portal.querySelector('.tool-link[href="./beastmaster/"]'));assert.ok(portal.querySelector('.tool-link[href="./ocean-fishing/"]'));
   const sitemap=readFileSync(new URL('../../sitemap.xml',import.meta.url),'utf8');assert.match(sitemap,/\/ffxiv\/beastmaster\//);assert.match(sitemap,/ocean-fishing/);
+});
+
+test('guide deep links open the named beast without changing collection and can be dismissed',()=>{
+  const a=setup([1,44],locations,'#beast-44');try{
+    const before=a.w.localStorage.getItem(KEY);
+    assert.equal(a.$('detailDialog').open,true);assert.equal(a.$('detailTitle').textContent,'실잠자리');
+    assert.equal(a.w.localStorage.getItem(KEY),before);
+    a.w.history.pushState(null,'','#beast-16');a.w.dispatchEvent(new a.w.HashChangeEvent('hashchange'));
+    assert.equal(a.$('detailTitle').textContent,'사마귀');assert.equal(a.w.localStorage.getItem(KEY),before);
+    a.click('#closeDetail');assert.equal(a.$('detailDialog').open,false);assert.equal(a.w.location.hash,'');
+    assert.equal(a.w.localStorage.getItem(KEY),before);
+  }finally{a.close();}
+  for(const hash of ['#beast-999','#beast-0','#beast-44-extra','#catalog']){
+    const b=setup([1],locations,hash);try{assert.equal(b.$('detailDialog').open,false,hash);assert.deepEqual([...b.saved()],[1]);}finally{b.close();}
+  }
 });

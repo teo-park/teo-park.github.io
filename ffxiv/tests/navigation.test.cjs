@@ -16,8 +16,10 @@ test('all public pages have consistent navigation, valid relative destinations a
     const dom = open(page), d = dom.window.document;
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
-      assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 15);
+      assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '마수조련사', '어부']);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 16);
+      assert.deepEqual([...d.querySelectorAll('#nav-beastmaster a')].map(a=>a.textContent.replace('현재','')),['마수도감','마수조련사 공략']);
+      assert.equal(d.querySelectorAll('#nav-collection a[href*="beastmaster"]').length,0);
       const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
       assert.deepEqual([...guides].map(a=>a.textContent.replace('현재','')),['어부 스킬 안내','터주 유형별 공략']);
       assert.deepEqual([...d.querySelectorAll('#nav-fishing .nav-group-label')].map(el=>el.textContent),['어부 가이드','낚시 도감']);
@@ -39,6 +41,19 @@ test('all public pages have consistent navigation, valid relative destinations a
     } finally { dom.window.close(); }
   }
 });
+test('home category and search expose both beastmaster tools and consistent counts', () => {
+  const dom=open(''),w=dom.window,d=w.document;
+  try{
+    w.eval(fs.readFileSync(path.join(root,'hub.js'),'utf8'));
+    d.querySelector('[data-category="beastmaster"]').click();
+    assert.deepEqual([...d.querySelectorAll('.tool-link:not([hidden])')].map(a=>new URL(a.href).pathname),['/ffxiv/beastmaster/','/ffxiv/beastmaster/guide/']);
+    const input=d.getElementById('toolSearch');input.value='전설';input.dispatchEvent(new w.Event('input',{bubbles:true}));
+    assert.deepEqual([...d.querySelectorAll('.tool-link:not([hidden])')].map(a=>new URL(a.href).pathname),['/ffxiv/beastmaster/guide/']);
+    const count=d.querySelectorAll('.tool-link').length;
+    assert.equal(Number(d.querySelector('.collection-count strong').textContent),count);
+    assert.equal([...d.querySelectorAll('[data-category]:not([data-category="all"]) span')].reduce((n,s)=>n+Number(s.textContent),0),count);
+  }finally{w.close();}
+});
 test('opening another category or clicking outside dismisses the previous dropdown', async () => {
   const dom = open(), d = dom.window.document;
   try {
@@ -48,7 +63,7 @@ test('opening another category or clicking outside dismisses the previous dropdo
     assert.equal(groups[0].open, true);
     assert.equal(groups[0].querySelector('summary').getAttribute('aria-expanded'), 'true');
     groups[1].querySelector('summary').click(); await tick();
-    assert.deepEqual(groups.map(el => el.open), [false, true, false]);
+    assert.deepEqual(groups.map(el => el.open), [false, true, false, false]);
     dom.window.dispatchEvent(new dom.window.PageTransitionEvent('pageshow'));
     assert.equal(groups[1].open, true, 'finishing the initial load must not close a menu already opened by the user');
     dom.window.dispatchEvent(new dom.window.PageTransitionEvent('pageshow', { persisted: true }));
