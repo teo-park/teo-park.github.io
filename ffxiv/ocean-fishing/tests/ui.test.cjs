@@ -170,6 +170,56 @@ for(const [route,goal,targetName,peerName] of [['indigo','Shark','Quicksilver Bl
   assert.equal(ui.storage.getItem('teo-ffxiv.fishing.collection.v2'),records);assert.deepEqual(ui.errors,[]);
  }finally{ui.close();}
 });
+for(const [route,targetName,requiredName,peerName] of [
+ ['indigo','Drunkfish','Galadion Chovy','Galadion Goby'],
+ ['indigo','Great Grandmarlin','Hi-aetherlouse','Charlatan Survivor'],
+ ['ruby','Dusk Shark',"Poet's Pipe",'Pink Shrimp']
+])test(`${route}: ${requiredName} compares hidden caught competitors while preparing ${targetName}`,async()=>{
+ const find=name=>payload.fish.find(f=>f.Fish===name);
+ const target=find(targetName),required=find(requiredName),peer=find(peerName);
+ const caught=Object.fromEntries(payload.fish.filter(f=>f.route===route).map(f=>[C.name(f.Fish),true]));caught[C.name(targetName)]=false;
+ const storage=memory({[storageKey]:JSON.stringify({indigo:{},ruby:{},[route]:caught})});let ui=await open(route,storage);
+ const comparison=()=>ui.$(`#fishPanels [data-bite-comparison="${required.id}"]`);
+ const check=()=>{
+  const row=ui.$(`#fishPanels tr[data-fish-id="${required.id}"]`);assert.ok(row.classList.contains('is-caught'));assert.match(row.textContent,/조건용/);
+  assert.equal(row.nextElementSibling.querySelector('[data-bite-comparison]'),comparison(),'comparison belongs directly below its prerequisite');
+  const competitor=comparison().querySelector(`[data-bite-peer="${peer.id}"]`);assert.ok(competitor);assert.match(competitor.textContent,/시간 겹침/);
+  assert.equal(competitor.querySelector('input'),null);assert.doesNotMatch(comparison().textContent,/업적 대상/,'unrelated prerequisites must not label peers as achievement targets');
+ };
+ try{
+  check();assert.equal(ui.$(`#fishPanels tr[data-fish-id="${peer.id}"]`),null,'caught competitor is absent from the filtered fish table');
+  assert.equal(ui.$(`#fishPanels [data-bite-comparison="${target.id}"]`),null,'ordinary targets do not expand the whole fish list');
+  const records=storage.getItem('teo-ffxiv.fishing.collection.v2'),baits=ui.$('#voyageBaits').textContent;
+  for(const mode of ['all','score','collection']){ui.$(`[name=purpose][value=${mode}]`).click();check();}
+  assert.equal(storage.getItem('teo-ffxiv.fishing.collection.v2'),records);assert.equal(ui.$('#voyageBaits').textContent,baits);
+  ui.$(`[data-fish-id="${target.id}"] input[data-entry]`).click();assert.equal(comparison(),null,'comparison leaves once its last unfinished target is caught');
+  ui.$('#undoCatch').click();check();
+  ui.close();ui=await open(route,storage);check();assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+
+test('mission and achievement prerequisites compare fish outside the selected group within the current departure',async()=>{
+ const target=payload.fish.find(f=>f.Fish==='Aetheric Seadragon'),required=payload.fish.find(f=>f.Fish==='Hi-aetherlouse');
+ const ui=await open('indigo');
+ try{
+  ui.$('[name=purpose][value=mission]').click();ui.$('[name=species][value=Seadragon]').click();ui.$('#scheduleToggle').click();
+  const departure=[...ui.d.querySelectorAll('[data-voyage]')].find(el=>{
+   const v=V.at('indigo',Number(el.dataset.voyage));return v.stops.some((s,i)=>V.available(target,v,i));
+  });assert.ok(departure);departure.click();
+  const comparison=()=>ui.$(`#fishPanels [data-bite-comparison="${required.id}"]`);
+  assert.ok(comparison());const peers=[...comparison().querySelectorAll('[data-bite-peer]')];assert.ok(peers.length);
+  const voyage=V.at('indigo',Number(departure.dataset.voyage));
+  for(const el of peers){
+   const peer=payload.fish.find(f=>f.id===+el.dataset.bitePeer);
+   assert.equal(peer.Stop,required.Stop);assert.equal(peer.spectral,required.spectral);assert.equal(peer.Bite,required.Bite);
+   assert.ok(voyage.stops.some((s,i)=>V.available(peer,voyage,i)));assert.equal(ui.$(`#fishPanels tr[data-fish-id="${peer.id}"]`),null);
+  }
+  assert.doesNotMatch(comparison().textContent,/업적 대상/);
+  ui.$('[name=purpose][value=achievement]').click();ui.$('[name=achievementGroup][value=Seadragon]').click();assert.ok(comparison());
+  assert.doesNotMatch(comparison().textContent,/업적 대상/);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+
 test('voyage supplies react to collection changes, undo and imports without losing caught prerequisites',async()=>{
  const caught=Object.fromEntries(payload.fish.filter(f=>f.route==='indigo').map(f=>[C.name(f.Fish),true]));caught.Sothis=false;
  const ui=await open('indigo',memory({[storageKey]:JSON.stringify({indigo:caught,ruby:{}})}));
