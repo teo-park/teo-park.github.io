@@ -8,6 +8,65 @@ const achievementData=require('../data/achievements.json');
 const payload=require('../data/fish.json'),root=path.resolve(__dirname,'..');
 const first=Date.parse(require('./fixtures/voyages.json').firstDeparture);
 const storageKey='caughtFishLS-combined';
+const AchievementRecords=require('../scripts/achievement-records.js');
+
+for(const [route,id] of [['indigo','Shark'],['ruby','Mantis']])test(`${route}: completed goals leave recommendations immediately, undo, and survive reload`,async()=>{
+ const storage=memory();let ui=await open(route,storage);
+ try{
+  const $=selector=>ui.$(selector);
+  $('[name=purpose][value=achievement]').click();$(`[name=achievementGroup][value=${id}]`).click();$(`[data-achievement-departure=${id}]`).click();
+  const catches=storage.getItem('teo-ffxiv.fishing.collection.v2'),legacy=storage.getItem(storageKey);
+  assert.ok($(`[data-recommended-achievement=${id}]`));
+  $(`[data-achievement-complete=${id}]`).click();
+  assert.ok(AchievementRecords.read(storage).has(id));assert.equal($(`[data-achievement=${id}]`),null);assert.equal($(`[data-recommended-achievement=${id}]`),null);
+  assert.ok($(`[name=achievementGroup][value=${id}]`).checked,'explicit target remains selected instead of silently selecting all goals');
+  assert.ok($(`[data-achievement-record=${id}]`).checked);assert.ok($('.achievement-empty-state'));
+  assert.equal(ui.d.querySelectorAll('#fishPanels [data-bite-comparison]').length,0);
+  assert.ok(ui.d.querySelectorAll('#fishPanels tr[data-fish-id]').length,'spectral triggers remain visible');
+  $('#undoCatch').click();assert.ok($(`[data-achievement=${id}]`));assert.ok($(`[data-recommended-achievement=${id}]`));assert.equal($(`[data-achievement-record=${id}]`).checked,false);
+  $(`[data-achievement-complete=${id}]`).click();$('[data-achievement-show-completed]').click();
+  assert.equal($('#excludeCompletedAchievements').checked,false);assert.equal($(`[data-achievement-complete=${id}]`).getAttribute('aria-pressed'),'true');assert.match($(`[data-recommended-achievement=${id}]`).textContent,/완료/);
+  ui.close();ui=await open(route,storage);
+  assert.equal($('#excludeCompletedAchievements').checked,false);assert.ok($(`[data-achievement-record=${id}]`).checked);assert.ok($(`[data-achievement=${id}]`));
+  $('#excludeCompletedAchievements').click();assert.equal($(`[data-achievement=${id}]`),null);
+  $(`[data-achievement-record=${id}]`).click();assert.ok($(`[data-achievement=${id}]`));assert.equal(AchievementRecords.read(storage).has(id),false);
+  assert.equal(storage.getItem('teo-ffxiv.fishing.collection.v2'),catches);assert.equal(storage.getItem(storageKey),legacy);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+test('complete records keep both routes and synchronize completion and exclusion from another tab',async()=>{
+ const storage=memory();let ui=await open('indigo',storage);
+ try{
+  ui.$('[data-achievement-record=Shark]').click();
+  AchievementRecords.setCompleted(storage,'Mantis',true);
+  ui.$('[data-achievement-record=Fugu]').click();assert.deepEqual([...AchievementRecords.read(storage)].sort(),['Fugu','Mantis','Shark']);
+  ui.close();ui=await open('ruby',storage);assert.ok(ui.$('[data-achievement-record=Mantis]').checked);
+  ui.$('[name=purpose][value=achievement]').click();assert.equal(ui.$('[data-achievement=Mantis]'),null);
+  storage.setItem(AchievementRecords.EXCLUDE_KEY,'false');ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:AchievementRecords.EXCLUDE_KEY}));
+  assert.equal(ui.$('#excludeCompletedAchievements').checked,false);assert.ok(ui.$('[data-achievement=Mantis]'));
+  AchievementRecords.setCompleted(storage,'Mantis',false);ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:AchievementRecords.KEY}));
+  assert.equal(ui.$('[data-achievement-record=Mantis]').checked,false);assert.deepEqual([...AchievementRecords.read(storage)].sort(),['Fugu','Shark']);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+test('all completed achievements give a reversible empty state without changing missions or fish collection',async()=>{
+ const storage=memory({[AchievementRecords.KEY]:JSON.stringify({version:1,completed:achievementData.goals.map(g=>g.id)})});
+ const ui=await open('ruby',storage);
+ try{
+  assert.equal(ui.$('[data-recommended-achievement]'),null);assert.match(ui.$('#achievementRecordCount').textContent,/5 \/ 5/);
+  ui.$('[name=purpose][value=mission]').click();ui.$('[name=species][value=Mantis]').click();
+  const before=ui.$('#fishPanels').textContent;ui.$('#excludeCompletedAchievements').click();assert.equal(ui.$('#fishPanels').textContent,before);
+  ui.$('#excludeCompletedAchievements').click();ui.$('[name=purpose][value=achievement]').click();assert.match(ui.$('.achievement-empty-state').textContent,/모두 완료/);
+  assert.equal(ui.d.querySelectorAll('[data-achievement]').length,0);assert.equal(ui.d.querySelectorAll('[data-achievement-record]').length,5);
+  ui.$('[data-achievement-show-completed]').click();assert.equal(ui.d.querySelectorAll('[data-achievement]').length,5);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+test('failed completion writes revert controls and do not discard the previous record',async()=>{
+ const storage=memory({[AchievementRecords.KEY]:JSON.stringify({version:1,completed:['Mantis']})});const ui=await open('indigo',storage);
+ try{
+  const original=storage.setItem;storage.setItem=(key,value)=>{if(key===AchievementRecords.KEY)throw Error('quota');original(key,value);};
+  ui.$('[data-achievement-record=Shark]').click();assert.equal(ui.$('[data-achievement-record=Shark]').checked,false);assert.match(ui.$('#noticeText').textContent,/저장하지 못/);
+  assert.deepEqual([...AchievementRecords.read(storage)],['Mantis']);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
 for(const route of ['indigo','ruby'])test(`${route}: missions and achievements retain independent selections across departure changes and reloads`,async()=>{
  const goals=achievementData.goals.filter(g=>g.route===route),a=goals[0].id,b=goals[1].id;
  const storage=memory({['ocean:purpose:'+route]:'mission',['ocean:species-groups:'+route]:JSON.stringify([a])});
@@ -215,7 +274,7 @@ for(const route of ['indigo','ruby'])test(`${route}: score view defaults to rank
 for(const route of ['indigo','ruby'])test(`${route}: native route UI, expanded departures, missions, GP and catch undo`,async()=>{
   const ui=await open(route);const {$,d,input,errors,requests}=ui;
   try {
-    assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/achievements.js','scripts/app.js']);
+    assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/achievements.js','scripts/achievement-records.js','scripts/app.js']);
     for(const global of ['$','jQuery','bootstrap','moment'])assert.equal(ui.w[global],undefined);
     assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,1);
     $('#scheduleToggle').click();assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,12);
