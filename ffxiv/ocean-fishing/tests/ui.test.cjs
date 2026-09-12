@@ -327,6 +327,14 @@ for(const route of ['indigo','ruby'])test(`${route}: native route UI, expanded d
     assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/achievements.js','scripts/achievement-records.js','scripts/app.js']);
     for(const global of ['$','jQuery','bootstrap','moment'])assert.equal(ui.w[global],undefined);
     assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,1);
+    const firstFishCell=()=>$('#scheduleRows tr:first-child .schedule-fish');
+    const expected=route==='indigo'?['소티스','바위비늘','만취어','꼬마 리바이어선','바다판금장화']:['지옥뚜껑게','어스름상어','매듭고기','천궁호랑이'];
+    for(const name of expected)assert.ok(firstFishCell().textContent.includes(name),name);
+    assert.equal(firstFishCell().querySelectorAll('[data-schedule-fish]').length,2);
+    assert.ok(!firstFishCell().textContent.includes(route==='indigo'?'산호가오리':'청옥룡'),'legendary fish from another time of day must not appear');
+    const regular=payload.fish.find(f=>f.Fish===(route==='indigo'?'Drunkfish':'Dusk Shark'));
+    $(`[data-fish-id="${regular.id}"] input[data-entry]`).click();assert.ok(firstFishCell().textContent.includes(regular.FishTranslated+' (수집완료)'));
+    $('#undoCatch').click();assert.ok(!firstFishCell().textContent.includes('(수집완료)'));
     $('#scheduleToggle').click();assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,12);
     $('#moreVoyages').click();assert.equal(d.querySelectorAll('[data-voyage]').length,24);
     d.querySelectorAll('[data-voyage]')[3].click();$('#scheduleToggle').click();

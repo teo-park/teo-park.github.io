@@ -232,6 +232,12 @@
     return unique.map(f=>f.FishTranslated+(caught(f)?' (수집완료)':'')).join(' · ');
   }
   function legendaryNames(rows) { return fishNames(rows.filter(f=>f.legendary)); }
+  function scheduleFish(rows) {
+    const groups=[['legendary','전설어',rows.filter(f=>f.legendary)],['regular','일반 터주',rows.filter(f=>f.bigFish)]];
+    return groups.filter(([, ,fish])=>fish.length).map(([kind,label,fish])=>
+      `<div class="schedule-fish-group" data-schedule-fish="${kind}"><span class="schedule-fish-kind">${label}</span><span>${esc(fishNames(fish))}</span></div>`
+    ).join('')||'—';
+  }
   function starterBait(rows) {
     const triggers=rows.filter(f=>f.spectralTrigger);
     if(!triggers.length)return '';
@@ -271,9 +277,9 @@
     $('hideCompleted').closest('label').hidden=purpose!=='collection'; $('hideCompleted').checked=hideCompleted;
     $('moreVoyages').hidden=!expanded || scheduleCount>=144;
     $('scheduleRows').innerHTML=voyages.map((v,i)=>{
-      const remaining=total(voyageFish(v))-count(voyageFish(v));
+      const available=voyageFish(v), remaining=total(available)-count(available);
       const hide=i>0&&(!expanded || (hideCompleted&&purpose==='collection'&&remaining===0));
-      return `<tr ${hide?'hidden':''} class="${v.start===selected.start?'selected':''}"><td><button type="button" data-voyage="${v.start}" aria-pressed="${v.start===selected.start}">${time(v.start)}</button></td><td><span class="departure-countdown">${countdown(v)}</span></td><td>${esc(v.stops[2].name)} ${period(v.stops[2].time)}${achievement(v)}</td><td>${remaining}종</td><td>${esc(legendaryNames(voyageFish(v)) || '—')}</td></tr>`;
+      return `<tr ${hide?'hidden':''} class="${v.start===selected.start?'selected':''}"><td><button type="button" data-voyage="${v.start}" aria-pressed="${v.start===selected.start}">${time(v.start)}</button></td><td><span class="departure-countdown">${countdown(v)}</span></td><td>${esc(v.stops[2].name)} ${period(v.stops[2].time)}${achievement(v)}</td><td>${remaining}종</td><td class="schedule-fish">${scheduleFish(available)}</td></tr>`;
     }).join('');
     if(focused)document.querySelector(`[data-voyage="${focused}"]`)?.focus({preventScroll:true});
   }
