@@ -37,3 +37,14 @@ test('guides remain readable without scripts and each beast link resolves to the
     }
   }finally{dom.window.close();}
 });
+
+test('strategy sources are Game8 articles and legendary claims retain their verified scope',()=>{
+  const dom=open('',false),d=dom.window.document;
+  try{
+    const links=[...d.querySelectorAll('main a[href^="https:"]')];assert.ok(links.length);
+    for(const link of links)assert.equal(new URL(link.href).hostname,'game8.jp');
+    for(const card of d.querySelectorAll('[data-source]'))assert.ok(card.querySelector(`.source-line a[href="https://game8.jp/ff14/${card.dataset.source}"]`));
+    assert.match(d.querySelector('#legendary').textContent,/확인하지 못했습니다/);
+    assert.doesNotMatch(html,/ffxiv-fudge|youtube\.com|reddit\.com|클리어 영상 있음/);
+  }finally{dom.window.close();}
+});

@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const version = '20260912-beastmaster1';
+const version = '20260912-collection1';
 const guidePages = [
   ['fisher-skills/', '어부 스킬 안내'],
   ['fisher-skills/big-fish/', '터주 유형별 공략'],
@@ -23,11 +23,9 @@ const categories = [
     ['triple-triad/', '트리플 트라이어드 수첩'],
     ['minions/', '꼬마친구 수첩'],
     ['blue-mage/', '청마도사 스킬 수첩'],
-    ['weapons/', '무기 수첩'],
-  ] },
-  { id: 'beastmaster', label: '마수조련사', tools: [
     ['beastmaster/', '마수도감'],
     ['beastmaster/guide/', '마수조련사 공략'],
+    ['weapons/', '무기 수첩'],
   ] },
   { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
 ];
