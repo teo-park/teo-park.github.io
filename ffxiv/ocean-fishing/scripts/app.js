@@ -296,10 +296,13 @@
     $('collectionProgress').setAttribute('aria-label',`${routeLabel()} 수집 ${count(routeFish)} / ${total(routeFish)}종`);
     $('collectionStatus').textContent=`${routeLabel()} ${count(routeFish)} / ${total(routeFish)}종 수집 · 이 브라우저에 저장`;
   }
+  function speciesGroups() {
+    return [...new Map(routeFish.filter(f=>f.Species).map(f=>[f.Species,f.SpeciesTranslated])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ko'));
+  }
   function renderOptions() {
     renderAchievementRecords();
     document.querySelectorAll('[name=purpose]').forEach(input=>{input.checked=input.value===purpose;});
-    const groups=[...new Map(routeFish.filter(f=>f.Species).map(f=>[f.Species,f.SpeciesTranslated])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ko'));
+    const groups=speciesGroups();
     $('speciesOptions').hidden=purpose!=='mission'; $('achievementOptions').hidden=purpose!=='achievement'; $('scoreOptions').hidden=purpose!=='score';
     if(!$('speciesChoices').children.length) $('speciesChoices').innerHTML=groups.map(([id,text])=>`<label class="species-option"><input type="checkbox" name="species" value="${esc(id)}" ${species.includes(id)?'checked':''}>${esc(text)}</label>`).join('');
     document.querySelectorAll('[name=species]').forEach(input=>{input.checked=species.includes(input.value);});
@@ -309,11 +312,35 @@
     $('strategyPrize').checked=strategy.prizeCatch;
     $('purposeHelp').textContent={all:'모든 물고기를 표시해요. 수집 상태와 관계없이 미끼를 확인할 수 있어요.',collection:'미수집 물고기와 필요한 직감·생미끼 조건을 보여줘요. 일반 구간의 유령·환해 물고기는 항상 남겨요.',mission:species.length?`선상과제 ${species.length}개 물고기군과 필요한 조건 물고기를 함께 보여줘요. 환해류 유도 물고기는 항상 표시해요.`:'선상과제에 나온 물고기군을 선택하세요. 두 종류 이상 함께 선택할 수 있어요.',achievement:!activeAchievementIds().length?'추천할 업적이 없어요. 목표 선택이나 완료 기록을 확인하세요. 환해류 유도 물고기는 계속 표시해요.':achievementSpecies.length?'선택한 업적의 목표 수량·추천 항로·구간별 공략과 대상 물고기를 보여줘요.':(excludeCompletedAchievements?'미완료':'전체')+' 업적을 보여줘요. 목표를 선택하면 해당 업적의 항로와 물고기로 좁혀져요.',score:'모든 점수를 표시하고, 현재 GP로 가능한 기술을 추천해요. 목표 물고기를 낚는 데 성공한다는 전제입니다.'}[purpose];
   }
+  // Use the same controls and change handlers so PiP preserves saved goals,
+  // achievement exclusions and recommendation rules without a second state store.
+  function changePipGoal(field,value) {
+    let input;
+    if(field==='purpose') {
+      input=[...document.querySelectorAll('[name=purpose]')].find(el=>el.value===value);
+      if(input)input.checked=true;
+    } else if(field==='species'||field==='achievementGroup') {
+      input=[...document.querySelectorAll(`[name=${field}]`)].find(el=>el.value===value.id);
+      if(input)input.checked=!!value.checked;
+    } else if(['scoreMode','strategyGP','strategyObjective','strategyPrize','excludeCompletedAchievements'].includes(field)) {
+      input=$(field);
+      if(input.type==='checkbox')input.checked=!!value;
+      else if(input.tagName==='SELECT') {
+        if(![...input.options].some(option=>option.value===value))return;
+        input.value=value;
+      } else input.value=String(Math.max(0,Math.min(9999,Number(value)||0)));
+    }
+    input?.dispatchEvent(new Event(field==='strategyGP'?'input':'change',{bubbles:true}));
+  }
   function pipSnapshot() {
     const rows=planned(),purposeName={all:'전체 보기',collection:'도감 채우기',mission:'선상과제',achievement:'업적작',score:'고득점'}[purpose];
     return {
       title:routeLabel()+' 수첩',departure:time(selected.start)+' 출항',start:selected.start,activeStop,
       purpose:purposeName+(purpose==='score'?' · '+strategy.gp+' GP':'')+' · 본 페이지 필터 적용',
+      goal:{purpose,purposes:[...document.querySelectorAll('[name=purpose]')].map(el=>({id:el.value,label:el.getAttribute('aria-label')})),
+        groups:speciesGroups().filter(([id])=>purpose!=='achievement'||achievements.goals.has(id)).map(([id,label])=>({id,label,checked:(purpose==='achievement'?achievementSpecies:species).includes(id),completed:completedAchievements.has(id)})),
+        excludeCompleted:excludeCompletedAchievements,help:$('purposeHelp').textContent,
+        score:{gp:strategy.gp,prize:strategy.prizeCatch,objective:strategy.objective,mode:scoreMode}},
       message:$('notice').hidden?'':$('noticeText').textContent,canUndo:!!undo,
       stops:selected.stops.map((stop,i)=>({name:stop.name,time:V.periods[stop.time],starter:starterBait(voyageFish(selected).filter(f=>V.available(f,selected,i))),
         zones:[false,true].map(spectral=>{
@@ -462,7 +489,7 @@
       if(!isChecklist){if(!achievementResponse.ok)throw Error('업적 자료 응답 '+achievementResponse.status);achievements=A.create(await achievementResponse.json(),fish);}
       if(!isChecklist){readAchievementRecords();refreshVoyages();renderOptions();}
       if(!isChecklist)notifications=window.OceanNotifications?.mount();
-      if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,notifications,
+      if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,notifications,changeGoal:changePipGoal,
         setStop:index=>{activeStop=index;renderFishing();},
         undoCatch:()=>$('undoCatch').click(),
         openMain:()=>$('stopTabs').scrollIntoView({block:'start',behavior:'smooth'})

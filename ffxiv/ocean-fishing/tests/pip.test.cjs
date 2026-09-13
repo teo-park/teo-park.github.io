@@ -7,7 +7,7 @@ const fish=require('../data/fish.json'),achievements=require('../data/achievemen
 const first=Date.parse(require('./fixtures/voyages.json').firstDeparture);
 
 async function open(route,options={}){
-  const errors=[],values=new Map(),timers=new Map(),children=[],childTimers=new Map(),notices=[];let now=first-60000,requests=0,failed=false;
+  const errors=[],values=options.values||new Map(),timers=new Map(),children=[],childTimers=new Map(),notices=[];let now=first-60000,requests=0,failed=false;
   const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));vc.on('error',(...s)=>errors.push(s.join(' ')));
   class Local extends ResourceLoader{fetch(url){const p=new URL(url);if(!p.pathname.endsWith('.js'))return null;return Promise.resolve(fs.readFileSync(path.join(root,p.pathname.replace('/ffxiv/',''))));}}
@@ -32,7 +32,7 @@ async function open(route,options={}){
   for(let i=0;i<100&&$('#appContent').hidden&&$('#retryLoad').hidden;i++)await new Promise(r=>setTimeout(r,10));
   assert.equal($('#appContent').hidden,false,errors.join('\n'));
   const flush=()=>new Promise(r=>setImmediate(r));
-  return {w,d,$,storage,errors,children,childTimers,timers,notices,get requests(){return requests;},setFail:v=>failed=v,setNow:t=>now=t,
+  return {w,d,$,storage,values,errors,children,childTimers,timers,notices,get requests(){return requests;},setFail:v=>failed=v,setNow:t=>now=t,
     get child(){return children.at(-1).window;},p(s){return this.child.document.querySelector(s);},
     input(s,value){const e=$(s);if(e.type==='checkbox')e.checked=value;else e.value=value;e.dispatchEvent(new w.Event(e.type==='number'?'input':'change',{bubbles:true}));},
     async launch(){ $('#openOceanPip').click();await flush();return this.child; },flush,
@@ -119,5 +119,37 @@ for(const route of ['indigo','ruby'])test(`${route}: departure alert switch sync
     ui.childTimers.get(ui.child)();await ui.flush();assert.equal(ui.notices.length,1);
     ui.child.close();assert.equal(ui.$('#oceanNotifications').getAttribute('aria-checked'),'true','closing PiP must not turn off the page alarm');
     ui.$('#oceanNotifications').click();await ui.flush();assert.equal(ui.$('#oceanNotifications').getAttribute('aria-checked'),'false');assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
+
+for(const route of ['indigo','ruby'])test(`${route}: goals can be edited in PiP without losing independent targets, filters, collections or saved preferences`,async()=>{
+  let ui=await open(route);const change=(selector,value,type='change')=>{const el=ui.p(selector);el.value=value;el.dispatchEvent(new ui.child.Event(type,{bubbles:true}));};
+  try{
+    await ui.launch();const records=ui.storage.getItem('teo-ffxiv.fishing.collection.v2'),departure=ui.$('#selectedTime').textContent;
+    assert.equal(ui.p('#oceanPipGoal').value,'collection');
+    change('#oceanPipGoal','mission');assert.ok(ui.$('[name=purpose][value=mission]').checked);assert.ok(ui.p('#oceanPipGoalOptions').open);
+    const groupIds=[...ui.child.document.querySelectorAll('[data-pip-group]')].slice(0,2).map(el=>el.dataset.pipGroup);assert.equal(groupIds.length,2);
+    for(const id of groupIds)ui.p(`[data-pip-group="${id}"]`).click();
+    assert.deepEqual([...ui.d.querySelectorAll('[name=species]:checked')].map(el=>el.value),groupIds);sameRows(ui,0,'all');
+    assert.equal(ui.storage.getItem('ocean:species-groups:'+route),JSON.stringify(groupIds));
+    change('#oceanPipGoal','achievement');assert.equal(ui.child.document.querySelectorAll('[data-pip-group]:checked').length,0);
+    const goal=ui.p('[data-pip-group]').dataset.pipGroup;ui.p(`[data-pip-group="${goal}"]`).click();assert.equal(ui.storage.getItem('ocean:achievement-groups:'+route),JSON.stringify([goal]));
+    ui.$(`[data-achievement-record="${goal}"]`).click();assert.equal(ui.p(`[data-pip-group="${goal}"]`).closest('label').querySelector('[data-pip-completed]').hidden,false);
+    ui.p('[data-pip-goal-field=excludeCompletedAchievements]').click();assert.equal(ui.$('#excludeCompletedAchievements').checked,false);sameRows(ui,0,'all');
+    ui.$('#excludeCompletedAchievements').click();assert.equal(ui.p('[data-pip-goal-field=excludeCompletedAchievements]').checked,true);
+    change('#oceanPipGoal','mission');assert.deepEqual([...ui.child.document.querySelectorAll('[data-pip-group]:checked')].map(el=>el.dataset.pipGroup),groupIds);
+    ui.$(`[name=species][value="${groupIds[1]}"]`).click();assert.equal(ui.p(`[data-pip-group="${groupIds[1]}"]`).checked,false);
+    ui.$('[name=purpose][value=score]').click();assert.equal(ui.p('#oceanPipGoal').value,'score');
+    const gp=ui.p('#oceanPipGP');gp.focus();change('#oceanPipGP','','input');assert.equal(ui.child.document.activeElement,gp);assert.equal(gp.value,'','clearing the input must not interrupt typing');
+    change('#oceanPipGP','1200','input');assert.equal(ui.child.document.activeElement,gp);assert.equal(ui.$('#strategyGP').value,'1200');
+    change('#oceanPipGP','1200');ui.p('[data-pip-goal-field=scoreMode][value=DH]').click();assert.equal(ui.$('#scoreMode').value,'DH');
+    ui.p('[data-pip-goal-field=strategyPrize]').click();assert.equal(ui.$('#strategyPrize').checked,false);
+    ui.p('[data-pip-goal-field=strategyObjective][value=efficiency]').click();assert.equal(ui.$('#strategyObjective').value,'efficiency');assert.equal(ui.p('#oceanPipPrize').hidden,true);sameRows(ui,0,'all');
+    ui.input('#strategyGP',500);assert.equal(ui.p('#oceanPipGP').value,'500');
+    assert.equal(ui.$('#selectedTime').textContent,departure);assert.equal(ui.storage.getItem('teo-ffxiv.fishing.collection.v2'),records);
+    const values=ui.values;ui.close();ui=await open(route,{values});await ui.launch();
+    assert.equal(ui.p('#oceanPipGoal').value,'score');assert.equal(ui.p('#oceanPipGP').value,'500');assert.equal(ui.p('[data-pip-goal-field=scoreMode][value=DH]').checked,true);
+    change('#oceanPipGoal','mission');assert.equal(ui.p(`[data-pip-group="${groupIds[0]}"]`).checked,true);assert.equal(ui.p(`[data-pip-group="${groupIds[1]}"]`).checked,false);
+    change('#oceanPipGoal','achievement');assert.equal(ui.p(`[data-pip-group="${goal}"]`).checked,true);assert.deepEqual(ui.errors,[]);
   }finally{ui.close();}
 });
