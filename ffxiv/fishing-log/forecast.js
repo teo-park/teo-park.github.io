@@ -18,6 +18,7 @@
     const out=[];for(const r of ranges.sort((a,b)=>a.start-b.start||a.end-b.end)){const prev=out.at(-1);if(prev&&r.start<=prev.end)prev.end=Math.max(prev.end,r.end);else out.push({...r});}return out;
   }
   function sessions(settings,from,to){
+    if(settings.unrestricted)return [{start:-8640000000000000,end:8640000000000000}];
     const ms=t=>{const [h,m]=t.split(':').map(Number);return (h*60+m)*MINUTE;},out=[];
     for(let day=Math.floor((from+KST)/DAY)*DAY-KST-DAY;day<to;day+=DAY){
       const d=settings.days[new Date(day+KST).getUTCDay()];if(!d.enabled)continue;
@@ -26,6 +27,8 @@
     }
     return merge(out);
   }
+  // Unrestricted timed windows remain continuous; always-fish alerts have a stable KST day identity.
+  function dailySessions(from,to){const out=[];for(let start=Math.floor((from+KST)/DAY)*DAY-KST;start<to;start+=DAY)out.push({start,end:start+DAY});return out;}
   function intersect(a,b){const start=Math.max(a.start,b.start),end=Math.min(a.end,b.end);return end>start?{start,end}:null;}
   function create(data,weather){
     const weatherCache=new Map(),byId=new Map([...Object.values(data.related||{}),...(data.fishes||[])].map(f=>[f.id,f]));
@@ -71,11 +74,11 @@
       return merge(result).filter(w=>w.end>from&&w.start<to);
     }
     function opportunities(fish,settings,from,to,{includeAlways=false}={}){
-      const play=sessions(settings,from,to),out=[];
-      if(!play.length)return out;
+      const basePlay=sessions(settings,from,to),out=[];
+      if(!basePlay.length)return out;
       for(const [index,route] of fish.routes.entries()){
         if(reason(route)||!includeAlways&&!limited(route))continue;
-        const always=!limited(route),ranges=windows(route,from,to);
+        const always=!limited(route),ranges=windows(route,from,to),play=always&&settings.unrestricted?dailySessions(from,to):basePlay;
         let cursor=0;
         for(const window of ranges){
           while(cursor<play.length&&play[cursor].end<=window.start)cursor++;
@@ -127,7 +130,7 @@
       for(const row of result.rows){
         if(row.nextStart!==null)continue;
         const supported=row.fish.routes.filter(r=>!reason(r));
-        if(!supported.some(r=>playable(r,settings,from))){row.pending=false;row.unavailableReason=settings.days.some(d=>d.enabled)?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';continue;}
+        if(!supported.some(r=>playable(r,settings,from))){row.pending=false;row.unavailableReason=(settings.unrestricted||settings.days.some(d=>d.enabled))?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';continue;}
         const state={row,to:result.to,currentEnd:row.currentEnd??row.end},old=previous?.signature===signature&&previous.states.get(row.fish.id);
         // Preserve distant searches across the minute refresh, without reusing
         // progress after route/filter changes or an expired first opportunity.
@@ -269,7 +272,7 @@
       const result={chances:[],pending:false,always:false,reason:null};
       if(!supported.length)result.reason=fish.routes.map(reason).find(Boolean)||'조건 자료 확인 필요';
       else if(supported.some(r=>!limited(r)))result.always=true;
-      else if(settings&&!supported.some(r=>playable(r,settings,from)))result.reason=settings.days.some(d=>d.enabled)?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';
+      else if(settings&&!supported.some(r=>playable(r,settings,from)))result.reason=(settings.unrestricted||settings.days.some(d=>d.enabled))?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';
       else result.pending=true;
       let cursor=from;
       function step(){

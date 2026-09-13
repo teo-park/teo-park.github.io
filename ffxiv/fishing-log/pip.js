@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const MINUTE=60000,VERSION='20260913-plan-filters';
+  const MINUTE=60000,VERSION='20260913-fishbell2';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const stamp=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
   function remaining(ms){
@@ -61,10 +61,10 @@
       for(const [rows,current] of [[groups.current,true],[groups.upcoming,false]])for(const row of rows){
         const el=d.getElementById('pip-time-'+row.id);
         el.textContent=row.always?'상시':current?'남은 '+remaining(row.end-now):remaining(row.start-now)+' 후';
-        el.title=row.always?'시간·날씨 제한 없음':`${stamp.format(row.start)} – ${stamp.format(row.end)} (KST · 내 접속 시간 기준)`;
+        el.title=row.always?'시간·날씨 제한 없음':`${stamp.format(row.start)} – ${stamp.format(row.end)} (KST · ${view.timeScope||'내 접속 시간'} 기준)`;
         if(!row.always)el.dateTime=new Date(current?row.end:row.start).toISOString();
       }
-      d.getElementById('pipNotes').textContent=(view.saved?'':'접속 시간은 아직 저장 전 예시 설정입니다. ')+`예보는 내 접속 시간 기준 · 직감·생미끼 등 선행 조건은 별도 준비.${groups.unresolved?' 준비·설정·예보 확인 필요 '+groups.unresolved+'종은 본 목록에서 확인하세요.':''}${view.pending?' 더 먼 기회 조회 중.':''}`;
+      d.getElementById('pipNotes').textContent=(view.saved?'':'접속 시간은 아직 저장 전 예시 설정입니다. ')+`예보는 ${view.timeScope||'내 접속 시간'} 기준 · 직감·생미끼 등 선행 조건은 별도 준비.${groups.unresolved?' 준비·설정·예보 확인 필요 '+groups.unresolved+'종은 본 목록에서 확인하세요.':''}${view.pending?' 더 먼 기회 조회 중.':''}`;
       d.getElementById('pipUpdated').textContent='KST · '+stamp.format(view.updatedAt);
     }
     function update(){if(isOpen()){view=getView();paint();notificationState();}}

@@ -16,6 +16,7 @@ function open({storage=memory(),scan=false,analyze,plan=false,pip,notificationCo
  w.eval(fs.readFileSync(path.join(root,'app.js'),'utf8'));
  w.eval(fs.readFileSync(path.join(root,'..','collection-layout.js'),'utf8'));
  const $=s=>d.querySelector(s),all=s=>[...d.querySelectorAll(s)],change=(s,value,event='change')=>{const el=$(s);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
- return {w,d,$,all,change,storage,downloads,scanApply,planSnapshot,close:()=>w.close(),async addImage(name='sample.png'){const el=$('#scanFiles');Object.defineProperty(el,'files',{configurable:true,value:[{name,type:'image/png',size:100}]});el.dispatchEvent(new w.Event('change'));await new Promise(r=>setTimeout(r,0));}};
+ const selectExpansions=values=>{const selected=new Set([values].flat().map(String));for(const input of all('#planExpansions input'))input.checked=values==='all'||selected.has(input.value);$('#planExpansions').dispatchEvent(new w.Event('change',{bubbles:true}));};
+ return {w,d,$,all,change,selectExpansions,storage,downloads,scanApply,planSnapshot,close:()=>w.close(),async addImage(name='sample.png'){const el=$('#scanFiles');Object.defineProperty(el,'files',{configurable:true,value:[{name,type:'image/png',size:100}]});el.dispatchEvent(new w.Event('change'));await new Promise(r=>setTimeout(r,0));}};
 }
 module.exports={D,KEY,memory,open};

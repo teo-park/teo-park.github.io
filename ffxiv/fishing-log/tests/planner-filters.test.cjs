@@ -19,16 +19,30 @@ test('big-fish collection status filters preserve catch toggles and keep collect
 test('expansions intersect rarity, collection, region and spot filters without narrowing notification targets',()=>{
   const p=open({plan:true});try{
     p.w.Date.now=()=>Date.parse('2026-09-09T11:00:00Z');p.$('#showPlanner').click();p.$('#savePlay').click();const targets=JSON.stringify(p.planSnapshot().ids);
-    assert.equal(p.all('#planExpansion option').length,7);
+    assert.equal(p.all('#planExpansions input[type="checkbox"]').length,6);
     for(let ex=0;ex<6;ex++){
-      p.change('#planExpansion',String(ex));assert.ok(p.$('.plan-card'),X.labels[ex]);
+      p.selectExpansions(String(ex));assert.ok(p.$('.plan-card'),X.labels[ex]);
       for(const el of p.all('.plan-card [data-caught]'))assert.equal(X.byFish[el.dataset.caught],ex);
       assert.equal(JSON.stringify(p.planSnapshot().ids),targets);
     }
-    p.change('#planExpansion','0');p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();p.$('.plan-card [data-caught]').click();p.change('#planStatus','caught');assert.ok(p.$('.plan-card'));
-    p.change('#planExpansion','1');assert.equal(p.$('.plan-card'),null);p.change('#planExpansion','0');assert.ok(p.$('.plan-card'));
-    p.change('#planRegion','다날란');assert.equal(p.$('.plan-card'),null);p.change('#planRegion','all');p.$('[data-plan-spot]').click();assert.equal(p.$('#planActiveFilters').hidden,false);assert.ok(p.$('.plan-card'));p.change('#planExpansion','5');assert.equal(p.$('.plan-card'),null);assert.equal(p.$('#planActiveFilters').hidden,false,'spot chip stays explicit');p.$('[data-plan-clear-spot]').click();
-    p.$('#planCollectionMode').click();p.$('#planSearch').value='포테우카';p.$('#planRefresh').click();assert.equal(p.$('.plan-name').textContent,'포테우카');p.change('#planExpansion','4');assert.equal(p.$('.plan-card'),null);
-    p.change('#planExpansion','all');assert.equal(p.$('.plan-name').textContent,'포테우카');
+    p.selectExpansions('0');p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();p.$('.plan-card [data-caught]').click();p.change('#planStatus','caught');assert.ok(p.$('.plan-card'));
+    p.selectExpansions('1');assert.equal(p.$('.plan-card'),null);p.selectExpansions('0');assert.ok(p.$('.plan-card'));
+    p.change('#planRegion','다날란');assert.equal(p.$('.plan-card'),null);p.change('#planRegion','all');p.$('[data-plan-spot]').click();assert.equal(p.$('#planActiveFilters').hidden,false);assert.ok(p.$('.plan-card'));p.selectExpansions('5');assert.equal(p.$('.plan-card'),null);assert.equal(p.$('#planActiveFilters').hidden,false,'spot chip stays explicit');p.$('[data-plan-clear-spot]').click();
+    p.$('#planCollectionMode').click();p.$('#planSearch').value='포테우카';p.$('#planRefresh').click();assert.equal(p.$('.plan-name').textContent,'포테우카');p.selectExpansions('4');assert.equal(p.$('.plan-card'),null);
+    p.selectExpansions('all');assert.equal(p.$('.plan-name').textContent,'포테우카');
+  }finally{p.close();}
+});
+test('expansion checkboxes combine their results, keep the selection between modes, and distinguish none from all',()=>{
+  const p=open({plan:true});try{
+    p.w.Date.now=()=>Date.parse('2026-09-09T11:00:00Z');p.$('#showPlanner').click();p.$('#savePlay').click();
+    const count=()=>+p.$('#planCount').textContent.match(/\d+/)[0],total=count(),targets=JSON.stringify(p.planSnapshot().ids);
+    assert.equal(p.all('#planExpansions input:checked').length,6);assert.equal(p.$('#planExpansionAll').disabled,true);
+    p.$('#planExpansionNone').click();assert.equal(count(),0);assert.match(p.$('#planResults').textContent,/확장팩을 하나 이상/);assert.equal(p.$('#planExpansionNone').disabled,true);
+    p.$('#planExpansions input[value="0"]').click();const first=count();assert.ok(first>0);
+    p.$('#planExpansions input[value="4"]').click();const combined=count();assert.ok(combined>first);
+    p.$('#planExpansions input[value="0"]').click();assert.equal(count()+first,combined,'selected expansions use a union');
+    p.$('#planExpansions input[value="0"]').click();assert.equal(JSON.stringify(p.planSnapshot().ids),targets);
+    p.$('#planCollectionMode').click();assert.deepEqual(p.all('#planExpansions input:checked').map(i=>i.value),['0','4']);p.$('#planBigMode').click();assert.equal(count(),combined);
+    p.$('#planExpansionAll').click();assert.equal(count(),total);assert.equal(p.all('#planExpansions input:checked').length,6);
   }finally{p.close();}
 });

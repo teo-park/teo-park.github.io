@@ -7,6 +7,7 @@
     const supported=()=>window.isSecureContext&&'Notification' in window;
     const announce=()=>document.dispatchEvent(new CustomEvent('fishing-notifications-changed'));
     const state=()=>({enabled,busy,supported:supported(),message:$('notificationStatus').textContent});
+    const offStatus=()=>snapshot().saved?'알림 꺼짐 · '+(snapshot().settings.unrestricted?'모든 시간':'저장된 접속 시간')+' 기준으로 알림을 켤 수 있습니다.':'알림 꺼짐 · 접속 시간을 저장하거나 해제한 뒤 알림을 켜 주세요.';
     const status=text=>{$('notificationStatus').textContent=text;announce();};
     const buttons=()=>{$('enableNotifications').disabled=busy||!supported();$('enableNotifications').textContent=enabled?'알림 켜짐 · 설정 반영':'이 브라우저에서 알림 켜기';$('testNotification').disabled=busy||!enabled;$('disableNotifications').disabled=busy||!enabled;announce();};
     const readHistory=()=>{const value=JSON.parse(localStorage.getItem(HISTORY)||'[]');return Array.isArray(value)?value:[];};
@@ -26,7 +27,7 @@
         if(Notification.permission!=='granted'){enabled=false;buttons();throw Error('알림 권한이 꺼졌습니다. 브라우저 사이트 설정을 확인해 주세요.');}
         const inspect=async()=>{
           if(!enabled||localStorage.getItem(KEY)!=='on')return;
-          const s=snapshot();if(!s.saved){status('접속 시간을 저장하면 예약 알림이 시작됩니다.');return;}
+          const s=snapshot();if(!s.saved){status('접속 시간을 저장하거나 해제하면 예약 알림이 시작됩니다.');return;}
           const now=Date.now(),sent=readHistory(),batch=E.next(data,window.FISHING_WEATHER,{...s,sent},now);
           if(batch.events.length&&batch.at<=now){
             await show(E.message(data,model,batch.events));
@@ -41,7 +42,7 @@
     }
     async function enable(){
       if(busy)return;busy=true;buttons();
-      try{if(!snapshot().saved)throw Error('먼저 내 접속 시간을 저장해 주세요.');
+      try{if(!snapshot().saved)throw Error('먼저 내 접속 시간을 저장하거나 해제해 주세요.');
         const permission=await Notification.requestPermission();if(permission!=='granted')throw Error('브라우저의 사이트 설정에서 알림을 허용해 주세요.');
         await prepare();localStorage.setItem(KEY,'on');enabled=true;await check();
       }catch(e){status(e.message||'알림을 켜지 못했습니다.');}finally{busy=false;buttons();}
@@ -50,14 +51,14 @@
     $('enableNotifications').onclick=enable;
     $('disableNotifications').onclick=disable;
     $('testNotification').onclick=async()=>{try{await show({title:'어부 수첩 · 시험 알림',body:'브라우저 알림이 연결됐습니다. 예약 알림을 받으려면 어부 수첩 페이지를 열어 두세요.',tag:'fishing-test'});status('시험 알림을 표시했습니다. 기기의 알림함을 확인해 주세요.');}catch(e){status('이 환경에서 알림을 표시하지 못했습니다. '+e.message);}};
-    document.addEventListener('fishing-plan-changed',()=>schedule());
+    document.addEventListener('fishing-plan-changed',()=>{if(enabled)schedule();else if(supported()&&!busy)status(offStatus());});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden&&enabled)check();});
     window.addEventListener('pageshow',()=>{if(enabled)check();});
     window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null){enabled=localStorage.getItem(KEY)==='on'&&supported()&&Notification.permission==='granted';if(enabled)schedule();else{clearTimeout(timer);timer=null;status('예약 알림이 꺼져 있습니다.');}buttons();}});
     (async()=>{try{
       if(!supported()){status('이 환경은 브라우저 알림을 지원하지 않습니다. iPhone·iPad는 홈 화면에 추가한 뒤 열어 주세요.');buttons();return;}
       enabled=localStorage.getItem(KEY)==='on'&&Notification.permission==='granted';
-      if(enabled){await prepare();await check();}else status('알림 꺼짐 · 접속 시간을 저장하고 알림을 켜 주세요.');
+      if(enabled){await prepare();await check();}else status(offStatus());
       buttons();
     }catch{status('알림 설정을 읽지 못했습니다. 브라우저 저장 권한을 확인해 주세요.');}})();
     return {state,enable,disable};
