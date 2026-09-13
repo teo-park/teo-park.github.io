@@ -324,7 +324,7 @@ for(const route of ['indigo','ruby'])test(`${route}: score view defaults to rank
 for(const route of ['indigo','ruby'])test(`${route}: native route UI, expanded departures, missions, GP and catch undo`,async()=>{
   const ui=await open(route);const {$,d,input,errors,requests}=ui;
   try {
-    assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/achievements.js','scripts/achievement-records.js','scripts/app.js']);
+    assert.deepEqual(requests,['scripts/teamcraft-ids.js','fishing-collection.js','scripts/collection.js','scripts/voyages.js','scripts/achievements.js','scripts/achievement-records.js','scripts/pip.js','scripts/app.js']);
     for(const global of ['$','jQuery','bootstrap','moment'])assert.equal(ui.w[global],undefined);
     assert.equal(d.querySelectorAll('#scheduleRows tr:not([hidden])').length,1);
     const firstFishCell=()=>$('#scheduleRows tr:first-child .schedule-fish');
