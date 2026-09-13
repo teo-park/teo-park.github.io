@@ -10,7 +10,7 @@
 
 공식 규칙, 공략 작성자의 추천, 플레이어 달성 제보를 화면에서 구분합니다. Lodestone 개인 일기를 공식 공략으로 표시하지 않습니다. 제보 조합을 최적 조합이나 모든 난도의 확정 공략으로 일반화하지 않습니다.
 
-한국어 마수 이름·기술명·도감 번호 연결은 기존 마수도감 게임 데이터로 대조합니다. 마수 이름은 `../#beast-번호`로 연결해 획득처를 열며, 이 페이지는 보유 기록을 변경하지 않습니다.
+한국어 마수 이름·기술명·도감 번호 연결은 기존 마수도감 게임 데이터로 대조합니다. 시련·적 이름은 같은 버전의 `PlaceName`·`BNpcName` 한국어 데이터로 확인합니다. 마수 이름은 `../#beast-번호`로 연결해 획득처를 열며, 이 페이지는 보유 기록을 변경하지 않습니다.
 
 ## 출처 관리
 
@@ -25,11 +25,17 @@
 - [Icy Veins 전투 운영](https://www.icy-veins.com/ffxiv/beastmaster-pve-dps-rotation-openers-abilities): 빌리기·연계·교대 주의점.
 - [Ivy Itk의 개인 기록](https://jp.finalfantasyxiv.com/lodestone/character/55090234/blog/5725219/): 첫 번째 시련 전설 반복 사례.
 - [Reddit 본인 달성 제보](https://www.reddit.com/r/ffxiv/comments/1wen5v5/legendary_on_all_5_boards/): Intelligent_Creme_39와 MiniMumbo의 편성. 다른 댓글 작성자의 조합을 게시자 조합으로 섞지 않습니다.
+- [Slanius Pulszky의 두 번째 시련 기록](https://na.finalfantasyxiv.com/lodestone/character/53005800/blog/5724923/): 추가 적·미노타우로스 대응. 저자가 추측으로 남긴 좀비 대상 제어나 고정 기술 순서는 확정 공략으로 옮기지 않습니다.
+- [Jets-Down-049222의 첫·두 번째 전설 기록](https://www.reddit.com/r/ffxiv/comments/1wcph60/got_my_1st_2_legendary_rank_on_boards_bst_crucible/): 본인 댓글의 편성과 두 번째 시련 경로. 장비 전제와 회복 아이템 사용을 함께 표시합니다.
+- [Mic Fc의 세 번째 시련 기록](https://jp.finalfantasyxiv.com/lodestone/character/18824631/blog/5724975/): 전설 도전용 연습 메모. 작성자의 전설 달성 인증으로 표시하지 않습니다.
+- [Da Da의 특급 시련 기록](https://forum.gamer.com.tw/C.php?bsn=17608&snA=31522&tnum=2): 1층·2층 글의 중국어 번체 운영 메모를 직접 요약했습니다. 영상은 원문에서 참고하도록 안내하며 영상을 시청·검증한 것으로 표시하지 않습니다.
 
-2026-09-14에 공식 안내·Icy Veins·해외 플레이 기록을 추가했습니다. Game8 기존 요약은 2026-09-12 확인본을 유지하며, 세 번째 시련 기사는 09-14 재확인했습니다. Icy Veins의 시련별 상세 공략 페이지는 아직 작성 예정 상태여서 구간별 공략 근거로 사용하지 않았습니다. 시련 공통 전설 최소 점수, 최속 육성 순위, 미검증 추가 난도별 절차는 제시하지 않습니다.
+2026-09-14에 공식 안내·Icy Veins·해외 플레이 기록을 추가했습니다. Game8 기존 요약은 2026-09-12 확인본을 유지하며, 두 번째·세 번째 시련 기사는 09-14 재확인했습니다. 두 번째 시련의 주요 기믹과 일반 세 시련·특급 두 시련의 전설 도전 팁을 추가했습니다. Icy Veins의 시련별 상세 공략 페이지는 아직 작성 예정 상태여서 구간별 공략 근거로 사용하지 않았습니다. 시련 공통 전설 최소 점수, 최속 육성 순위, 미검증 추가 난도별 절차는 제시하지 않습니다.
 
 ## 동작과 검증
 
 `#leveling`, `#rank`, `#legendary`와 기존 `#starter-team` 링크를 유지합니다. 정적 HTML은 스크립트를 끄면 세 항목이 모두 보이고, `guide.js`가 탭과 뒤로 가기를 지원합니다.
+
+상단 시련별 바로가기는 일반 세 시련의 기본 공략과 특급 두 시련의 전설 공략으로 연결합니다. 전설 탭에서도 다섯 시련별 바로가기를 제공합니다. `#legendary-first-board`, `#legendary-second-board`, `#legendary-third-board`, `#legendary-master-first`, `#legendary-master-second`가 해당 카드로 연결되고, `#legendary-shared-team`은 공통 편성 사례입니다. 숨겨진 탭의 항목을 열고 나서 해당 카드로 스크롤·초점을 이동합니다.
 
 검증: 저장소 루트에서 `node --test ffxiv/tests/navigation.test.cjs`, `cd ffxiv/beastmaster` 후 `npm test`. 검토한 원문 링크, 플레이어 사례 표시, 마수 이름·도감 번호와 탭 동작을 검증합니다.

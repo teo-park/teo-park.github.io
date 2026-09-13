@@ -7,6 +7,14 @@
 .guide-tabs a { display: block; padding: 10px 16px; border: 1px solid #41566d; margin-left: -1px; color: var(--ff-muted); font-size: 14px; line-height: 1.5; background: #0e1b2c; }
 .guide-tabs a:first-child { margin-left: 0; border-radius: 6px 0 0 6px; }.guide-tabs a:last-child { border-radius: 0 6px 6px 0; }
 .guide-tabs strong { display: block; color: var(--ff-text); font-size: 16px; }
+.guide-shortcuts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -8px 0 22px; font-size: 14px; }
+.guide-shortcuts span { color: var(--ff-muted); margin-right: 4px; }
+.guide-shortcuts a { border: 1px solid var(--ff-line); border-radius: 4px; padding: 8px 12px; color: var(--ff-cyan); }
+.guide-shortcuts a:hover,.guide-shortcuts a[aria-current] { border-color: var(--ff-cyan); background: var(--ff-raised); }
+.strategy-card[id] { scroll-margin-top: 110px; }
+.guide-table caption { text-align: left; color: var(--ff-muted); padding-bottom: 8px; }
+@media(max-width:760px) { .strategy-card[id] { scroll-margin-top: 150px; } }
+@media(max-width:520px) { .strategy-card[id] { scroll-margin-top: 190px; } }
 .guide-tabs a:hover { background: var(--ff-raised); }.guide-tabs a[aria-current="location"] { position: relative; border-color: var(--ff-gold); background: #30302d; color: var(--ff-gold); }.guide-tabs a[aria-current="location"] strong { color: #f4dcad; }
 .guide-panel { scroll-margin-top: 110px; }.panel-heading { margin-bottom: 15px; }.panel-heading h2 { margin: 0; font-size: 22px; }.panel-heading p { margin: 3px 0 0; color: var(--ff-muted); font-size: 14px; }
 .strategy-card { border: 1px solid var(--ff-line); border-radius: 6px; padding: 20px 22px; margin: 0 0 18px; background: var(--ff-panel); }
