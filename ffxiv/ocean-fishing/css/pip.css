@@ -11,3 +11,5 @@
 
 .ocean-pip-cast,.ocean-pip-meta{display:flex;align-items:center;flex-wrap:wrap;gap:2px 12px;margin:4px 0}.ocean-pip-cast .ocean-pip-bait,.ocean-pip-cast .ocean-pip-bite,.ocean-pip-meta .ocean-pip-weather{margin:0}.ocean-pip-tags:empty{display:none}
 .ocean-pip .efficiency{display:block;margin-top:3px;line-height:1.5}
+
+.ocean-pip-alerts{margin-top:8px;align-items:flex-start!important}.ocean-pip-alerts details{font-size:10pt;min-width:0;flex:1;text-align:right}.ocean-pip-alerts summary{cursor:pointer;color:var(--muted);padding:5px 0}.ocean-pip-alerts details p{text-align:left;margin-top:4px}.ocean-pip-alerts details[open]{max-height:125px;overflow:auto}

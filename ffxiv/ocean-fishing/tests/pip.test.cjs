@@ -7,7 +7,7 @@ const fish=require('../data/fish.json'),achievements=require('../data/achievemen
 const first=Date.parse(require('./fixtures/voyages.json').firstDeparture);
 
 async function open(route,options={}){
-  const errors=[],values=new Map(),timers=new Map(),children=[],childTimers=new Map();let now=first-60000,requests=0,failed=false;
+  const errors=[],values=new Map(),timers=new Map(),children=[],childTimers=new Map(),notices=[];let now=first-60000,requests=0,failed=false;
   const storage={getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)};
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));vc.on('error',(...s)=>errors.push(s.join(' ')));
   class Local extends ResourceLoader{fetch(url){const p=new URL(url);if(!p.pathname.endsWith('.js'))return null;return Promise.resolve(fs.readFileSync(path.join(root,p.pathname.replace('/ffxiv/',''))));}}
@@ -18,6 +18,7 @@ async function open(route,options={}){
       w.Date.now=()=>now;w.scrollTo=()=>{};w.focus=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};
       w.setInterval=(fn,ms)=>{timers.set(ms,fn);return ms;};w.clearInterval=id=>timers.delete(id);
       w.fetch=async url=>({ok:true,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements')?achievements:fish))});
+      if(options.alerts){w.Notification=function(title,options){notices.push({title,options});this.close=()=>{};};w.Notification.permission='granted';}
       if(!options.unsupported)w.documentPictureInPicture={requestWindow:async()=>{
         requests++;if(failed)throw Error('denied');
         const child=new JSDOM('<!doctype html><html><head></head><body></body></html>',{url:w.location.href,pretendToBeVisual:true,virtualConsole:vc});
@@ -31,7 +32,7 @@ async function open(route,options={}){
   for(let i=0;i<100&&$('#appContent').hidden&&$('#retryLoad').hidden;i++)await new Promise(r=>setTimeout(r,10));
   assert.equal($('#appContent').hidden,false,errors.join('\n'));
   const flush=()=>new Promise(r=>setImmediate(r));
-  return {w,d,$,storage,errors,children,childTimers,timers,get requests(){return requests;},setFail:v=>failed=v,setNow:t=>now=t,
+  return {w,d,$,storage,errors,children,childTimers,timers,notices,get requests(){return requests;},setFail:v=>failed=v,setNow:t=>now=t,
     get child(){return children.at(-1).window;},p(s){return this.child.document.querySelector(s);},
     input(s,value){const e=$(s);if(e.type==='checkbox')e.checked=value;else e.value=value;e.dispatchEvent(new w.Event(e.type==='number'?'input':'change',{bubbles:true}));},
     async launch(){ $('#openOceanPip').click();await flush();return this.child; },flush,
@@ -105,4 +106,18 @@ test('unsupported browser leaves both route buttons disabled and checklist uncha
       assert.deepEqual(ui.errors,[]);
     }finally{ui.close();}
   }
+});
+
+for(const route of ['indigo','ruby'])test(`${route}: departure alert switch syncs between PiP and timetable, and the child clock triggers it`,async()=>{
+  const ui=await open(route,{alerts:true});try{
+    await ui.launch();assert.equal(ui.p('#oceanPipNotifications').getAttribute('aria-checked'),'false');
+    ui.$('#oceanNotifications').click();await ui.flush();assert.equal(ui.p('#oceanPipNotifications').getAttribute('aria-checked'),'true');
+    assert.match(ui.p('#oceanPipNotificationStatus').textContent,/근해·원양 공통/);
+    ui.p('#oceanPipNotifications').click();await ui.flush();assert.equal(ui.$('#oceanNotifications').getAttribute('aria-checked'),'false');
+    ui.p('#oceanPipNotifications').click();await ui.flush();assert.equal(ui.$('#oceanNotifications').getAttribute('aria-checked'),'true');
+    ui.setNow(first);ui.childTimers.get(ui.child)();await ui.flush();assert.equal(ui.notices.length,1);assert.match(ui.notices[0].title,/접수 시작/);
+    ui.childTimers.get(ui.child)();await ui.flush();assert.equal(ui.notices.length,1);
+    ui.child.close();assert.equal(ui.$('#oceanNotifications').getAttribute('aria-checked'),'true','closing PiP must not turn off the page alarm');
+    ui.$('#oceanNotifications').click();await ui.flush();assert.equal(ui.$('#oceanNotifications').getAttribute('aria-checked'),'false');assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
 });

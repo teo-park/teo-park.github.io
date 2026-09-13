@@ -13,7 +13,7 @@
   let fish = [], routeFish = [], catalog, names, state, voyages = [], selected = null, activeStop = 0;
   let expanded = false, scheduleCount = 12, hideCompleted = read('ocean:hide-completed-routes') === 'true';
   let purpose = 'collection', species = [], achievementSpecies = [];
-  let achievements, pipView;
+  let achievements, pipView, notifications;
   let completedAchievements=new Set(),excludeCompletedAchievements=true;
   const achievementOpen = new Set();
   let query = '', uncaught = false, checkOpen = new Set(), checklistInitialized = false, timer, undo;
@@ -461,7 +461,8 @@
       fish=payload.fish;names=new Map(fish.map(f=>[C.key(f.Fish),f.FishTranslated]));state=checkState();loadPreferences();
       if(!isChecklist){if(!achievementResponse.ok)throw Error('업적 자료 응답 '+achievementResponse.status);achievements=A.create(await achievementResponse.json(),fish);}
       if(!isChecklist){readAchievementRecords();refreshVoyages();renderOptions();}
-      if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,
+      if(!isChecklist)notifications=window.OceanNotifications?.mount();
+      if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,notifications,
         setStop:index=>{activeStop=index;renderFishing();},
         undoCatch:()=>$('undoCatch').click(),
         openMain:()=>$('stopTabs').scrollIntoView({block:'start',behavior:'smooth'})
