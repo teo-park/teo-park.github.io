@@ -40,7 +40,7 @@ async function open(route,options={}){
   };
 }
 function sameRows(ui,stop,phase){
-  const parent=[...ui.d.querySelectorAll(`[data-zone="${stop}-${phase}"] [data-entry]`)].map(e=>e.dataset.entry);
+  const parent=[...ui.d.querySelectorAll(phase==='all'?`#stopPanel${stop} [data-entry]`:`[data-zone="${stop}-${phase}"] [data-entry]`)].map(e=>e.dataset.entry);
   const child=[...ui.child.document.querySelectorAll('[data-pip-entry]')].map(e=>e.dataset.pipEntry);
   assert.deepEqual(child,parent);return child;
 }
@@ -51,10 +51,10 @@ for(const route of ['indigo','ruby'])test(`${route}: PiP mirrors filters, stop s
     assert.equal(ui.requests,0,'opening the planner must not open PiP');assert.equal(ui.$('#openOceanPip').disabled,false);
     await ui.launch();assert.equal(ui.requests,1);assert.equal(ui.$('#openOceanPip').getAttribute('aria-pressed'),'true');
     assert.equal(ui.p('#oceanPipTitle').textContent,route==='indigo'?'근해 수첩':'원양 수첩');
-    assert.equal(ui.p('#oceanPipDeparture').textContent,ui.$('#selectedTime').textContent);sameRows(ui,0,'regular');
+    assert.equal(ui.p('#oceanPipDeparture').textContent,ui.$('#selectedTime').textContent);sameRows(ui,0,'all');
     assert.equal(ui.p('img').src.startsWith(`https://journal.test/ffxiv/ocean-fishing/`),true);
     ui.$('#openOceanPip').click();await ui.flush();assert.equal(ui.requests,1,'reuse the existing PiP window');
-    ui.p('[data-pip-stop="2"]').click();assert.equal(ui.$('#stopTab2').getAttribute('aria-selected'),'true');sameRows(ui,2,'regular');
+    ui.p('[data-pip-stop="2"]').click();assert.equal(ui.$('#stopTab2').getAttribute('aria-selected'),'true');sameRows(ui,2,'all');
     ui.p('[data-pip-phase=spectral]').click();sameRows(ui,2,'spectral');
     ui.$('[data-stop="1"]').click();assert.equal(ui.p('#oceanPipStop1').getAttribute('aria-selected'),'true');sameRows(ui,1,'spectral');
     ui.p('#oceanPipStop1').dispatchEvent(new ui.child.KeyboardEvent('keydown',{key:'Home',bubbles:true}));sameRows(ui,0,'spectral');

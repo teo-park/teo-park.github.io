@@ -5,7 +5,7 @@
   function mount({getView,setStop,changeCatch,undoCatch,openMain,notifications}) {
     const buttons=[...document.querySelectorAll('[data-open-ocean-pip]')],hint=document.getElementById('oceanPipHint');
     if(!buttons.length)return;
-    let child=null,opening=false,interval=null,phase='regular',view=null,signature='',context='';
+    let child=null,opening=false,interval=null,phase='all',view=null,signature='',context='';
     const isOpen=()=>!!child&&!child.closed;
     if(!window.isSecureContext||!window.documentPictureInPicture?.requestWindow){
       buttons.forEach(b=>b.disabled=true);hint.textContent='PiP는 PC Chrome·Edge 등 지원 브라우저에서 사용할 수 있어요.';return {isOpen,update(){}};
@@ -62,12 +62,12 @@
     async function open(){
       if(opening)return;if(isOpen()){child.focus();return;}opening=true;buttons.forEach(b=>b.disabled=true);
       try{
-        child=await window.documentPictureInPicture.requestWindow({width:560,height:720});const opened=child,d=child.document;
+        child=await window.documentPictureInPicture.requestWindow({width:560,height:720});const opened=child,d=child.document;phase='all';
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
         for(const path of ['../../theme.css?v=20260909-line1','../css/app.css?v=20260913-departure-alerts','../css/pip.css?v=20260913-departure-alerts']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,location.href).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
-        d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div class="ocean-pip-phase" role="group" aria-label="일반·환해류 보기"><button type="button" data-pip-phase="regular">일반</button><button type="button" data-pip-phase="spectral">환해류</button><button type="button" data-pip-phase="all">모두</button></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 실제 구간·환해류는 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
+        d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div class="ocean-pip-phase" role="group" aria-label="일반·환해류 보기"><button type="button" data-pip-phase="all">모두</button><button type="button" data-pip-phase="regular">일반</button><button type="button" data-pip-phase="spectral">환해류</button></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 실제 구간·환해류는 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
         d.addEventListener('click',event=>{
           const p=event.target.closest('[data-pip-phase]');if(p){phase=p.dataset.pipPhase;paint();return;}
