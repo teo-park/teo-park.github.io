@@ -16,9 +16,9 @@
     <nav class="guide-tabs" aria-label="공략 목적">
       <a href="#leveling"><span>30~49레벨</span><strong>시련장 레벨링</strong></a>
       <a href="#rank"><span>50레벨</span><strong>마수 랭크·시련별 편성</strong></a>
-      <a href="#legendary"><span>고득점</span><strong>전설 평가·달성 사례</strong></a>
+      <a href="#legendary"><span>고득점</span><strong>전설 조건·시련별 공략</strong></a>
     </nav>
-    <nav class="guide-shortcuts" aria-label="시련별 바로가기"><span>시련별 보기</span><a href="#starter-team">첫 번째 시련</a><a href="#second-board">두 번째 시련</a><a href="#third-board">세 번째 시련</a><a href="#legendary-master-first">첫 번째 특급 시련</a><a href="#legendary-master-second">두 번째 특급 시련</a></nav>
+    <nav class="guide-shortcuts" aria-label="시련별 바로가기"><a href="#legendary-conditions">전설 등급 조건</a><span>시련별 보기</span><a href="#starter-team">첫 번째 시련</a><a href="#second-board">두 번째 시련</a><a href="#third-board">세 번째 시련</a><a href="#legendary-master-first">첫 번째 특급 시련</a><a href="#legendary-master-second">두 번째 특급 시련</a></nav>
     <section id="leveling" class="guide-panel" aria-labelledby="leveling-title">
       <div class="panel-heading"><h2 id="leveling-title">시련장 레벨링</h2><p>30레벨 이후의 성장과 첫 번째 시련 편성을 확인하세요.</p></div>
       <article class="strategy-card" data-source="814100">
@@ -91,12 +91,45 @@
     </section>
     <section id="legendary" class="guide-panel" aria-labelledby="legendary-title">
       <div class="panel-heading"><h2 id="legendary-title">전설 평가·시련별 공략</h2><p>달성 사례와 연습 기록을 구분해 정리했습니다. 자신의 장비·마수 랭크에 맞춰 비교하세요.</p></div>
-      <nav class="guide-shortcuts legendary-shortcuts" aria-label="전설 공략 시련 선택"><a href="#legendary-first-board">첫 번째 시련</a><a href="#legendary-second-board">두 번째 시련</a><a href="#legendary-third-board">세 번째 시련</a><a href="#legendary-master-first">첫 번째 특급 시련</a><a href="#legendary-master-second">두 번째 특급 시련</a><a href="#legendary-shared-team">공통 편성 사례</a></nav>
-      <article class="strategy-card" data-source="official">
-        <div class="strategy-heading"><div><span class="strategy-label">점수 계획</span><h3>편성 전에 보너스 조건 확인</h3></div><span class="evidence-label">공식 안내</span></div>
-        <p>완료 점수에는 진행한 칸, 남은 본인 HP 등 여러 요소가 반영됩니다. 입장 전 시련 구성 화면의 <strong>보너스 조건</strong>을 확인하고 이번 도전에서 노릴 항목을 정하세요.</p>
-        <p>전설은 완료 점수에 따른 평가입니다. 적이 강해지는 추가 난도와 구분하며, 아래 달성 사례를 모든 난도의 공통 해법이나 공통 최소 점수로 보지는 않습니다.</p>
+      <nav class="guide-shortcuts legendary-shortcuts" aria-label="전설 공략 시련 선택"><a href="#legendary-conditions">등급 조건</a><a href="#legendary-score-reports">목표 점수</a><a href="#legendary-bonuses">보너스 조건</a><a href="#legendary-first-board">첫 번째 시련</a><a href="#legendary-second-board">두 번째 시련</a><a href="#legendary-third-board">세 번째 시련</a><a href="#legendary-master-first">첫 번째 특급 시련</a><a href="#legendary-master-second">두 번째 특급 시련</a><a href="#legendary-shared-team">공통 편성 사례</a></nav>
+      <article id="legendary-conditions" class="strategy-card" data-source="official">
+        <div class="strategy-heading"><div><span class="strategy-label">전설의 마수조련사</span><h3>시련을 완료하고 총점으로 평가받기</h3></div><span class="evidence-label">공식 안내</span></div>
+        <p class="requirement"><strong>진행한 칸·남은 HP 등의 점수 + 달성한 보너스 = 최종 총점</strong><br>전설 도전은 이 총점을 높이는 것이 목표입니다. 보너스 목록을 전부 달성하는 방식이 아닙니다.</p>
+        <p>입장 전 시련 구성 화면의 <strong>보너스 조건</strong>을 확인하세요. 같은 전설 목표라도 휴식·아이템을 활용하거나 편성을 제한하는 등 점수를 확보하는 방법이 다릅니다.</p>
+        <p><strong>일반 모드에서도 전설을 노릴 수 있습니다.</strong> 짐승길은 적의 HP·공격력과 추가 점수 보너스가 늘어나는 별도 난도입니다. 공식 랭킹 참가 조건인 짐승길 3과 전설 평가를 구분하세요.</p>
         <div class="source-line"><span>출처</span><a href="https://na.finalfantasyxiv.com/jobguide/beastmaster/" target="_blank" rel="noopener noreferrer">공식 직업 안내 · 점수·보너스·추가 난도 (영어) ↗</a></div>
+      </article>
+      <article id="legendary-score-reports" class="strategy-card" data-source="reddit-score-thresholds" data-evidence="player-report">
+        <div class="strategy-heading"><div><span class="strategy-label">목표 점수 참고 · 2026.09.14 확인</span><h3>시련별로 알려진 점수와 확인 범위</h3></div><span class="evidence-label">플레이어 사례 · 점수 추정</span></div>
+        <p>아래는 <strong>커뮤니티의 추정 기준과 달성 제보</strong>입니다. 공식 최소 점수표는 확인하지 못했으며, 난도를 통제한 검증 결과가 아니므로 경계 점수에서 전설을 보장하지 않습니다.</p>
+        <table class="guide-table"><caption>확정 커트라인이 아닌 목표 참고선</caption><thead><tr><th scope="col">시련</th><th scope="col">참고 점수</th><th scope="col">근거·주의점</th></tr></thead><tbody>
+          <tr data-source="reddit-five-boards"><th scope="row">첫째·둘째·셋째</th><td>17,500점 기준으로 알려짐</td><td><a href="https://www.reddit.com/r/ffxiv/comments/1wen5v5/legendary_on_all_5_boards/" target="_blank" rel="noopener noreferrer">일반 세 시련에 대한 커뮤니티 답변 ↗</a>. 보너스만의 합이 아닌 최종 총점입니다.</td></tr>
+          <tr><th scope="row">첫 번째 특급</th><td>약 18,750점 추정</td><td>18,5xx점으로 특급에 머물렀다는 제보가 있습니다. 경계 점수는 미확정입니다.</td></tr>
+          <tr><th scope="row">두 번째 특급</th><td>정확한 경계 미확정</td><td>18,250·18,500점 추정이 엇갈립니다. 짐승길 1에서는 19,000점 달성 제보도 있어 서로 같은 조건으로 비교하기 어렵습니다.</td></tr>
+        </tbody></table>
+        <p class="strategy-note">‘보너스 8개 필수’에는 6개로 달성했다는 반례 제보가 있습니다. ‘보너스만 10,000점’이 별도 필수 조건이라는 주장도 검증되지 않았습니다. 최종 총점을 기준으로 계획하세요.</p>
+        <div class="source-line"><span>출처</span><a href="https://www.reddit.com/r/ffxiv/comments/1wdvlwo/psa_master_boards_are_not_17500_for_legendary/" target="_blank" rel="noopener noreferrer">Reddit · 특급 시련 점수·보너스 조건 토론 (영어) ↗</a></div>
+      </article>
+      <article id="legendary-bonuses" class="strategy-card" data-source="ko-score-bonuses">
+        <div class="strategy-heading"><div><span class="strategy-label">선택해서 노리는 점수 보너스</span><h3>이번 도전에서 챙길 조건 고르기</h3></div><span class="evidence-label">한국어 게임 데이터</span></div>
+        <p>보너스 이름·조건은 한국어 게임 데이터로 확인했습니다. <strong>시련마다 제공되는 항목과 배점이 다를 수 있으므로</strong> 실제 적용 목록은 입장 전 화면을 우선하세요.</p>
+        <table class="guide-table"><caption>주요 보너스와 달성 조건</caption><thead><tr><th scope="col">보너스</th><th scope="col">조건·헷갈리기 쉬운 점</th></tr></thead><tbody>
+          <tr><th scope="row">소수 정예 1·2·3</th><td>편성 인원이 각각 6~7마리 / 4~5마리 / <strong>1~3마리</strong>일 때입니다. 실제로 소환한 종류 수가 아닌 동행 편성 기준입니다.</td></tr>
+          <tr><th scope="row">○○강을 통솔하는 자</th><td>동행 마수를 한 분류로 통일합니다. 백수강·백충강 등 여덟 분류에 각각 항목이 있습니다.</td></tr>
+          <tr><th scope="row">희생 없는 승리</th><td>종료 시 동행 마수가 모두 살아 있어야 합니다.</td></tr>
+          <tr><th scope="row">온전한 승리 [주]·[종]</th><td>[주]는 본인, [종]은 모든 동행 마수가 <strong>종료 시 HP 100%</strong>인 조건입니다. 처음부터 한 번도 맞지 말라는 조건과는 다릅니다.</td></tr>
+          <tr><th scope="row">회피의 극의</th><td>도전 중 <strong>주는 피해량 감소·받는 피해량 증가</strong> 효과를 받지 않아야 합니다. 종료 직전에 효과가 사라지는 것으로 충족되지 않습니다.</td></tr>
+          <tr><th scope="row">맨몸 / 장비 상인</th><td>맨몸은 마수 장비를 획득하지 않기, 장비 상인은 종료 시 10개 소지하기입니다. 서로 다른 운영으로 고릅니다.</td></tr>
+          <tr><th scope="row">절약가 / 수집가</th><td>절약가는 시련장 아이템 <strong>사용 0회</strong>, 수집가는 종료 시 10개 소지입니다. 아이템을 획득하는 것과 사용하는 것을 구분하세요.</td></tr>
+          <tr><th scope="row">배고픈 왕</th><td>이번 도전에서 마수에게 먹이를 주지 않습니다.</td></tr>
+          <tr><th scope="row">검약가 / 자산가</th><td>검약가는 마수 동전 소비 0, 자산가는 종료 시 2,000개 이상 소지입니다. 두 조건은 함께 노릴 수 있습니다.</td></tr>
+          <tr><th scope="row">강행군</th><td>야영지에서 휴식하지 않습니다. 전설 자체의 필수 조건은 아닙니다.</td></tr>
+        </tbody></table>
+        <div class="board-notes"><details><summary>그 밖의 보너스 조건</summary><div>
+          <ul><li><strong>희생을 동반한 승리 1·2·3:</strong> 종료 시 전투불능 마수가 각각 3마리 / 2마리 / 1마리인 조건입니다.</li><li><strong>배부른 왕:</strong> 먹이를 20개 이상 준 상태로 종료하는 조건입니다.</li><li><strong>연계에 통달한 자 1·2·3:</strong> 만상유전을 각각 5회 / 10회 / 15회 이상 성공하는 조건입니다.</li><li><strong>짐승길 1·2·3:</strong> 해당 난도로 완료하는 조건입니다. 일반 모드의 필수 보너스로 계산하지 마세요.</li></ul>
+        </div></details></div>
+        <p class="strategy-note"><strong>시작 예시:</strong> 전설용 세 마리 편성에 분류 통일·모두 생존·기믹 회피를 먼저 계획하고, 남은 HP와 보유 동전·아이템으로 추가 점수를 챙깁니다. 회복약이나 휴식을 쓰더라도 다른 보너스로 보완할 수 있으며, 이 예시만으로 전설이 확정되지는 않습니다.</p>
+        <div class="source-line"><span>출처</span><a href="https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/XBMScoreBonus.csv" target="_blank" rel="noopener noreferrer">한국어 데이터 · 보너스 이름·조건 ↗</a></div>
       </article>
       <article id="legendary-first-board" class="strategy-card" data-source="ivy-first-board" data-evidence="player-report">
         <div class="strategy-heading"><div><span class="strategy-label">첫 번째 시련 · 전설 반복 도전</span><h3>사마귀 · 땅벌 · 거미전갈</h3></div><span class="evidence-label">플레이어 사례</span></div>

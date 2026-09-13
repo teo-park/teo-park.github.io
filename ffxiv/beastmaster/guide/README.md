@@ -29,13 +29,17 @@
 - [Jets-Down-049222의 첫·두 번째 전설 기록](https://www.reddit.com/r/ffxiv/comments/1wcph60/got_my_1st_2_legendary_rank_on_boards_bst_crucible/): 본인 댓글의 편성과 두 번째 시련 경로. 장비 전제와 회복 아이템 사용을 함께 표시합니다.
 - [Mic Fc의 세 번째 시련 기록](https://jp.finalfantasyxiv.com/lodestone/character/18824631/blog/5724975/): 전설 도전용 연습 메모. 작성자의 전설 달성 인증으로 표시하지 않습니다.
 - [Da Da의 특급 시련 기록](https://forum.gamer.com.tw/C.php?bsn=17608&snA=31522&tnum=2): 1층·2층 글의 중국어 번체 운영 메모를 직접 요약했습니다. 영상은 원문에서 참고하도록 안내하며 영상을 시청·검증한 것으로 표시하지 않습니다.
+- [Reddit 점수 경계 토론](https://www.reddit.com/r/ffxiv/comments/1wdvlwo/psa_master_boards_are_not_17500_for_legendary/): 특급 시련의 엇갈리는 추정과 보너스 개수 반례. 일반 세 시련의 17,500점 제보는 기존 다섯 시련 게시글을 연결합니다. 숫자는 확정 커트라인이나 모든 난도의 공통 기준으로 사용하지 않습니다.
+- [한국어 보너스 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/XBMScoreBonus.csv): 보너스 이름과 조건을 요약합니다. `XBMContent`의 미해석 숫자 열에서 등급 기준이나 배점을 추정해 게시하지 않습니다. 실제 시련별 제공 항목은 게임 내 보너스 화면을 우선하도록 안내합니다.
 
-2026-09-14에 공식 안내·Icy Veins·해외 플레이 기록을 추가했습니다. Game8 기존 요약은 2026-09-12 확인본을 유지하며, 두 번째·세 번째 시련 기사는 09-14 재확인했습니다. 두 번째 시련의 주요 기믹과 일반 세 시련·특급 두 시련의 전설 도전 팁을 추가했습니다. Icy Veins의 시련별 상세 공략 페이지는 아직 작성 예정 상태여서 구간별 공략 근거로 사용하지 않았습니다. 시련 공통 전설 최소 점수, 최속 육성 순위, 미검증 추가 난도별 절차는 제시하지 않습니다.
+2026-09-14에 공식 안내·Icy Veins·해외 플레이 기록을 추가했습니다. Game8 기존 요약은 2026-09-12 확인본을 유지하며, 두 번째·세 번째 시련 기사는 09-14 재확인했습니다. 두 번째 시련의 주요 기믹과 일반 세 시련·특급 두 시련의 전설 도전 팁을 추가했습니다. Icy Veins의 시련별 상세 공략 페이지는 아직 작성 예정 상태여서 구간별 공략 근거로 사용하지 않았습니다. 전설 등급 안내에는 총점 평가 방식, 시련별 점수 제보의 한계, 선택할 보너스 조건을 구분합니다. 최속 육성 순위와 미검증 추가 난도별 절차는 제시하지 않습니다.
 
 ## 동작과 검증
 
 `#leveling`, `#rank`, `#legendary`와 기존 `#starter-team` 링크를 유지합니다. 정적 HTML은 스크립트를 끄면 세 항목이 모두 보이고, `guide.js`가 탭과 뒤로 가기를 지원합니다.
 
 상단 시련별 바로가기는 일반 세 시련의 기본 공략과 특급 두 시련의 전설 공략으로 연결합니다. 전설 탭에서도 다섯 시련별 바로가기를 제공합니다. `#legendary-first-board`, `#legendary-second-board`, `#legendary-third-board`, `#legendary-master-first`, `#legendary-master-second`가 해당 카드로 연결되고, `#legendary-shared-team`은 공통 편성 사례입니다. 숨겨진 탭의 항목을 열고 나서 해당 카드로 스크롤·초점을 이동합니다.
+
+`#legendary-conditions`는 전설 평가 방식, `#legendary-score-reports`는 점수 참고선, `#legendary-bonuses`는 보너스 조건으로 연결합니다. 숫자 추정·한국어 게임 데이터·공식 안내에 각각 근거 표시와 출처를 둡니다.
 
 검증: 저장소 루트에서 `node --test ffxiv/tests/navigation.test.cjs`, `cd ffxiv/beastmaster` 후 `npm test`. 검토한 원문 링크, 플레이어 사례 표시, 마수 이름·도감 번호와 탭 동작을 검증합니다.

@@ -20,7 +20,7 @@ test('purpose links switch panels, preserve deep links, and respond to browser h
     assert.deepEqual(visible(),['rank']);assert.equal(d.querySelector('.guide-tabs [aria-current]').hash,'#rank');
     w.location.hash='#starter-team';await new Promise(resolve=>w.addEventListener('hashchange',resolve,{once:true}));assert.deepEqual(visible(),['leveling']);
   }finally{w.close();}
-  for(const [hash,want] of [['#legendary','legendary'],['#rank','rank'],['#second-board','rank'],['#third-board','rank'],...['first-board','second-board','third-board','master-first','master-second','shared-team'].map(id=>[`#legendary-${id}`,'legendary']),['#unknown','leveling']]){
+  for(const [hash,want] of [['#legendary','legendary'],['#rank','rank'],['#second-board','rank'],['#third-board','rank'],...['conditions','score-reports','bonuses','first-board','second-board','third-board','master-first','master-second','shared-team'].map(id=>[`#legendary-${id}`,'legendary']),['#unknown','leveling']]){
     const page=open(hash);try{assert.equal(page.window.document.querySelector('.guide-panel:not([hidden])').id,want);}finally{page.window.close();}
   }
 });
@@ -71,7 +71,7 @@ test('every strategy cites a reviewed original and personal reports are visibly 
     for(const card of d.querySelectorAll('.strategy-card')){
       const source=sources[card.dataset.source];assert.ok(source,card.dataset.source);
       assert.ok(card.querySelector(`.source-line a[href="${source.url}"]`));
-      assert.ok(['en','ja','zh-Hant'].includes(source.language));
+      assert.ok(['en','ja','zh-Hant','ko'].includes(source.language));
       if(source.kind==='player-report'){
         assert.equal(card.dataset.evidence,'player-report');
         assert.match(card.querySelector('.evidence-label').textContent,/플레이어 사례/);
