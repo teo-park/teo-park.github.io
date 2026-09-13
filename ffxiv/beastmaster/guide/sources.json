@@ -1,0 +1,11 @@
+{
+  "814100": { "url": "https://game8.jp/ff14/814100", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-12" },
+  "815038": { "url": "https://game8.jp/ff14/815038", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-12" },
+  "815368": { "url": "https://game8.jp/ff14/815368", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-12" },
+  "815556": { "url": "https://game8.jp/ff14/815556", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-14", "updatedAt": "2026-09-12" },
+  "official": { "url": "https://na.finalfantasyxiv.com/jobguide/beastmaster/", "publisher": "SQUARE ENIX", "language": "en", "kind": "official", "checkedAt": "2026-09-14" },
+  "icy-items": { "url": "https://www.icy-veins.com/ffxiv/beastmaster-crucible-of-the-unbroken-items", "publisher": "Icy Veins / Liam Galt", "language": "en", "kind": "guide", "checkedAt": "2026-09-14", "updatedAt": "2026-09-10" },
+  "icy-rotation": { "url": "https://www.icy-veins.com/ffxiv/beastmaster-pve-dps-rotation-openers-abilities", "publisher": "Icy Veins / Liam Galt", "language": "en", "kind": "guide", "checkedAt": "2026-09-14", "updatedAt": "2026-09-09" },
+  "ivy-first-board": { "url": "https://jp.finalfantasyxiv.com/lodestone/character/55090234/blog/5725219/", "publisher": "Ivy Itk / Lodestone", "language": "ja", "kind": "player-report", "checkedAt": "2026-09-14" },
+  "reddit-five-boards": { "url": "https://www.reddit.com/r/ffxiv/comments/1wen5v5/legendary_on_all_5_boards/", "publisher": "Intelligent_Creme_39, MiniMumbo / r/ffxiv", "language": "en", "kind": "player-report", "checkedAt": "2026-09-14", "publishedAt": "2026-09-12" }
+}

@@ -38,13 +38,26 @@ test('guides remain readable without scripts and each beast link resolves to the
   }finally{dom.window.close();}
 });
 
-test('strategy sources are Game8 articles and legendary claims retain their verified scope',()=>{
+test('every strategy cites a reviewed original and personal reports are visibly distinguished',()=>{
   const dom=open('',false),d=dom.window.document;
+  const sources=JSON.parse(readFileSync(new URL('../guide/sources.json',import.meta.url)));
   try{
     const links=[...d.querySelectorAll('main a[href^="https:"]')];assert.ok(links.length);
-    for(const link of links)assert.equal(new URL(link.href).hostname,'game8.jp');
-    for(const card of d.querySelectorAll('[data-source]'))assert.ok(card.querySelector(`.source-line a[href="https://game8.jp/ff14/${card.dataset.source}"]`));
-    assert.match(d.querySelector('#legendary').textContent,/확인하지 못했습니다/);
-    assert.doesNotMatch(html,/ffxiv-fudge|youtube\.com|reddit\.com|클리어 영상 있음/);
+    const reviewed=new Set(Object.values(sources).map(source=>source.url));
+    for(const link of links)assert.ok(reviewed.has(link.href),`unreviewed source: ${link.href}`);
+    for(const card of d.querySelectorAll('.strategy-card')){
+      const source=sources[card.dataset.source];assert.ok(source,card.dataset.source);
+      assert.ok(card.querySelector(`.source-line a[href="${source.url}"]`));
+      assert.ok(['en','ja'].includes(source.language));
+      if(source.kind==='player-report'){
+        assert.equal(card.dataset.evidence,'player-report');
+        assert.match(card.querySelector('.evidence-label').textContent,/플레이어 사례/);
+        assert.doesNotMatch(card.querySelector('.evidence-label').textContent,/공식/);
+      }
+    }
+    assert.equal(d.querySelectorAll('#legendary [data-evidence="player-report"]').length,2);
+    assert.match(d.querySelector('#legendary').textContent,/필수 조건은 아니/);
+    assert.match(d.querySelector('.guide-sources').textContent,/Lodestone 개인 일기는 공식 공략이 아닙니다/);
+    assert.doesNotMatch(html,/ffxiv-fudge|Game8 기반|현재 확인한 Game8 자료의 범위/);
   }finally{dom.window.close();}
 });
