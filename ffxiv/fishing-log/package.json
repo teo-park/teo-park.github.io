@@ -1,1 +1,1 @@
-{"name":"ffxiv-fishing-notebook","version":"1.0.0","private":true,"scripts":{"test":"node --test tests/*.test.cjs","update-data":"node scripts/update-data.mjs"},"devDependencies":{"jsdom":"26.1.0"}}
+{"name":"ffxiv-fishing-notebook","version":"1.0.0","private":true,"scripts":{"test":"node --test tests/*.test.cjs","update-data":"node scripts/update-data.mjs","update-expansions":"node scripts/update-expansions.mjs"},"devDependencies":{"jsdom":"26.1.0"}}

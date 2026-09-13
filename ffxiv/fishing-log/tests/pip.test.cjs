@@ -28,13 +28,16 @@ test('PIP opens on user action, mirrors planner filters and collection changes, 
     assert.equal(calls,1);assert.equal(enables,0);assert.equal(p.$('#openFishingPip').getAttribute('aria-pressed'),'true');
     assert.ok(c.all('#pipCurrent li[data-pip-fish]').length>30,'PIP includes rows beyond the main page limit');
     assert.match(c.$('#pipScope').textContent,/수첩작/);assert.equal(c.$('#pipNotifications').checked,false);
-    assert.ok(c.$('link[href$="pip.css?v=20260913-pip1"]'));assert.equal(c.w.document.documentElement.lang,'ko');
+    assert.ok(c.$('link[href$="pip.css?v=20260913-plan-filters"]'));assert.equal(c.w.document.documentElement.lang,'ko');
     c.$('#pipNotifications').click();await flush();assert.equal(enables,1);assert.equal(c.$('#pipNotifications').checked,true);
     notificationController.disable();assert.equal(c.$('#pipNotifications').checked,false,'main-page state updates the PIP switch');
     c.$('#pipNotifications').click();await flush();c.$('#pipNotifications').click();await flush();assert.equal(disables,2);
     const first=c.$('#pipCurrent li[data-pip-fish]'),id=first.dataset.pipFish;p.$('#planSearch').value=first.querySelector('button').textContent;p.$('#planRefresh').click();
     assert.equal(c.all('[data-pip-fish]').length,1);assert.equal(c.$('[data-pip-fish]').dataset.pipFish,id);
     p.$('.plan-card [data-caught]').click();assert.equal(c.all('[data-pip-fish]').length,0);p.$('#undo').click();assert.equal(c.all('[data-pip-fish]').length,1);
+    p.$('#planBigMode').click();p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();p.$('.plan-card [data-caught]').click();p.change('#planStatus','caught');p.change('#planExpansion','0');c.$('[data-pip-horizon="0"]').click();
+    assert.equal(c.all('[data-pip-fish]').length,1);assert.equal(c.$('[data-pip-fish]').dataset.pipCaught,'true');assert.match(c.$('#pipScope').textContent,/수집 · 신생 에오르제아/);assert.match(c.$('.pip-fish p').textContent,/✓ 수집/);assert.ok(!p.planSnapshot().ids.includes(+c.$('[data-pip-fish]').dataset.pipFish));
+    p.change('#planExpansion','1');assert.equal(c.all('[data-pip-fish]').length,0);p.change('#planExpansion','0');assert.equal(c.all('[data-pip-fish]').length,1);
     p.$('#showBook').click();c.$('[data-pip-detail]').click();assert.equal(p.$('#detailDialog').open,true);p.$('#closeDetail').click();
     assert.equal(c.timers.size,1);p.$('#openFishingPip').click();await flush();assert.equal(calls,1,'existing PIP is reused');
     c.close();assert.equal(c.timers.size,0);assert.equal(p.$('#openFishingPip').getAttribute('aria-pressed'),'false');assert.equal(disables,2,'closing PIP does not disable alerts');

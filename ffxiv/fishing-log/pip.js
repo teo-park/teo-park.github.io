@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const MINUTE=60000,VERSION='20260913-pip1';
+  const MINUTE=60000,VERSION='20260913-plan-filters';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const stamp=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
   function remaining(ms){
@@ -38,8 +38,8 @@
       pip.document.getElementById('pipNotificationStatus').textContent=state.message;
     }
     function rowMarkup(row){
-      const detail=[row.spot,row.bait,row.bite,row.conditions].filter(Boolean).join(' · ');
-      return `<li class="pip-fish${row.always?' is-always':''}" data-pip-fish="${row.id}"><img src="${esc(row.icon)}" width="28" height="28" alt="" loading="lazy"><div class="pip-fish-copy"><div class="pip-fish-top"><button type="button" data-pip-detail="${row.id}" title="본 페이지에서 ${esc(row.name)} 상세 보기">${row.star?'★ ':''}${esc(row.name)}</button><time id="pip-time-${row.id}" data-pip-time="${row.id}"></time></div><p title="${esc(detail)}">${esc(detail)}</p></div></li>`;
+      const detail=[row.caught?'✓ 수집':'',row.spot,row.bait,row.bite,row.conditions].filter(Boolean).join(' · ');
+      return `<li class="pip-fish${row.always?' is-always':''}" data-pip-fish="${row.id}" data-pip-caught="${!!row.caught}"><img src="${esc(row.icon)}" width="28" height="28" alt="" loading="lazy"><div class="pip-fish-copy"><div class="pip-fish-top"><button type="button" data-pip-detail="${row.id}" title="본 페이지에서 ${esc(row.name)} 상세 보기">${row.star?'★ ':''}${esc(row.name)}</button><time id="pip-time-${row.id}" data-pip-time="${row.id}"></time></div><p title="${esc(detail)}">${esc(detail)}</p></div></li>`;
     }
     function paint(){
       if(!isOpen()||!view)return;
@@ -51,7 +51,7 @@
       const nextSignature=JSON.stringify([groups.current,groups.upcoming]);
       if(signature!==nextSignature){
         const focus=d.activeElement?.dataset.pipDetail;
-        for(const [id,rows,message] of [['pipCurrent',groups.current,'지금 도전 가능한 미수집 물고기가 없어요.'],['pipUpcoming',groups.upcoming,'선택한 시간 안에 예정된 물고기가 없어요.']]){
+        for(const [id,rows,message] of [['pipCurrent',groups.current,'지금 도전 가능한 물고기가 없어요.'],['pipUpcoming',groups.upcoming,'선택한 시간 안에 예정된 물고기가 없어요.']]){
           const list=d.getElementById(id),scroll=list.scrollTop;
           list.innerHTML=rows.map(rowMarkup).join('')||`<li class="pip-empty">${message}</li>`;list.scrollTop=scroll;
         }
