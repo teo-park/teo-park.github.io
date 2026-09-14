@@ -53,7 +53,7 @@ test('PiP settings fold away and both water lists fold independently without los
     assert.equal(settings().open,false);assert.equal(ui.p('[data-pip-phase]'),null);
     for(const id of ['regular','spectral'])assert.ok(zone(id).open);
     assert.match(ui.p('#oceanPipCompactSummary').textContent,/1구간.*알림 OFF/);sameRows(ui,0,'all');
-    for(const id of ['oceanPipStops','oceanPipStarter']){
+    for(const id of ['oceanPipStops','oceanPipStarter','oceanPipRecommendations']){
       assert.equal(ui.p('#'+id).closest('details'),null,id+' must remain outside folded settings');
       assert.ok(ui.p('#'+id).compareDocumentPosition(ui.p('#oceanPipList'))&ui.child.Node.DOCUMENT_POSITION_FOLLOWING);
     }
@@ -61,7 +61,7 @@ test('PiP settings fold away and both water lists fold independently without los
     assert.match(ui.p('#oceanPipCompactSummary').textContent,/3구간/);sameRows(ui,2,'all');
     assert.equal(ui.p('#oceanPipStarter').textContent,ui.$('#stopTab2 .stop-starter').textContent);
     settings().querySelector('summary').click();assert.equal(settings().open,true);
-    for(const id of ['oceanPipGoal','oceanPipRecommendations','oceanPipNotifications'])assert.ok(settings().contains(ui.p('#'+id)),id);
+    for(const id of ['oceanPipGoal','oceanPipNotifications'])assert.ok(settings().contains(ui.p('#'+id)),id);
     ui.p('#oceanPipNotifications').click();await ui.flush();assert.match(ui.p('#oceanPipCompactSummary').textContent,/알림 ON/);
     ui.p('[data-pip-stop="2"]').click();assert.match(ui.p('#oceanPipCompactSummary').textContent,/3구간/);
     settings().querySelector('summary').click();assert.equal(settings().open,false);
@@ -96,14 +96,21 @@ for(const route of ['indigo','ruby'])test(`${route}: PiP recommends current voya
       choose(number);
       const expected=achievements.goals.filter(g=>g.route===route&&g.recommended.includes(number)).map(g=>g.id).sort();
       assert.deepEqual(ids(),expected,'only exact recommended routes, never appearance or alternatives');
-      assert.equal(ui.p('#oceanPipRecommendations').hidden,!expected.length);
+      assert.equal(ui.p('#oceanPipRecommendations').hidden,false);
+      if(!expected.length)assert.match(ui.p('#oceanPipRecommendations').textContent,/현재 항로에 추천 업적 없음/);
     }
     const voyage=route==='indigo'?12:5;choose(voyage);
     const goals=achievements.goals.filter(g=>g.route===route&&g.recommended.includes(voyage));assert.equal(goals.length,2);
     const expected=goals.map(g=>g.id).sort();
+    const mainIds=()=>[...ui.$('[data-voyage][aria-pressed=true]').closest('tr').querySelectorAll('[data-recommended-achievement]')].map(el=>el.dataset.recommendedAchievement).sort();
     for(const purpose of ['all','collection','mission','score','achievement']){
       ui.input(`[name=purpose][value=${purpose}]`,purpose);assert.deepEqual(ids(),expected);
+      assert.deepEqual(mainIds(),expected,'main schedule must also recommend independently of fishing purpose');
+      assert.equal(ui.p('#oceanPipRecommendations').closest('details'),null);
     }
+    const different=achievements.goals.find(g=>g.route===route&&!expected.includes(g.id));
+    ui.$(`[name=achievementGroup][value="${different.id}"]`).click();
+    assert.deepEqual(mainIds(),expected,'a selected goal must not hide other recommended achievements');assert.deepEqual(ids(),expected);
     for(const g of goals){
       const button=ui.p(`[data-pip-achievement="${g.id}"]`);
       assert.ok(button.textContent.includes(g.label));assert.ok(button.textContent.includes((g.scope==='party'?'파티':'개인')+' '+g.count+'마리'));
@@ -120,7 +127,8 @@ for(const route of ['indigo','ruby'])test(`${route}: PiP recommends current voya
     assert.equal(child.document.activeElement.dataset.pipAchievement,goal.id);
     assert.equal(ui.$('#selectedTime').textContent,departure);assert.equal(ui.p('#oceanPipStop2').getAttribute('aria-selected'),'true');
     for(const g of goals)ui.$(`[data-achievement-record="${g.id}"]`).click();
-    assert.deepEqual(ids(),[]);assert.equal(ui.p('#oceanPipRecommendations').hidden,true);
+    assert.deepEqual(ids(),[]);assert.equal(ui.p('#oceanPipRecommendations').hidden,false);
+    assert.match(ui.p('#oceanPipRecommendations').textContent,/완료한 추천 업적은 제외 중/);
     ui.p('[data-pip-goal-field=excludeCompletedAchievements]').click();assert.deepEqual(ids(),expected);
     for(const g of goals)assert.match(ui.p(`[data-pip-achievement="${g.id}"]`).textContent,/완료/);
     // External completion changes also update the open PiP.

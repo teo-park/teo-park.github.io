@@ -62,16 +62,14 @@
       const stop=view.stops[view.activeStop],goal=view.goal,alert=notifications?.state().enabled?'알림 ON':'알림 OFF';
       const purpose=goal.purposes.find(p=>p.id===goal.purpose)?.label||'';
       $('oceanPipCompactSummary').textContent=`${view.activeStop+1}구간 · ${stop.name} · ${purpose} · ${alert}`;
-      const recommended=$('oceanPipCompactRecommendations'),items=view.recommendations||[];
-      recommended.hidden=!items.length;recommended.textContent=items.length?'추천 '+items.map(g=>g.label).join(' · '):'';
     }
     function recommendedAchievements(){
-      const section=$('oceanPipRecommendations'),items=view.recommendations||[],nextSignature=JSON.stringify(items);
-      section.hidden=!items.length;
+      const section=$('oceanPipRecommendations'),items=view.recommendations||[],nextSignature=JSON.stringify([items,view.recommendationsEmpty]);
       if(nextSignature===recommendationsSignature)return;
       const focused=section.contains(child.document.activeElement)?child.document.activeElement.dataset.pipAchievement:null;
-      section.innerHTML=items.length?`<h2>이번 항로 추천 업적</h2><div>${items.map(g=>`<button type="button" data-pip-achievement="${esc(g.id)}" aria-pressed="${g.selected}" aria-label="${esc(g.label)} 업적작 목표로 선택"><strong>${esc(g.label)}</strong><span>${g.scope==='party'?'파티':'개인'} ${g.count}마리</span>${g.completed?'<small>완료</small>':''}<b aria-hidden="true">${g.selected?'✓':'↗'}</b></button>`).join('')}</div>${items.length>1?'<p>각 업적을 따로 노리는 추천이에요.</p>':''}`:'';
-      if(focused)(section.querySelector(`[data-pip-achievement="${focused}"]`)||$('oceanPipGoal')).focus({preventScroll:true});
+      section.innerHTML=`<h2>추천 업적</h2>${items.length?`<div>${items.map(g=>`<button type="button" data-pip-achievement="${esc(g.id)}" aria-pressed="${g.selected}" aria-label="${esc(g.label)} 업적작 목표로 선택"><strong>${esc(g.label)}</strong><span>${g.scope==='party'?'파티':'개인'} ${g.count}마리</span>${g.completed?'<small>완료</small>':''}<b aria-hidden="true">${g.selected?'✓':'↗'}</b></button>`).join('')}</div>`:`<p>${esc(view.recommendationsEmpty||'현재 항로에 추천 업적 없음')}</p>`}`;
+      section.title=items.length>1?'각 업적을 따로 노리는 추천이며, 동시 달성 추천은 아닙니다.':'';
+      if(focused)(section.querySelector(`[data-pip-achievement="${focused}"]`)||$('oceanPipControls').querySelector('summary')).focus({preventScroll:true});
       recommendationsSignature=nextSignature;
     }
     function card(f){
@@ -129,7 +127,7 @@
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
         const assets=new URL(document.body.dataset.assetBase||'../',location.href);
-        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-pip-stops']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
+        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-always-achievements']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
         d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 현재 구간은 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
@@ -139,7 +137,7 @@
         const goals=d.createElement('section');goals.className='ocean-pip-goals';goals.setAttribute('aria-label','낚시 목적과 목표');
         goals.innerHTML='<label class="ocean-pip-goal-select" for="oceanPipGoal">낚시 목적 <select id="oceanPipGoal"></select></label><details id="oceanPipGoalOptions"><summary id="oceanPipGoalSummary">목표 설정</summary><div id="oceanPipGoalBody"></div></details>';
         d.querySelector('.ocean-pip-header').after(goals);
-        const recommendations=d.createElement('section');recommendations.id='oceanPipRecommendations';recommendations.className='ocean-pip-recommendations';recommendations.setAttribute('aria-label','이번 항로 추천 업적');recommendations.hidden=true;
+        const recommendations=d.createElement('section');recommendations.id='oceanPipRecommendations';recommendations.className='ocean-pip-recommendations';recommendations.setAttribute('aria-label','이번 항로 추천 업적');
         goals.after(recommendations);
         // Keep the status available inside settings without repeating the selected purpose in the header.
         $('oceanPipGoalOptions').append($('oceanPipPurpose'));
@@ -171,10 +169,11 @@
         d.querySelector('.ocean-pip-header').append(controls);
         $('oceanPipNotifications').onclick=()=>notifications?.state().enabled?notifications.disable():notifications?.enable();
         const settings=d.createElement('details');settings.id='oceanPipControls';settings.className='ocean-pip-controls';
-        settings.innerHTML='<summary><span class="ocean-pip-controls-title"><strong>설정·항로</strong><span id="oceanPipCompactRecommendations" hidden></span></span><span id="oceanPipCompactSummary"></span></summary><div id="oceanPipControlsBody"></div>';
+        settings.innerHTML='<summary><span class="ocean-pip-controls-title"><strong>설정·항로</strong></span><span id="oceanPipCompactSummary"></span></summary><div id="oceanPipControlsBody"></div>';
         const header=d.querySelector('.ocean-pip-header');header.after(settings);
         const departure=header.querySelector('p');departure.className='ocean-pip-departure';
-        $('oceanPipControlsBody').append(departure,controls,goals,recommendations,d.querySelector('.ocean-pip>footer'));
+        $('oceanPipControlsBody').append(departure,controls,goals,d.querySelector('.ocean-pip>footer'));
+        $('oceanPipStarter').after(recommendations);
         update();interval=opened.setInterval(clock,1000);
         for(const b of buttons){b.setAttribute('aria-pressed','true');b.textContent='PiP 창으로 이동';}
         hint.textContent='PiP에서 설정·항로와 일반·환해류 목록을 접고 펼칠 수 있어요. 본 페이지는 열어 두세요.';

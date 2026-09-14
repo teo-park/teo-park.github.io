@@ -77,7 +77,7 @@ for(const route of ['indigo','ruby'])test(`${route}: missions and achievements r
   assert.equal(ui.$('[name=purpose][value=mission]').checked,true);
   assert.equal(ui.$('#speciesOptions').hidden,false);assert.equal(ui.$('#achievementOptions').hidden,true);
   assert.equal(ui.$('#achievementPlans').hidden,true);assert.equal(ui.$('#scheduleAchievementHelp').hidden,true);
-  assert.equal(ui.$('.route-achievement'),null);
+  assert.ok(ui.$('.route-achievement'),'mission mode still shows recommended achievements');
   assert.deepEqual(checked('species'),[a]);
   ui.$(`[name=species][value=${b}]`).click();
   assert.deepEqual(checked('species'),[a,b].sort());

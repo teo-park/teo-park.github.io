@@ -323,8 +323,7 @@
     return `<span class="stop-starter" title="${esc(triggers.map(f=>f.FishTranslated).join(' · '))}를 노리는 시작 미끼"><span>환해류 유도</span><b>${esc(baits)}</b></span>`;
   }
   function achievement(v) {
-    if(purpose==='mission')return '';
-    const plans=recommendedAchievements(v).filter(g=>purpose!=='achievement'||!achievementSpecies.length||achievementSpecies.includes(g.id));
+    const plans=recommendedAchievements(v);
     return plans.map(g=>`<span class="route-achievement" data-recommended-achievement="${esc(g.id)}">업적 추천 · ${esc(g.label)} · ${g.scope==='party'?'파티':'개인'} ${g.count}마리${completedAchievements.has(g.id)?' · 완료':''}</span>`).join('');
   }
   function recommendedAchievements(v) {
@@ -418,6 +417,7 @@
       purpose:purposeName+(purpose==='score'?' · '+strategy.gp+' GP':'')+' · 본 페이지 필터 적용',
       recommendations:recommendedAchievements(selected).map(g=>({id:g.id,label:g.label,count:g.count,scope:g.scope,
         completed:completedAchievements.has(g.id),selected:purpose==='achievement'&&achievementSpecies.includes(g.id)})),
+      recommendationsEmpty:achievements.forVoyage(selected).some(g=>g.status==='recommended')?'완료한 추천 업적은 제외 중':'현재 항로에 추천 업적 없음',
       goal:{purpose,purposes:[...document.querySelectorAll('[name=purpose]')].map(el=>({id:el.value,label:el.getAttribute('aria-label')})),
         groups:speciesGroups().filter(([id])=>purpose!=='achievement'||achievements.goals.has(id)).map(([id,label])=>({id,label,checked:(purpose==='achievement'?achievementSpecies:species).includes(id),completed:completedAchievements.has(id)})),
         excludeCompleted:excludeCompletedAchievements,help:$('purposeHelp').textContent,
