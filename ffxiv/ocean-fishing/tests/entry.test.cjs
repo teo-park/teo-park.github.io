@@ -30,9 +30,11 @@ test('published pages have no password form, lock button, lock styling, or index
   if(route&&route!=='sources/')assert.equal(doc.querySelector('script[src*="entry.js"]'),null);
  }
 });
-test('public home links to each journal route and the portal includes the journal',()=>{
+test('public home combines both routes in one planner and preserves bookmark entry pages',()=>{
  const home=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8')).window.document;
- for(const route of ['indigo','ruby','checklist'])assert.ok(home.querySelector(`.journal-home-links a[href="./${route}/"]`));
+ assert.equal(home.body.dataset.page,'planner');assert.ok(home.querySelector('#scheduleRows'));assert.ok(home.querySelector('[data-open-ocean-pip]'));
+ for(const route of ['indigo','ruby'])assert.ok(home.querySelector(`[data-ocean-route="${route}"]`));
+ assert.ok(home.querySelector('.planner-route-bar a[href="checklist/"]'));
  const portal=new JSDOM(fs.readFileSync(path.join(root,'../index.html'),'utf8')).window.document;assert.ok(portal.querySelector('.tool-link[href="./ocean-fishing/"]'));
  const sitemap=fs.readFileSync(path.join(root,'../sitemap.xml'),'utf8');for(const route of ['', 'indigo/','ruby/','checklist/'])assert.ok(sitemap.includes(`/ffxiv/ocean-fishing/${route}</loc>`));
 });

@@ -17,7 +17,7 @@ test('all public pages have consistent navigation, valid relative destinations a
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
       assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 16);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 14);
       assert.equal(d.querySelector('#nav-beastmaster'),null);
       assert.deepEqual([...d.querySelectorAll('#nav-collection a[href*="beastmaster"]')].map(a=>a.textContent.replace('현재','')),['마수도감','마수조련사 공략']);
       const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
@@ -31,7 +31,7 @@ test('all public pages have consistent navigation, valid relative destinations a
       }
       const current = d.querySelectorAll('[data-navigation] [aria-current="page"]');
       assert.equal(current.length, page === 'ocean-fishing/sources/' ? 0 : 1, page);
-      if (current.length) assert.equal(new URL(current[0].href).pathname, `/ffxiv/${page}`);
+      if (current.length) assert.equal(new URL(current[0].href).pathname, `/ffxiv/${['ocean-fishing/indigo/','ocean-fishing/ruby/'].includes(page)?'ocean-fishing/':page}`);
       for (const asset of ['navigation.js', 'navigation.css']) {
         const selector = asset.endsWith('.js') ? 'script[src]' : 'link[href]';
         const nodes = [...d.querySelectorAll(selector)].filter(el => (el.src || el.href).includes('/' + asset + '?'));

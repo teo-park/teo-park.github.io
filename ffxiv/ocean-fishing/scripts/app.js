@@ -4,12 +4,17 @@
   const C = window.OceanCollection, V = window.JournalVoyages, A = window.OceanAchievements, R = window.OceanAchievementRecords;
   const page = document.body.dataset.page;
   const isChecklist = page === 'checklist';
+  const assetBase = document.body.dataset.assetBase || '../';
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const read = key => { try { return localStorage.getItem(key); } catch { return null; } };
   const write = (key, value) => { try { localStorage.setItem(key, value); } catch { /* Nonessential preferences can remain in memory. */ } };
   const json = (key, fallback) => { try { return JSON.parse(read(key)) ?? fallback; } catch { return fallback; } };
-  let route = isChecklist ? (read('checklistCombined-activeTab') === 'ruby' ? 'ruby' : 'indigo') : page;
+  const routeIds = ['indigo','ruby'];
+  const entryRoute = routeIds.includes(page) ? page : read('ocean:active-route') === 'ruby' ? 'ruby' : 'indigo';
+  const urlRoute = () => {const value=new URLSearchParams(location.search).get('route');return routeIds.includes(value)?value:entryRoute;};
+  let route = isChecklist ? (read('checklistCombined-activeTab') === 'ruby' ? 'ruby' : 'indigo') : urlRoute();
+  const routeViews = new Map();
   let fish = [], routeFish = [], catalog, names, state, voyages = [], selected = null, activeStop = 0;
   let expanded = false, scheduleCount = 12, hideCompleted = read('ocean:hide-completed-routes') === 'true';
   let purpose = 'collection', species = [], achievementSpecies = [];
@@ -33,7 +38,7 @@
   const range = value => value ? (value.min === value.max ? String(value.min) : `${value.min.toLocaleString()}–${value.max.toLocaleString()}`) : '미확인';
   const points = (f, mode) => { const amount = C.numberRange(f[mode]); return amount && Number(f.Points) > 0 ? {min:Number(f.Points)*amount.min,max:Number(f.Points)*amount.max} : null; };
   const label = name => names.get(C.key(name)) || C.name(name);
-  const image = f => `<img class="fish-image" src="../${esc(f.image)}" alt="" width="32" height="32" loading="lazy">`;
+  const image = f => `<img class="fish-image" src="${assetBase}${esc(f.image)}" alt="" width="32" height="32" loading="lazy">`;
   const period = value => `<span class="period ${value.toLowerCase()}">${esc(V.periods[value])}</span>`;
   function initials(text) {
     const table = [...'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'];
@@ -158,6 +163,27 @@
     achievementSpecies=Array.isArray(savedAchievements)?savedAchievements.filter(x=>typeof x==='string'):[...species];
     if(!Array.isArray(savedAchievements))write('ocean:achievement-groups:'+route,JSON.stringify(achievementSpecies));
     scoreMode=read('ocean:score:'+route)==='DH'?'DH':'TH';
+  }
+  function changeRoute(next, updateHistory=true) {
+    if(isChecklist||!routeIds.includes(next)||next===route)return;
+    const departure=selected.start;
+    routeViews.set(route,{start:departure,activeStop,expanded,scheduleCount,options:new Map(zoneOptions)});
+    route=next;write('ocean:active-route',route);
+    const saved=routeViews.get(route);
+    activeStop=saved?.activeStop??0;expanded=saved?.expanded??expanded;scheduleCount=saved?.scheduleCount??scheduleCount;
+    zoneOptions.clear();for(const [key,value] of saved?.options||[])zoneOptions.set(key,value);
+    loadPreferences();
+    $('speciesChoices').replaceChildren();$('achievementChoices').replaceChildren();$('achievementRecordChoices').replaceChildren();
+    voyages=V.upcoming(route,Date.now(),scheduleCount);
+    // Recompute all three stops for this route, even when the departure is the same.
+    selected=V.at(route,saved?.start??departure);
+    if(updateHistory){const url=new URL(location.href);url.searchParams.set('route',route);history.pushState(null,'',url);}
+    renderOptions();render();
+  }
+  function renderRoutePicker() {
+    document.querySelectorAll('[data-ocean-route]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.oceanRoute===route)));
+    $('collectionRouteLabel').textContent=`나의 ${routeLabel()} 도감`;
+    document.title=routeLabel()+' · 먼바다 수첩';
   }
   function readAchievementRecords() {
     if(isChecklist)return;
@@ -335,7 +361,7 @@
   function pipSnapshot() {
     const rows=planned(),purposeName={all:'전체 보기',collection:'도감 채우기',mission:'선상과제',achievement:'업적작',score:'고득점'}[purpose];
     return {
-      title:routeLabel()+' 수첩',departure:time(selected.start)+' 출항',start:selected.start,activeStop,
+      route,title:routeLabel()+' 수첩',departure:time(selected.start)+' 출항',start:selected.start,activeStop,
       purpose:purposeName+(purpose==='score'?' · '+strategy.gp+' GP':'')+' · 본 페이지 필터 적용',
       goal:{purpose,purposes:[...document.querySelectorAll('[name=purpose]')].map(el=>({id:el.value,label:el.getAttribute('aria-label')})),
         groups:speciesGroups().filter(([id])=>purpose!=='achievement'||achievements.goals.has(id)).map(([id,label])=>({id,label,checked:(purpose==='achievement'?achievementSpecies:species).includes(id),completed:completedAchievements.has(id)})),
@@ -346,7 +372,7 @@
         zones:[false,true].map(spectral=>{
           const key=spectral?'spectral':'regular',visible=sortRows(rows.filter(f=>V.available(f,selected,i)&&f.spectral===spectral),zoneOptions.get(i+'-'+key));
           return {key,label:spectral?'환해류':'일반 구간',baits:baitSummary(visible),rows:visible.map(f=>({
-            entryId:f.entryId,name:f.FishTranslated,image:'../'+f.image,caught:caught(f),bite:f.Bite||'',
+            entryId:f.entryId,name:f.FishTranslated,image:assetBase+f.image,caught:caught(f),bite:f.Bite||'',
             hookset:f.hooksetName||(f.Hookset==='Precision'?'섬세한 낚아채기':'강력한 낚아채기'),baitTime:C.biteTimeText(C.baitInfo(f).rawTime),bait:baitText(f),
             tags:[f.spectralTrigger?'환해류 유도':'',f.legendary?'전설어':f.bigFish?'터주':'',f.LocalRequiredBy?.length?'조건용 · '+f.LocalRequiredBy.join(' · '):'',f.LocalGroupMatch?(purpose==='achievement'?'업적':'과제')+' 대상':'',f.SpeciesTranslated||''].filter(Boolean),
             conditions:conditions(f),weather:weatherText(f),points:f.Points?Number(f.Points).toLocaleString():'미확인',double:range(points(f,'DH')),triple:range(points(f,'TH')),
@@ -396,7 +422,7 @@
   function render() {
     if(!fish.length) return;
     if(isChecklist) renderChecklist();
-    else {renderSummary();renderSchedule();renderFishing();}
+    else {renderRoutePicker();renderSummary();renderSchedule();renderFishing();}
   }
   function backupStatus() {
     const date=read('ocean:last-export'); $('backupStatus').textContent=date && Number.isFinite(Date.parse(date))?'최근 내보내기: '+time(Date.parse(date)):'아직 이 브라우저에서 내보낸 기록이 없어요.';
@@ -446,6 +472,20 @@
         if(open&&!d.querySelector('table')){const group=checklistGroups().find(g=>g.id===d.dataset.group);d.insertAdjacentHTML('beforeend',table(group.rows.filter(f=>matches(f,query)&&(!uncaught||!caught(f))),'check-'+group.id));}
       });
     } else {
+      document.querySelectorAll('[data-ocean-route]').forEach(button=>button.addEventListener('click',()=>changeRoute(button.dataset.oceanRoute)));
+      window.addEventListener('popstate',()=>changeRoute(urlRoute(),false));
+      // Old route links (including cached navigation) switch this planner in place.
+      document.addEventListener('click',event=>{
+        if(event.defaultPrevented||event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+        const anchor=event.target.closest('a[href]');if(!anchor||anchor.target||anchor.hasAttribute('download'))return;
+        const url=new URL(anchor.href),root=new URL(assetBase,location.href);
+        if(url.origin!==root.origin)return;
+        const relative=url.pathname.slice(root.pathname.length);
+        if(!url.pathname.startsWith(root.pathname)||!['','indigo/','ruby/'].includes(relative))return;
+        event.preventDefault();
+        const requested=url.searchParams.get('route');changeRoute(routeIds.includes(requested)?requested:relative?relative.slice(0,-1):route);
+        anchor.closest('.nav-category')?.removeAttribute('open');
+      });
       document.querySelectorAll('[name=purpose]').forEach(input=>input.addEventListener('change',()=>{purpose=input.value;write('ocean:purpose:'+route,purpose);renderOptions();render();}));
       $('speciesChoices').addEventListener('change',()=>{species=[...document.querySelectorAll('[name=species]:checked')].map(el=>el.value);write('ocean:species-groups:'+route,JSON.stringify(species));renderOptions();render();});
       $('achievementChoices').addEventListener('change',event=>{achievementSpecies=[...document.querySelectorAll('[name=achievementGroup]:checked')].map(el=>el.value);if(event.target.checked)achievementOpen.add(event.target.value);write('ocean:achievement-groups:'+route,JSON.stringify(achievementSpecies));renderOptions();render();});
@@ -483,13 +523,13 @@
     try {
       if(!window.FishingCollection)throw Error('수집 기록 연동 프로그램을 불러오지 못했습니다.');
       const suffix='?v='+encodeURIComponent(document.body.dataset.version);
-      const [response,achievementResponse]=await Promise.all([fetch('../data/fish.json'+suffix),isChecklist?Promise.resolve(null):fetch('../data/achievements.json'+suffix)]);if(!response.ok)throw Error('자료 응답 '+response.status);
+      const [response,achievementResponse]=await Promise.all([fetch(assetBase+'data/fish.json'+suffix),isChecklist?Promise.resolve(null):fetch(assetBase+'data/achievements.json'+suffix)]);if(!response.ok)throw Error('자료 응답 '+response.status);
       const payload=await response.json();if(payload.version!==1||!Array.isArray(payload.fish)||payload.fish.length!==260)throw Error('자료 형식 오류');
       fish=payload.fish;names=new Map(fish.map(f=>[C.key(f.Fish),f.FishTranslated]));state=checkState();loadPreferences();
       if(!isChecklist){if(!achievementResponse.ok)throw Error('업적 자료 응답 '+achievementResponse.status);achievements=A.create(await achievementResponse.json(),fish);}
       if(!isChecklist){readAchievementRecords();refreshVoyages();renderOptions();}
       if(!isChecklist)notifications=window.OceanNotifications?.mount();
-      if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,notifications,changeGoal:changePipGoal,
+      if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,notifications,changeGoal:changePipGoal,changeRoute,
         setStop:index=>{activeStop=index;renderFishing();},
         undoCatch:()=>$('undoCatch').click(),
         openMain:()=>$('stopTabs').scrollIntoView({block:'start',behavior:'smooth'})

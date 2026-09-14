@@ -268,12 +268,12 @@ async function open(page,storage=memory(),failData=false) {
     }
   }
   const dom=new JSDOM(fs.readFileSync(path.join(root,page,'index.html'),'utf8'),{
-    url:`https://journal.test/ffxiv/ocean-fishing/${page}/`,resources:new LocalScripts(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,
+    url:`https://journal.test/ffxiv/ocean-fishing/${page?page+'/':''}`,resources:new LocalScripts(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,
     beforeParse(w) {
       Object.defineProperty(w,'localStorage',{value:storage});
       Object.defineProperty(w,'sessionStorage',{get(){throw Error('Session storage is unavailable');}});
       w.Date.now=()=>first-60000;w.scrollTo=()=>{};
-      w.fetch=async url=>{assert.ok(['fish','achievements'].some(name=>url==='../data/'+name+'.json?v='+w.document.body.dataset.version));return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements.json')?achievementData:payload))};};
+      w.fetch=async url=>{assert.ok(['fish','achievements'].some(name=>url===(page?'../':'./')+'data/'+name+'.json?v='+w.document.body.dataset.version));return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements.json')?achievementData:payload))};};
       w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
       w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
       w.Blob=Blob;w.URL.createObjectURL=blob=>{downloads.push(blob);return 'blob:test';};w.URL.revokeObjectURL=()=>{};

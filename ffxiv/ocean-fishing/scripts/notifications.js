@@ -32,7 +32,7 @@
       });
       const notification=new Notification('먼바다 · '+format(start)+' 접수 시작',{
         body:'15분 동안 접수할 수 있어요.\n'+routes.join('\n'),tag:'ocean-departure-'+start,
-        icon:new URL('../../fishing-log/app-icon.png',location.href).href
+        icon:new URL((document.body.dataset.assetBase||'../')+'../fishing-log/app-icon.png',location.href).href
       });
       notification.onclick=()=>{window.focus();notification.close();document.getElementById('scheduleRows').scrollIntoView({block:'center'});};
       notification.onerror=()=>stop('알림을 표시하지 못해 정시 알림을 껐어요. 브라우저·기기 알림 설정을 확인해 주세요.',true);

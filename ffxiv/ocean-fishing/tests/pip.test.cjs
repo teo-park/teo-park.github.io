@@ -12,7 +12,7 @@ async function open(route,options={}){
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));vc.on('error',(...s)=>errors.push(s.join(' ')));
   class Local extends ResourceLoader{fetch(url){const p=new URL(url);if(!p.pathname.endsWith('.js'))return null;return Promise.resolve(fs.readFileSync(path.join(root,p.pathname.replace('/ffxiv/',''))));}}
   const dom=new JSDOM(fs.readFileSync(path.join(ocean,route,'index.html'),'utf8'),{
-    url:`https://journal.test/ffxiv/ocean-fishing/${route}/`,resources:new Local(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,
+    url:`https://journal.test/ffxiv/ocean-fishing/${route?route+'/':''}${options.search||''}`,resources:new Local(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,
     beforeParse(w){
       Object.defineProperty(w,'localStorage',{value:storage});Object.defineProperty(w,'isSecureContext',{value:true});
       w.Date.now=()=>now;w.scrollTo=()=>{};w.focus=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};
@@ -44,6 +44,59 @@ function sameRows(ui,stop,phase){
   const child=[...ui.child.document.querySelectorAll('[data-pip-entry]')].map(e=>e.dataset.pipEntry);
   assert.deepEqual(child,parent);return child;
 }
+
+for(const entry of ['', 'indigo', 'ruby'])test(`${entry||'unified home'}: switching routes keeps one PiP, independent goals and route views, records and alerts`,async()=>{
+  const values=new Map(['indigo','ruby'].map(route=>['ocean:purpose:'+route,'mission']));
+  const ui=await open(entry,{values,alerts:true});
+  try{
+    const initial=entry==='ruby'?'ruby':'indigo',other=initial==='ruby'?'indigo':'ruby';
+    await ui.launch();const child=ui.child;
+    const groupIds=()=>[...child.document.querySelectorAll('[data-pip-group]')].map(el=>el.dataset.pipGroup);
+    const firstGroup=groupIds()[0];ui.p(`[data-pip-group="${firstGroup}"]`).click();
+    ui.$('#scheduleToggle').click();ui.d.querySelectorAll('[data-voyage]')[3].click();
+    const departure=ui.$('#selectedTime').textContent;
+    ui.p('[data-pip-stop="2"]').click();
+    ui.input('[data-zone="2-regular"] [data-zone-option=sort]','name');
+    ui.p('#oceanPipNotifications').click();await ui.flush();
+    ui.p(`[data-pip-route="${other}"]`).click();
+    assert.equal(ui.child,child);assert.equal(child.closed,false);assert.equal(ui.requests,1);assert.equal(ui.childTimers.size,1);
+    assert.equal(new URL(ui.w.location.href).searchParams.get('route'),other);
+    assert.equal(ui.p(`[data-pip-route="${other}"]`).getAttribute('aria-pressed'),'true');
+    assert.equal(ui.$(`[data-ocean-route="${other}"]`).getAttribute('aria-pressed'),'true');
+    assert.equal(ui.$('#selectedTime').textContent,departure,'first visit keeps the departure time while recomputing the route');
+    assert.equal(ui.p('#oceanPipGoal').value,'mission');
+    const expected=[...new Set(fish.fish.filter(f=>f.route===other&&f.Species).map(f=>f.Species))].sort();
+    assert.deepEqual(groupIds().sort(),expected,'same purpose must rebuild groups for the new route');
+    assert.equal(child.document.querySelectorAll('[data-pip-group]:checked').length,0);
+    assert.deepEqual([...ui.d.querySelectorAll('[data-achievement-record]')].map(el=>el.dataset.achievementRecord).sort(),achievements.goals.filter(g=>g.route===other).map(g=>g.id).sort());
+    sameRows(ui,0,'all');assert.equal(ui.p('#oceanPipNotifications').getAttribute('aria-checked'),'true');
+    const nextGroup=groupIds()[0];ui.p(`[data-pip-group="${nextGroup}"]`).click();
+    const catchBox=ui.p('[data-pip-catch]'),f=fish.fish.find(f=>f.entryId===catchBox.dataset.pipCatch);catchBox.click();
+    assert.ok(ui.w.OceanCollection.caught(ui.w.OceanCollection.read(ui.storage),other,f.Fish));
+    ui.$(`[data-ocean-route="${initial}"]`).click();
+    assert.equal(ui.child,child);assert.equal(ui.p('#oceanPipStop2').getAttribute('aria-selected'),'true');
+    assert.equal(ui.$('[data-zone="2-regular"] [data-zone-option=sort]').value,'name');
+    assert.equal(ui.$('#selectedTime').textContent,departure);assert.ok(ui.p(`[data-pip-group="${firstGroup}"]`).checked);sameRows(ui,2,'all');
+    ui.p('#oceanPipUndo').click();assert.equal(ui.w.OceanCollection.caught(ui.w.OceanCollection.read(ui.storage),other,f.Fish),false,'undo still targets the fish on the previous route');
+    ui.w.history.back();await new Promise(resolve=>setTimeout(resolve,30));
+    assert.equal(ui.$(`[data-ocean-route="${other}"]`).getAttribute('aria-pressed'),'true');assert.ok(ui.p(`[data-pip-group="${nextGroup}"]`).checked);sameRows(ui,0,'all');
+    ui.w.history.forward();await new Promise(resolve=>setTimeout(resolve,30));sameRows(ui,2,'all');
+    // Navigation's journal link must also leave the current PiP alive.
+    ui.$('.site-nav a[aria-current="page"]').click();assert.equal(child.closed,false);assert.equal(ui.requests,1);
+    for(const img of child.document.querySelectorAll('img'))assert.ok(new URL(img.src).pathname.startsWith('/ffxiv/ocean-fishing/img/'),img.src);
+    for(const link of child.document.querySelectorAll('link[rel=stylesheet]'))assert.ok(fs.existsSync(path.join(root,link.href.split('/ffxiv/')[1].split('?')[0])),link.href);
+    ui.setNow(first);ui.childTimers.get(child)();await ui.flush();assert.equal(ui.notices.length,1);
+    assert.ok(new URL(ui.notices[0].options.icon).pathname==='/ffxiv/fishing-log/app-icon.png');
+    assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
+
+test('unified entry restores the last route, accepts explicit bookmarks and ignores unknown routes',async()=>{
+  const values=new Map([['ocean:active-route','ruby']]);
+  for(const [search,route] of [['','ruby'],['?route=indigo','indigo'],['?route=invalid','ruby']]){
+    const ui=await open('',{values,search});try{assert.equal(ui.$(`[data-ocean-route="${route}"]`).getAttribute('aria-pressed'),'true');assert.equal(Number(ui.$('#collectionTotal').textContent.replace('종','')),route==='ruby'?119:140);assert.deepEqual(ui.errors,[]);}finally{ui.close();}
+  }
+});
 
 for(const route of ['indigo','ruby'])test(`${route}: PiP mirrors filters, stop selection, ranking and shared collection`,async()=>{
   const ui=await open(route);

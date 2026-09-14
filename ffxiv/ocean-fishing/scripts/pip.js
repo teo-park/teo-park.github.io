@@ -2,7 +2,7 @@
   'use strict';
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const remaining=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}시간 ${m}분`:m?`${m}분 ${s%60}초`:`${s}초`;};
-  function mount({getView,setStop,changeCatch,undoCatch,openMain,notifications,changeGoal}) {
+  function mount({getView,setStop,changeCatch,undoCatch,openMain,notifications,changeGoal,changeRoute}) {
     const buttons=[...document.querySelectorAll('[data-open-ocean-pip]')],hint=document.getElementById('oceanPipHint');
     if(!buttons.length)return;
     let child=null,opening=false,interval=null,phase='all',view=null,signature='',context='',goalKind='',editingGP=false;
@@ -18,8 +18,9 @@
       if(!select.options.length)select.innerHTML=goal.purposes.map(p=>`<option value="${esc(p.id)}">${esc(p.label)}</option>`).join('');
       select.value=goal.purpose;
       details.hidden=!['mission','achievement','score'].includes(goal.purpose);
-      if(goalKind!==goal.purpose){
-        const switching=!!goalKind;goalKind=goal.purpose;
+      const nextKind=view.route+':'+goal.purpose;
+      if(goalKind!==nextKind){
+        const switching=!!goalKind;goalKind=nextKind;
         if(goal.purpose==='mission'||goal.purpose==='achievement'){
           body.innerHTML=`<fieldset class="ocean-pip-goal-groups"><legend>${goal.purpose==='mission'?'선상과제 물고기군':'목표 업적'} · 복수 선택</legend>${goal.groups.map(g=>`<label><input type="checkbox" data-pip-group="${esc(g.id)}"><span>${esc(g.label)}</span><small data-pip-completed hidden>완료</small></label>`).join('')}</fieldset>${goal.purpose==='achievement'?'<label class="ocean-pip-goal-check"><input type="checkbox" data-pip-goal-field="excludeCompletedAchievements"> 완료한 업적 추천에서 제외</label>':''}<p id="oceanPipGoalHelp"></p>`;
         }else if(goal.purpose==='score'){
@@ -65,6 +66,8 @@
     function paint(){
       if(!isOpen()||!view)return;
       $('oceanPipTitle').textContent=view.title;
+      child.document.title=view.title+' · 먼바다 PiP';
+      for(const button of child.document.querySelectorAll('[data-pip-route]'))button.setAttribute('aria-pressed',String(button.dataset.pipRoute===view.route));
       $('oceanPipDeparture').textContent=view.departure;
       $('oceanPipPurpose').textContent=view.purpose;
       goalControls();
@@ -74,7 +77,7 @@
       for(const b of child.document.querySelectorAll('[data-pip-phase]'))b.setAttribute('aria-pressed',String(b.dataset.pipPhase===phase));
       const stop=view.stops[view.activeStop];
       $('oceanPipStarter').innerHTML=stop.starter||'';
-      const zones=stop.zones.filter(z=>phase==='all'||z.key===phase),nextContext=view.start+':'+view.activeStop+':'+phase,nextSignature=JSON.stringify(zones);
+      const zones=stop.zones.filter(z=>phase==='all'||z.key===phase),nextContext=view.route+':'+view.start+':'+view.activeStop+':'+phase,nextSignature=JSON.stringify(zones);
       if(signature!==nextSignature||context!==nextContext){
         const list=$('oceanPipList'),scroll=list.scrollTop,focused=child.document.activeElement?.dataset.pipCatch;
         const open=[...list.querySelectorAll('[data-pip-entry]')].flatMap(row=>[...row.querySelectorAll('details')].flatMap((d,i)=>d.open?[row.dataset.pipEntry+':'+i]:[]));
@@ -100,10 +103,14 @@
         child=await window.documentPictureInPicture.requestWindow({width:560,height:720});const opened=child,d=child.document;phase='all';
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
-        for(const path of ['../../theme.css?v=20260909-line1','../css/app.css?v=20260913-departure-alerts','../css/pip.css?v=20260913-pip-goals']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,location.href).href;d.head.append(link);}
+        const assets=new URL(document.body.dataset.assetBase||'../',location.href);
+        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-unified-routes','css/pip.css?v=20260914-unified-routes']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
         d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div class="ocean-pip-phase" role="group" aria-label="일반·환해류 보기"><button type="button" data-pip-phase="all">모두</button><button type="button" data-pip-phase="regular">일반</button><button type="button" data-pip-phase="spectral">환해류</button></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 실제 구간·환해류는 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
+        const routes=d.createElement('div');routes.className='ocean-pip-routes';routes.setAttribute('role','group');routes.setAttribute('aria-label','근해·원양 선택');
+        routes.innerHTML='<button type="button" data-pip-route="indigo">근해</button><button type="button" data-pip-route="ruby">원양</button>';
+        d.querySelector('.ocean-pip-header>div').append(routes);
         const goals=d.createElement('section');goals.className='ocean-pip-goals';goals.setAttribute('aria-label','낚시 목적과 목표');
         goals.innerHTML='<label class="ocean-pip-goal-select" for="oceanPipGoal">낚시 목적 <select id="oceanPipGoal"></select></label><details id="oceanPipGoalOptions"><summary id="oceanPipGoalSummary">목표 설정</summary><div id="oceanPipGoalBody"></div></details>';
         d.querySelector('.ocean-pip-header').after(goals);
@@ -120,6 +127,7 @@
         });
         goals.addEventListener('input',event=>{if(event.target.id==='oceanPipGP'){editingGP=true;try{changeGoal('strategyGP',event.target.value);}finally{editingGP=false;}}});
         d.addEventListener('click',event=>{
+          const route=event.target.closest('[data-pip-route]');if(route){changeRoute(route.dataset.pipRoute);return;}
           const p=event.target.closest('[data-pip-phase]');if(p){phase=p.dataset.pipPhase;paint();return;}
           const s=event.target.closest('[data-pip-stop]');if(s){setStop(+s.dataset.pipStop);$('oceanPipStop'+s.dataset.pipStop).focus();}
         });
@@ -136,7 +144,7 @@
         $('oceanPipNotifications').onclick=()=>notifications?.state().enabled?notifications.disable():notifications?.enable();
         update();interval=opened.setInterval(clock,1000);
         for(const b of buttons){b.setAttribute('aria-pressed','true');b.textContent='PiP 창으로 이동';}
-        hint.textContent='PiP에서 구간·환해류 전환과 수집 체크를 할 수 있어요. 본 페이지는 열어 두세요.';
+        hint.textContent='PiP에서 근해·원양, 목적·구간·환해류를 바꾸고 수집 체크를 할 수 있어요. 본 페이지는 열어 두세요.';
       }catch{
         if(child){const failed=child;failed.close();cleanup(failed);}
         hint.textContent='작은 창을 열지 못했어요. PC Chrome·Edge에서 다시 눌러 주세요.';

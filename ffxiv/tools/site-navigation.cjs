@@ -30,11 +30,10 @@ const categories = [
   { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
 ];
 const journalPages = [
-  ['ocean-fishing/indigo/', '근해 수첩'],
-  ['ocean-fishing/ruby/', '원양 수첩'],
   ['ocean-fishing/checklist/', '물고기 도감'],
 ];
-const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...journalPages.map(([url]) => url), 'ocean-fishing/sources/'];
+const journalAliases = ['ocean-fishing/indigo/', 'ocean-fishing/ruby/'];
+const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...journalPages.map(([url]) => url), ...journalAliases, 'ocean-fishing/sources/'];
 const baseFor = page => page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
@@ -42,7 +41,8 @@ function assets(page) {
 }
 function header(page) {
   const base = baseFor(page);
-  const link = ([url, label], nested = false) => `<li><a href="${base}${url}"${nested ? ' class="nav-subpage"' : ''}${page === url ? ' aria-current="page"' : ''}>${label}${page === url ? '<span class="nav-current-label">현재</span>' : ''}</a>${url === 'ocean-fishing/' ? `<ul class="nav-journal-pages" aria-label="먼바다 페이지">${journalPages.map(tool => link(tool, true)).join('')}</ul>` : ''}</li>`;
+  const currentPage = journalAliases.includes(page) ? 'ocean-fishing/' : page;
+  const link = ([url, label], nested = false) => `<li><a href="${base}${url}"${nested ? ' class="nav-subpage"' : ''}${currentPage === url ? ' aria-current="page"' : ''}>${label}${currentPage === url ? '<span class="nav-current-label">현재</span>' : ''}</a>${url === 'ocean-fishing/' ? `<ul class="nav-journal-pages" aria-label="먼바다 페이지">${journalPages.map(tool => link(tool, true)).join('')}</ul>` : ''}</li>`;
   const groups = categories.map(category => {
     const active = category.tools.some(([url]) => page.startsWith(url));
     const contents = category.groups
