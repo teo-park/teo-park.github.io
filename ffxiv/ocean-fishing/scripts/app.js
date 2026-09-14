@@ -15,6 +15,7 @@
   const urlRoute = () => {const value=new URLSearchParams(location.search).get('route');return routeIds.includes(value)?value:entryRoute;};
   let route = isChecklist ? (read('checklistCombined-activeTab') === 'ruby' ? 'ruby' : 'indigo') : urlRoute();
   const routeViews = new Map();
+  const fishDeparturesOpen = new Set();
   let fish = [], routeFish = [], catalog, names, state, voyages = [], selected = null, activeStop = 0;
   let expanded = false, scheduleCount = 12, hideCompleted = read('ocean:hide-completed-routes') === 'true';
   let purpose = 'collection', species = [], achievementSpecies = [];
@@ -141,6 +142,50 @@
     if(sort==='triple') rows.sort((a,b)=>(points(b,'TH')?.min||0)-(points(a,'TH')?.min||0));
     return rows;
   }
+  function fishDepartureButton(f) {
+    const next=V.forFish(f,Date.now(),1)[0], open=fishDeparturesOpen.has(f.entryId);
+    return `<button type="button" class="fish-departure-toggle" data-fish-departures="${esc(f.entryId)}" aria-expanded="${open}" aria-controls="departures-${esc(f.entryId)}" aria-label="${esc(f.FishTranslated)} 가까운 출항 5회"><span>${next?(next.start<=Date.now()?'접수 중 · ':'가장 빠른 출항 · ')+time(next.start):'출항 조건 확인 필요'}</span><b>출항 5회 ${open?'접기 −':'보기 +'}</b></button>`;
+  }
+  function fishDepartureList(f) {
+    const now=Date.now(), departures=V.forFish(f,now);
+    return `<section class="fish-departures" aria-label="${esc(f.FishTranslated)} 출항 시간"><header><strong>${esc(f.FishTranslated)} · 가까운 출항 ${departures.length}회</strong><span>KST · 접수 시작 시각</span></header>${departures.length?`<ol>${departures.map(v=>{
+      const stop=v.stops[v.stopIndex], url=new URL(assetBase,location.href);
+      url.search=new URLSearchParams({route:f.route,departure:String(v.start),fish:f.entryId});
+      url.hash='selectedTime';
+      const minutes=Math.max(1,Math.ceil((v.start-now)/60000)), wait=minutes>=1440?`${Math.floor(minutes/1440)}일 ${Math.floor(minutes%1440/60)}시간 후`:minutes>=60?`${Math.floor(minutes/60)}시간 ${minutes%60}분 후`:`${minutes}분 후`;
+      return `<li><a href="${esc(url.href)}" data-fish-departure="${v.start}"><time datetime="${new Date(v.start).toISOString()}">${time(v.start)}</time><span class="fish-departure-state">${v.start<=now?'접수 중 · '+Math.max(1,Math.ceil((v.close-now)/60000))+'분 남음':wait}</span><span>${f.route==='indigo'?'근해':'원양'} · ${esc(v.stops[2].name)}행</span><span>${v.stopIndex+1}구역 · ${esc(stop.name)} ${period(stop.time)} · ${f.spectral?'환해류':'일반'}</span><b>항로 보기 ↗</b></a></li>`;
+    }).join('')}</ol>`:'<p>자료에 맞는 출항을 찾지 못했어요.</p>'}<p class="fish-departure-note">${f.spectral?'해당 구역에서 환해류 발생이 필요해요. ':''}${f.intuition.fish.length?'직감 조건을 충족해야 해요. ':''}${f.weather.some(w=>!w.available)?'날씨 조건: '+esc(weatherText(f))+'. ':''}출항·구역 시간대 기준이며, 실제 입질 시각이나 포획을 보장하지 않아요.</p></section>`;
+  }
+  function fishDepartureRow(f) {
+    const open=fishDeparturesOpen.has(f.entryId);
+    return `<tr class="fish-departures-row" id="departures-${esc(f.entryId)}" ${open?'':'hidden'}><td colspan="9">${open?fishDepartureList(f):''}</td></tr>`;
+  }
+  function updateFishDepartures() {
+    for(const button of document.querySelectorAll('[data-fish-departures]')){
+      const f=fish.find(f=>f.entryId===button.dataset.fishDepartures);
+      const label=button.querySelector('span'), next=V.forFish(f,Date.now(),1)[0];
+      label.textContent=next?(next.start<=Date.now()?'접수 중 · ':'가장 빠른 출항 · ')+time(next.start):'출항 조건 확인 필요';
+      const panel=$('departures-'+f.entryId);
+      if(!panel.hidden){
+        const focused=panel.contains(document.activeElement)?document.activeElement.dataset.fishDeparture:null;
+        panel.firstElementChild.innerHTML=fishDepartureList(f);
+        if(focused)(panel.querySelector(`[data-fish-departure="${focused}"]`)||button).focus({preventScroll:true});
+      }
+    }
+  }
+  function applyLinkedDeparture() {
+    const params=new URLSearchParams(location.search), raw=params.get('departure');
+    if(!raw)return;
+    const timestamp=Number(raw), now=Date.now();
+    if(!/^\d{13}$/.test(raw)||!V.isDeparture(timestamp)||timestamp>now+60*24*3600000)return;
+    if(timestamp+15*60000<=now){notify('선택한 출항의 접수가 끝나 현재 시간표를 표시했어요.');return;}
+    selected=V.at(route,timestamp);
+    const target=routeFish.find(f=>f.entryId===params.get('fish'));
+    const index=target?selected.stops.findIndex((_,i)=>V.available(target,selected,i)):-1;
+    activeStop=Math.max(0,index);
+    // Show a linked fish even when saved collection/mission filters would hide it.
+    if(index>=0)purpose='all';
+  }
   function table(rows, id, options={}) {
     const score=purpose==='score' && !isChecklist;
     rows=sortRows(rows,options);
@@ -149,7 +194,7 @@
     return `<div class="fish-table-scroll" role="region" aria-label="물고기 표 · 작은 화면에서는 가로로 스크롤" tabindex="0"><table id="${esc(id)}" class="fish-table ${score?'score-table':''}"><thead><tr>${headers.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(f=>{
       const rec=f.LocalRecommendation, preferred=rec?.best?.action;
       const badges=[f.LocalAlwaysVisible?`<span class="fish-tag">${f.spectralTrigger?'환해류 유도 · ':''}항상 표시</span>`:'',f.LocalGroupMatch?`<span class="fish-tag">${purpose==='achievement'?'업적':'과제'} 대상</span>`:'',f.LocalRequiredBy?.length?`<span class="fish-tag condition" title="${esc(f.LocalRequiredBy.join(', '))}에 필요한 조건 물고기">조건용</span>`:''];
-      return `<tr data-fish-id="${f.id}" class="${caught(f)?'is-caught':''}"><td><div class="fish-heading">${image(f)}<div><strong>${esc(f.FishTranslated)}</strong><span class="fish-stars" aria-label="별 ${esc(f.Stars)}개">${'★'.repeat(Math.min(5,Number(f.Stars)||0))}</span></div></div><div class="collection-control">${catchToggle(f)}${badges.join('')}</div>${conditions(f)}${f.DataNotes?`<details class="data-note"><summary>자료 참고</summary><p>${esc(f.DataNotes)}</p></details>`:''}${score?recommendation(rec):''}</td><td><strong class="bite bite-${f.Bite.length}">${esc(f.Bite||'?')}</strong><small>${esc(f.hooksetName || (f.Hookset==='Precision'?'섬세한 낚아채기':'강력한 낚아채기'))}</small></td><td><strong class="bait-label">${esc(baitText(f))}</strong><small>${esc(C.biteTimeText(C.baitInfo(f).rawTime))}</small></td><td class="points">${f.Points?Number(f.Points).toLocaleString():'미확인'}</td>${['DH','TH'].map(mode=>`<td class="points ${score&&preferred===mode?'score-emphasis':''}">${range(points(f,mode))}<small>${C.numberRange(f[mode])?range(C.numberRange(f[mode]))+'마리':'수량 미확인'}</small>${score&&preferred===mode?`<span class="recommended-cell">${rec.best.prize?'월척 '+range(rec.best.total)+'점':'추천'}</span>`:''}</td>`).join('')}<td><div>${f.spectral?['Day','Sunset','Night'].filter(p=>f['TimeFrame'+p]==='Yes').map(period).join(' '):'모든 시간'}</div><small>${esc(weatherText(f))}</small></td><td>${esc(f.SpeciesTranslated||'—')}</td><td class="bait-times">${f.baits.map(b=>`<div><span>${esc(b.kind==='Mooch'?'생미끼 · '+label(b.name):b.label)}</span> ${esc(C.biteTimeText(b.time))}</div>`).join('')||'자료 없음'}</td></tr>${f.LocalBiteComparison?`<tr class="achievement-comparison-row"><td colspan="9">${biteComparison(f,f.LocalBiteComparison,purpose==='achievement'&&f.LocalGroupMatch)}</td></tr>`:''}`;
+      return `<tr data-fish-id="${f.id}" class="${caught(f)?'is-caught':''}"><td><div class="fish-heading">${image(f)}<div><strong>${esc(f.FishTranslated)}</strong><span class="fish-stars" aria-label="별 ${esc(f.Stars)}개">${'★'.repeat(Math.min(5,Number(f.Stars)||0))}</span></div></div><div class="collection-control">${catchToggle(f)}${badges.join('')}</div>${isChecklist?fishDepartureButton(f):''}${conditions(f)}${f.DataNotes?`<details class="data-note"><summary>자료 참고</summary><p>${esc(f.DataNotes)}</p></details>`:''}${score?recommendation(rec):''}</td><td><strong class="bite bite-${f.Bite.length}">${esc(f.Bite||'?')}</strong><small>${esc(f.hooksetName || (f.Hookset==='Precision'?'섬세한 낚아채기':'강력한 낚아채기'))}</small></td><td><strong class="bait-label">${esc(baitText(f))}</strong><small>${esc(C.biteTimeText(C.baitInfo(f).rawTime))}</small></td><td class="points">${f.Points?Number(f.Points).toLocaleString():'미확인'}</td>${['DH','TH'].map(mode=>`<td class="points ${score&&preferred===mode?'score-emphasis':''}">${range(points(f,mode))}<small>${C.numberRange(f[mode])?range(C.numberRange(f[mode]))+'마리':'수량 미확인'}</small>${score&&preferred===mode?`<span class="recommended-cell">${rec.best.prize?'월척 '+range(rec.best.total)+'점':'추천'}</span>`:''}</td>`).join('')}<td><div>${f.spectral?['Day','Sunset','Night'].filter(p=>f['TimeFrame'+p]==='Yes').map(period).join(' '):'모든 시간'}</div><small>${esc(weatherText(f))}</small></td><td>${esc(f.SpeciesTranslated||'—')}</td><td class="bait-times">${f.baits.map(b=>`<div><span>${esc(b.kind==='Mooch'?'생미끼 · '+label(b.name):b.label)}</span> ${esc(C.biteTimeText(b.time))}</div>`).join('')||'자료 없음'}</td></tr>${isChecklist?fishDepartureRow(f):''}${f.LocalBiteComparison?`<tr class="achievement-comparison-row"><td colspan="9">${biteComparison(f,f.LocalBiteComparison,purpose==='achievement'&&f.LocalGroupMatch)}</td></tr>`:''}`;
     }).join('')}</tbody></table></div>`;
   }
   function loadPreferences() {
@@ -177,7 +222,7 @@
     voyages=V.upcoming(route,Date.now(),scheduleCount);
     // Recompute all three stops for this route, even when the departure is the same.
     selected=V.at(route,saved?.start??departure);
-    if(updateHistory){const url=new URL(location.href);url.searchParams.set('route',route);history.pushState(null,'',url);}
+    if(updateHistory){const url=new URL(location.href);url.searchParams.set('route',route);url.searchParams.delete('departure');url.searchParams.delete('fish');history.pushState(null,'',url);}
     renderOptions();render();
   }
   function renderRoutePicker() {
@@ -461,11 +506,20 @@
     window.addEventListener('storage',event=>{if(!isChecklist&&(event.key===null||event.key===R.KEY||event.key===R.EXCLUDE_KEY)){readAchievementRecords();renderOptions();render();}if(window.FishingCollection.isStorageKey(event.key)){try{state=checkState();undo=null;render();notify('연동된 수집 기록을 반영했어요.');}catch{notify('연동 기록을 읽지 못했어요. 기존 기록은 보존됩니다.');}}});
     window.addEventListener('pageshow',()=>{if(fish.length){try{state=checkState();if(!isChecklist){readAchievementRecords();renderOptions();}render();}catch{notify('연동 기록을 읽지 못했어요. 기존 기록은 보존됩니다.');}}});
     if(isChecklist) {
+      timer=setInterval(updateFishDepartures,30000);
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateFishDepartures();});
       document.querySelectorAll('[data-check-route]').forEach(button=>button.addEventListener('click',()=>{route=button.dataset.checkRoute;write('checklistCombined-activeTab',route);loadPreferences();checkOpen=new Set();checklistInitialized=false;render();}));
       $('checklistSearch').addEventListener('input',event=>{query=event.target.value;renderChecklist();});
       $('checklistUncaught').addEventListener('change',event=>{uncaught=event.target.checked;renderChecklist();});
       $('clearSearch').addEventListener('click',()=>{query='';uncaught=false;$('checklistSearch').value='';$('checklistUncaught').checked=false;renderChecklist();$('checklistSearch').focus();});
       $('checklistGroups').addEventListener('click',event=>{
+        const button=event.target.closest('[data-fish-departures]');
+        if(button){
+          const f=fish.find(f=>f.entryId===button.dataset.fishDepartures), panel=$('departures-'+f.entryId), open=panel.hidden;
+          if(open)fishDeparturesOpen.add(f.entryId);else fishDeparturesOpen.delete(f.entryId);
+          panel.hidden=!open;panel.firstElementChild.innerHTML=open?fishDepartureList(f):'';
+          button.setAttribute('aria-expanded',String(open));button.querySelector('b').textContent='출항 5회 '+(open?'접기 −':'보기 +');return;
+        }
         const summary=event.target.closest('summary');if(!summary||!summary.parentElement.matches('[data-group]'))return;
         event.preventDefault();const d=summary.parentElement, open=!d.open;d.open=open;
         if(!query.trim()&&!uncaught){if(open)checkOpen.add(d.dataset.group);else checkOpen.delete(d.dataset.group);}
@@ -527,7 +581,7 @@
       const payload=await response.json();if(payload.version!==1||!Array.isArray(payload.fish)||payload.fish.length!==260)throw Error('자료 형식 오류');
       fish=payload.fish;names=new Map(fish.map(f=>[C.key(f.Fish),f.FishTranslated]));state=checkState();loadPreferences();
       if(!isChecklist){if(!achievementResponse.ok)throw Error('업적 자료 응답 '+achievementResponse.status);achievements=A.create(await achievementResponse.json(),fish);}
-      if(!isChecklist){readAchievementRecords();refreshVoyages();renderOptions();}
+      if(!isChecklist){readAchievementRecords();refreshVoyages();applyLinkedDeparture();renderOptions();}
       if(!isChecklist)notifications=window.OceanNotifications?.mount();
       if(!isChecklist)pipView=window.OceanPip?.mount({getView:pipSnapshot,changeCatch,notifications,changeGoal:changePipGoal,changeRoute,
         setStop:index=>{activeStop=index;renderFishing();},

@@ -2,6 +2,32 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const V=require('../scripts/voyages.js'),C=require('../scripts/collection.js');
 const fixture=require('./fixtures/voyages.json'),data=require('../data/fish.json').fish;
+
+test('every checklist entry finds the nearest five boardable departures in order',()=>{
+ const first=Date.parse(fixture.firstDeparture);
+ for(const now of [first-60000,first,first+15*60000,first+23*3600000])for(const f of data){
+  const actual=V.forFish(f,now),expected=[];
+  const beginning=V.upcoming(f.route,now,1)[0].start;
+  for(let i=0;i<720&&expected.length<5;i++){
+   const v=V.at(f.route,beginning+i*V.INTERVAL);
+   const stopIndex=v.stops.findIndex(s=>s.stop===f.Stop&&(!f.spectral||f['TimeFrame'+s.time]==='Yes'));
+   if(v.close>now&&stopIndex>=0)expected.push([v.start,stopIndex]);
+  }
+  assert.equal(actual.length,5,f.entryId);
+  assert.deepEqual(actual.map(v=>[v.start,v.stopIndex]),expected,f.entryId);
+  for(const v of actual){assert.ok(V.isDeparture(v.start));assert.equal(v.route,f.route);assert.equal(v.stops[v.stopIndex].stop,f.Stop);}
+ }
+});
+test('fish departures include open registration but stop at the exact closing time',()=>{
+ const start=Date.parse(fixture.firstDeparture),v=V.at('indigo',start);
+ const f=data.find(f=>f.route==='indigo'&&V.available(f,v,0));
+ for(const offset of [-1,0,15*60000-1])assert.equal(V.forFish(f,start+offset)[0].start,start);
+ assert.ok(V.forFish(f,start+15*60000)[0].start>start);
+ assert.equal(V.forFish({...f,Stop:'unknown'},start).length,0);
+ assert.deepEqual(V.forFish({...f,route:'unknown'},start),[]);
+ assert.deepEqual(V.forFish(f,start,0),[]);
+ assert.equal(V.isDeparture(start+1),false);assert.equal(V.isDeparture(NaN),false);
+});
 test('both native schedulers match a full 12-day rotation, including midnight skips',()=>{
  const first=Date.parse(fixture.firstDeparture);
  for(const route of ['indigo','ruby']){

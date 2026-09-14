@@ -251,7 +251,8 @@ for(const route of ['indigo','ruby'])test(`${route}: supplies cover all three st
   assert.deepEqual(ui.errors,[]);
  }finally{ui.close();}
 });
-async function open(page,storage=memory(),failData=false) {
+async function open(page,storage=memory(),failData=false,options={}) {
+  let now=options.now??first-60000;
   const errors=[],requests=[],downloads=[],console=new VirtualConsole();
   console.on('jsdomError',e=>errors.push(e.message));
   console.on('error',(...args)=>errors.push(args.map(String).join(' ')));
@@ -268,11 +269,11 @@ async function open(page,storage=memory(),failData=false) {
     }
   }
   const dom=new JSDOM(fs.readFileSync(path.join(root,page,'index.html'),'utf8'),{
-    url:`https://journal.test/ffxiv/ocean-fishing/${page?page+'/':''}`,resources:new LocalScripts(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,
+    url:`https://journal.test/ffxiv/ocean-fishing/${page?page+'/':''}${options.search||''}`,resources:new LocalScripts(),runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:console,
     beforeParse(w) {
       Object.defineProperty(w,'localStorage',{value:storage});
       Object.defineProperty(w,'sessionStorage',{get(){throw Error('Session storage is unavailable');}});
-      w.Date.now=()=>first-60000;w.scrollTo=()=>{};
+      w.Date.now=()=>now;w.scrollTo=()=>{};
       w.fetch=async url=>{assert.ok(['fish','achievements'].some(name=>url===(page?'../':'./')+'data/'+name+'.json?v='+w.document.body.dataset.version));return {ok:!failData,status:failData?503:200,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements.json')?achievementData:payload))};};
       w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
       w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};
@@ -285,8 +286,44 @@ async function open(page,storage=memory(),failData=false) {
   assert.equal(failData?$('#retryLoad').hidden:$('#appContent').hidden,false);
   const input=(selector,value,type='input')=>{const el=$(selector);if(el.type==='checkbox')el.checked=value;else el.value=value;el.dispatchEvent(new w.Event(type,{bubbles:true}));};
   const submit=value=>{input('#importText',value);$('#pasteImport').dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));};
-  return {w,d,$,input,submit,storage,downloads,errors,requests,close:()=>w.close()};
+  return {w,d,$,input,submit,storage,downloads,errors,requests,setNow:value=>{now=value;},close:()=>w.close()};
 }
+
+for(const route of ['indigo','ruby'])test(`${route}: checklist departures expand, survive collection edits and link to the correct voyage and stop`,async()=>{
+ const storage=memory({'checklistCombined-activeTab':route,['ocean:purpose:'+route]:'mission'}),ui=await open('checklist',storage);
+ try{
+  const f=payload.fish.find(f=>f.route===route&&f.legendary),button=()=>ui.$(`[data-fish-departures="${f.entryId}"]`),panel=()=>ui.$('#departures-'+f.entryId);
+  ui.input('#checklistSearch',f.FishTranslated);
+  assert.equal(button().getAttribute('aria-expanded'),'false');assert.equal(panel().hidden,true);
+  button().click();assert.equal(panel().hidden,false);assert.equal(button().getAttribute('aria-expanded'),'true');
+  const links=[...panel().querySelectorAll('[data-fish-departure]')];assert.equal(links.length,5);
+  assert.match(panel().textContent,/환해류 발생/);assert.match(panel().textContent,/직감 조건/);
+  assert.match(panel().textContent,/KST/);
+  const firstURL=new URL(links[0].href),expected=V.forFish(f,first-60000)[0];
+  assert.equal(Number(firstURL.searchParams.get('departure')),expected.start);assert.equal(firstURL.searchParams.get('fish'),f.entryId);assert.equal(firstURL.searchParams.get('route'),route);
+  ui.$(`[data-entry="${f.entryId}"]`).click();assert.equal(panel().hidden,false);assert.equal(panel().querySelectorAll('[data-fish-departure]').length,5);
+  const planner=await open('',storage,false,{search:firstURL.search});
+  try{
+   assert.ok(planner.$(`[data-ocean-route="${route}"][aria-pressed=true]`));
+   assert.ok(planner.$(`[data-stop="${expected.stopIndex}"][aria-selected=true]`));
+   assert.ok(planner.$(`[name=purpose][value=all]`).checked);
+   assert.ok(planner.$(`#stopPanel${expected.stopIndex} tr[data-fish-id="${f.id}"]`));
+   assert.equal(storage.getItem('ocean:purpose:'+route),'mission','opening a linked fish must not overwrite saved purpose');
+   assert.deepEqual(planner.errors,[]);
+  }finally{planner.close();}
+  ui.setNow(expected.start);ui.d.dispatchEvent(new ui.w.Event('visibilitychange'));
+  assert.match(button().textContent,/접수 중/);assert.match(panel().textContent,/접수 중/);
+  ui.setNow(expected.close);ui.d.dispatchEvent(new ui.w.Event('visibilitychange'));
+  assert.equal(panel().querySelector(`[data-fish-departure="${expected.start}"]`),null);assert.equal(panel().querySelectorAll('[data-fish-departure]').length,5);
+  button().click();assert.equal(panel().hidden,true);assert.deepEqual(ui.errors,[]);
+ }finally{ui.close();}
+});
+test('expired or invalid linked departures fall back to the current timetable',async()=>{
+ for(const departure of [first-2*3600000,first+123,9999999999999]){
+  const ui=await open('',memory(),false,{search:'?route=indigo&departure='+departure});
+  try{assert.equal(Number(ui.$('[data-voyage][aria-pressed=true]').dataset.voyage),first);assert.deepEqual(ui.errors,[]);}finally{ui.close();}
+ }
+});
 for(const route of ['indigo','ruby'])test(`${route}: score view defaults to ranked community strategy and keeps all fish and preferences`,async()=>{
   const storage=memory({'ocean:strategy':JSON.stringify({gp:900,objective:'efficiency'})});
   let ui=await open(route,storage);

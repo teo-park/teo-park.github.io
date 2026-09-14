@@ -37,6 +37,23 @@
     const stop=voyage.stops[stopIndex];
     return !!stop && fish.Stop===stop.stop && (!fish.spectral || fish['TimeFrame'+stop.time]==='Yes');
   }
-  const api={at,upcoming,stops,available,names,periods,INTERVAL};
+  function isDeparture(timestamp) {
+    return Number.isSafeInteger(timestamp) && Math.abs(timestamp)<=8640000000000000 && mod(timestamp-REFERENCE_DAY-HOUR,INTERVAL)===0;
+  }
+  function forFish(fish, now=Date.now(), count=5) {
+    if(!config[fish?.route] || !Number.isFinite(now))return [];
+    const limit=Math.max(0,Math.min(5,Math.trunc(count)||0)), results=[];
+    const first=upcoming(fish.route,now,1)[0].start;
+    // A complete route/time rotation has 144 departures. Five rotations also
+    // cover a hypothetical fish appearing only once in each rotation.
+    for(let i=0;i<144*limit&&results.length<limit;i++){
+      const voyage=at(fish.route,first+i*INTERVAL);
+      if(voyage.close<=now)continue;
+      const stopIndex=voyage.stops.findIndex((_,index)=>available(fish,voyage,index));
+      if(stopIndex>=0)results.push({...voyage,stopIndex});
+    }
+    return results;
+  }
+  const api={at,upcoming,stops,available,forFish,isDeparture,names,periods,INTERVAL};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.JournalVoyages=api;
 })(typeof window==='undefined'?globalThis:window);
