@@ -53,8 +53,15 @@ test('PiP settings fold away and both water lists fold independently without los
     assert.equal(settings().open,false);assert.equal(ui.p('[data-pip-phase]'),null);
     for(const id of ['regular','spectral'])assert.ok(zone(id).open);
     assert.match(ui.p('#oceanPipCompactSummary').textContent,/1구간.*알림 OFF/);sameRows(ui,0,'all');
+    for(const id of ['oceanPipStops','oceanPipStarter']){
+      assert.equal(ui.p('#'+id).closest('details'),null,id+' must remain outside folded settings');
+      assert.ok(ui.p('#'+id).compareDocumentPosition(ui.p('#oceanPipList'))&ui.child.Node.DOCUMENT_POSITION_FOLLOWING);
+    }
+    ui.p('[data-pip-stop="2"]').click();assert.equal(settings().open,false);
+    assert.match(ui.p('#oceanPipCompactSummary').textContent,/3구간/);sameRows(ui,2,'all');
+    assert.equal(ui.p('#oceanPipStarter').textContent,ui.$('#stopTab2 .stop-starter').textContent);
     settings().querySelector('summary').click();assert.equal(settings().open,true);
-    for(const id of ['oceanPipGoal','oceanPipStops','oceanPipRecommendations','oceanPipNotifications','oceanPipStarter'])assert.ok(settings().contains(ui.p('#'+id)),id);
+    for(const id of ['oceanPipGoal','oceanPipRecommendations','oceanPipNotifications'])assert.ok(settings().contains(ui.p('#'+id)),id);
     ui.p('#oceanPipNotifications').click();await ui.flush();assert.match(ui.p('#oceanPipCompactSummary').textContent,/알림 ON/);
     ui.p('[data-pip-stop="2"]').click();assert.match(ui.p('#oceanPipCompactSummary').textContent,/3구간/);
     settings().querySelector('summary').click();assert.equal(settings().open,false);

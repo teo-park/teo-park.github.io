@@ -129,7 +129,7 @@
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
         const assets=new URL(document.body.dataset.assetBase||'../',location.href);
-        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-pip-folds']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
+        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-pip-stops']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
         d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 현재 구간은 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
@@ -174,7 +174,7 @@
         settings.innerHTML='<summary><span class="ocean-pip-controls-title"><strong>설정·항로</strong><span id="oceanPipCompactRecommendations" hidden></span></span><span id="oceanPipCompactSummary"></span></summary><div id="oceanPipControlsBody"></div>';
         const header=d.querySelector('.ocean-pip-header');header.after(settings);
         const departure=header.querySelector('p');departure.className='ocean-pip-departure';
-        $('oceanPipControlsBody').append(departure,controls,goals,recommendations,$('oceanPipStops'),$('oceanPipStarter'),d.querySelector('.ocean-pip>footer'));
+        $('oceanPipControlsBody').append(departure,controls,goals,recommendations,d.querySelector('.ocean-pip>footer'));
         update();interval=opened.setInterval(clock,1000);
         for(const b of buttons){b.setAttribute('aria-pressed','true');b.textContent='PiP 창으로 이동';}
         hint.textContent='PiP에서 설정·항로와 일반·환해류 목록을 접고 펼칠 수 있어요. 본 페이지는 열어 두세요.';
