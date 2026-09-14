@@ -324,8 +324,11 @@
   }
   function achievement(v) {
     if(purpose==='mission')return '';
-    const plans=achievements.forVoyage(v).filter(g=>g.status==='recommended'&&achievementEligible(g.id)&&(purpose!=='achievement'||!achievementSpecies.length||achievementSpecies.includes(g.id)));
+    const plans=recommendedAchievements(v).filter(g=>purpose!=='achievement'||!achievementSpecies.length||achievementSpecies.includes(g.id));
     return plans.map(g=>`<span class="route-achievement" data-recommended-achievement="${esc(g.id)}">업적 추천 · ${esc(g.label)} · ${g.scope==='party'?'파티':'개인'} ${g.count}마리${completedAchievements.has(g.id)?' · 완료':''}</span>`).join('');
+  }
+  function recommendedAchievements(v) {
+    return achievements.forVoyage(v).filter(g=>g.status==='recommended'&&achievementEligible(g.id));
   }
   function renderAchievements() {
     const board=$('achievementPlans');board.hidden=purpose!=='achievement';if(board.hidden)return;
@@ -387,7 +390,12 @@
   // achievement exclusions and recommendation rules without a second state store.
   function changePipGoal(field,value) {
     let input;
-    if(field==='purpose') {
+    if(field==='recommendedAchievement') {
+      if(!recommendedAchievements(selected).some(g=>g.id===value))return;
+      purpose='achievement';achievementSpecies=[value];achievementOpen.add(value);
+      write('ocean:purpose:'+route,purpose);write('ocean:achievement-groups:'+route,JSON.stringify(achievementSpecies));
+      renderOptions();render();return;
+    } else if(field==='purpose') {
       input=[...document.querySelectorAll('[name=purpose]')].find(el=>el.value===value);
       if(input)input.checked=true;
     } else if(field==='species'||field==='achievementGroup') {
@@ -408,6 +416,8 @@
     return {
       route,title:routeLabel()+' 수첩',departure:time(selected.start)+' 출항',start:selected.start,activeStop,
       purpose:purposeName+(purpose==='score'?' · '+strategy.gp+' GP':'')+' · 본 페이지 필터 적용',
+      recommendations:recommendedAchievements(selected).map(g=>({id:g.id,label:g.label,count:g.count,scope:g.scope,
+        completed:completedAchievements.has(g.id),selected:purpose==='achievement'&&achievementSpecies.includes(g.id)})),
       goal:{purpose,purposes:[...document.querySelectorAll('[name=purpose]')].map(el=>({id:el.value,label:el.getAttribute('aria-label')})),
         groups:speciesGroups().filter(([id])=>purpose!=='achievement'||achievements.goals.has(id)).map(([id,label])=>({id,label,checked:(purpose==='achievement'?achievementSpecies:species).includes(id),completed:completedAchievements.has(id)})),
         excludeCompleted:excludeCompletedAchievements,help:$('purposeHelp').textContent,

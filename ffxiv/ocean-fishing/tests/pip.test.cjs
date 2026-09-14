@@ -17,7 +17,7 @@ async function open(route,options={}){
       Object.defineProperty(w,'localStorage',{value:storage});Object.defineProperty(w,'isSecureContext',{value:true});
       w.Date.now=()=>now;w.scrollTo=()=>{};w.focus=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};
       w.setInterval=(fn,ms)=>{timers.set(ms,fn);return ms;};w.clearInterval=id=>timers.delete(id);
-      w.fetch=async url=>({ok:true,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements')?achievements:fish))});
+      w.fetch=async url=>({ok:true,json:async()=>JSON.parse(JSON.stringify(url.includes('achievements.json')?achievements:fish))});
       if(options.alerts){w.Notification=function(title,options){notices.push({title,options});this.close=()=>{};};w.Notification.permission='granted';}
       if(!options.unsupported)w.documentPictureInPicture={requestWindow:async()=>{
         requests++;if(failed)throw Error('denied');
@@ -44,6 +44,57 @@ function sameRows(ui,stop,phase){
   const child=[...ui.child.document.querySelectorAll('[data-pip-entry]')].map(e=>e.dataset.pipEntry);
   assert.deepEqual(child,parent);return child;
 }
+
+for(const route of ['indigo','ruby'])test(`${route}: PiP recommends current voyage achievements across purposes and completion filters`,async()=>{
+  const ui=await open(route);const V=require('../scripts/voyages.js');
+  try{
+    await ui.launch();const child=ui.child;
+    ui.$('#scheduleToggle').click();ui.$('#moreVoyages').click();
+    const ids=()=>[...child.document.querySelectorAll('[data-pip-achievement]')].map(b=>b.dataset.pipAchievement).sort();
+    const choose=number=>{
+      const button=[...ui.d.querySelectorAll('[data-voyage]')].find(b=>V.at(route,Number(b.dataset.voyage)).number===number);
+      assert.ok(button,route+' '+number);button.click();return button.dataset.voyage;
+    };
+    for(let number=1;number<=(route==='indigo'?12:9);number++){
+      choose(number);
+      const expected=achievements.goals.filter(g=>g.route===route&&g.recommended.includes(number)).map(g=>g.id).sort();
+      assert.deepEqual(ids(),expected,'only exact recommended routes, never appearance or alternatives');
+      assert.equal(ui.p('#oceanPipRecommendations').hidden,!expected.length);
+    }
+    const voyage=route==='indigo'?12:5;choose(voyage);
+    const goals=achievements.goals.filter(g=>g.route===route&&g.recommended.includes(voyage));assert.equal(goals.length,2);
+    const expected=goals.map(g=>g.id).sort();
+    for(const purpose of ['all','collection','mission','score','achievement']){
+      ui.input(`[name=purpose][value=${purpose}]`,purpose);assert.deepEqual(ids(),expected);
+    }
+    for(const g of goals){
+      const button=ui.p(`[data-pip-achievement="${g.id}"]`);
+      assert.ok(button.textContent.includes(g.label));assert.ok(button.textContent.includes((g.scope==='party'?'파티':'개인')+' '+g.count+'마리'));
+    }
+    ui.$('[name=purpose][value=mission]').click();
+    const mission=ui.$('[name=species]');mission.click();const savedMission=ui.values.get('ocean:species-groups:'+route);
+    ui.p('[data-pip-stop="2"]').click();const departure=ui.$('#selectedTime').textContent;
+    const goal=goals[0],badge=ui.p(`[data-pip-achievement="${goal.id}"]`);badge.focus();badge.click();
+    assert.equal(ui.p('#oceanPipGoal').value,'achievement');assert.equal(ui.p('#oceanPipGoalOptions').open,false);
+    assert.deepEqual([...ui.d.querySelectorAll('[name=achievementGroup]:checked')].map(b=>b.value),[goal.id]);
+    assert.deepEqual(JSON.parse(ui.values.get('ocean:achievement-groups:'+route)),[goal.id]);
+    assert.equal(ui.values.get('ocean:species-groups:'+route),savedMission);
+    assert.equal(ui.p(`[data-pip-achievement="${goal.id}"]`).getAttribute('aria-pressed'),'true');
+    assert.equal(child.document.activeElement.dataset.pipAchievement,goal.id);
+    assert.equal(ui.$('#selectedTime').textContent,departure);assert.equal(ui.p('#oceanPipStop2').getAttribute('aria-selected'),'true');
+    for(const g of goals)ui.$(`[data-achievement-record="${g.id}"]`).click();
+    assert.deepEqual(ids(),[]);assert.equal(ui.p('#oceanPipRecommendations').hidden,true);
+    ui.p('[data-pip-goal-field=excludeCompletedAchievements]').click();assert.deepEqual(ids(),expected);
+    for(const g of goals)assert.match(ui.p(`[data-pip-achievement="${g.id}"]`).textContent,/완료/);
+    // External completion changes also update the open PiP.
+    const records=ui.w.OceanAchievementRecords;records.setCompleted(ui.storage,goal.id,false);
+    ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:records.KEY}));
+    assert.doesNotMatch(ui.p(`[data-pip-achievement="${goal.id}"]`).textContent,/완료/);
+    ui.p(`[data-pip-route="${route==='indigo'?'ruby':'indigo'}"]`).click();
+    assert.ok(ids().every(id=>achievements.goals.find(g=>g.id===id).route!==route));
+    assert.equal(ui.child,child);assert.equal(ui.requests,1);assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
 
 for(const entry of ['', 'indigo', 'ruby'])test(`${entry||'unified home'}: switching routes keeps one PiP, independent goals and route views, records and alerts`,async()=>{
   const values=new Map(['indigo','ruby'].map(route=>['ocean:purpose:'+route,'mission']));

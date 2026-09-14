@@ -5,7 +5,7 @@
   function mount({getView,setStop,changeCatch,undoCatch,openMain,notifications,changeGoal,changeRoute}) {
     const buttons=[...document.querySelectorAll('[data-open-ocean-pip]')],hint=document.getElementById('oceanPipHint');
     if(!buttons.length)return;
-    let child=null,opening=false,interval=null,phase='all',view=null,signature='',context='',goalKind='',editingGP=false;
+    let child=null,opening=false,interval=null,phase='all',view=null,signature='',context='',goalKind='',editingGP=false,recommendationsSignature='';
     const isOpen=()=>!!child&&!child.closed;
     if(!window.isSecureContext||!window.documentPictureInPicture?.requestWindow){
       buttons.forEach(b=>b.disabled=true);hint.textContent='PiP는 PC Chrome·Edge 등 지원 브라우저에서 사용할 수 있어요.';return {isOpen,update(){}};
@@ -55,6 +55,15 @@
       toggle.textContent=state.busy?'알림 설정 중…':'정시 알림 '+(state.enabled?'ON':'OFF');
       $('oceanPipNotificationStatus').textContent=state.message;
     }
+    function recommendedAchievements(){
+      const section=$('oceanPipRecommendations'),items=view.recommendations||[],nextSignature=JSON.stringify(items);
+      section.hidden=!items.length;
+      if(nextSignature===recommendationsSignature)return;
+      const focused=section.contains(child.document.activeElement)?child.document.activeElement.dataset.pipAchievement:null;
+      section.innerHTML=items.length?`<h2>이번 항로 추천 업적</h2><div>${items.map(g=>`<button type="button" data-pip-achievement="${esc(g.id)}" aria-pressed="${g.selected}" aria-label="${esc(g.label)} 업적작 목표로 선택"><strong>${esc(g.label)}</strong><span>${g.scope==='party'?'파티':'개인'} ${g.count}마리</span>${g.completed?'<small>완료</small>':''}<b aria-hidden="true">${g.selected?'✓':'↗'}</b></button>`).join('')}</div>${items.length>1?'<p>각 업적을 따로 노리는 추천이에요.</p>':''}`:'';
+      if(focused)(section.querySelector(`[data-pip-achievement="${focused}"]`)||$('oceanPipGoal')).focus({preventScroll:true});
+      recommendationsSignature=nextSignature;
+    }
     function card(f){
       return `<article class="ocean-pip-fish${f.caught?' is-caught':''}" data-pip-entry="${esc(f.entryId)}"><div class="ocean-pip-fish-head"><img src="${esc(f.image)}" alt="" width="28" height="28"><strong>${esc(f.name)}</strong><label class="ocean-pip-catch"><input type="checkbox" data-pip-catch="${esc(f.entryId)}" aria-label="${esc(f.name)} 수집" ${f.caught?'checked':''}><span>수집</span></label></div><div class="ocean-pip-cast"><p class="ocean-pip-bait">${esc(f.bait)}</p><div class="ocean-pip-bite"><strong class="bite bite-${f.bite.length}">${esc(f.bite||'?')}</strong><span>${esc(f.hookset)}</span><span>${esc(f.baitTime)}</span></div></div><div class="ocean-pip-meta"><div class="ocean-pip-tags">${f.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div><p class="ocean-pip-weather">${esc(f.weather)}</p></div>${f.conditions}<div class="ocean-pip-points"><span>기본 <b>${esc(f.points)}</b></span><span>이중 <b>${esc(f.double)}</b></span><span>삼중 <b>${esc(f.triple)}</b></span></div>${f.recommendation}${f.comparison?`<details class="ocean-pip-comparison"><summary>같은 입질 비교</summary>${f.comparison}</details>`:''}</article>`;
     }
@@ -71,6 +80,7 @@
       $('oceanPipDeparture').textContent=view.departure;
       $('oceanPipPurpose').textContent=view.purpose;
       goalControls();
+      recommendedAchievements();
       $('oceanPipMessage').textContent=view.message||'';$('oceanPipUndo').hidden=!view.canUndo;
       $('oceanPipStops').innerHTML=view.stops.map((s,i)=>`<button type="button" role="tab" id="oceanPipStop${i}" data-pip-stop="${i}" aria-controls="oceanPipList" aria-selected="${i===view.activeStop}" tabindex="${i===view.activeStop?0:-1}"><small>${i+1}구간 · ${esc(s.time)}</small><span>${esc(s.name)}</span></button>`).join('');
       $('oceanPipList').setAttribute('aria-labelledby','oceanPipStop'+view.activeStop);
@@ -93,7 +103,7 @@
     }
     function update(){if(isOpen()){view=getView();paint();notificationState();}}
     function cleanup(closed){
-      if(child!==closed)return;closed.clearInterval(interval);interval=null;child=null;view=null;signature='';context='';goalKind='';
+      if(child!==closed)return;closed.clearInterval(interval);interval=null;child=null;view=null;signature='';context='';goalKind='';recommendationsSignature='';
       for(const b of buttons){b.setAttribute('aria-pressed','false');b.textContent='PiP 작은 창';}
       hint.textContent='작은 창을 닫았어요. 선택한 항로와 수집 기록은 유지됩니다.';
     }
@@ -104,7 +114,7 @@
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
         const assets=new URL(document.body.dataset.assetBase||'../',location.href);
-        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-unified-routes','css/pip.css?v=20260914-unified-routes']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
+        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-pip-achievements']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
         d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div class="ocean-pip-phase" role="group" aria-label="일반·환해류 보기"><button type="button" data-pip-phase="all">모두</button><button type="button" data-pip-phase="regular">일반</button><button type="button" data-pip-phase="spectral">환해류</button></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 실제 구간·환해류는 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
@@ -114,6 +124,8 @@
         const goals=d.createElement('section');goals.className='ocean-pip-goals';goals.setAttribute('aria-label','낚시 목적과 목표');
         goals.innerHTML='<label class="ocean-pip-goal-select" for="oceanPipGoal">낚시 목적 <select id="oceanPipGoal"></select></label><details id="oceanPipGoalOptions"><summary id="oceanPipGoalSummary">목표 설정</summary><div id="oceanPipGoalBody"></div></details>';
         d.querySelector('.ocean-pip-header').after(goals);
+        const recommendations=d.createElement('section');recommendations.id='oceanPipRecommendations';recommendations.className='ocean-pip-recommendations';recommendations.setAttribute('aria-label','이번 항로 추천 업적');recommendations.hidden=true;
+        goals.after(recommendations);
         // Keep the status available inside settings without repeating the selected purpose in the header.
         $('oceanPipGoalOptions').append($('oceanPipPurpose'));
         $('oceanPipGoal').onchange=event=>changeGoal('purpose',event.target.value);
@@ -127,6 +139,8 @@
         });
         goals.addEventListener('input',event=>{if(event.target.id==='oceanPipGP'){editingGP=true;try{changeGoal('strategyGP',event.target.value);}finally{editingGP=false;}}});
         d.addEventListener('click',event=>{
+          const achievement=event.target.closest('[data-pip-achievement]');
+          if(achievement){changeGoal('recommendedAchievement',achievement.dataset.pipAchievement);$('oceanPipGoalOptions').open=false;return;}
           const route=event.target.closest('[data-pip-route]');if(route){changeRoute(route.dataset.pipRoute);return;}
           const p=event.target.closest('[data-pip-phase]');if(p){phase=p.dataset.pipPhase;paint();return;}
           const s=event.target.closest('[data-pip-stop]');if(s){setStop(+s.dataset.pipStop);$('oceanPipStop'+s.dataset.pipStop).focus();}
