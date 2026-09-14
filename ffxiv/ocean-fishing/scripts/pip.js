@@ -5,7 +5,8 @@
   function mount({getView,setStop,changeCatch,undoCatch,openMain,notifications,changeGoal,changeRoute}) {
     const buttons=[...document.querySelectorAll('[data-open-ocean-pip]')],hint=document.getElementById('oceanPipHint');
     if(!buttons.length)return;
-    let child=null,opening=false,interval=null,phase='all',view=null,signature='',context='',goalKind='',editingGP=false,recommendationsSignature='';
+    let child=null,opening=false,interval=null,view=null,signature='',context='',goalKind='',editingGP=false,recommendationsSignature='';
+    const closedZones=new Set();
     const isOpen=()=>!!child&&!child.closed;
     if(!window.isSecureContext||!window.documentPictureInPicture?.requestWindow){
       buttons.forEach(b=>b.disabled=true);hint.textContent='PiP는 PC Chrome·Edge 등 지원 브라우저에서 사용할 수 있어요.';return {isOpen,update(){}};
@@ -54,6 +55,15 @@
       toggle.disabled=state.busy||!state.supported;toggle.setAttribute('aria-checked',String(state.enabled));
       toggle.textContent=state.busy?'알림 설정 중…':'정시 알림 '+(state.enabled?'ON':'OFF');
       $('oceanPipNotificationStatus').textContent=state.message;
+      compactSettings();
+    }
+    function compactSettings(){
+      if(!view)return;
+      const stop=view.stops[view.activeStop],goal=view.goal,alert=notifications?.state().enabled?'알림 ON':'알림 OFF';
+      const purpose=goal.purposes.find(p=>p.id===goal.purpose)?.label||'';
+      $('oceanPipCompactSummary').textContent=`${view.activeStop+1}구간 · ${stop.name} · ${purpose} · ${alert}`;
+      const recommended=$('oceanPipCompactRecommendations'),items=view.recommendations||[];
+      recommended.hidden=!items.length;recommended.textContent=items.length?'추천 '+items.map(g=>g.label).join(' · '):'';
     }
     function recommendedAchievements(){
       const section=$('oceanPipRecommendations'),items=view.recommendations||[],nextSignature=JSON.stringify(items);
@@ -81,22 +91,27 @@
       $('oceanPipPurpose').textContent=view.purpose;
       goalControls();
       recommendedAchievements();
+      compactSettings();
       $('oceanPipMessage').textContent=view.message||'';$('oceanPipUndo').hidden=!view.canUndo;
       $('oceanPipStops').innerHTML=view.stops.map((s,i)=>`<button type="button" role="tab" id="oceanPipStop${i}" data-pip-stop="${i}" aria-controls="oceanPipList" aria-selected="${i===view.activeStop}" tabindex="${i===view.activeStop?0:-1}"><small>${i+1}구간 · ${esc(s.time)}</small><span>${esc(s.name)}</span></button>`).join('');
       $('oceanPipList').setAttribute('aria-labelledby','oceanPipStop'+view.activeStop);
-      for(const b of child.document.querySelectorAll('[data-pip-phase]'))b.setAttribute('aria-pressed',String(b.dataset.pipPhase===phase));
       const stop=view.stops[view.activeStop];
       $('oceanPipStarter').innerHTML=stop.starter||'';
-      const zones=stop.zones.filter(z=>phase==='all'||z.key===phase),nextContext=view.route+':'+view.start+':'+view.activeStop+':'+phase,nextSignature=JSON.stringify(zones);
+      const zones=stop.zones,nextContext=view.route+':'+view.start+':'+view.activeStop,nextSignature=JSON.stringify(zones);
       if(signature!==nextSignature||context!==nextContext){
         const list=$('oceanPipList'),scroll=list.scrollTop,focused=child.document.activeElement?.dataset.pipCatch;
+        const focusedZone=child.document.activeElement?.dataset.pipZoneSummary;
+        for(const zone of list.querySelectorAll('[data-pip-zone]')){
+          if(zone.open)closedZones.delete(zone.dataset.pipZone);else closedZones.add(zone.dataset.pipZone);
+        }
         const open=[...list.querySelectorAll('[data-pip-entry]')].flatMap(row=>[...row.querySelectorAll('details')].flatMap((d,i)=>d.open?[row.dataset.pipEntry+':'+i]:[]));
-        list.innerHTML=zones.map(z=>`<section class="ocean-pip-zone${z.key==='spectral'?' spectral':''}"><h2>${z.label} <small>${z.rows.length}종</small></h2>${z.baits}${z.rows.map(card).join('')||'<p class="ocean-pip-empty">현재 목적·필터에 맞는 물고기가 없어요.</p>'}</section>`).join('');
+        list.innerHTML=zones.map(z=>`<details class="ocean-pip-zone${z.key==='spectral'?' spectral':''}" data-pip-zone="${z.key}" ${closedZones.has(z.key)?'':'open'}><summary data-pip-zone-summary="${z.key}"><h2>${z.label} <small>${z.rows.length}종</small></h2></summary><div class="ocean-pip-zone-content">${z.baits}${z.rows.map(card).join('')||'<p class="ocean-pip-empty">현재 목적·필터에 맞는 물고기가 없어요.</p>'}</div></details>`).join('');
         if(context===nextContext){
           for(const row of list.querySelectorAll('[data-pip-entry]'))[...row.querySelectorAll('details')].forEach((d,i)=>d.open=open.includes(row.dataset.pipEntry+':'+i));
           list.scrollTop=scroll;
           if(focused){const target=[...list.querySelectorAll('[data-pip-catch]')].find(b=>b.dataset.pipCatch===focused);(target||list).focus({preventScroll:true});}
         }else list.scrollTop=0;
+        if(focusedZone)list.querySelector(`[data-pip-zone-summary="${focusedZone}"]`)?.focus({preventScroll:true});
         signature=nextSignature;context=nextContext;
       }
       clock();
@@ -110,13 +125,13 @@
     async function open(){
       if(opening)return;if(isOpen()){child.focus();return;}opening=true;buttons.forEach(b=>b.disabled=true);
       try{
-        child=await window.documentPictureInPicture.requestWindow({width:560,height:720});const opened=child,d=child.document;phase='all';
+        child=await window.documentPictureInPicture.requestWindow({width:560,height:720});const opened=child,d=child.document;closedZones.clear();
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
         const assets=new URL(document.body.dataset.assetBase||'../',location.href);
-        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-pip-achievements']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
+        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-pip-folds']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
-        d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div class="ocean-pip-phase" role="group" aria-label="일반·환해류 보기"><button type="button" data-pip-phase="all">모두</button><button type="button" data-pip-phase="regular">일반</button><button type="button" data-pip-phase="spectral">환해류</button></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 실제 구간·환해류는 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
+        d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 현재 구간은 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
         const routes=d.createElement('div');routes.className='ocean-pip-routes';routes.setAttribute('role','group');routes.setAttribute('aria-label','근해·원양 선택');
         routes.innerHTML='<button type="button" data-pip-route="indigo">근해</button><button type="button" data-pip-route="ruby">원양</button>';
@@ -142,7 +157,6 @@
           const achievement=event.target.closest('[data-pip-achievement]');
           if(achievement){changeGoal('recommendedAchievement',achievement.dataset.pipAchievement);$('oceanPipGoalOptions').open=false;return;}
           const route=event.target.closest('[data-pip-route]');if(route){changeRoute(route.dataset.pipRoute);return;}
-          const p=event.target.closest('[data-pip-phase]');if(p){phase=p.dataset.pipPhase;paint();return;}
           const s=event.target.closest('[data-pip-stop]');if(s){setStop(+s.dataset.pipStop);$('oceanPipStop'+s.dataset.pipStop).focus();}
         });
         d.addEventListener('change',event=>{const el=event.target;if(el.matches('[data-pip-catch]')){changeCatch(el.dataset.pipCatch,el.checked);update();}});
@@ -156,9 +170,14 @@
         controls.innerHTML='<button id="oceanPipNotifications" class="departure-alert-toggle" type="button" role="switch" aria-checked="false" aria-label="먼바다 정시 알림">정시 알림 OFF</button><details><summary>알림 안내</summary><p id="oceanPipNotificationStatus" role="status"></p><p>KST 홀수 시 정각 · 근해·원양 공통. 페이지를 열어 둔 동안만 알립니다. 절전·브라우저 상태에 따라 늦어질 수 있어요.</p></details>';
         d.querySelector('.ocean-pip-header').append(controls);
         $('oceanPipNotifications').onclick=()=>notifications?.state().enabled?notifications.disable():notifications?.enable();
+        const settings=d.createElement('details');settings.id='oceanPipControls';settings.className='ocean-pip-controls';
+        settings.innerHTML='<summary><span class="ocean-pip-controls-title"><strong>설정·항로</strong><span id="oceanPipCompactRecommendations" hidden></span></span><span id="oceanPipCompactSummary"></span></summary><div id="oceanPipControlsBody"></div>';
+        const header=d.querySelector('.ocean-pip-header');header.after(settings);
+        const departure=header.querySelector('p');departure.className='ocean-pip-departure';
+        $('oceanPipControlsBody').append(departure,controls,goals,recommendations,$('oceanPipStops'),$('oceanPipStarter'),d.querySelector('.ocean-pip>footer'));
         update();interval=opened.setInterval(clock,1000);
         for(const b of buttons){b.setAttribute('aria-pressed','true');b.textContent='PiP 창으로 이동';}
-        hint.textContent='PiP에서 근해·원양, 목적·구간·환해류를 바꾸고 수집 체크를 할 수 있어요. 본 페이지는 열어 두세요.';
+        hint.textContent='PiP에서 설정·항로와 일반·환해류 목록을 접고 펼칠 수 있어요. 본 페이지는 열어 두세요.';
       }catch{
         if(child){const failed=child;failed.close();cleanup(failed);}
         hint.textContent='작은 창을 열지 못했어요. PC Chrome·Edge에서 다시 눌러 주세요.';

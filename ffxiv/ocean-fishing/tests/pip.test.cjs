@@ -41,9 +41,39 @@ async function open(route,options={}){
 }
 function sameRows(ui,stop,phase){
   const parent=[...ui.d.querySelectorAll(phase==='all'?`#stopPanel${stop} [data-entry]`:`[data-zone="${stop}-${phase}"] [data-entry]`)].map(e=>e.dataset.entry);
-  const child=[...ui.child.document.querySelectorAll('[data-pip-entry]')].map(e=>e.dataset.pipEntry);
+  const child=[...ui.child.document.querySelectorAll(phase==='all'?'[data-pip-entry]':`[data-pip-zone="${phase}"] [data-pip-entry]`)].map(e=>e.dataset.pipEntry);
   assert.deepEqual(child,parent);return child;
 }
+
+test('PiP settings fold away and both water lists fold independently without losing state',async()=>{
+  const ui=await open('indigo',{alerts:true});
+  try{
+    await ui.launch();const child=ui.child;
+    const settings=()=>ui.p('#oceanPipControls'),zone=id=>ui.p(`[data-pip-zone="${id}"]`);
+    assert.equal(settings().open,false);assert.equal(ui.p('[data-pip-phase]'),null);
+    for(const id of ['regular','spectral'])assert.ok(zone(id).open);
+    assert.match(ui.p('#oceanPipCompactSummary').textContent,/1구간.*알림 OFF/);sameRows(ui,0,'all');
+    settings().querySelector('summary').click();assert.equal(settings().open,true);
+    for(const id of ['oceanPipGoal','oceanPipStops','oceanPipRecommendations','oceanPipNotifications','oceanPipStarter'])assert.ok(settings().contains(ui.p('#'+id)),id);
+    ui.p('#oceanPipNotifications').click();await ui.flush();assert.match(ui.p('#oceanPipCompactSummary').textContent,/알림 ON/);
+    ui.p('[data-pip-stop="2"]').click();assert.match(ui.p('#oceanPipCompactSummary').textContent,/3구간/);
+    settings().querySelector('summary').click();assert.equal(settings().open,false);
+    ui.p('[data-pip-zone-summary=regular]').click();assert.equal(zone('regular').open,false);assert.equal(zone('spectral').open,true);
+    const catchBox=zone('spectral').querySelector('[data-pip-catch]');catchBox.click();
+    assert.equal(zone('regular').open,false);assert.equal(zone('spectral').open,true);assert.equal(settings().open,false);
+    ui.p('#oceanPipUndo').click();assert.equal(zone('regular').open,false);
+    ui.input('#strategyGP',100);assert.equal(zone('regular').open,false);
+    ui.$('[data-stop="1"]').click();assert.equal(zone('regular').open,false);assert.equal(zone('spectral').open,true);sameRows(ui,1,'all');
+    ui.p('[data-pip-zone-summary=spectral]').click();assert.equal(zone('spectral').open,false);
+    ui.p('[data-pip-route=ruby]').click();assert.equal(settings().open,false);assert.equal(zone('regular').open,false);assert.equal(zone('spectral').open,false);sameRows(ui,0,'all');
+    ui.p('[data-pip-zone-summary=regular]').click();assert.equal(zone('regular').open,true);
+    ui.$('#scheduleToggle').click();ui.d.querySelectorAll('[data-voyage]')[1].click();
+    assert.equal(zone('regular').open,true);assert.equal(zone('spectral').open,false);assert.equal(ui.child,child);
+    // A newly opened PiP starts with both lists visible, rather than inheriting a hidden phase.
+    child.close();await ui.launch();assert.equal(settings().open,false);assert.equal(zone('regular').open,true);assert.equal(zone('spectral').open,true);
+    assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
 
 for(const route of ['indigo','ruby'])test(`${route}: PiP recommends current voyage achievements across purposes and completion filters`,async()=>{
   const ui=await open(route);const V=require('../scripts/voyages.js');
@@ -159,7 +189,7 @@ for(const route of ['indigo','ruby'])test(`${route}: PiP mirrors filters, stop s
     assert.equal(ui.p('img').src.startsWith(`https://journal.test/ffxiv/ocean-fishing/`),true);
     ui.$('#openOceanPip').click();await ui.flush();assert.equal(ui.requests,1,'reuse the existing PiP window');
     ui.p('[data-pip-stop="2"]').click();assert.equal(ui.$('#stopTab2').getAttribute('aria-selected'),'true');sameRows(ui,2,'all');
-    ui.p('[data-pip-phase=spectral]').click();sameRows(ui,2,'spectral');
+    ui.p('[data-pip-zone-summary=regular]').click();assert.equal(ui.p('[data-pip-zone=regular]').open,false);sameRows(ui,2,'spectral');
     ui.$('[data-stop="1"]').click();assert.equal(ui.p('#oceanPipStop1').getAttribute('aria-selected'),'true');sameRows(ui,1,'spectral');
     ui.p('#oceanPipStop1').dispatchEvent(new ui.child.KeyboardEvent('keydown',{key:'Home',bubbles:true}));sameRows(ui,0,'spectral');
     ui.$('[name=purpose][value=score]').click();sameRows(ui,0,'spectral');assert.match(ui.p('#oceanPipPurpose').textContent,/고득점 · 700 GP/);
@@ -167,7 +197,7 @@ for(const route of ['indigo','ruby'])test(`${route}: PiP mirrors filters, stop s
     ui.input('#strategyGP',100);assert.match(ui.p('#oceanPipPurpose').textContent,/100 GP/);
     ui.input('[data-zone="0-spectral"] [data-zone-option=scoreSort]','name');sameRows(ui,0,'spectral');
     ui.input('[data-zone="0-spectral"] [data-zone-option=bait]','Krill');sameRows(ui,0,'spectral');
-    ui.$('[name=purpose][value=all]').click();ui.p('[data-pip-phase=regular]').click();
+    ui.$('[name=purpose][value=all]').click();ui.p('[data-pip-zone-summary=regular]').click();ui.p('[data-pip-zone-summary=spectral]').click();
     const entry=sameRows(ui,0,'regular')[0],f=fish.fish.find(f=>f.entryId===entry);
     ui.p(`[data-pip-catch="${entry}"]`).click();assert.equal(ui.w.OceanCollection.caught(ui.w.OceanCollection.read(ui.storage),route,f.Fish),true);
     assert.equal(ui.$(`[data-entry="${entry}"]`).checked,true);assert.equal(ui.p(`[data-pip-catch="${entry}"]`).checked,true);
