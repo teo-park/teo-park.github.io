@@ -1,6 +1,8 @@
 {
   "814100": { "url": "https://game8.jp/ff14/814100", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-12" },
   "815038": { "url": "https://game8.jp/ff14/815038", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-12" },
+  "815138": { "url": "https://game8.jp/ff14/815138", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-14", "updatedAt": "2026-09-10", "scope": "Borrow activation, per-summon choice and Vileskin; does not establish same-familiar resummon cancellation" },
+  "ko-actions": { "url": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/ActionTransient.csv", "publisher": "SQUARE ENIX game data / Ra-Workspace Korean dump", "language": "ko", "kind": "game-data", "checkedAt": "2026-09-14", "scope": "Action 44886, 44890, 44895, 44897, 44902 and 44903 names and tooltips; resummon cancellation is not specified" },
   "815368": { "url": "https://game8.jp/ff14/815368", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-14", "updatedAt": "2026-09-11" },
   "815556": { "url": "https://game8.jp/ff14/815556", "publisher": "Game8", "language": "ja", "kind": "guide", "checkedAt": "2026-09-14", "updatedAt": "2026-09-12" },
   "official": { "url": "https://na.finalfantasyxiv.com/jobguide/beastmaster/", "publisher": "SQUARE ENIX", "language": "en", "kind": "official", "checkedAt": "2026-09-14" },
