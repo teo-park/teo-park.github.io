@@ -40,7 +40,7 @@ for(const catalog of [false,true]){
   $('.planner-actions').append(settingsButton);options.querySelector('summary').classList.add('visually-hidden');
   const info=d.createElement('div');info.className='forecast-info';info.append($('#planCount'),$('.plan-prep'),$('.plan-help'));$('.plan-results-scroll').before(info);
  }
- const css=d.createElement('link');css.rel='stylesheet';css.href='../fishing-pages.css?v='+version;d.head.append(css);
+ const css=d.createElement('link');css.rel='stylesheet';css.href='../fishing-pages.css?v=20260916-width1';d.head.append(css);
  for(const name of ['app.js','planner.js']){const s=$(`script[src^="./${name}?"]`);s.src='./'+name+'?v='+version;}
  $('[data-navigation]').outerHTML=navigation.header(page);
  for(const el of d.querySelectorAll('script[src],link[href]'))if(/\/(navigation|select-options|visitor-counter|selection-counter)\.(js|css)\?/.test(el.getAttribute('src')||el.getAttribute('href')))el.remove();

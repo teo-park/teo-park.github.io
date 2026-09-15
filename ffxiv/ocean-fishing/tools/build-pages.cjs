@@ -9,7 +9,7 @@ function layout(html,route){
  const nav=d.createElement('nav');nav.className='fishing-page-nav';nav.setAttribute('aria-label','먼바다 페이지');
  nav.innerHTML=`<a href="../"${catalog?'':' aria-current="page"'}>항해 예보</a><a href="../checklist/"${catalog?' aria-current="page"':''}>물고기 도감</a>`;hero.after(nav);
  d.querySelector('.collection-summary')?.remove();d.querySelector('.planner-route-bar>a')?.remove();
- const css=d.createElement('link');css.rel='stylesheet';css.href='../../fishing-pages.css?v='+version;d.head.append(css);
+ const css=d.createElement('link');css.rel='stylesheet';css.href='../../fishing-pages.css?v=20260916-width1';d.head.append(css);
  const output=dom.serialize();dom.window.close();return output;
 }
 const copyright='<p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>';
