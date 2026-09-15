@@ -59,7 +59,7 @@
       const storageKey = storagePrefix + page.key;
       let storage;
       try { storage = w.localStorage; storage.getItem(storageKey); } catch { return; }
-      if (storage.getItem('ffxiv-usage-stats-disabled') === 'true') return;
+      if (storage.getItem('ffxiv-counter-owner-excluded') === 'true' || storage.getItem('ffxiv-usage-stats-disabled') === 'true') return;
       const now = Date.now();
       if (!tracked || !due(Number(storage.getItem(storageKey)), now, config.intervalMs)) return;
       // Reserve before sending: an uncertain network response must never cause an automatic duplicate.

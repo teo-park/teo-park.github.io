@@ -49,3 +49,23 @@ test('failed refresh clears old stats and offers retry',async()=>{
 test('admin page is noindex without embedded statistics',()=>{
  const ui=open();try{assert.match(ui.d.querySelector('meta[name="robots"]').content,/noindex/);assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('selectionRows').children.length,0);assert.equal(ui.$('selectionTotal').textContent,'—');}finally{ui.dom.window.close();}
 });
+
+test('verified owner permanently excludes this browser, including already loaded collectors',async()=>{
+ const ui=open();try{
+ const storage=ui.dom.window.localStorage;
+ await ui.controller.onUser(null);assert.equal(storage.getItem('ffxiv-counter-owner-excluded'),null);
+ await ui.controller.onUser({...owner,email:'other@gmail.com'});assert.equal(storage.getItem('ffxiv-counter-owner-excluded'),null);
+ await ui.controller.onUser(owner);
+ assert.equal(storage.getItem('ffxiv-counter-owner-excluded'),'true');assert.equal(storage.getItem('ffxiv-usage-stats-disabled'),'true');
+ assert.match(ui.$('selfExclusion').textContent,/집계에서 제외/);
+ ui.$('logout').click();await ui.controller.onUser(null);
+ assert.equal(storage.getItem('ffxiv-counter-owner-excluded'),'true');assert.equal(storage.getItem('ffxiv-usage-stats-disabled'),'true');
+ }finally{ui.dom.window.close();}
+});
+
+test('excluded owner still gets statistics when local storage is unavailable, with an honest warning',async()=>{
+ const ui=open();try{
+ Object.defineProperty(ui.dom.window,'localStorage',{get:()=>{throw Error('blocked');}});
+ await ui.controller.onUser(owner);assert.equal(ui.$('total').textContent,'15');assert.match(ui.$('selfExclusion').textContent,/저장하지 못/);
+ }finally{ui.dom.window.close();}
+});

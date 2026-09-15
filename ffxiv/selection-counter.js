@@ -17,7 +17,8 @@
     'fishing-log':['fish','[data-fish-detail],[data-plan-detail],[data-catalog-detail]',null],
     'ocean-fishing__checklist':['fish','[data-fish-departures]','data-fish-departures'],
   };
-  function enabled(w){try{return w.navigator.doNotTrack!=='1'&&!w.navigator.globalPrivacyControl&&w.localStorage.getItem(preference)!=='true';}catch{return false;}}
+  function ownerExcluded(w){try{return w.localStorage.getItem('ffxiv-counter-owner-excluded')==='true';}catch{return false;}}
+  function enabled(w){try{return w.navigator.doNotTrack!=='1'&&!w.navigator.globalPrivacyControl&&!ownerExcluded(w)&&w.localStorage.getItem(preference)!=='true';}catch{return false;}}
   function candidate(page,event){
     const target=event.target;
     if(!target?.closest||target.closest('[disabled],[aria-disabled="true"]'))return null;
@@ -50,7 +51,7 @@
     const summary=w.document.createElement('summary');summary.textContent='이용 통계 안내';
     const p=w.document.createElement('p');p.textContent='조회 수와 직접 선택한 게임 항목 ID를 집계합니다. 검색어·수집 기록·사용자 식별자는 보내지 않습니다. 같은 항목은 이 브라우저에서 30분에 한 번 집계하며, 통계는 관리자만 확인합니다. 전송에는 Google Firebase를 사용합니다.';
     const button=w.document.createElement('button');button.type='button';
-    const sync=()=>{const privacy=w.navigator.doNotTrack==='1'||w.navigator.globalPrivacyControl;button.textContent=privacy?'브라우저 개인정보 보호 설정으로 집계 꺼짐':enabled(w)?'이 브라우저에서 집계 끄기':'이 브라우저에서 집계 켜기';button.disabled=!!privacy;};
+    const sync=()=>{const owner=ownerExcluded(w),privacy=w.navigator.doNotTrack==='1'||w.navigator.globalPrivacyControl;button.textContent=owner?'관리자 브라우저 · 집계 제외':privacy?'브라우저 개인정보 보호 설정으로 집계 꺼짐':enabled(w)?'이 브라우저에서 집계 끄기':'이 브라우저에서 집계 켜기';button.disabled=owner||!!privacy;};
     button.addEventListener('click',()=>{try{w.localStorage.setItem(preference,enabled(w)?'true':'false');sync();}catch{button.textContent='브라우저 저장 설정으로 집계 꺼짐';button.disabled=true;}});
     w.addEventListener('storage',sync);sync();details.append(summary,p,button);host.append(details);
   }

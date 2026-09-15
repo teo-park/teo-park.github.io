@@ -66,3 +66,19 @@ test('public pages have only a background collector and no admin links or old co
  for(const p of pages){const html=fs.readFileSync(path.resolve(__dirname,'..',p,'index.html'),'utf8');assert.equal((html.match(/src="[^"]*visitor-counter\.js/g)||[]).length,1,p);assert.doesNotMatch(html,/visitor-counter\.css|counter-admin\//);}
  assert.doesNotMatch(fs.readFileSync(path.resolve(__dirname,'../../sitemap.xml'),'utf8'),/counter-admin/);
 });
+
+test('owner exclusion blocks visits even if the general statistics preference is re-enabled',async()=>{
+ const ui=open();try{
+ ui.w.localStorage.setItem('ffxiv-counter-owner-excluded','true');ui.w.localStorage.setItem('ffxiv-usage-stats-disabled','false');
+ await api.start(ui.w,'https://site.example/config.json');assert.equal(ui.writes().length,0);
+ assert.equal(ui.w.localStorage.getItem('ffxiv-counter-v1:fishing-log'),null);
+ }finally{ui.w.close();}
+});
+
+test('owner login while a visit is waiting for a cross-tab lock prevents that visit',async()=>{
+ const ui=open();let record;try{
+ Object.defineProperty(ui.w.navigator,'locks',{value:{request:async(_,run)=>{record=run;}}});
+ await api.start(ui.w,'https://site.example/config.json');ui.w.localStorage.setItem('ffxiv-counter-owner-excluded','true');
+ await record();assert.equal(ui.writes().length,0);
+ }finally{ui.w.close();}
+});

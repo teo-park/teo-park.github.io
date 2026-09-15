@@ -60,3 +60,20 @@ test('admin resolves names from public catalog and never counts unknown or malfo
  const s=admin.selections(catalog,{fish:{4776:{a:true,b:false,c:true},999999:{d:true}},minion:{3:{a:true}},query:{secret:{a:true}}});
  assert.equal(s.total,3);assert.equal(s.rows.length,2);assert.equal(s.rows[0].name,'말름미역');assert.equal(s.rows[1].name,'초코초코보');
 });
+
+test('owner browser never transmits selections and cannot accidentally enable statistics from the footer',async()=>{
+ const ui=open();try{
+ ui.w.localStorage.setItem('ffxiv-counter-owner-excluded','true');ui.w.localStorage.setItem('ffxiv-usage-stats-disabled','false');
+ const handler=api.start(ui.w,'https://site.test/config.json');await handler.handle(ui.event('[data-fish-detail]'));assert.equal(ui.calls.length,0);
+ const button=ui.w.document.querySelector('footer button');assert.equal(button.disabled,true);assert.match(button.textContent,/관리자 브라우저/);
+ }finally{ui.w.close();}
+});
+
+test('owner login while selection metadata loads prevents the queued record and updates another tab notice',async()=>{
+ const ui=open();let resolve;try{
+ const original=ui.w.fetch;ui.w.fetch=(url,opts)=>url.includes('config.json')?new Promise(r=>{resolve=r;}):original(url,opts);
+ const handler=api.start(ui.w,'https://site.test/config.json'),pending=handler.handle(ui.event('[data-fish-detail]'));
+ ui.w.localStorage.setItem('ffxiv-counter-owner-excluded','true');ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:'ffxiv-counter-owner-excluded',newValue:'true'}));
+ resolve({ok:true,json:async()=>config});await pending;assert.equal(ui.writes().length,0);assert.equal(ui.w.document.querySelector('footer button').disabled,true);
+ }finally{ui.w.close();}
+});

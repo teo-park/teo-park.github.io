@@ -2,6 +2,17 @@
   function create(document,model,services){
     const $=id=>document.getElementById(id);
     let user=null,generation=0,selectedRows=[];
+    function excludeThisBrowser(){
+      try{
+        const storage=document.defaultView.localStorage;
+        storage.setItem('ffxiv-counter-owner-excluded','true');
+        // Also stop collectors already loaded in other tabs on the previous version.
+        storage.setItem('ffxiv-usage-stats-disabled','true');
+        $('selfExclusion').textContent='이 브라우저는 방문·게임 항목 선택 집계에서 제외됩니다. 로그아웃하거나 브라우저를 다시 열어도 유지됩니다.';
+      }catch{
+        $('selfExclusion').textContent='집계 제외 설정을 저장하지 못했습니다. 브라우저의 사이트 저장소를 허용한 뒤 이 페이지를 새로고침해 주세요.';
+      }
+    }
     function clearSelections(){selectedRows=[];$('selectionRows').replaceChildren();$('selectionTotal').textContent='—';$('selectionHint').textContent='';}
     function renderSelections(){
       const rows=selectedRows.filter(row=>!$('selectionKind').value||row.kind===$('selectionKind').value);
@@ -17,6 +28,7 @@
     function clear(){
       $('dashboard').hidden=true;$('loginPanel').hidden=false;
       $('account').textContent='';$('total').textContent='—';$('updated').textContent='';$('rows').replaceChildren();
+      $('selfExclusion').textContent='';
       clearSelections();
     }
     async function refresh(){
@@ -58,6 +70,7 @@
       generation++;user=next;clear();$('login').disabled=false;$('refresh').disabled=false;
       if(!next){$('status').textContent='관리자 계정으로 로그인하면 통계가 표시됩니다.';return;}
       if(!model.allowed(next)){$('status').textContent='이 계정에는 통계 조회 권한이 없습니다. 관리자 계정으로 다시 로그인하세요.';await services.signOut();return;}
+      excludeThisBrowser();
       $('loginPanel').hidden=true;$('dashboard').hidden=false;$('account').textContent=next.email;
       await refresh();
     }

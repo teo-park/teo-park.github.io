@@ -46,3 +46,9 @@ node --test ffxiv/tests/visitor-counter.test.cjs ffxiv/tests/counter-admin.test.
 보안 규칙은 생성 당시 카탈로그에 등록된 종류와 정확한 ID만 허용하며 공개 조회·변경·삭제·자유 텍스트·숫자 카운터를 차단한다. Firebase 정규식 컴파일 한도 때문에 허용 목록을 32개씩 나눠 검증한다. 새 게임 데이터를 추가할 때 `node ffxiv/tools/visitor-counter.cjs`를 실행하고 규칙을 다시 게시해야 집계된다. 게임 데이터 업데이트 전후로 이름이 바뀌어도 ID가 같으면 합산한다.
 
 선택 집계 검증: `node --test ffxiv/tests/selection-counter.test.cjs ffxiv/tests/counter-admin.test.cjs ffxiv/tests/visitor-counter.test.cjs ffxiv/tests/navigation.test.cjs`.
+
+## 관리자 본인 집계 제외
+
+검증된 관리자 계정이 관리자 페이지에 로그인하면 `ffxiv-counter-owner-excluded=true`를 이 브라우저의 localStorage에 저장한다. 이미 열린 이전 버전 탭에도 적용되도록 일반 통계 거부 설정도 함께 저장한다. 방문/선택 집계는 전송 직전에 제외 설정을 확인하며, 공개 페이지 하단에는 ‘관리자 브라우저 · 집계 제외’라고 표시한다. 이 플래그는 조회 권한을 부여하지 않는다. 관리자 인증 정보나 이메일을 공개 페이지에 읽어오거나 전송하지 않는다.
+
+로그아웃·재시작 후에도 제외를 유지한다. 다른 브라우저·프로필·기기에서는 각각 관리자 페이지에 한 번 로그인해야 한다. 사이트 저장소 삭제 시 제외 설정도 지워진다. 기존에 로그인한 탭은 새 버전 관리자 페이지를 새로고침하면 적용된다. 설정 저장에 실패하면 성공으로 표시하지 않고 관리자 화면에 안내한다. 이전 기록에는 사용자 식별자가 없어 본인의 과거 방문분만 소급 차감하지 않는다.
