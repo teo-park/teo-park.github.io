@@ -47,3 +47,30 @@ test('new ID writes survive migration snapshots and malformed or unrelated impor
   journal.setCaught(ui.storage,'indigo','Galadion Chovy',true);assert.deepEqual(E.parseBackup(ui.storage.getItem(S.KEY)),new Set([a,b,spear]));
  }finally{ui.close();}
 });
+
+test('rare collection totals partition ordinary big fish and kings, including ocean five-star fish once',()=>{
+ const kings=D.fishes.filter(E.isLegendary),ordinary=D.fishes.filter(f=>f.big&&!E.isLegendary(f));
+ assert.equal(kings.length,49);assert.equal(ordinary.length,442);
+ assert.equal(kings.length+ordinary.length,D.fishes.filter(f=>f.big).length);
+ assert.ok(kings.some(f=>f.name==='칠채천주'));assert.ok(kings.some(f=>f.name==='소티스'));assert.ok(kings.some(f=>f.name==='세계거북'));
+ assert.ok(ordinary.some(f=>f.name==='만취어'));assert.ok(ordinary.some(f=>f.name==='잘레라'));
+ const filtered=E.create(D).filter(new Set(),{rarity:'legendary',scope:'all'});
+ assert.deepEqual(filtered.map(f=>f.id),kings.map(f=>f.id),'king filter must agree with its counter');
+});
+
+test('rare counters follow checks, imports, undo and ocean sync, independent of active catalog filters',()=>{
+ const storage=memory({[S.BOOK_KEY]:E.backup(new Set([7678,8754,4776,spear,999999]))}),ui=open({storage});
+ const counts=(big,king)=>{
+  assert.equal(ui.$('#bigCount').textContent,`${big} / 442`);assert.equal(ui.$('#bigProgress').value,big);assert.equal(ui.$('#bigProgress').max,442);
+  assert.equal(ui.$('#legendaryCount').textContent,`${king} / 49`);assert.equal(ui.$('#legendaryProgress').value,king);assert.equal(ui.$('#legendaryProgress').max,49);
+ };
+ try{
+  counts(1,1);ui.change('#search','잘레라','input');ui.$('[data-caught="7678"]').click();counts(0,1);ui.$('#undo').click();counts(1,1);
+  ui.$('#openRecords').click();ui.change('#importText','[29788,29788]','input');ui.$('#applyImport').click();counts(1,2);ui.$('#undo').click();counts(1,1);
+  ui.change('#status','missing');ui.$('#spearMode').click();counts(1,1);
+  ui.w.eval(fs.readFileSync(path.join(__dirname,'../../ocean-fishing/scripts/collection.js'),'utf8'));const journal=ui.w.OceanCollection;
+  journal.setCaught(storage,'indigo','Sothis',true);ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:S.KEY}));counts(1,2);
+  journal.setCaught(storage,'indigo','Sothis',false);ui.w.dispatchEvent(new ui.w.Event('pageshow'));counts(1,1);
+  assert.ok(S.read(storage).has(999999),'unknown backup ID preserved but not counted');
+ }finally{ui.close();}
+});

@@ -3,6 +3,8 @@
   const INITIALS=[...'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'];
   const normalize=v=>String(v??'').normalize('NFC').toLowerCase().replace(/[\s\p{P}\p{S}]/gu,'');
   const initials=v=>[...v].map(c=>{const n=c.charCodeAt(0)-0xac00;return n>=0&&n<=11171?INITIALS[Math.floor(n/588)]:c;}).join('');
+  // The field legendary list omits ocean fishing's five-star fish.
+  const isLegendary=fish=>!!fish.legendary||fish.kind==='rod'&&fish.stars===5;
   // Teamcraft: tug 0 = !!, 1 = !!!, 2 = !; hookset 1 = Powerful, 2 = Precision.
   const comparisonTugs=route=>route.tug===1&&route.hookset===1?[0,1]:route.tug===1&&route.hookset===2?[2,1]:route.tug===undefined?[]:[route.tug];
   function lureRequirements(route){
@@ -67,7 +69,7 @@
     const routeList=(fish,options={})=>fish.routes.filter(r=>routeMatches(r,options));
     const terms=new Map(data.fishes.map(f=>{const s=[f.name,f.original,...f.routes.flatMap(r=>[data.spots[r.spotKey]?.name,data.spots[r.spotKey]?.area,data.spots[r.spotKey]?.region,...paths(r).flatMap(p=>p.ids.map(id=>byId.get(id)?.name)),...(r.predators||[]).map(p=>byId.get(p.id)?.name)])].join(' ');return [f.id,{text:normalize(s),initials:normalize(initials(s))}];}));
     function filter(caught,options={}){const q=normalize(options.query),number=/^(?:no)?\d+$/.test(q)?+q.replace(/^no/,''):null;
-      return data.fishes.filter(f=>scopeMatches(f,options.scope)&&(!options.kind||f.kind===options.kind)&&(!options.status||options.status==='all'||caught.has(f.id)===(options.status==='caught'))&&(!options.rarity||options.rarity==='all'||(options.rarity==='normal'?!f.big:options.rarity==='big'?f.big:f.legendary))&&(!q||(number!==null?f.order===number||f.id===number:terms.get(f.id).text.includes(q)||terms.get(f.id).initials.includes(q)))&&((options.region==='all'||!options.region)&&((options.bait==='all'||!options.bait)||options.bait==='unknown'&&!f.routes.length)||routeList(f,options).length));
+      return data.fishes.filter(f=>scopeMatches(f,options.scope)&&(!options.kind||f.kind===options.kind)&&(!options.status||options.status==='all'||caught.has(f.id)===(options.status==='caught'))&&(!options.rarity||options.rarity==='all'||(options.rarity==='normal'?!f.big:options.rarity==='big'?f.big:isLegendary(f)))&&(!q||(number!==null?f.order===number||f.id===number:terms.get(f.id).text.includes(q)||terms.get(f.id).initials.includes(q)))&&((options.region==='all'||!options.region)&&((options.bait==='all'||!options.bait)||options.bait==='unknown'&&!f.routes.length)||routeList(f,options).length));
     }
     function groups(fishes,mode,options={}){
       const found=new Map();
@@ -98,5 +100,5 @@
     const r=observation,range=`약 ${r.min}–${r.max}초`,median=Number.isFinite(r.median)?`중앙값 약 ${r.median}초`:'',mean=Number.isFinite(r.mean)?`평균 약 ${r.mean}초`:'',central=[median,mean].filter(Boolean).join(' · '),detail=[central,range].filter(Boolean).join(' · ');
     return {range,primary:median?`중앙 ${r.median}초`:range,central,detail,title:`${detail} · 같은 낚시터·미끼의 관측 ${r.samples.toLocaleString()}건${central?' · 1초 구간별 건수로 추정한 중앙값·평균':''} · 밑밥·루어 사용 여부 미구분`};
   }
-  return {normalize,initials,comparisonTugs,lureRequirements,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows,biteStats};
+  return {normalize,initials,isLegendary,comparisonTugs,lureRequirements,create,parseBackup,parseTransfer,backup,teamcraft,timeWindow,clearBiteWindows,biteStats};
 });

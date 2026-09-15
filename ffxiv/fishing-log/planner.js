@@ -94,7 +94,7 @@
       $('planBigMode').setAttribute('aria-pressed',String(purpose==='big'));$('planCollectionMode').setAttribute('aria-pressed',String(purpose==='collection'));
       $('planPurposeNote').textContent=purpose==='big'?'수집 상태를 골라 터주를 모아 봅니다. 알림은 미수집 터주만 대상으로 합니다.':'미수집 일반 물고기와 터주를 함께 모아 보고 알림을 받습니다.';
       $('planStatusField').hidden=purpose!=='big';
-      const choices=purpose==='big'?[['big','터주 전체'],['legendary','전설어만']]:[['all','일반 + 터주 전체'],['normal','일반 물고기만'],['big','터주만'],['legendary','전설어만']];
+      const choices=purpose==='big'?[['big','터주 전체'],['legendary','터주왕만']]:[['all','일반 + 터주 전체'],['normal','일반 물고기만'],['big','터주만'],['legendary','터주왕만']];
       $('planRarity').innerHTML=choices.map(([v,label])=>`<option value="${v}">${label}</option>`).join('');$('planRarity').value=rarities[purpose];
       $('notificationScope').options[0].textContent=purpose==='big'?'터주 전용 · 선택 어종 전체':'수첩작 전용 · 선택 어종 전체';
       $('notifyAlways').checked=alwaysAlerts[purpose];$('planUpcomingHint').hidden=purpose!=='collection';
@@ -201,7 +201,7 @@
       const preparationOnly=preparationView?.timeOnly(fish,[route]);
       const timingState=timing(row,result.now,purpose),now=timingState?.state==='now';
       return `<div class="plan-entry"><article class="plan-card" aria-label="${esc(fish.name)} 낚시 계획" data-plan-kind="${fish.big?'big':'normal'}" data-plan-availability="${row.always?'always':'timed'}" data-plan-now="${now}">
-        <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(fish.legendary?'전설어':'터주'):'일반'}</span><span class="plan-availability-label">${row.always?'상시':'조건부'}</span>${getCaught().has(fish.id)?'<span class="plan-collected">✓ 수집</span>':''}<span data-plan-timing data-always="${!!row.always}" data-start="${row.start??''}" data-end="${row.end??''}" data-opening="${row.windowStart??''}">${timingBadge(timingState)}</span></div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
+        <div class="plan-fish"><img src="${esc(fish.icon)}" width="30" height="30" alt="" loading="lazy"><div><button class="plan-name" data-fish-detail="${fish.id}">${esc(fish.name)}</button><div class="plan-labels"><span>${fish.big?(window.FishingBook.isLegendary(fish)?'터주왕':'터주'):'일반'}</span><span class="plan-availability-label">${row.always?'상시':'조건부'}</span>${getCaught().has(fish.id)?'<span class="plan-collected">✓ 수집</span>':''}<span data-plan-timing data-always="${!!row.always}" data-start="${row.start??''}" data-end="${row.end??''}" data-opening="${row.windowStart??''}">${timingBadge(timingState)}</span></div></div><button class="plan-star" data-plan-star="${fish.id}" aria-pressed="${stars.has(fish.id)}" aria-label="${esc(fish.name)} 관심 물고기">${stars.has(fish.id)?'★':'☆'}</button></div>
         ${rowBite(fish,route)}
         ${rowPlace(fish,route,`<button class="plan-spot-filter" data-plan-spot="${esc(route.spotKey)}" aria-label="${esc(spot.name)} 낚시터로 필터링" title="이 낚시터만 보기" aria-pressed="${spotFilter===route.spotKey}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button>`)}
         ${windowCell(row)}
