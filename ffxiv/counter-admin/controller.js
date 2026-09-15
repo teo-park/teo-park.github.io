@@ -43,7 +43,16 @@
     $('login').addEventListener('click',async()=>{
       $('login').disabled=true;$('status').textContent='Google 로그인 창에서 계정을 선택하세요.';
       try{await services.signIn();}
-      catch(error){$('status').textContent=error.code==='auth/popup-blocked'?'로그인 팝업이 차단되었습니다. 팝업을 허용한 뒤 다시 눌러 주세요.':'로그인을 완료하지 못했습니다. 다시 시도하세요.';}
+      catch(error){
+        const messages={
+          'auth/popup-blocked':'로그인 팝업이 차단되었습니다. 팝업을 허용한 뒤 다시 눌러 주세요.',
+          'auth/popup-closed-by-user':'로그인 창이 닫혔습니다. 다시 눌러 로그인해 주세요.',
+          'auth/unauthorized-domain':'이 주소에서 로그인이 허용되지 않았습니다. 관리자에게 주소 설정 확인을 요청하세요.',
+          'auth/network-request-failed':'로그인 서버에 연결하지 못했습니다. 연결 상태를 확인하고 다시 시도하세요.',
+        };
+        const code=/^auth\/[a-z-]+$/.test(error?.code||'')?error.code:'';
+        $('status').textContent=messages[code]||('로그인을 완료하지 못했습니다. 다시 시도하세요.'+(code?' ('+code+')':''));
+      }
       finally{$('login').disabled=false;}
     });
     $('refresh').addEventListener('click',refresh);
