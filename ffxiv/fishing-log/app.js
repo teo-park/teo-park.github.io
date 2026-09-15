@@ -11,7 +11,7 @@
   const strategyLinks=f=>window.FishingStrategyLinks?.render(f)||'';
   function notify(message){$('noticeText').textContent=message;$('notice').hidden=false;$('undo').hidden=!history.length;}
   function counts(){
-    const categories={rod:f=>f.kind==='rod',spear:f=>f.kind==='spear',big:f=>f.big&&!E.isLegendary(f),legendary:E.isLegendary};
+    const categories={rod:f=>f.kind==='rod',spear:f=>f.kind==='spear',big:f=>f.big&&!E.isLegendary(f)&&!E.isOceanLegendary(f),legendary:E.isLegendary,oceanLegendary:E.isOceanLegendary};
     for(const [type,matches] of Object.entries(categories)){const fish=D.fishes.filter(matches),count=fish.filter(f=>caught.has(f.id)).length;$(`${type}Count`).textContent=`${count.toLocaleString()} / ${fish.length.toLocaleString()}`;$(`${type}Progress`).max=fish.length;$(`${type}Progress`).value=count;}
     const count=[...caught].filter(id=>known.has(id)).length;$('totalCount').textContent=`${count.toLocaleString()} / ${D.count.toLocaleString()}`;$('recordCount').textContent=`수집 ${count.toLocaleString()}종`+(caught.size>count?` · 현재 목록 밖 ID ${caught.size-count}개 보존`:'');
     $('markPage').disabled=!pageFish.some(f=>!caught.has(f.id));

@@ -48,28 +48,31 @@ test('new ID writes survive migration snapshots and malformed or unrelated impor
  }finally{ui.close();}
 });
 
-test('rare collection totals partition ordinary big fish and kings, including ocean five-star fish once',()=>{
- const kings=D.fishes.filter(E.isLegendary),ordinary=D.fishes.filter(f=>f.big&&!E.isLegendary(f));
- assert.equal(kings.length,49);assert.equal(ordinary.length,442);
- assert.equal(kings.length+ordinary.length,D.fishes.filter(f=>f.big).length);
- assert.ok(kings.some(f=>f.name==='칠채천주'));assert.ok(kings.some(f=>f.name==='소티스'));assert.ok(kings.some(f=>f.name==='세계거북'));
+test('rare collection totals partition big fish, field kings and ocean legendary fish without overlap',()=>{
+ const kings=D.fishes.filter(E.isLegendary),ocean=D.fishes.filter(E.isOceanLegendary),ordinary=D.fishes.filter(f=>f.big&&!E.isLegendary(f)&&!E.isOceanLegendary(f));
+ assert.equal(kings.length,36);assert.equal(ocean.length,13);assert.equal(ordinary.length,442);
+ const all=[...kings,...ordinary,...ocean];assert.equal(all.length,D.fishes.filter(f=>f.big).length);assert.equal(new Set(all.map(f=>f.id)).size,all.length);
+ assert.ok(kings.some(f=>f.name==='칠채천주'));assert.ok(ocean.some(f=>f.name==='소티스'));assert.ok(ocean.some(f=>f.name==='세계거북'));
  assert.ok(ordinary.some(f=>f.name==='만취어'));assert.ok(ordinary.some(f=>f.name==='잘레라'));
  const filtered=E.create(D).filter(new Set(),{rarity:'legendary',scope:'all'});
  assert.deepEqual(filtered.map(f=>f.id),kings.map(f=>f.id),'king filter must agree with its counter');
+ assert.deepEqual(E.create(D).filter(new Set(),{rarity:'oceanLegendary',scope:'all'}).map(f=>f.id),ocean.map(f=>f.id));
+ const ui=open();try{ui.change('#rarity','oceanLegendary');assert.equal(ui.all('#fishGrid [data-caught]').length,13);assert.equal(ui.$('#rarity').hasAttribute('data-radio-options'),false);}finally{ui.close();}
 });
 
 test('rare counters follow checks, imports, undo and ocean sync, independent of active catalog filters',()=>{
  const storage=memory({[S.BOOK_KEY]:E.backup(new Set([7678,8754,4776,spear,999999]))}),ui=open({storage});
- const counts=(big,king)=>{
+ const counts=(big,king,ocean=0)=>{
   assert.equal(ui.$('#bigCount').textContent,`${big} / 442`);assert.equal(ui.$('#bigProgress').value,big);assert.equal(ui.$('#bigProgress').max,442);
-  assert.equal(ui.$('#legendaryCount').textContent,`${king} / 49`);assert.equal(ui.$('#legendaryProgress').value,king);assert.equal(ui.$('#legendaryProgress').max,49);
+  assert.equal(ui.$('#legendaryCount').textContent,`${king} / 36`);assert.equal(ui.$('#legendaryProgress').value,king);assert.equal(ui.$('#legendaryProgress').max,36);
+  assert.equal(ui.$('#oceanLegendaryCount').textContent,`${ocean} / 13`);assert.equal(ui.$('#oceanLegendaryProgress').value,ocean);assert.equal(ui.$('#oceanLegendaryProgress').max,13);
  };
  try{
   counts(1,1);ui.change('#search','잘레라','input');ui.$('[data-caught="7678"]').click();counts(0,1);ui.$('#undo').click();counts(1,1);
-  ui.$('#openRecords').click();ui.change('#importText','[29788,29788]','input');ui.$('#applyImport').click();counts(1,2);ui.$('#undo').click();counts(1,1);
+  ui.$('#openRecords').click();ui.change('#importText','[29788,29788]','input');ui.$('#applyImport').click();counts(1,1,1);ui.$('#undo').click();counts(1,1);
   ui.change('#status','missing');ui.$('#spearMode').click();counts(1,1);
   ui.w.eval(fs.readFileSync(path.join(__dirname,'../../ocean-fishing/scripts/collection.js'),'utf8'));const journal=ui.w.OceanCollection;
-  journal.setCaught(storage,'indigo','Sothis',true);ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:S.KEY}));counts(1,2);
+  journal.setCaught(storage,'indigo','Sothis',true);ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:S.KEY}));counts(1,1,1);
   journal.setCaught(storage,'indigo','Sothis',false);ui.w.dispatchEvent(new ui.w.Event('pageshow'));counts(1,1);
   assert.ok(S.read(storage).has(999999),'unknown backup ID preserved but not counted');
  }finally{ui.close();}
