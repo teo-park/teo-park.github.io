@@ -1,17 +1,30 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.CounterAdminController=factory();})(typeof window==='object'?window:null,function(){
   function create(document,model,services){
     const $=id=>document.getElementById(id);
-    let user=null,generation=0;
+    let user=null,generation=0,selectedRows=[];
+    function clearSelections(){selectedRows=[];$('selectionRows').replaceChildren();$('selectionTotal').textContent='—';$('selectionHint').textContent='';}
+    function renderSelections(){
+      const rows=selectedRows.filter(row=>!$('selectionKind').value||row.kind===$('selectionKind').value);
+      $('selectionRows').replaceChildren();
+      for(const item of rows.slice(0,50)){
+        const tr=document.createElement('tr'),name=document.createElement('td'),id=document.createElement('small');
+        name.textContent=item.name;id.textContent='ID '+item.id;name.append(id);tr.append(name);
+        for(const text of [item.label,item.count.toLocaleString('ko-KR')]){const td=document.createElement('td');td.textContent=text;tr.append(td);}
+        $('selectionRows').append(tr);
+      }
+      $('selectionHint').textContent=rows.length?`${rows.length.toLocaleString('ko-KR')}개 항목 중 상위 ${Math.min(50,rows.length)}개`:'아직 집계된 선택이 없습니다.';
+    }
     function clear(){
       $('dashboard').hidden=true;$('loginPanel').hidden=false;
       $('account').textContent='';$('total').textContent='—';$('updated').textContent='';$('rows').replaceChildren();
+      clearSelections();
     }
     async function refresh(){
       if(!model.allowed(user))return;
       const revision=++generation;
       $('refresh').disabled=true;$('status').textContent='통계를 불러오고 있습니다.';
       try{
-        const {pages,baseline,visits}=await services.load();
+        const {pages,baseline,visits,catalog,selections}=await services.load();
         if(revision!==generation||!model.allowed(user))return;
         const summary=model.summarize(pages,baseline,visits);
         $('rows').replaceChildren();
@@ -24,12 +37,20 @@
           $('rows').append(tr);
         }
         $('total').textContent=summary.total.toLocaleString('ko-KR');
+        const selected=model.selections(catalog,selections);selectedRows=selected.rows;
+        const kind=$('selectionKind').value;$('selectionKind').replaceChildren();
+        for(const [value,label] of [['','전체 종류'],...Object.entries(catalog?.groups||{}).map(([key,group])=>[key,group.label])]){
+          const option=document.createElement('option');option.value=value;option.textContent=label;$('selectionKind').append(option);
+        }
+        if([...$('selectionKind').options].some(option=>option.value===kind))$('selectionKind').value=kind;
+        $('selectionTotal').textContent=selected.total.toLocaleString('ko-KR');renderSelections();
         $('updated').textContent='확인 시각 · '+new Date().toLocaleString('ko-KR');
         $('status').textContent='';
       }catch{
         if(revision!==generation)return;
         // Clear previously loaded data instead of presenting it as a successful refresh.
         $('rows').replaceChildren();$('total').textContent='—';$('updated').textContent='';
+        clearSelections();
         $('status').textContent='통계를 읽지 못했습니다. 계정 권한이나 연결 상태를 확인한 뒤 다시 시도하세요.';
       }finally{if(revision===generation)$('refresh').disabled=false;}
     }
@@ -56,6 +77,7 @@
       finally{$('login').disabled=false;}
     });
     $('refresh').addEventListener('click',refresh);
+    $('selectionKind').addEventListener('change',renderSelections);
     $('logout').addEventListener('click',async()=>{
       generation++;user=null;clear();$('status').textContent='로그아웃 중입니다.';
       try{await services.signOut();$('status').textContent='로그아웃했습니다.';}

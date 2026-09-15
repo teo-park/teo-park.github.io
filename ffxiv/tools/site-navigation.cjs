@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const version = '20260912-collection1';
+const version = '20260915-selection1';
 const guidePages = [
   ['fisher-skills/', '어부 스킬 안내'],
   ['fisher-skills/big-fish/', '터주 유형별 공략'],
@@ -37,7 +37,7 @@ const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...j
 const baseFor = page => page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
-  return `<script defer src="${base}visitor-counter.js?v=20260915-private1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
+  return `<script defer src="${base}visitor-counter.js?v=20260915-selection1"></script><script defer src="${base}selection-counter.js?v=20260915-selection1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
 }
 function header(page) {
   const base = baseFor(page);
@@ -60,7 +60,7 @@ function update() {
     if (!/<header class="site-header"/.test(html)) throw Error(`Missing header: ${file}`);
     html = html.replace(/<header class="site-header"[^>]*>[\s\S]*?<\/header>/, header(page));
     html = html.replace(/<link\b[^>]*href="[^"\s]*(?:navigation|select-options|visitor-counter)\.css[^"\s]*"[^>]*>\s*/g, '')
-      .replace(/<script\b[^>]*src="[^"\s]*(?:navigation|select-options|visitor-counter)\.js[^"\s]*"[^>]*><\/script>\s*/g, '');
+      .replace(/<script\b[^>]*src="[^"\s]*(?:navigation|select-options|visitor-counter|selection-counter)\.js[^"\s]*"[^>]*><\/script>\s*/g, '');
     html = html.replace('</head>', `${assets(page)}</head>`);
     fs.writeFileSync(file, html);
   }

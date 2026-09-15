@@ -5,7 +5,7 @@
   else {
     const script = document.currentScript;
     if (script && location.origin === 'https://teo-park.github.io') {
-      const configUrl = new URL('visitor-counter-config.json?v=20260915-private1', script.src);
+      const configUrl = new URL('visitor-counter-config.json?v=20260915-selection1', script.src);
       api.start(window, configUrl.href).catch(() => {});
     }
   }
@@ -59,6 +59,7 @@
       const storageKey = storagePrefix + page.key;
       let storage;
       try { storage = w.localStorage; storage.getItem(storageKey); } catch { return; }
+      if (storage.getItem('ffxiv-usage-stats-disabled') === 'true') return;
       const now = Date.now();
       if (!tracked || !due(Number(storage.getItem(storageKey)), now, config.intervalMs)) return;
       // Reserve before sending: an uncertain network response must never cause an automatic duplicate.

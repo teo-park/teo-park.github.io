@@ -25,11 +25,14 @@ try{
     signOut:()=>Auth.signOut(auth),
     load:async()=>{
       if(!CounterAdminModel.allowed(auth.currentUser))throw Error('Unauthorized');
-      const [baseline,visits]=await Promise.all([
+      const [baseline,visits,selections,catalogResponse]=await Promise.all([
         Database.get(Database.ref(db,'counters')),
         Database.get(Database.ref(db,'visits')),
+        Database.get(Database.ref(db,'selections')),
+        fetch('../selection-catalog.json?v=20260915-selection1',{cache:'no-store'}),
       ]);
-      return {pages:config.pages,baseline:baseline.val(),visits:visits.val()};
+      if(!catalogResponse.ok)throw Error('Catalog unavailable');
+      return {pages:config.pages,baseline:baseline.val(),visits:visits.val(),selections:selections.val(),catalog:await catalogResponse.json()};
     },
   });
   Auth.onAuthStateChanged(auth,user=>{controller.onUser(user).catch(()=>{

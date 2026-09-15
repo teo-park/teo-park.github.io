@@ -8,7 +8,7 @@
   <title>조회 통계 · 파판14 도구함</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../theme.css?v=20260909-line1">
-  <link rel="stylesheet" href="./styles.css?v=20260915-private1">
+  <link rel="stylesheet" href="./styles.css?v=20260915-selection1">
 </head>
 <body>
   <main>
@@ -26,11 +26,19 @@
       <div class="panel total"><span>전체 조회</span><strong id="total">—</strong><small id="updated"></small></div>
       <div class="panel table-panel"><table><caption>페이지별 조회 수</caption><thead><tr><th scope="col">페이지</th><th scope="col">조회</th><th scope="col">비중</th></tr></thead><tbody id="rows"></tbody></table></div>
       <p class="note">같은 브라우저의 같은 페이지는 30분에 한 번 집계합니다. 전체 조회는 페이지별 합계로, 고유 방문자 수와 다릅니다. 근해·원양은 먼바다로 합산합니다. 집계 이전의 방문은 포함하지 않습니다.</p>
+      <section class="panel table-panel selection-panel">
+        <h2>선택한 게임 항목 <span id="selectionTotal">—</span>회</h2>
+        <p class="note">상세보기·퀘스트 선택·임무 가이드 링크·먼바다 도감 출항 보기를 집계합니다. 같은 항목은 종류별로 30분에 한 번 집계하며, 수집 체크와 검색어는 포함하지 않습니다.</p>
+        <label for="selectionKind">게임 데이터 종류</label>
+        <select id="selectionKind"><option value="">전체 종류</option></select>
+        <p id="selectionHint" role="status"></p>
+        <table><caption class="sr-only">많이 선택한 게임 항목</caption><thead><tr><th scope="col">게임 항목</th><th scope="col">종류</th><th scope="col">선택</th></tr></thead><tbody id="selectionRows"></tbody></table>
+      </section>
     </section>
     <noscript>통계를 확인하려면 JavaScript를 켜 주세요.</noscript>
   </main>
-  <script src="./model.js?v=20260915-private1"></script>
-  <script src="./controller.js?v=20260915-private2"></script>
-  <script type="module" src="./app.js?v=20260915-private1"></script>
+  <script src="./model.js?v=20260915-selection1"></script>
+  <script src="./controller.js?v=20260915-selection1"></script>
+  <script type="module" src="./app.js?v=20260915-selection1"></script>
 </body>
 </html>

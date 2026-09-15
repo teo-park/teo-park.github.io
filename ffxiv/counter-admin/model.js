@@ -9,5 +9,15 @@
     }).sort((a,b)=>b.count-a.count);
     return {rows,total:rows.reduce((sum,row)=>sum+row.count,0)};
   }
-  return {ownerEmail,allowed,summarize};
+  function selections(catalog,data){
+    const rows=[];
+    for(const [kind,group] of Object.entries(catalog?.groups||{}))for(const [id,events] of Object.entries(data?.[kind]||{})){
+      if(!Object.hasOwn(group.names,id))continue;
+      const count=Object.values(events||{}).filter(value=>value===true).length;
+      if(count)rows.push({kind,id,name:group.names[id],label:group.label,count});
+    }
+    rows.sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'ko'));
+    return {rows,total:rows.reduce((sum,row)=>sum+row.count,0)};
+  }
+  return {ownerEmail,allowed,summarize,selections};
 });

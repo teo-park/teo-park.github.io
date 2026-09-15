@@ -1,4 +1,4 @@
-/* Local collection state. No account, upload, analytics, or runtime catalog requests. */
+/* Collection state stays in this browser. Shared usage statistics exclude collection records. */
 (function(){
   'use strict';
   const $=id=>document.getElementById(id),D=window.MINION_DATA,E=window.MinionCollection;

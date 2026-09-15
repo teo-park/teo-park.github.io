@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path');
 const{JSDOM}=require('../ocean-fishing/node_modules/jsdom');
 const model=require('../counter-admin/model.js'),{create}=require('../counter-admin/controller.js');
 const owner={email:'teo.ffxiv.kr@gmail.com',emailVerified:true,providerData:[{providerId:'google.com'}]};
-const fixture={pages:[{key:'home',path:'/ffxiv/',label:'홈'},{key:'minions',path:'/ffxiv/minions/',label:'꼬마친구'}],baseline:{home:10,minions:2},visits:{home:{a:true,b:true},minions:{c:true},unknown:{d:true}}};
+const fixture={catalog:{groups:{fish:{label:'물고기',names:{4776:'말름미역'}}}},selections:{fish:{4776:{a:true,b:true}}},pages:[{key:'home',path:'/ffxiv/',label:'홈'},{key:'minions',path:'/ffxiv/minions/',label:'꼬마친구'}],baseline:{home:10,minions:2},visits:{home:{a:true,b:true},minions:{c:true},unknown:{d:true}}};
 function open(load=async()=>fixture){
  const dom=new JSDOM(fs.readFileSync(path.resolve(__dirname,'../counter-admin/index.html'),'utf8'),{url:'https://teo-park.github.io/ffxiv/counter-admin/'});
  const d=dom.window.document,calls={load:0,signOut:0};
@@ -24,28 +24,28 @@ test('keeps prior counts and adds only known valid visit records',()=>{
 test('logged-out and wrong-account states never read statistics',async()=>{
  const ui=open();try{
  await ui.controller.onUser(null);assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.calls.load,0);
- await ui.controller.onUser({...owner,email:'other@gmail.com'});assert.equal(ui.calls.load,0);assert.equal(ui.calls.signOut,1);assert.equal(ui.$('rows').children.length,0);
+ await ui.controller.onUser({...owner,email:'other@gmail.com'});assert.equal(ui.calls.load,0);assert.equal(ui.calls.signOut,1);assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('selectionRows').children.length,0);assert.equal(ui.$('selectionTotal').textContent,'—');
  assert.match(ui.$('status').textContent,/권한이 없습니다/);
  }finally{ui.dom.window.close();}
 });
 test('owner sees counts and logout immediately erases them',async()=>{
  const ui=open();try{
- await ui.controller.onUser(owner);assert.equal(ui.$('dashboard').hidden,false);assert.equal(ui.$('loginPanel').hidden,true);assert.equal(ui.$('total').textContent,'15');assert.equal(ui.$('rows').children.length,2);
- ui.$('logout').click();assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('total').textContent,'—');
+ await ui.controller.onUser(owner);assert.equal(ui.$('dashboard').hidden,false);assert.equal(ui.$('loginPanel').hidden,true);assert.equal(ui.$('total').textContent,'15');assert.equal(ui.$('rows').children.length,2);assert.equal(ui.$('selectionTotal').textContent,'2');assert.match(ui.$('selectionRows').textContent,/말름미역/);
+ ui.$('logout').click();assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('selectionRows').children.length,0);assert.equal(ui.$('selectionTotal').textContent,'—');assert.equal(ui.$('total').textContent,'—');
  await new Promise(r=>setImmediate(r));assert.equal(ui.calls.signOut,1);
  }finally{ui.dom.window.close();}
 });
 test('a response arriving after logout cannot restore private data',async()=>{
  let resolve;const ui=open(()=>new Promise(r=>{resolve=r;}));try{
  const pending=ui.controller.onUser(owner);ui.$('logout').click();resolve(fixture);await pending;
- assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);
+ assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('selectionRows').children.length,0);assert.equal(ui.$('selectionTotal').textContent,'—');
  }finally{ui.dom.window.close();}
 });
 test('failed refresh clears old stats and offers retry',async()=>{
  let fail=false;const ui=open(async()=>{if(fail)throw Error('permission-denied');return fixture;});try{
- await ui.controller.onUser(owner);fail=true;await ui.controller.refresh();assert.equal(ui.$('total').textContent,'—');assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('refresh').disabled,false);assert.match(ui.$('status').textContent,/읽지 못했습니다/);
+ await ui.controller.onUser(owner);fail=true;await ui.controller.refresh();assert.equal(ui.$('total').textContent,'—');assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('selectionRows').children.length,0);assert.equal(ui.$('selectionTotal').textContent,'—');assert.equal(ui.$('refresh').disabled,false);assert.match(ui.$('status').textContent,/읽지 못했습니다/);
  }finally{ui.dom.window.close();}
 });
 test('admin page is noindex without embedded statistics',()=>{
- const ui=open();try{assert.match(ui.d.querySelector('meta[name="robots"]').content,/noindex/);assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);}finally{ui.dom.window.close();}
+ const ui=open();try{assert.match(ui.d.querySelector('meta[name="robots"]').content,/noindex/);assert.equal(ui.$('dashboard').hidden,true);assert.equal(ui.$('rows').children.length,0);assert.equal(ui.$('selectionRows').children.length,0);assert.equal(ui.$('selectionTotal').textContent,'—');}finally{ui.dom.window.close();}
 });
