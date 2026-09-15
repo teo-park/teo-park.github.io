@@ -50,16 +50,21 @@
     }
     function notificationState(){
       if(!isOpen())return;
-      const state=notifications?.state()||{enabled:false,busy:false,supported:false,message:'알림 기능을 사용할 수 없어요.'};
-      const toggle=$('oceanPipNotifications');if(!toggle)return;
-      toggle.disabled=state.busy||!state.supported;toggle.setAttribute('aria-checked',String(state.enabled));
-      toggle.textContent=state.busy?'알림 설정 중…':'정시 알림 '+(state.enabled?'ON':'OFF');
-      $('oceanPipNotificationStatus').textContent=state.message;
+      for(const [kind,id,label] of [['departure','','정시 알림'],['score','Score','점수 마감 1분 전 알림']]){
+        const state=notifications?.state(kind)||{enabled:false,busy:false,supported:false,message:'알림 기능을 사용할 수 없어요.'};
+        const toggle=$(`oceanPip${id}Notifications`);if(!toggle)continue;
+        toggle.disabled=state.busy||!state.supported;toggle.setAttribute('aria-checked',String(state.enabled));
+        toggle.textContent=state.busy?'알림 설정 중…':label+' '+(state.enabled?'ON':'OFF');
+        $(`oceanPip${id}NotificationStatus`).textContent=label+' · '+state.message;
+      }
       compactSettings();
     }
     function compactSettings(){
       if(!view)return;
-      const stop=view.stops[view.activeStop],goal=view.goal,alert=notifications?.state().enabled?'알림 ON':'알림 OFF';
+      const stop=view.stops[view.activeStop],goal=view.goal,activeAlerts=[];
+      if(notifications?.state().enabled)activeAlerts.push('정시');
+      if(notifications?.state('score').enabled)activeAlerts.push('점수 마감');
+      const alert=activeAlerts.length?activeAlerts.join('·')+' 알림 ON':'알림 OFF';
       const purpose=goal.purposes.find(p=>p.id===goal.purpose)?.label||'';
       $('oceanPipCompactSummary').textContent=`${view.activeStop+1}구간 · ${stop.name} · ${purpose} · ${alert}`;
     }
@@ -127,7 +132,7 @@
         d.documentElement.lang='ko';d.title=getView().title+' · 먼바다 PiP';
         const base=d.createElement('base');base.href=new URL('./',location.href).href;d.head.append(base);
         const assets=new URL(document.body.dataset.assetBase||'../',location.href);
-        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260914-fish-departures','css/pip.css?v=20260914-always-achievements']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
+        for(const path of ['../theme.css?v=20260909-line1','css/app.css?v=20260915-score-alert','css/pip.css?v=20260915-score-alert']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(path,assets).href;d.head.append(link);}
         d.body.className='ocean-pip-body';
         d.body.innerHTML='<main class="ocean-pip"><header class="ocean-pip-header"><div><h1 id="oceanPipTitle"></h1><button id="oceanPipMain" type="button">본 페이지 ↗</button></div><p><span id="oceanPipDeparture"></span><strong id="oceanPipClock"></strong></p><p id="oceanPipPurpose"></p></header><div id="oceanPipStops" class="ocean-pip-stops" role="tablist" aria-label="항로의 세 구간"></div><div id="oceanPipStarter"></div><div id="oceanPipList" role="tabpanel" tabindex="0"></div><div class="ocean-pip-status"><span id="oceanPipMessage" role="status"></span><button type="button" id="oceanPipUndo" hidden>실행 취소</button></div><footer>목적·필터는 본 페이지와 연동됩니다. 현재 구간은 직접 선택하세요. 본 페이지를 열어 두세요.</footer></main>';
         opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});
@@ -165,9 +170,10 @@
         $('oceanPipMain').onclick=()=>{window.focus();openMain();};
         $('oceanPipUndo').onclick=()=>{undoCatch();update();};
         const controls=d.createElement('div');controls.className='ocean-pip-alerts';
-        controls.innerHTML='<button id="oceanPipNotifications" class="departure-alert-toggle" type="button" role="switch" aria-checked="false" aria-label="먼바다 정시 알림">정시 알림 OFF</button><details><summary>알림 안내</summary><p id="oceanPipNotificationStatus" role="status"></p><p>KST 홀수 시 정각 · 근해·원양 공통. 페이지를 열어 둔 동안만 알립니다. 절전·브라우저 상태에 따라 늦어질 수 있어요.</p></details>';
+        controls.innerHTML='<div class="departure-alert-actions"><button id="oceanPipNotifications" class="departure-alert-toggle" type="button" role="switch" aria-checked="false" aria-label="먼바다 정시 알림">정시 알림 OFF</button><button id="oceanPipScoreNotifications" class="departure-alert-toggle" type="button" role="switch" aria-checked="false" aria-label="먼바다 점수 마감 1분 전 알림">점수 마감 1분 전 알림 OFF</button></div><details><summary>알림 안내</summary><p id="oceanPipNotificationStatus" role="status"></p><p id="oceanPipScoreNotificationStatus" role="status"></p><p>KST 홀수 시 정각·14분 · 근해·원양 공통. 페이지를 열어 둔 동안만 알립니다. 절전·브라우저 상태에 따라 늦어질 수 있어요.</p></details>';
         d.querySelector('.ocean-pip-header').append(controls);
         $('oceanPipNotifications').onclick=()=>notifications?.state().enabled?notifications.disable():notifications?.enable();
+        $('oceanPipScoreNotifications').onclick=()=>notifications?.state('score').enabled?notifications.disable('score'):notifications?.enable('score');
         const settings=d.createElement('details');settings.id='oceanPipControls';settings.className='ocean-pip-controls';
         settings.innerHTML='<summary><span class="ocean-pip-controls-title"><strong>설정·항로</strong></span><span id="oceanPipCompactSummary"></span></summary><div id="oceanPipControlsBody"></div>';
         const header=d.querySelector('.ocean-pip-header');header.after(settings);

@@ -271,6 +271,26 @@ for(const route of ['indigo','ruby'])test(`${route}: departure alert switch sync
   }finally{ui.close();}
 });
 
+for(const route of ['indigo','ruby'])test(`${route}: score deadline switch syncs independently and the PiP clock fires it at :14`,async()=>{
+  const ui=await open(route,{alerts:true});try{
+    await ui.launch();assert.equal(ui.p('#oceanPipScoreNotifications').getAttribute('aria-checked'),'false');
+    assert.equal(ui.p('#oceanPipScoreNotifications').previousElementSibling.id,'oceanPipNotifications');
+    assert.equal(ui.$('#oceanScoreNotifications').previousElementSibling.id,'oceanNotifications');
+    ui.$('#oceanScoreNotifications').click();await ui.flush();
+    assert.equal(ui.p('#oceanPipScoreNotifications').getAttribute('aria-checked'),'true');
+    assert.equal(ui.p('#oceanPipNotifications').getAttribute('aria-checked'),'false');
+    assert.match(ui.p('#oceanPipCompactSummary').textContent,/점수 마감 알림 ON/);
+    ui.p('#oceanPipScoreNotifications').click();await ui.flush();assert.equal(ui.$('#oceanScoreNotifications').getAttribute('aria-checked'),'false');
+    ui.p('#oceanPipScoreNotifications').click();await ui.flush();assert.equal(ui.$('#oceanScoreNotifications').getAttribute('aria-checked'),'true');
+    ui.setNow(first);ui.childTimers.get(ui.child)();await ui.flush();assert.equal(ui.notices.length,0);
+    ui.p('[data-pip-route="'+(route==='indigo'?'ruby':'indigo')+'"]').click();
+    assert.equal(ui.p('#oceanPipScoreNotifications').getAttribute('aria-checked'),'true');
+    ui.setNow(first+14*60000);ui.childTimers.get(ui.child)();await ui.flush();assert.equal(ui.notices.length,1);assert.match(ui.notices[0].title,/점수 마감 1분 전/);
+    ui.childTimers.get(ui.child)();await ui.flush();assert.equal(ui.notices.length,1);
+    ui.child.close();assert.equal(ui.$('#oceanScoreNotifications').getAttribute('aria-checked'),'true');assert.deepEqual(ui.errors,[]);
+  }finally{ui.close();}
+});
+
 for(const route of ['indigo','ruby'])test(`${route}: goals can be edited in PiP without losing independent targets, filters, collections or saved preferences`,async()=>{
   let ui=await open(route);const change=(selector,value,type='change')=>{const el=ui.p(selector);el.value=value;el.dispatchEvent(new ui.child.Event(type,{bubbles:true}));};
   try{
