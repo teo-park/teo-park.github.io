@@ -7,6 +7,20 @@
   const time=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false});
   // Teamcraft encodes Medium, Big, Light as 0, 1, 2. Hookset is independent.
   const tugs={0:'!!',1:'!!!',2:'!'},hooksets={0:'일반 낚아채기',1:'강력한 낚아채기',2:'섬세한 낚아채기'};
+  function compareRows(a,b,primary='soon',secondary='rare',purpose='big'){
+    const numeric=(x,y,descending=false)=>{
+      const knownX=Number.isFinite(x),knownY=Number.isFinite(y);
+      if(knownX!==knownY)return knownX?-1:1;
+      return knownX?(descending?y-x:x-y):0;
+    };
+    const criterion=key=>{
+      if(key==='book')return a.fish.order-b.fish.order;
+      if(key==='rare')return Number(!!a.always)-Number(!!b.always)||numeric(a.nextStart,b.nextStart,true);
+      if(key==='soon')return (purpose==='big'?Number(!!a.always)-Number(!!b.always):0)||numeric(a.start,b.start);
+      return 0;
+    };
+    return criterion(primary)||(primary!==secondary?criterion(secondary):0)||a.fish.order-b.fish.order;
+  }
   function timing(row,now,purpose){
     if(row.always)return {state:'now',label:'지금',title:'현재 도전 가능 · 직감 등 선행 조건 별도 준비'};
     if(!Number.isFinite(row.start)||!Number.isFinite(row.end)||now>=row.end)return null;
@@ -40,6 +54,15 @@
       rarities={big:v.rarities?.big==='legendary'?'legendary':'big',collection:['all','normal','big','legendary'].includes(v.rarities?.collection)?v.rarities.collection:'all'};
       alwaysAlerts={big:v.alwaysAlerts?.big===true,collection:v.alwaysAlerts?.collection!==false};saved=true;}
     try{const raw=localStorage.getItem(KEY);if(raw)preferences(JSON.parse(raw));}catch{$('planMessage').textContent='저장된 계획을 읽지 못했습니다. 시간을 확인하고 다시 저장해 주세요.';}
+    // Each new visit starts in the big-fish planner; saved playtimes and other mode settings remain intact.
+    purpose='big';rarities.big='big';
+    const sortKey='teo-ffxiv.fishing.planner-view.v1';
+    try{const value=JSON.parse(localStorage.getItem(sortKey)||'null');if(['soon','rare','book'].includes(value?.primary))$('planSort').value=value.primary;if(['none','soon','rare','book'].includes(value?.secondary))$('planSortSecondary').value=value.secondary;}catch{/* Keep the defaults if view preferences cannot be read. */}
+    function sortControls(){
+      if($('planSortSecondary').value===$('planSort').value)$('planSortSecondary').value='none';
+      for(const option of $('planSortSecondary').options)option.disabled=option.value===$('planSort').value;
+    }
+    sortControls();
     const serialized=(next=settings)=>JSON.stringify({settings:next,usePlaytime,stars:[...stars],mode,purpose,rarities,alwaysAlerts});
     const store=()=>{localStorage.setItem(KEY,serialized());saved=true;};
     const effectiveSettings=()=>({...settings,unrestricted:!usePlaytime});
@@ -134,9 +157,7 @@
       const list=availability==='always'?[]:[...result.rows];
       if(availability!=='always')for(const fish of result.excluded.filter(hasTimedPreparation))list.push({fish,route:fish.routes.findIndex(r=>forecast.reason(r)==='생미끼·직감 선행 시간 별도 확인'),preparationOnly:true,start:null,end:null,nextStart:null,unavailableReason:'준비 어종 시간 확인'});
       if(availability!=='timed')for(const fish of result.always)list.push({fish,route:fish.routes.findIndex(r=>!forecast.reason(r)&&!forecast.limited(r)),always:true,start:result.now});
-      if($('planSort').value==='rare')list.sort((a,b)=>Number(!!a.always)-Number(!!b.always)||(b.nextGap??-Infinity)-(a.nextGap??-Infinity)||(a.start??Infinity)-(b.start??Infinity)||a.fish.order-b.fish.order);
-      else if($('planSort').value==='book')list.sort((a,b)=>a.fish.order-b.fish.order);
-      else list.sort((a,b)=>(purpose==='big'?Number(!!a.always)-Number(!!b.always):0)||(a.start??Infinity)-(b.start??Infinity)||a.fish.order-b.fish.order);
+      list.sort((a,b)=>compareRows(a,b,$('planSort').value,$('planSortSecondary').value,purpose));
       return list;
     }
     function biteTime(id,route){const range=route&&model.biteTime(id,route),stats=window.FishingBook.biteStats(range);return `<span class="plan-bite-time${range?'':' is-unknown'}" title="${esc(stats.title)}">${esc(stats.primary)}</span>`;}
@@ -244,7 +265,8 @@
     $('planExpansionNone').onclick=()=>{for(const input of expansionInputs())input.checked=false;calculate();};
     $('planRarity').onchange=()=>{const previous=rarities[purpose];rarities[purpose]=$('planRarity').value;try{if(saved)store();calculate();changed();}catch{rarities[purpose]=previous;$('planRarity').value=previous;$('planMessage').textContent='어종 필터를 저장하지 못했습니다.';}};
     $('planSearch').oninput=()=>{clearTimeout(timer);timer=setTimeout(calculate,150);};
-    for(const id of ['planSort','planAvailability'])$(id).onchange=()=>{shown=30;render();};
+    $('planAvailability').onchange=()=>{shown=30;render();};
+    for(const id of ['planSort','planSortSecondary'])$(id).onchange=()=>{sortControls();try{localStorage.setItem(sortKey,JSON.stringify({primary:$('planSort').value,secondary:$('planSortSecondary').value}));}catch{$('planMessage').textContent='정렬은 적용했지만 다음 방문을 위해 저장하지 못했습니다.';}shown=30;render();};
     $('planRefresh').onclick=calculate;$('planMore').onclick=()=>{shown+=30;render();};
     document.addEventListener('click',e=>{const button=e.target.closest('[data-plan-countdown]');if(!button)return;const id=+button.dataset.planCountdown;if(countdowns.has(id))countdowns.delete(id);else countdowns.add(id);render();document.querySelector(`[data-plan-countdown="${id}"]`)?.focus({preventScroll:true});});
     setInterval(updateCountdowns,1000);
@@ -264,7 +286,7 @@
         return {id:fish.id,name:fish.name,icon:new URL(fish.icon,location.href).href,order:fish.order,star:stars.has(fish.id),caught:caught.has(fish.id),spot:spot?.name||'',bait,bite:[tugs[route.tug],hooksets[route.hookset]].filter(Boolean).join(' '),conditions,always:!!row.always,preparationOnly:!!row.preparationOnly||!!preparationView?.timeOnly(fish,[route]),start:row.start,end:row.end};
       })};
     }
-    pipView=window.FishingPip?.mount({getView:pipSnapshot,refresh:calculate,notifications,onOpen:calculate,onClose:()=>{if(!active||document.hidden)clearTimeout(searchTimer);},openSettings:()=>{show(true);$('notificationsTitle').scrollIntoView({block:'start'});$('enableNotifications').focus({preventScroll:true});},openFish:id=>{const b=document.createElement('button');b.dataset.fishDetail=id;b.hidden=true;document.body.append(b);b.click();b.remove();}});
+    pipView=window.FishingPip?.mount({getView:pipSnapshot,refresh:calculate,notifications,onOpen:calculate,onClose:()=>{if(!active||document.hidden)clearTimeout(searchTimer);},openSettings:()=>{show(true);$('planOptions').open=true;$('notificationsTitle').scrollIntoView({block:'start'});$('enableNotifications').focus({preventScroll:true});},openFish:id=>{const b=document.createElement('button');b.dataset.fishDetail=id;b.hidden=true;document.body.append(b);b.click();b.remove();}});
     // Opt-in handshake: only the installed extension requests this read-only snapshot.
     function publishBell(){
       if(!bellConnected||document.hidden)return;
@@ -275,7 +297,8 @@
     }
     window.addEventListener('message',event=>{if(event.source===window&&event.origin===location.origin&&event.data?.type==='SENUEO_FISH_BELL_REQUEST'){bellConnected=true;publishBell();}});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)publishBell();});
-    const linked=Number(new URL(location.href).searchParams.get('fish'));if(fishById.has(linked)){show(true);const b=document.createElement('button');b.dataset.fishDetail=linked;b.hidden=true;document.body.append(b);b.click();b.remove();}
+    show(true);
+    const linked=Number(new URL(location.href).searchParams.get('fish'));if(fishById.has(linked)){const b=document.createElement('button');b.dataset.fishDetail=linked;b.hidden=true;document.body.append(b);b.click();b.remove();}
   }
-  window.FishingPlanner={mount,timing};
+  window.FishingPlanner={mount,timing,compareRows};
 })();

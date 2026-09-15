@@ -53,7 +53,7 @@ test('normal-only filtering controls alert targets, mode preferences survive rel
     p.$('#showPlanner').click();p.$('#planCollectionMode').click();p.change('#planRarity','normal');assert.ok(p.planSnapshot().ids.length);assert.ok(p.planSnapshot().ids.every(id=>!byId.get(id).big));assert.ok(p.all('.plan-card').every(c=>c.dataset.planKind==='normal'));
     p.change('#planAvailability','always');assert.ok(p.all('.plan-card').every(c=>c.dataset.planAvailability==='always'));p.change('#planAvailability','timed');assert.ok(p.all('.plan-card').every(c=>c.dataset.planAvailability==='timed'));
     p.$('#planToSpot').click();assert.equal(p.$('#rarity').value,'normal');assert.equal(p.$('#view').value,'spot');
-    p.close();p=open({plan:true,storage:store});assert.equal(p.$('#planCollectionMode').getAttribute('aria-pressed'),'true');assert.equal(p.$('#planRarity').value,'normal');assert.equal(p.planSnapshot().includeAlways,true);
+    p.close();p=open({plan:true,storage:store});assert.equal(p.$('#planBigMode').getAttribute('aria-pressed'),'true');assert.equal(p.$('#planRarity').value,'big');p.$('#planCollectionMode').click();assert.equal(p.$('#planRarity').value,'normal');assert.equal(p.planSnapshot().includeAlways,true);
   }finally{p.close();}
 });
 test('unlimited planner keeps a pending distant fish visible, then fills its date and year',async()=>{
