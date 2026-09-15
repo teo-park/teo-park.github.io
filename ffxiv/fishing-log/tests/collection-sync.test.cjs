@@ -48,22 +48,27 @@ test('new ID writes survive migration snapshots and malformed or unrelated impor
  }finally{ui.close();}
 });
 
-test('rare collection totals partition big fish, field kings and ocean legendary fish without overlap',()=>{
- const kings=D.fishes.filter(E.isLegendary),ocean=D.fishes.filter(E.isOceanLegendary),ordinary=D.fishes.filter(f=>f.big&&!E.isLegendary(f)&&!E.isOceanLegendary(f));
- assert.equal(kings.length,36);assert.equal(ocean.length,13);assert.equal(ordinary.length,442);
- const all=[...kings,...ordinary,...ocean];assert.equal(all.length,D.fishes.filter(f=>f.big).length);assert.equal(new Set(all.map(f=>f.id)).size,all.length);
- assert.ok(kings.some(f=>f.name==='칠채천주'));assert.ok(ocean.some(f=>f.name==='소티스'));assert.ok(ocean.some(f=>f.name==='세계거북'));
- assert.ok(ordinary.some(f=>f.name==='만취어'));assert.ok(ordinary.some(f=>f.name==='잘레라'));
- const filtered=E.create(D).filter(new Set(),{rarity:'legendary',scope:'all'});
- assert.deepEqual(filtered.map(f=>f.id),kings.map(f=>f.id),'king filter must agree with its counter');
- assert.deepEqual(E.create(D).filter(new Set(),{rarity:'oceanLegendary',scope:'all'}).map(f=>f.id),ocean.map(f=>f.id));
- const ui=open();try{ui.change('#rarity','oceanLegendary');assert.equal(ui.all('#fishGrid [data-caught]').length,13);assert.equal(ui.$('#rarity').hasAttribute('data-radio-options'),false);}finally{ui.close();}
+test('field and ocean rare collections have independent big fish and king groups',()=>{
+ const model=E.create(D),expected={fieldBig:299,legendary:36,oceanBig:143,oceanLegendary:13};
+ const all=[];
+ for(const [group,total] of Object.entries(expected)){
+  const fish=D.fishes.filter(f=>model.rarityGroup(f)===group);assert.equal(fish.length,total,group);all.push(...fish);
+  assert.deepEqual(model.filter(new Set(),{rarity:group,scope:'all'}).map(f=>f.id),fish.map(f=>f.id));
+ }
+ assert.equal(all.length,D.fishes.filter(f=>f.big).length);assert.equal(new Set(all.map(f=>f.id)).size,all.length);
+ for(const [name,group] of [['잘레라','fieldBig'],['칠채천주','legendary'],['만취어','oceanBig'],['소티스','oceanLegendary'],['세계거북','oceanLegendary']])assert.equal(model.rarityGroup(D.fishes.find(f=>f.name===name)),group);
+ const ui=open();try{
+  for(const [group,total] of Object.entries(expected)){ui.change('#rarity',group);assert.match(ui.$('#resultCount').textContent,new RegExp('^'+total+'종'));}
+  assert.ok(ui.$('#fieldRareTitle').parentElement.contains(ui.$('#bigCount')));assert.ok(ui.$('#fieldRareTitle').parentElement.contains(ui.$('#legendaryCount')));
+  assert.ok(ui.$('#oceanRareTitle').parentElement.contains(ui.$('#oceanBigCount')));assert.ok(ui.$('#oceanRareTitle').parentElement.contains(ui.$('#oceanLegendaryCount')));
+ }finally{ui.close();}
 });
 
 test('rare counters follow checks, imports, undo and ocean sync, independent of active catalog filters',()=>{
  const storage=memory({[S.BOOK_KEY]:E.backup(new Set([7678,8754,4776,spear,999999]))}),ui=open({storage});
- const counts=(big,king,ocean=0)=>{
-  assert.equal(ui.$('#bigCount').textContent,`${big} / 442`);assert.equal(ui.$('#bigProgress').value,big);assert.equal(ui.$('#bigProgress').max,442);
+ const counts=(big,king,ocean=0,oceanBig=0)=>{
+  assert.equal(ui.$('#bigCount').textContent,`${big} / 299`);assert.equal(ui.$('#bigProgress').value,big);assert.equal(ui.$('#bigProgress').max,299);
+  assert.equal(ui.$('#oceanBigCount').textContent,`${oceanBig} / 143`);assert.equal(ui.$('#oceanBigProgress').value,oceanBig);assert.equal(ui.$('#oceanBigProgress').max,143);
   assert.equal(ui.$('#legendaryCount').textContent,`${king} / 36`);assert.equal(ui.$('#legendaryProgress').value,king);assert.equal(ui.$('#legendaryProgress').max,36);
   assert.equal(ui.$('#oceanLegendaryCount').textContent,`${ocean} / 13`);assert.equal(ui.$('#oceanLegendaryProgress').value,ocean);assert.equal(ui.$('#oceanLegendaryProgress').max,13);
  };
@@ -74,6 +79,7 @@ test('rare counters follow checks, imports, undo and ocean sync, independent of 
   ui.w.eval(fs.readFileSync(path.join(__dirname,'../../ocean-fishing/scripts/collection.js'),'utf8'));const journal=ui.w.OceanCollection;
   journal.setCaught(storage,'indigo','Sothis',true);ui.w.dispatchEvent(new ui.w.StorageEvent('storage',{key:S.KEY}));counts(1,1,1);
   journal.setCaught(storage,'indigo','Sothis',false);ui.w.dispatchEvent(new ui.w.Event('pageshow'));counts(1,1);
+  journal.setCaught(storage,'indigo','Drunkfish',true);ui.w.dispatchEvent(new ui.w.Event('pageshow'));counts(1,1,0,1);
   assert.ok(S.read(storage).has(999999),'unknown backup ID preserved but not counted');
  }finally{ui.close();}
 });
