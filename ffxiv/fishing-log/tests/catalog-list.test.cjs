@@ -1,9 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),E=require('../engine.js');
 const {open,D,KEY,memory}=require('./helpers.cjs');
 const wait=()=>new Promise(r=>setTimeout(r,70));
-function list(p){Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.$('[data-layout-choice="list"]').click();}
+function list(p){if(!p.$('#collectionPanel'))p.$('#showBook').click();Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.$('[data-layout-choice="list"]').click();}
 test('catalog list preserves 100-fish pages, caught checks, undo and saved layout across reload',async()=>{
-  const storage=memory();let p=open({plan:true,storage});try{
+  const storage=memory();let p=open({plan:true,catalog:true,storage});try{
     p.$('#paginationTop [aria-label="2페이지"]').click();const first=p.$('#fishGrid [data-caught]').dataset.caught;list(p);
     assert.equal(p.$('#collectionListViewport').hidden,false);assert.equal(p.$('#gridViewport').hidden,true);assert.equal(p.all('.catalog-card').length,100);
     assert.equal(p.$('.catalog-card [data-caught]').dataset.caught,first);assert.equal(p.$('#paginationTop [aria-current]').textContent,'2');
@@ -11,18 +11,18 @@ test('catalog list preserves 100-fish pages, caught checks, undo and saved layou
     const before=storage.getItem(KEY);p.$('[data-layout-choice="grid"]').click();assert.equal(storage.getItem(KEY),before);assert.equal(p.$('#gridViewport').hidden,false);assert.equal(p.$('#fishGrid [data-caught]').dataset.caught,first);assert.equal(p.$('#fishGrid [data-caught]').getAttribute('aria-pressed'),'true');
     list(p);p.$('#undo').click();assert.equal(p.$('.catalog-card [data-caught]').getAttribute('aria-pressed'),'false');
     p.$('#markPage').click();assert.equal(E.parseBackup(storage.getItem(KEY)).size,100);p.$('#undo').click();
-    p.close();p=open({plan:true,storage});assert.equal(p.$('#collectionListViewport').hidden,false);assert.equal(p.all('.catalog-card').length,100);
+    p.close();p=open({plan:true,catalog:true,storage});assert.equal(p.$('#collectionListViewport').hidden,false);assert.equal(p.all('.catalog-card').length,100);
   }finally{p.close();}
 });
 test('list shows actual openings independent of online settings and keeps caught rows until explicit refresh',async()=>{
   const p=open({plan:true});try{
     p.w.Date.now=()=>Date.parse('2026-09-10T13:00:00Z');p.all('[data-day]').forEach(el=>el.checked=false);p.$('#savePlay').click();list(p);p.change('#search','잘레라','input');await wait();
-    const preferences=JSON.stringify(p.planSnapshot()),row=p.$('.catalog-card');assert.match(row.querySelector('.plan-window').textContent,/9\./);assert.match(row.querySelector('.plan-bite').textContent,/!!!.*섬세한/s);
+    const preferences=p.storage.getItem('teo-ffxiv.fishing.plan.v1'),row=p.$('.catalog-card');assert.match(row.querySelector('.plan-window').textContent,/9\./);assert.match(row.querySelector('.plan-bite').textContent,/!!!.*섬세한/s);
     p.$('[data-catalog-countdown]').click();assert.match(p.$('.catalog-card .plan-window').textContent,/(시작|종료)까지/);
     p.$('[data-catalog-detail]').click();assert.equal(p.$('[data-catalog-panel]').hidden,false);assert.ok(p.$('[data-catalog-panel] .plan-detail-grid'));assert.equal(p.$('#detailDialog').open,false);
     p.$('[data-catalog-panel] [data-catalog-detail]').click();assert.equal(p.$('[data-catalog-panel]').hidden,true);
     p.change('#status','missing');const check=p.$('.catalog-card [data-caught]');check.click();assert.equal(p.all('.catalog-card').length,1);assert.equal(check.textContent,'수집');assert.equal(p.$('#refreshResults').hidden,false);
-    assert.equal(JSON.stringify(p.planSnapshot().settings),JSON.stringify(JSON.parse(preferences).settings));
+    assert.equal(p.storage.getItem('teo-ffxiv.fishing.plan.v1'),preferences);
     p.$('#refreshResults').click();assert.equal(p.all('.catalog-card').length,0);
   }finally{p.close();}
 });

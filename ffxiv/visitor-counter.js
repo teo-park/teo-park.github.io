@@ -5,7 +5,7 @@
   else {
     const script = document.currentScript;
     if (script && location.origin === 'https://teo-park.github.io') {
-      const configUrl = new URL('visitor-counter-config.json?v=20260915-selection1', script.src);
+      const configUrl = new URL('visitor-counter-config.json?v=20260916-pages1', script.src);
       api.start(window, configUrl.href).catch(() => {});
     }
   }

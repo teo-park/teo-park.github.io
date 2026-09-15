@@ -14,10 +14,10 @@ test('secondary criterion only breaks primary ties and compares the actual next 
 });
 test('planner opens first with big fish and only additional controls are collapsed',()=>{
  const p=open({plan:true});try{
- assert.equal(p.$('#fishingPlanner').hidden,false);assert.equal(p.$('#collectionPanel').hidden,true);assert.equal(p.$('#showPlanner').getAttribute('aria-pressed'),'true');assert.equal(p.$('#planBigMode').getAttribute('aria-pressed'),'true');
+ assert.equal(p.$('#fishingPlanner').hidden,false);assert.equal(p.$('#collectionPanel'),null);assert.equal(p.$('#showPlanner').getAttribute('aria-current'),'page');assert.equal(p.$('#planBigMode').getAttribute('aria-pressed'),'true');
  assert.equal(p.$('#planOptions').open,false);
  for(const id of ['planExpansions','planStatus','planRegion','planRarity','planAvailability','planSort','planSortSecondary'])assert.equal(p.$('#'+id).closest('details'),null,id);
- for(const id of ['planSearch','notificationScope','playtimeOn','planLead'])assert.ok(p.$('#planOptions').contains(p.$('#'+id)),id);
+ for(const id of ['notificationScope','playtimeOn','planLead'])assert.ok(p.$('#planOptions').contains(p.$('#'+id)),id);
  p.$('#planOptions').open=true;p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();const before=p.$('#planCount').textContent;
  p.$('#planOptions').open=false;assert.equal(p.$('#planSearch').value,'잘레라');assert.equal(p.$('#planCount').textContent,before);
  p.$('#showBook').click();assert.equal(p.$('#collectionPanel').hidden,false);

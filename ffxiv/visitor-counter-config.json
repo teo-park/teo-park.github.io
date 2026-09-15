@@ -88,6 +88,7 @@
   ],
   "aliases": {
     "/ffxiv/ocean-fishing/indigo/": "/ffxiv/ocean-fishing/",
-    "/ffxiv/ocean-fishing/ruby/": "/ffxiv/ocean-fishing/"
+    "/ffxiv/ocean-fishing/ruby/": "/ffxiv/ocean-fishing/",
+    "/ffxiv/fishing-log/catalog/": "/ffxiv/fishing-log/"
   }
 }

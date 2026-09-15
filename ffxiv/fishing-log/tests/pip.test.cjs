@@ -39,7 +39,7 @@ test('PIP opens on user action, mirrors planner filters and collection changes, 
     assert.equal(c.all('[data-pip-fish]').length,1);assert.equal(c.$('[data-pip-fish]').dataset.pipCaught,'true');assert.match(c.$('#pipScope').textContent,/수집 · 신생 에오르제아/);assert.match(c.$('.pip-fish p').textContent,/✓ 수집/);assert.ok(!p.planSnapshot().ids.includes(+c.$('[data-pip-fish]').dataset.pipFish));
     p.selectExpansions('1');assert.equal(c.all('[data-pip-fish]').length,0);p.selectExpansions('0');assert.equal(c.all('[data-pip-fish]').length,1);
     p.$('#planExpansions input[value="4"]').click();assert.match(c.$('#pipScope').textContent,/신생 에오르제아 · 효월의 종언/);assert.equal(c.all('[data-pip-fish]').length,1);p.$('#planExpansionNone').click();assert.match(c.$('#pipScope').textContent,/확장팩 선택 없음/);assert.equal(c.all('[data-pip-fish]').length,0);p.$('#planExpansions input[value="0"]').click();assert.equal(c.all('[data-pip-fish]').length,1);
-    p.$('#showBook').click();c.$('[data-pip-detail]').click();assert.equal(p.$('#detailDialog').open,true);p.$('#closeDetail').click();
+    c.$('[data-pip-detail]').click();assert.equal(p.$('#detailDialog').open,true);p.$('#closeDetail').click();
     assert.equal(c.timers.size,1);p.$('#openFishingPip').click();await flush();assert.equal(calls,1,'existing PIP is reused');
     c.close();assert.equal(c.timers.size,0);assert.equal(p.$('#openFishingPip').getAttribute('aria-pressed'),'false');assert.equal(disables,2,'closing PIP does not disable alerts');
     p.$('#showPlanner').click();p.$('#openFishingPip').click();await flush();assert.equal(calls,2);assert.equal(children[1].timers.size,1);

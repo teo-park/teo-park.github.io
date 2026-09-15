@@ -227,8 +227,8 @@
   }
   function renderRoutePicker() {
     document.querySelectorAll('[data-ocean-route]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.oceanRoute===route)));
-    $('collectionRouteLabel').textContent=`나의 ${routeLabel()} 도감`;
-    document.title=routeLabel()+' · 먼바다 수첩';
+    if($('collectionRouteLabel'))$('collectionRouteLabel').textContent=`나의 ${routeLabel()} 도감`;
+    document.title='항해 예보 · '+routeLabel()+' · 먼바다';
   }
   function readAchievementRecords() {
     if(isChecklist)return;
@@ -364,9 +364,11 @@
     if(focused)document.querySelector(`[data-voyage="${focused}"]`)?.focus({preventScroll:true});
   }
   function renderSummary() {
+    if($('collectionCount')){
     $('collectionCount').textContent=count(routeFish); $('collectionTotal').textContent=total(routeFish)+'종';
     $('collectionProgress').value=count(routeFish); $('collectionProgress').max=total(routeFish);
     $('collectionProgress').setAttribute('aria-label',`${routeLabel()} 수집 ${count(routeFish)} / ${total(routeFish)}종`);
+    }
     $('collectionStatus').textContent=`${routeLabel()} ${count(routeFish)} / ${total(routeFish)}종 수집 · 이 브라우저에 저장`;
   }
   function speciesGroups() {

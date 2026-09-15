@@ -1,0 +1,87 @@
+/* Shared navigation and compact forecast workspaces. */
+.fishing-page-nav{display:flex;align-items:center;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.fishing-page-nav>a{display:inline-flex;align-items:center;min-height:38px;padding:7px 14px;border:1px solid #385770;border-radius:6px;color:var(--ff-text);text-decoration:none;font-weight:700;font-size:14px}
+.fishing-page-nav>a[aria-current]{background:#9bd9d3;color:#143539;border-color:#9bd9d3}
+.fishing-page-nav .planner-actions{margin-left:auto;display:flex;gap:6px}
+.planner-actions>a{display:inline-flex;align-items:center;min-height:38px;padding:7px 12px;border:1px solid #385770;background:#182d41;border-radius:7px;color:var(--ff-text);text-decoration:none;font-size:14px;font-weight:700}
+.nav-family-label{display:block;padding:7px 12px 2px;color:var(--ff-muted);font-size:10pt}
+.fishing-page-nav a:focus-visible{outline:2px solid #9bd9d3;outline-offset:3px}
+[data-fishing-page] .fish-main{padding-top:18px;width:min(1600px,calc(100% - 48px))}
+[data-fishing-page] .masthead{margin:0 0 12px;gap:12px}
+[data-fishing-page] .masthead h1{font-size:23px;margin:0}
+[data-fishing-page] .masthead h1 span{font-size:15px;color:var(--ff-muted);font-weight:400;margin-left:10px}
+.forecast-masthead{flex-wrap:wrap}
+.forecast-masthead .fishing-page-nav{flex:1;margin:0}
+.forecast-masthead h1{white-space:nowrap}
+[data-fishing-page="forecast"] .plan-options:not([open]){display:none}
+[data-fishing-page="forecast"] .plan-options{margin:0 0 12px}
+[data-fishing-page="forecast"] .plan-expansion-filter{margin:0 0 10px;padding:0;border:0}
+[data-fishing-page="forecast"] .plan-expansion-filter legend{float:left;margin:8px 12px 0 0}
+[data-fishing-page="forecast"] .plan-expansion-filter legend span{display:none}
+[data-fishing-page="forecast"] .plan-expansion-row{gap:10px}
+[data-fishing-page="forecast"] .plan-catalog-filters,[data-fishing-page="forecast"] .plan-filters{margin:8px 0;gap:12px}
+[data-fishing-page="forecast"] .plan-catalog-filters label{flex:0 1 260px}
+[data-fishing-page="forecast"] .plan-catalog-filters #planStatusField{flex:0 1 235px}
+[data-fishing-page="forecast"] .plan-filters>label{flex:0 1 360px}
+[data-fishing-page="forecast"] .plan-sort-group{flex:0 1 580px}
+[data-fishing-page="forecast"] .plan-sort-group small{display:none}
+[data-fishing-page="forecast"] .plan-sort-group legend{float:left;margin:27px 10px 0 0}
+.forecast-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.forecast-search{display:flex;gap:8px;align-items:center;flex:1;max-width:500px}
+.forecast-search #planSearch{margin:0;flex:1;width:auto}
+.forecast-state{font-size:10pt;color:var(--ff-muted)}
+.forecast-toolbar>button{margin-left:auto}
+.forecast-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;align-items:end;margin:8px 0}
+.forecast-filters>label{display:grid;gap:5px;min-width:0;font-size:10pt}
+.forecast-filters select{width:100%}
+.forecast-filters .plan-sort-group{grid-column:span 2}
+.forecast-filters .plan-sort-group legend{float:none!important;margin:0 0 5px!important}
+.forecast-filters .plan-sort-controls label{gap:5px;display:grid}
+.forecast-filters .plan-sort-controls{gap:8px}
+.forecast-filters .plan-sort-controls label{font-size:0!important}
+.forecast-filters .plan-sort-controls select{font-size:14px}
+.forecast-filters .plan-sort-controls label:first-child:before{content:'① 조건 1';font-size:10pt}
+.forecast-filters .plan-sort-controls label:last-child:before{content:'② 조건 2';font-size:10pt}
+.forecast-filters .plan-sort-group legend{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.plan-options .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(min-width:1450px){.forecast-filters{grid-template-columns:210px 180px 175px 350px minmax(400px,1fr)}.forecast-filters .plan-sort-group{grid-column:auto}}
+.forecast-info{display:flex;align-items:baseline;gap:8px 18px;flex-wrap:wrap;margin:8px 0}
+.forecast-info #planCount{margin:0;font-size:10pt}
+.forecast-info>details{margin:0;padding:4px 8px;font-size:10pt}
+.forecast-info>details[open]{flex-basis:100%}
+.forecast-info .plan-help>summary{min-height:0}
+[data-fishing-page="forecast"] .plan-results-scroll{margin-top:6px}
+[data-fishing-page="catalog"] .progress-strip{margin:0 0 18px;padding:16px 20px}
+[data-fishing-page="catalog"] .progress-strip strong{font-size:23px}
+.journal-hero{padding:0;margin:0 0 12px;min-height:0}
+.journal-hero h1{font-size:23px;margin:0}
+.journal-hero h1 span{font-size:15px;color:var(--ff-muted);font-weight:400;margin-left:10px}
+.journal-hero .eyebrow,.journal-hero>div>p{display:none}
+.planner-route-bar{margin:8px 0;min-height:0}
+.planner-route-bar>p{margin:0;font-size:10pt}
+.departure-board{padding:14px 18px}
+.departure-alerts{padding:8px 0;margin:4px 0;align-items:center}
+.departure-alerts p{font-size:10pt;margin:0}
+.departure-alert-note{display:none}
+.planner-sidebar .collection-summary{display:none}
+.departure-board .section-heading{margin-bottom:8px}
+.departure-board .section-heading .number{display:none}
+@media(min-width:1100px){
+ [data-fishing-page="forecast"] #fishingPlanner{display:grid;grid-template-columns:minmax(0,1fr)}
+ [data-fishing-page="forecast"] #fishingPlanner[hidden]{display:none}
+}
+@media(max-width:700px){
+ [data-fishing-page] .fish-main{width:calc(100% - 28px);padding-top:12px}
+ [data-fishing-page] .masthead{flex-direction:row;align-items:center}
+ [data-fishing-page] .masthead h1{font-size:20px}
+ [data-fishing-page] .masthead h1 span,.journal-hero h1 span{display:block;margin:4px 0 0}
+ .forecast-masthead .fishing-page-nav{flex-basis:100%}
+ .fishing-page-nav .planner-actions{width:100%;margin:4px 0 0;flex-wrap:wrap}
+ [data-fishing-page="forecast"] .plan-expansion-filter legend{float:none;margin:0 0 6px}
+ [data-fishing-page="forecast"] .plan-catalog-filters label{flex:1 1 140px}
+ [data-fishing-page="forecast"] .plan-sort-group{flex-basis:100%}
+ [data-fishing-page="forecast"] .plan-sort-group legend{float:none;margin:0 0 6px}
+ .forecast-search{min-width:100%}.forecast-info{gap:8px}
+ .forecast-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .forecast-filters>label:nth-child(3),.forecast-filters>label:nth-child(4),.forecast-filters>.select-options,.forecast-filters .plan-sort-group{grid-column:1/-1}
+}

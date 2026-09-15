@@ -9,7 +9,7 @@ test('preparation times toggle live countdowns, retain focus, cross start/end an
     let now=Date.parse('2026-09-10T13:00:00Z');p.w.Date.now=()=>now;
     const chance=real.startTimeline(fish(21177),now,{count:2}).result.chances[0];now=chance.start-2000;
     p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
-    const selector='[data-preparation-fish="21177"] button[data-preparation-times]',before=p.storage.getItem(KEY),preferences=JSON.stringify(p.planSnapshot());
+    const selector='[data-preparation-fish="21177"] button[data-preparation-times]',before=p.storage.getItem(KEY),preferences=p.storage.getItem('teo-ffxiv.fishing.plan.v1');
     let button=p.$('#planResults '+selector);assert.ok(button&&!button.disabled);assert.equal(button.getAttribute('aria-pressed'),'false');assert.match(button.textContent,/9\./);
     button.focus();button.click();assert.match(button.textContent,/시작까지 2초/);assert.match(button.textContent,/다음 출현까지/);
     now+=1000;await tick();assert.match(button.textContent,/시작까지 1초/);assert.equal(p.d.activeElement,button);
@@ -19,7 +19,7 @@ test('preparation times toggle live countdowns, retain focus, cross start/end an
     p.$('.plan-name').click();const modal=p.$('#detailBody '+selector);assert.equal(modal.getAttribute('aria-pressed'),'true');modal.click();assert.equal(modal.getAttribute('aria-pressed'),'false');assert.match(modal.textContent,/9\./);assert.equal(button.getAttribute('aria-pressed'),'false');assert.equal(p.$('#detailTitle').textContent,'칠채천주');
     p.$('#closeDetail').click();p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','칠채천주','input');
     const catalog=p.$('#collectionListViewport '+selector);catalog.click();assert.match(catalog.textContent,/시작까지/);p.change('#search','칠채천주','input');assert.equal(p.$('#collectionListViewport '+selector).getAttribute('aria-pressed'),'true');
-    assert.equal(p.storage.getItem(KEY),before);assert.equal(JSON.stringify(p.planSnapshot()),preferences);
+    assert.equal(p.storage.getItem(KEY),before);assert.equal(p.storage.getItem('teo-ffxiv.fishing.plan.v1'),preferences);
   }finally{p.close();}
 });
 test('Warden preparation preserves intuition counts and follows timed mooch fish',()=>{
@@ -55,7 +55,7 @@ test('all views retain collected unrestricted intuition fish without changing ta
   const p=open({plan:true,storage:memory({[KEY]:E.backup(new Set([36520,36519]))})});try{
     Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.w.Date.now=()=>Date.parse('2026-09-10T13:00:00Z');
     p.$('#showPlanner').click();p.$('#planSearch').value='별고래';p.$('#planRefresh').click();
-    const before=p.storage.getItem(KEY),preferences=JSON.stringify(p.planSnapshot());
+    const before=p.storage.getItem(KEY),preferences=p.storage.getItem('teo-ffxiv.fishing.plan.v1');
     function check(container){
       const group=container.querySelector('[aria-label="별고래 준비 어종"]');assert.ok(group);
       assert.deepEqual([...group.querySelectorAll('[data-preparation-fish]')].map(n=>+n.dataset.preparationFish),[36521,36520,36519]);
@@ -74,7 +74,7 @@ test('all views retain collected unrestricted intuition fish without changing ta
     p.$('#planResults .plan-name[data-fish-detail="41412"]').click();check(p.$('#detailBody'));
     assert.equal(p.all('#detailBody .timeline-list li').length,5);
     p.$('#closeDetail').click();p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','별고래','input');check(p.$('#collectionListViewport'));
-    assert.equal(p.storage.getItem(KEY),before);assert.equal(JSON.stringify(p.planSnapshot()),preferences);
+    assert.equal(p.storage.getItem(KEY),before);assert.equal(p.storage.getItem('teo-ffxiv.fishing.plan.v1'),preferences);
   }finally{p.close();}
 });
 
@@ -109,13 +109,13 @@ test('planner and dialog show timed prerequisites below targets despite collecti
     assert.equal(group.querySelector('[data-preparation-caught="24203"]').hidden,false);
     assert.ok(group.querySelector('[data-preparation-fish="24203"] [data-preparation-fish="21177"]'));
     assert.match(group.querySelector('[data-preparation-fish="21177"] [data-preparation-times]').textContent,/다음/);
-    const before=p.storage.getItem(KEY),preferences=JSON.stringify(p.planSnapshot());
+    const before=p.storage.getItem(KEY),preferences=p.storage.getItem('teo-ffxiv.fishing.plan.v1');
     p.$('.plan-name').click();assert.equal(p.all('#detailBody [data-preparation-fish]').length,5);
     p.$('#detailBody [data-preparation-fish="21177"] .preparation-more').click();assert.equal(p.$('#detailTitle').textContent,'자채어');assert.equal(p.all('.timeline-list li').length,5);
     p.$('#closeDetail').click();p.$('#planSearch').value='세 날 범고래';p.$('#planRefresh').click();
     const whale=p.$('.plan-entry>.fish-preparations');assert.equal(whale.querySelectorAll('[data-preparation-fish]').length,2);
     for(const id of [43795,52006]){assert.equal(whale.querySelector(`[data-preparation-caught="${id}"]`).hidden,false);assert.match(whale.querySelector(`[data-preparation-fish="${id}"] [data-preparation-times]`).textContent,/다음/);}
-    assert.equal(p.storage.getItem(KEY),before);assert.equal(JSON.stringify(p.planSnapshot()),preferences);
+    assert.equal(p.storage.getItem(KEY),before);assert.equal(p.storage.getItem('teo-ffxiv.fishing.plan.v1'),preferences);
     p.$('#planSearch').value='잘레라';p.$('#planRefresh').click();assert.equal(p.$('.plan-entry>.fish-preparations'),null);
   }finally{p.close();}
 });

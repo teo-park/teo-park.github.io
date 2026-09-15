@@ -52,7 +52,7 @@ test('numeric preparation and intuition times appear in all views, refresh after
     Object.defineProperty(p.d,'hidden',{value:false,configurable:true});let time=now;p.w.Date.now=()=>time;
     const before=p.storage.getItem(KEY);
     p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
-    const settings=JSON.stringify(p.planSnapshot()),selector='[data-intuition-target="24994"]';
+    const settings=p.storage.getItem('teo-ffxiv.fishing.plan.v1'),selector='[data-intuition-target="24994"]';
     assert.equal(p.all('#planResults '+selector).length,2);
     const summary=p.$('#planResults .intuition-summary');assert.match(summary.textContent,/준비 시작 → 직감 가능/);assert.match(summary.textContent,/9\. 11\./);assert.doesNotMatch(summary.textContent,/완성|계산 중/);
     const plan=p.$('#planResults .intuition-plan');assert.match(plan.textContent,/남채어 ×3/);assert.match(plan.textContent,/등채어 ×3/);assert.match(plan.textContent,/녹채어 ×5/);assert.match(plan.textContent,/직감 종료 시각은 아닙니다/);
@@ -61,6 +61,6 @@ test('numeric preparation and intuition times appear in all views, refresh after
     p.w.FishingPreparationView.refresh();assert.notEqual(plan.textContent,prior);
     p.$('#planResults .plan-name[data-fish-detail="24994"]').click();assert.equal(p.$('#fishTimeline'),null);assert.ok(p.$('#detailBody '+selector));assert.equal(p.$('#detailBody [data-mooch-plan]'),null);p.$('#closeDetail').click();
     p.$('#showBook').click();p.$('[data-layout-choice="list"]').click();p.change('#search','칠채천주','input');assert.match(p.$('#collectionListViewport .intuition-summary').textContent,/직감 가능/);
-    assert.equal(p.storage.getItem(KEY),before);assert.equal(JSON.stringify(p.planSnapshot()),settings);
+    assert.equal(p.storage.getItem(KEY),before);assert.equal(p.storage.getItem('teo-ffxiv.fishing.plan.v1'),settings);
   }finally{p.close();}
 });

@@ -21,7 +21,7 @@ test('fish details show five openings with a separate playtime view, without cha
 });
 test('planner keeps the book accessible, saves overnight playtime and removes caught fish from alert targets',()=>{
   const p=open({plan:true});try{
-    assert.equal(p.planSnapshot().saved,false);p.$('#showPlanner').click();assert.equal(p.$('#collectionPanel').hidden,true);assert.ok(p.all('.plan-card').length);
+    assert.equal(p.planSnapshot().saved,false);p.$('#showPlanner').click();assert.equal(p.$('#collectionPanel'),null);assert.ok(p.all('.plan-card').length);
     p.change('#playStart5','22:00');p.change('#playEnd5','02:00');p.$('#savePlay').click();assert.equal(p.planSnapshot().saved,true);assert.equal(p.planSnapshot().settings.days[5].end,'02:00');
     const check=p.$('.plan-card [data-caught]'),id=+check.dataset.caught;assert.ok(p.planSnapshot().ids.includes(id));check.click();assert.ok(!p.planSnapshot().ids.includes(id));assert.equal(p.$(`.plan-card [data-caught="${id}"]`),null);
     p.$('#undo').click();assert.ok(p.planSnapshot().ids.includes(id));
@@ -73,7 +73,7 @@ test('condition panels expand under each row, preserve comparisons on refresh, a
     p.$('#planRefresh').click();assert.equal(p.$('.plan-inline-detail:not([hidden])'),panel);assert.equal(panel.querySelector('[data-compare-exclude]').value,choice);
     p.$('[data-plan-spot]').click();const another=p.all('.plan-card [data-plan-detail]').find(b=>b.dataset.planDetail!=='12720');another.click();assert.equal(p.all('.plan-inline-detail:not([hidden])').length,2);
     p.$('.plan-card [data-plan-detail="12720"]').click();assert.equal(p.$('#plan-detail-12720').hidden,true);assert.equal(p.all('.plan-inline-detail:not([hidden])').length,1);
-    assert.equal(p.$('#detailDialog').open,false);assert.equal(p.$('#totalCount').textContent,'0 / 1,806');
+    assert.equal(p.$('#detailDialog').open,false);assert.match(p.$('#recordCount').textContent,/수집 0종/);
   }finally{p.close();}
 });
 

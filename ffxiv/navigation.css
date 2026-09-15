@@ -111,3 +111,5 @@ body .site-header[data-navigation] .nav-dropdown .nav-subpage { padding-left: 24
   [data-navigation] .nav-dropdown { max-height: calc(100dvh - 180px); }
 }
 .usage-notice{margin-top:12px;font-size:13px;line-height:1.65;text-align:left;max-width:720px;color:var(--ff-muted,#a7b9ce)}.usage-notice summary{cursor:pointer;list-style:revert}.usage-notice p{margin:8px 0!important}.usage-notice button{font:inherit;color:inherit;background:transparent;border:1px solid var(--ff-line,#30465c);padding:6px 10px;border-radius:4px;cursor:pointer}.usage-notice button:focus-visible{outline:2px solid var(--ff-accent,#84d9ed);outline-offset:2px}
+
+.nav-family-label{display:block;padding:7px 12px 2px;color:var(--ff-muted);font-size:10pt}

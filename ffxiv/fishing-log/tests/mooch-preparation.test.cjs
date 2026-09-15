@@ -50,7 +50,7 @@ test('plan, catalog and dialog keep intuition waiting separate from mooch prepar
     Object.defineProperty(p.d,'hidden',{value:false,configurable:true});p.w.Date.now=()=>now;
     assert.deepEqual(Array.from(p.w.FISHING_DATA.fishes.filter(f=>p.w.FishingPreparationView.timeOnly(f)),f=>f.id),[8763,24994]);
     p.$('#showPlanner').click();p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();
-    const saved=p.storage.getItem(KEY),settings=JSON.stringify(p.planSnapshot());
+    const saved=p.storage.getItem(KEY),settings=p.storage.getItem('teo-ffxiv.fishing.plan.v1');
     assert.equal(p.$('#planResults [data-mooch-plan]'),null);
     assert.match(p.$('.plan-window').textContent,/준비 시작 → 직감 가능/);
     assert.match(p.$('.preparation-note').textContent,/지역에서 대기/);
@@ -75,6 +75,6 @@ test('plan, catalog and dialog keep intuition waiting separate from mooch prepar
     assert.equal(p.$('#collectionListViewport [data-mooch-plan]'),null);assert.match(p.$('#collectionListViewport .plan-window').textContent,/준비 시작 → 직감 가능/);
     p.change('#search','남채어','input');
     const indigo=p.$('#collectionListViewport [data-mooch-target="24203"]');assert.ok(indigo);assert.match(indigo.textContent,/생미끼 확보 후 · 유지 중 도전/);
-    assert.equal(p.storage.getItem(KEY),saved);assert.equal(JSON.stringify(p.planSnapshot()),settings);
+    assert.equal(p.storage.getItem(KEY),saved);assert.equal(p.storage.getItem('teo-ffxiv.fishing.plan.v1'),settings);
   }finally{p.close();}
 });

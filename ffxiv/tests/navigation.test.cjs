@@ -17,13 +17,13 @@ test('all public pages have consistent navigation, valid relative destinations a
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
       assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 14);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 15);
       assert.equal(d.querySelector('#nav-beastmaster'),null);
       assert.deepEqual([...d.querySelectorAll('#nav-collection a[href*="beastmaster"]')].map(a=>a.textContent.replace('현재','')),['마수도감','마수조련사 공략']);
       const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
       assert.deepEqual([...guides].map(a=>a.textContent.replace('현재','')),['어부 스킬 안내','터주 유형별 공략']);
       assert.deepEqual([...d.querySelectorAll('#nav-fishing .nav-group-label')].map(el=>el.textContent),['어부 가이드','낚시 도감']);
-      assert.deepEqual([...d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fishing-log-label"] > li > a')].map(el=>el.textContent.replace('현재','')),['세계를 누비는 어부','먼바다']);
+      assert.deepEqual([...d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fishing-log-label"] > li > .nav-family-label')].map(el=>el.textContent.replace('현재','')),['세계를 누비는 어부','먼바다']);
       for (const link of d.querySelectorAll('[data-navigation] a')) {
         const url = new URL(link.href);
         assert.equal(url.origin, 'https://example.test');

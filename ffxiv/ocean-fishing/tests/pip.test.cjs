@@ -190,7 +190,7 @@ for(const entry of ['', 'indigo', 'ruby'])test(`${entry||'unified home'}: switch
 test('unified entry restores the last route, accepts explicit bookmarks and ignores unknown routes',async()=>{
   const values=new Map([['ocean:active-route','ruby']]);
   for(const [search,route] of [['','ruby'],['?route=indigo','indigo'],['?route=invalid','ruby']]){
-    const ui=await open('',{values,search});try{assert.equal(ui.$(`[data-ocean-route="${route}"]`).getAttribute('aria-pressed'),'true');assert.equal(Number(ui.$('#collectionTotal').textContent.replace('종','')),route==='ruby'?119:140);assert.deepEqual(ui.errors,[]);}finally{ui.close();}
+    const ui=await open('',{values,search});try{assert.equal(ui.$(`[data-ocean-route="${route}"]`).getAttribute('aria-pressed'),'true');assert.ok(ui.$('#collectionStatus').textContent.includes('/ '+(route==='ruby'?119:140)+'종'));assert.deepEqual(ui.errors,[]);}finally{ui.close();}
   }
 });
 

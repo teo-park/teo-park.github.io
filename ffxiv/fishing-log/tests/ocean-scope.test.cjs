@@ -35,7 +35,7 @@ test('planner excludes ocean fish from rows, review list and alerts, and links t
   p.$('#planSearch').value='칠채천주';p.$('#planRefresh').click();assert.match(p.$('.plan-window').textContent,/준비 시작 → 직감 가능/);assert.equal(p.all('#planResults [data-preparation-fish]').length,5);
   assert.ok(p.planSnapshot().ids.every(id=>!M.isOceanFish(M.byId.get(id))));assert.ok(![...p.$('#planRegion').options].some(o=>o.value==='???'));
   p.$('#planSearch').value='송린가자미';p.$('#planRefresh').click();assert.equal(p.$('.plan-card'),null);assert.equal(p.$('#planUnscheduled [data-fish-detail]'),null);
-  p.$('#planToOcean').click();assert.equal(p.$('#fishingPlanner').hidden,true);assert.equal(p.$('#collectionScope').value,'ocean');assert.equal(p.$('#search').value,'');assert.match(p.$('#resultCount').textContent,/259종/);
+  assert.equal(new URL(p.$('#planToOcean').href).pathname,'/ffxiv/ocean-fishing/checklist/');
   p.$('#showPlanner').click();p.$('#planSearch').value='포테우카';p.$('#planRefresh').click();p.$('#planToSpot').click();assert.equal(p.$('#collectionScope').value,'field');assert.match(p.$('#resultCount').textContent,/1종/);assert.equal(p.storage.getItem(KEY),before);
  }finally{p.close();}
 });

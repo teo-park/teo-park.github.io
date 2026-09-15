@@ -2,7 +2,7 @@
   const api=factory();
   if(typeof module==='object'&&module.exports)module.exports=api;
   else if(document.currentScript&&location.origin==='https://teo-park.github.io'){
-    api.start(window,new URL('visitor-counter-config.json?v=20260915-selection1',document.currentScript.src).href);
+    api.start(window,new URL('visitor-counter-config.json?v=20260916-pages1',document.currentScript.src).href);
   }
 })(typeof window==='object'?window:null,function(){
   'use strict';

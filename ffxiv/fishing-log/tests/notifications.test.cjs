@@ -18,7 +18,7 @@ test('normal untimed fish notify once per play session, not on every timer tick 
   const message=E.message(ordinary,Book.create(ordinary),first.events);assert.match(message.title,/상시 낚시 준비/);assert.match(message.body,/시간·날씨 제한 없음/);
 });
 test('page alerts request permission only on click, use local history and stop after disabling',async()=>{
-  const p=open(),notices=[];let requests=0,now=start,settings={...prefs},timers=new Map(),seq=0;
+  const p=open({catalog:false}),notices=[];let requests=0,now=start,settings={...prefs},timers=new Map(),seq=0;
   try{
     Object.defineProperty(p.w,'isSecureContext',{value:true});p.w.Date.now=()=>now;
     p.w.setTimeout=(fn)=>{timers.set(++seq,fn);return seq;};p.w.clearTimeout=id=>timers.delete(id);
@@ -38,7 +38,7 @@ test('page alerts request permission only on click, use local history and stop a
   }finally{p.close();}
 });
 test('notification failures do not mark an opportunity delivered',async()=>{
-  const p=open();try{
+  const p=open({catalog:false});try{
     Object.defineProperty(p.w,'isSecureContext',{value:true});p.w.Date.now=()=>E.next(data,weather,prefs,start).at;
     class BrokenNotification{static permission='granted';static async requestPermission(){return 'granted';}constructor(){throw Error('OS rejected notification');}}
     p.w.Notification=BrokenNotification;

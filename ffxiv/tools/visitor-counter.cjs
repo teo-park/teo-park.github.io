@@ -13,7 +13,7 @@ function build(databaseUrl) {
     origins: ['https://teo-park.github.io'],
     intervalMs: 30 * 60 * 1000,
     pages,
-    aliases: { '/ffxiv/ocean-fishing/indigo/': '/ffxiv/ocean-fishing/', '/ffxiv/ocean-fishing/ruby/': '/ffxiv/ocean-fishing/' },
+    aliases: { '/ffxiv/fishing-log/catalog/': '/ffxiv/fishing-log/', '/ffxiv/ocean-fishing/indigo/': '/ffxiv/ocean-fishing/', '/ffxiv/ocean-fishing/ruby/': '/ffxiv/ocean-fishing/' },
   };
   const owner = "auth != null && auth.token.email === 'teo.ffxiv.kr@gmail.com' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'";
   const rules = { rules: { '.read': false, '.write': false, counters: { '.read': owner }, visits: { '.read': owner }, selections: { '.read': owner } } };

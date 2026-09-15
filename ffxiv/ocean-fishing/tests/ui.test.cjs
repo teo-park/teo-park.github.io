@@ -260,6 +260,7 @@ async function open(page,storage=memory(),failData=false,options={}) {
     fetch(url) {
       const parsed=new URL(url);assert.equal(parsed.origin,'https://journal.test');
       if(parsed.pathname.endsWith('.css'))return null;
+      if(['/ffxiv/visitor-counter.js','/ffxiv/selection-counter.js'].includes(parsed.pathname))return Promise.resolve(fs.readFileSync(path.join(root,'..',path.basename(parsed.pathname))));
       if(parsed.pathname==='/ffxiv/select-options.js')return Promise.resolve(fs.readFileSync(path.join(root,'../select-options.js')));
       if(parsed.pathname==='/ffxiv/navigation.js')return Promise.resolve(fs.readFileSync(path.join(root,'../navigation.js')));
       if(parsed.pathname==='/ffxiv/fishing-collection.js'){requests.push('fishing-collection.js');return Promise.resolve(fs.readFileSync(path.join(root,'../fishing-collection.js')));}
@@ -451,7 +452,7 @@ test('legacy names, pasted imports, file imports, downloads and Teamcraft share 
   }finally{ui.close();}
   for(const route of ['indigo','ruby']){
     const ui=await open(route,storage);
-    try{assert.ok(Number(ui.$('#collectionCount').textContent)>0);assert.equal(Number(ui.$('#collectionCount').textContent),new Set(payload.fish.filter(f=>f.route===route&&C.caught(Shared.readOcean(storage),route,f.Fish)).map(f=>f.id)).size);}
+    try{assert.ok(Number(ui.$('#collectionStatus').textContent.match(/(\d+) \//)[1])>0);assert.equal(Number(ui.$('#collectionStatus').textContent.match(/(\d+) \//)[1]),new Set(payload.fish.filter(f=>f.route===route&&C.caught(Shared.readOcean(storage),route,f.Fish)).map(f=>f.id)).size);}
     finally{ui.close();}
   }
 });

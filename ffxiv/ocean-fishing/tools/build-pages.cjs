@@ -1,7 +1,17 @@
 const fs=require('node:fs'),path=require('node:path');
 const navigation=require('../../tools/site-navigation.cjs');
-const root=path.resolve(__dirname,'..'),version='20260915-score-alert';
-const routes={indigo:'먼바다 수첩',ruby:'먼바다 수첩',checklist:'물고기 도감'};
+const root=path.resolve(__dirname,'..'),version='20260916-pages1';
+const routes={indigo:'항해 예보',ruby:'항해 예보',checklist:'물고기 도감'};
+function layout(html,route){
+ const {JSDOM}=require('jsdom'),dom=new JSDOM(html),d=dom.window.document;
+ const catalog=route==='checklist',hero=d.querySelector('.journal-hero');
+ hero.querySelector('div').innerHTML=`<h1>먼바다 <span>${catalog?'물고기 도감':'항해 예보'}</span></h1>`;
+ const nav=d.createElement('nav');nav.className='fishing-page-nav';nav.setAttribute('aria-label','먼바다 페이지');
+ nav.innerHTML=`<a href="../"${catalog?'':' aria-current="page"'}>항해 예보</a><a href="../checklist/"${catalog?' aria-current="page"':''}>물고기 도감</a>`;hero.after(nav);
+ d.querySelector('.collection-summary')?.remove();d.querySelector('.planner-route-bar>a')?.remove();
+ const css=d.createElement('link');css.rel='stylesheet';css.href='../../fishing-pages.css?v='+version;d.head.append(css);
+ const output=dom.serialize();dom.window.close();return output;
+}
 const copyright='<p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>';
 function header(page){return navigation.header(page==='home'?'ocean-fishing/':`ocean-fishing/${page}/`);}
 const footer=`<footer class="journal-footer"><div><span>먼바다 · 무료·비영리 팬 도구</span><a href="../sources/">출처 및 라이선스</a></div>${copyright}<p class="font-credit">글꼴: <a href="https://seed.line.me/index_kr.html" target="_blank" rel="noopener noreferrer">LINE Seed KR</a> · <a href="../../fonts/line-seed-kr/OFL.txt">LINE Seed 글꼴 라이선스</a> · 보조 글꼴: <a href="https://hangeul.naver.com/font/nanum">나눔스퀘어라운드</a></p></footer>`;
@@ -10,7 +20,7 @@ function planner(route){return `<div class="planner-route-bar"><div class="route
 const checklist=`<section class="checklist-board"><div class="route-picker" aria-label="도감 항로"><button type="button" data-check-route="indigo" aria-pressed="true">근해</button><button type="button" data-check-route="ruby" aria-pressed="false">원양</button></div><div class="checklist-search"><label for="checklistSearch">물고기 검색</label><input id="checklistSearch" type="search" placeholder="이름 또는 초성으로 검색" autocomplete="off"><label class="subtle-option"><input id="checklistUncaught" type="checkbox"> 미획득만 보기</label><button id="clearSearch" type="button">검색 초기화</button></div><div class="checklist-status"><strong id="checklistCount"></strong><span id="checklistResults" role="status" aria-live="polite"></span></div><p class="checklist-departure-help">물고기별 가장 빠른 출항과 다음 5회를 확인하세요. 접수 중인 배부터 표시하며, 시간을 누르면 해당 항로로 이동합니다.</p><div id="checklistGroups"></div></section>`;
 for(const [route,title] of Object.entries(routes)){
  const html=`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title} · 먼바다</title><meta name="description" content="${title}의 수집 기록과 낚시 조건을 확인하세요. 먼바다 낚시 시간표·미끼·선상과제·업적작·고득점 계획을 무료로 제공합니다."><link rel="canonical" href="https://teo-park.github.io/ffxiv/ocean-fishing/${route==='checklist'?'checklist/':''}"><meta name="theme-color" content="#0b1220"><link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../../theme.css?v=20260909-line1"><link rel="stylesheet" href="../css/app.css?v=${version}"><script defer src="../scripts/teamcraft-ids.js?v=${version}"></script><script defer src="../../fishing-collection.js?v=${version}"></script><script defer src="../scripts/collection.js?v=${version}"></script><script defer src="../scripts/voyages.js?v=${version}"></script>${route==='checklist'?'':`<script defer src="../scripts/achievements.js?v=${version}"></script><script defer src="../scripts/achievement-records.js?v=${version}"></script><script defer src="../scripts/notifications.js?v=${version}"></script><script defer src="../scripts/pip.js?v=${version}"></script>`}<script defer src="../scripts/app.js?v=${version}"></script>${navigation.assets(`ocean-fishing/${route}/`)}</head><body data-page="${route}" data-asset-base="../" data-version="${version}"><a class="skip-link" href="#mainContent">낚시 정보로 바로가기</a>${header(route)}<main id="mainContent"><section class="journal-hero"><div><p class="eyebrow">${route==='checklist'?'FISH COLLECTION':'OCEAN FISHING / VOYAGE PLANNER'}</p><h1>${title}</h1><p>${route==='checklist'?'근해·원양 물고기의 수집 상태와 낚시 조건을 확인하세요.':'출항 시간별 항로, 미끼, 물고기 정보를 확인하세요.'}</p></div><div class="journal-actions">${route==='checklist'?'':'<button id="openOceanPip" type="button" data-open-ocean-pip disabled aria-pressed="false">PiP 작은 창</button>'}<button id="openRecords" type="button">수집 기록 관리</button></div></section><p id="loading" role="status">항해 자료를 불러오는 중이에요.</p><button id="retryLoad" type="button" hidden>다시 불러오기</button><div id="appContent" hidden>${route==='checklist'?checklist:planner(route)}</div></main>${footer}${modal}<noscript>먼바다를 사용하려면 JavaScript를 켜 주세요.</noscript></body></html>`;
- fs.writeFileSync(path.join(root,route,'index.html'),html+'\n');
+ fs.writeFileSync(path.join(root,route,'index.html'),layout(html,route)+'\n');
 }
 const home=fs.readFileSync(path.join(root,'indigo/index.html'),'utf8')
  .replace(/(href|src)="(\.\.\/)+/g,match=>match.replace('../',''))

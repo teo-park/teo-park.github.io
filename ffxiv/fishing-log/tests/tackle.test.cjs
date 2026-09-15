@@ -49,7 +49,7 @@ test('planner shows target and chained bite details, snagging, short collection 
  const p=open({plan:true});try{
   p.$('#showPlanner').click();p.$('#planCollectionMode').click();
   p.$('#planSearch').value='호수성게';p.$('#planRefresh').click();assert.equal(p.$('.plan-snagging').textContent,'갈고리 낚시 필요');assert.match(p.$('.plan-bite-time').textContent,/중앙 \d+(?:\.\d+)?초/);assert.match(p.$('.plan-bite-time').title,/평균 약/);
-  assert.equal(p.$('.plan-card [data-caught]').textContent,'수집');p.$('#showBook').click();p.scanApply([4869]);p.$('#showPlanner').click();
+  assert.equal(p.$('.plan-card [data-caught]').textContent,'수집');p.$('#showBook').click();p.scanApply([4869]);p.$('#showPlanner').click();p.$('#planCollectionMode').click();
   p.$('#planSearch').value='심해아귀';p.$('#planRefresh').click();assert.equal(p.$('.plan-tug').textContent,'!!');assert.equal(p.$('.plan-hookset').textContent,'강력한 낚아채기');
   const steps=p.all('.plan-mooch');assert.deepEqual(steps.map(e=>e.querySelector('button').textContent),['멜토르 망둥이','줄삼치']);assert.match(steps[0].textContent,/! · 섬세한 낚아채기/);assert.match(steps[1].textContent,/!! · 강력한 낚아채기/);
   const m=E.create(D,B),target=m.byId.get(4912),step=m.tacklePaths(target.routes[0])[0].steps[1],range=m.biteTime(step.id,step.routes[0]);assert.ok(steps[0].textContent.includes(`중앙 ${range.median}초`));assert.ok(steps[0].querySelector('.plan-bite-time').title.includes(`약 ${range.min}–${range.max}초`));

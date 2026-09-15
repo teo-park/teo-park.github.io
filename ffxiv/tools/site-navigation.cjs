@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const version = '20260915-owner1';
+const version = '20260916-pages1';
 const guidePages = [
   ['fisher-skills/', '어부 스킬 안내'],
   ['fisher-skills/big-fish/', '터주 유형별 공략'],
@@ -29,20 +29,27 @@ const categories = [
   ] },
   { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
 ];
+const catalogPages = [['fishing-log/catalog/', '물고기 도감']];
 const journalPages = [
   ['ocean-fishing/checklist/', '물고기 도감'],
 ];
 const journalAliases = ['ocean-fishing/indigo/', 'ocean-fishing/ruby/'];
-const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...journalPages.map(([url]) => url), ...journalAliases, 'ocean-fishing/sources/'];
-const baseFor = page => page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
+const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...catalogPages.map(([url])=>url), ...journalPages.map(([url]) => url), ...journalAliases, 'ocean-fishing/sources/'];
+const baseFor = page => page === 'fishing-log/catalog/' ? '../' : page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
-  return `<script defer src="${base}visitor-counter.js?v=20260915-owner1"></script><script defer src="${base}selection-counter.js?v=20260915-owner1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
+  return `<script defer src="${base}visitor-counter.js?v=20260916-pages1"></script><script defer src="${base}selection-counter.js?v=20260916-pages1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
 }
 function header(page) {
   const base = baseFor(page);
   const currentPage = journalAliases.includes(page) ? 'ocean-fishing/' : page;
-  const link = ([url, label], nested = false) => `<li><a href="${base}${url}"${nested ? ' class="nav-subpage"' : ''}${currentPage === url ? ' aria-current="page"' : ''}>${label}${currentPage === url ? '<span class="nav-current-label">현재</span>' : ''}</a>${url === 'ocean-fishing/' ? `<ul class="nav-journal-pages" aria-label="먼바다 페이지">${journalPages.map(tool => link(tool, true)).join('')}</ul>` : ''}</li>`;
+  const link = ([url, label], nested = false) => {
+    if(!nested && ['fishing-log/','ocean-fishing/'].includes(url)){
+      const children=url==='fishing-log/'?[[url,'낚시 예보'],...catalogPages]:[[url,'항해 예보'],...journalPages];
+      return `<li><span class="nav-family-label">${label}</span><ul class="nav-journal-pages" aria-label="${label} 페이지">${children.map(tool=>link(tool,true)).join('')}</ul></li>`;
+    }
+    return `<li><a href="${base}${url}"${nested ? ' class="nav-subpage"' : ''}${currentPage === url ? ' aria-current="page"' : ''}>${label}${currentPage === url ? '<span class="nav-current-label">현재</span>' : ''}</a></li>`;
+  };
   const groups = categories.map(category => {
     const active = category.tools.some(([url]) => page.startsWith(url));
     const contents = category.groups
@@ -67,4 +74,4 @@ function update() {
   console.log(`Updated navigation on ${pages.length} pages.`);
 }
 if (require.main === module) update();
-module.exports = { categories, journalPages, guidePages, pages, header, assets, update };
+module.exports = { categories, journalPages, catalogPages, guidePages, pages, header, assets, update };

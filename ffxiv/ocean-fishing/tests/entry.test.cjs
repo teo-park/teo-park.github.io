@@ -34,7 +34,7 @@ test('public home combines both routes in one planner and preserves bookmark ent
  const home=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8')).window.document;
  assert.equal(home.body.dataset.page,'planner');assert.ok(home.querySelector('#scheduleRows'));assert.ok(home.querySelector('[data-open-ocean-pip]'));
  for(const route of ['indigo','ruby'])assert.ok(home.querySelector(`[data-ocean-route="${route}"]`));
- assert.ok(home.querySelector('.planner-route-bar a[href="checklist/"]'));
+ assert.ok(home.querySelector('.fishing-page-nav a[href="checklist/"]'));
  const portal=new JSDOM(fs.readFileSync(path.join(root,'../index.html'),'utf8')).window.document;assert.ok(portal.querySelector('.tool-link[href="./ocean-fishing/"]'));
  const sitemap=fs.readFileSync(path.join(root,'../sitemap.xml'),'utf8');for(const route of ['', 'indigo/','ruby/','checklist/'])assert.ok(sitemap.includes(`/ffxiv/ocean-fishing/${route}</loc>`));
 });
