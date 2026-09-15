@@ -14,12 +14,13 @@ function build(databaseUrl) {
     pages,
     aliases: { '/ffxiv/ocean-fishing/indigo/': '/ffxiv/ocean-fishing/', '/ffxiv/ocean-fishing/ruby/': '/ffxiv/ocean-fishing/' },
   };
-  const rules = { rules: { '.read': false, '.write': false, counters: { '.read': true } } };
+  const owner = "auth != null && auth.token.email === 'teo.ffxiv.kr@gmail.com' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'";
+  const rules = { rules: { '.read': false, '.write': false, counters: { '.read': owner }, visits: { '.read': owner } } };
   for (const { key } of pages) {
-    rules.rules.counters[key] = {
-      '.write': 'newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))',
-      '.validate': 'newData.val() <= 9007199254740991 && newData.getPriority() === null',
-    };
+    rules.rules.visits[key] = { '$eventId': {
+      '.write': "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+      '.validate': 'newData.getPriority() === null',
+    } };
   }
   return { config, rules };
 }

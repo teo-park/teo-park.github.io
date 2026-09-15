@@ -3,70 +3,105 @@
     ".read": false,
     ".write": false,
     "counters": {
-      ".read": true,
+      ".read": "auth != null && auth.token.email === 'teo.ffxiv.kr@gmail.com' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'"
+    },
+    "visits": {
+      ".read": "auth != null && auth.token.email === 'teo.ffxiv.kr@gmail.com' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'",
       "home": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "msq-tracker": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "pvp-series-calculator": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "duty-finder": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "triple-triad": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "minions": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "blue-mage": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "beastmaster": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "beastmaster__guide": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "weapons": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "fisher-skills": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "fisher-skills__big-fish": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "fishing-log": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "ocean-fishing": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "ocean-fishing__checklist": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       },
       "ocean-fishing__sources": {
-        ".write": "newData.isNumber() && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))",
-        ".validate": "newData.val() <= 9007199254740991 && newData.getPriority() === null"
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
       }
     }
   }
