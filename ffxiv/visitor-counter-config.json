@@ -1,0 +1,93 @@
+{
+  "databaseUrl": "https://teo-ffxiv-counter-default-rtdb.asia-southeast1.firebasedatabase.app",
+  "origins": [
+    "https://teo-park.github.io"
+  ],
+  "intervalMs": 1800000,
+  "pages": [
+    {
+      "key": "home",
+      "path": "/ffxiv/",
+      "label": "도구함 홈"
+    },
+    {
+      "key": "msq-tracker",
+      "path": "/ffxiv/msq-tracker/",
+      "label": "메인 퀘스트 진행률"
+    },
+    {
+      "key": "pvp-series-calculator",
+      "path": "/ffxiv/pvp-series-calculator/",
+      "label": "PvP 시리즈 계산기"
+    },
+    {
+      "key": "duty-finder",
+      "path": "/ffxiv/duty-finder/",
+      "label": "임무 초성 사전"
+    },
+    {
+      "key": "triple-triad",
+      "path": "/ffxiv/triple-triad/",
+      "label": "트리플 트라이어드 수첩"
+    },
+    {
+      "key": "minions",
+      "path": "/ffxiv/minions/",
+      "label": "꼬마친구 수첩"
+    },
+    {
+      "key": "blue-mage",
+      "path": "/ffxiv/blue-mage/",
+      "label": "청마도사 스킬 수첩"
+    },
+    {
+      "key": "beastmaster",
+      "path": "/ffxiv/beastmaster/",
+      "label": "마수도감"
+    },
+    {
+      "key": "beastmaster__guide",
+      "path": "/ffxiv/beastmaster/guide/",
+      "label": "마수조련사 공략"
+    },
+    {
+      "key": "weapons",
+      "path": "/ffxiv/weapons/",
+      "label": "무기 수첩"
+    },
+    {
+      "key": "fisher-skills",
+      "path": "/ffxiv/fisher-skills/",
+      "label": "어부 스킬 안내"
+    },
+    {
+      "key": "fisher-skills__big-fish",
+      "path": "/ffxiv/fisher-skills/big-fish/",
+      "label": "터주 유형별 공략"
+    },
+    {
+      "key": "fishing-log",
+      "path": "/ffxiv/fishing-log/",
+      "label": "세계를 누비는 어부"
+    },
+    {
+      "key": "ocean-fishing",
+      "path": "/ffxiv/ocean-fishing/",
+      "label": "먼바다"
+    },
+    {
+      "key": "ocean-fishing__checklist",
+      "path": "/ffxiv/ocean-fishing/checklist/",
+      "label": "물고기 도감"
+    },
+    {
+      "key": "ocean-fishing__sources",
+      "path": "/ffxiv/ocean-fishing/sources/",
+      "label": "먼바다 출처 안내"
+    }
+  ],
+  "aliases": {
+    "/ffxiv/ocean-fishing/indigo/": "/ffxiv/ocean-fishing/",
+    "/ffxiv/ocean-fishing/ruby/": "/ffxiv/ocean-fishing/"
+  }
+}

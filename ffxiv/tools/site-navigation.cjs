@@ -37,7 +37,7 @@ const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...j
 const baseFor = page => page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
-  return `<link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
+  return `<link rel="stylesheet" href="${base}visitor-counter.css?v=20260915-counter1"><script defer src="${base}visitor-counter.js?v=20260915-counter1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
 }
 function header(page) {
   const base = baseFor(page);
@@ -59,8 +59,8 @@ function update() {
     let html = fs.readFileSync(file, 'utf8');
     if (!/<header class="site-header"/.test(html)) throw Error(`Missing header: ${file}`);
     html = html.replace(/<header class="site-header"[^>]*>[\s\S]*?<\/header>/, header(page));
-    html = html.replace(/<link\b[^>]*href="[^"\s]*(?:navigation|select-options)\.css[^"\s]*"[^>]*>\s*/g, '')
-      .replace(/<script\b[^>]*src="[^"\s]*(?:navigation|select-options)\.js[^"\s]*"[^>]*><\/script>\s*/g, '');
+    html = html.replace(/<link\b[^>]*href="[^"\s]*(?:navigation|select-options|visitor-counter)\.css[^"\s]*"[^>]*>\s*/g, '')
+      .replace(/<script\b[^>]*src="[^"\s]*(?:navigation|select-options|visitor-counter)\.js[^"\s]*"[^>]*><\/script>\s*/g, '');
     html = html.replace('</head>', `${assets(page)}</head>`);
     fs.writeFileSync(file, html);
   }
