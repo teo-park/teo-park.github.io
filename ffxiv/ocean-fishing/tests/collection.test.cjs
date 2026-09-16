@@ -43,28 +43,27 @@ test('multiple species show the union of targets and prerequisites; empty select
   assert.deepEqual(empty.map(r=>r.Fish),rows.filter(api.alwaysVisible).map(r=>r.Fish));
  }
 });
-test('score mode shows every fish while marking top candidates and retaining dependencies',()=>{
- const rows=[
-  {Fish:'A',Points:'100',DH:'2 - 4',TH:['3 - 6'],TimeFrameDay:'',BestBait:'M!B'},
-  {Fish:'B',Points:'10',DH:'1',TH:'1',TimeFrameDay:''},
-  {Fish:'C',Points:'90',DH:'3',TH:'4',TimeFrameDay:''},
-  {Fish:'D',Points:'100',DH:'3',TH:'4',TimeFrameDay:''},
-  {Fish:'E',Points:'100',DH:'2',TH:'3',TimeFrameDay:''},
-  {Fish:'Spectral',Points:'1000',DH:'4',TH:'7',TimeFrameDay:'Yes'},
-  {Fish:'Low',Points:'1',DH:'1',TH:'1',TimeFrameDay:''}
- ];
- assert.deepEqual(api.haulScore(rows[0],'DH'),{min:200,max:400});
- assert.deepEqual(api.haulScore(rows[0],'TH'),{min:300,max:600});
- const plan=api.plan(rows,api.createCatalog(rows),()=>true,true,'','DH');
- assert.deepEqual(plan.map(row=>row.Fish),rows.map(row=>row.Fish));
+test('score modes keep only regular triggers and every spectral fish, including caught and low-score fish',()=>{
  for(const route of ['indigo','ruby'])for(const mode of ['DH','TH']){
-  const all=load(route);
-  assert.equal(api.plan(all,api.createCatalog(all),()=>true,true,'',mode).length,all.length);
+  const rows=load(route),catalog=api.createCatalog(rows);
+  const expected=rows.filter(r=>r.TimeFrameDay||api.alwaysVisible(r)).map(r=>r.Fish);
+  for(const objective of [null,'community','efficiency','burst'])for(const gp of [0,900]){
+   const visible=api.plan(rows,catalog,()=>true,true,'',mode,objective?{gp,objective}:null);
+   assert.deepEqual(visible.map(r=>r.Fish),expected,route+' '+mode+' '+objective+' '+gp);
+  }
+  assert.ok(expected.length<rows.length);
  }
- assert.deepEqual(new Set(plan.filter(r=>r.LocalScore).map(r=>r.Fish)),new Set(['A','C','D','E','Spectral']));
- assert.ok(plan.find(r=>r.Fish==='B').LocalGroupDependency);
- assert.deepEqual(api.haulScore({Points:'100',DH:''},'DH'),{min:300,max:400});
+ const rows=[
+  {Fish:'Trigger',spectralTrigger:true,TimeFrameDay:''},
+  {Fish:'Regular prey',Points:'999',DH:'4',TH:'7',TimeFrameDay:''},
+  {Fish:'Spectral target',Points:'100',DH:'2',TH:'3',TimeFrameDay:'Yes',BestBait:'M!Regular prey'},
+  {Fish:'Spectral low',Points:'1',DH:'1',TH:'1',TimeFrameDay:'Yes'}
+ ];
+ const plan=api.plan(rows,api.createCatalog(rows),()=>true,true,'','TH');
+ assert.deepEqual(plan.map(r=>r.Fish),['Trigger','Spectral target','Spectral low']);
+ assert.deepEqual(api.plan(rows,api.createCatalog(rows),()=>false,false).map(r=>r.Fish),rows.map(r=>r.Fish));
 });
+
 test('all task species include caught targets, transitive prerequisites, and regular ghosts',()=>{
  for(const route of ['indigo','ruby']) {
   const rows=load(route), catalog=api.createCatalog(rows), groups=new Set(rows.map(r=>r.Species).filter(Boolean));

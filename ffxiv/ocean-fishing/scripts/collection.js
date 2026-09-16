@@ -217,7 +217,9 @@
       }
       walk(targetId);
     }
-    return rows.filter(row => scoring || alwaysVisible(row) || reasons.has(key(row.Fish)) || (focused ? matchesGroup(row) : !hideCaught || !caught(row.Fish))).map(row => ({
+    // Score mode reserves regular water for spectral-current triggers, even when
+    // a spectral target has regular-water prerequisites. Keep all spectral fish.
+    return rows.filter(row => scoring ? (!!row.TimeFrameDay || alwaysVisible(row)) : alwaysVisible(row) || reasons.has(key(row.Fish)) || (focused ? matchesGroup(row) : !hideCaught || !caught(row.Fish))).map(row => ({
       ...row, LocalRecommendation: recommendations?.get(row) || null, LocalScore: scoring && matchesGroup(row) ? (recommendations?.get(row)?.best?.total || haulScore(row, scoreMode)) : null, LocalGroupMatch: groupFiltering && matchesGroup(row), LocalGroupDependency: focused && !matchesGroup(row) && reasons.has(key(row.Fish)), LocalAlwaysVisible: alwaysVisible(row), LocalCaught: caught(row.Fish), LocalRequiredBy: [...(reasons.get(key(row.Fish)) || [])]
     }));
   }

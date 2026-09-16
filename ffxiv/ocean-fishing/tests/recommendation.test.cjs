@@ -46,7 +46,7 @@ test('ranks separately by stop, normal/spectral and preparation conditions, with
   assert.deepEqual(result.get(rows[4]).hints.conditions, ['생미끼']);
   assert.equal(JSON.stringify(rows), before);
   const planned = api.plan(rows, api.createCatalog(rows), () => true, true, '', 'TH', { gp: 700 });
-  assert.equal(planned.length, rows.length, 'recommendation never hides low-score or caught fish');
+  assert.deepEqual(planned.map(row=>row.Fish),['Spectral'], 'regular non-trigger fish are hidden only from the score plan');
   assert.ok(planned.every(row => row.LocalRecommendation));
 });
 
@@ -102,12 +102,12 @@ test('optional mooching keeps alternatives in prerequisites without making bait 
 test('community strategy conserves normal-water GP and prioritizes the spectral trigger', () => {
   const rows=[fish('Expensive normal', {Points:1000}),fish('Trigger',{spectralTrigger:true}),fish('Spectral',{TimeFrameDay:'Yes'})];
   const planned=api.plan(rows,api.createCatalog(rows),()=>true,true,'','TH',{gp:900,objective:'community'});
+  assert.deepEqual(planned.map(row=>row.Fish),['Trigger','Spectral']);
   assert.equal(planned[0].LocalRecommendation.best,null);
-  assert.equal(planned[1].LocalRecommendation.role,'trigger');
-  assert.equal(planned[1].LocalRecommendation.rank,1);
-  assert.equal(planned[1].LocalScore,null,'preparation does not claim a multi-hook score');
-  assert.equal(planned[2].LocalRecommendation.best.action,'TH');
-  assert.equal(planned.length,rows.length);
+  assert.equal(planned[0].LocalRecommendation.role,'trigger');
+  assert.equal(planned[0].LocalRecommendation.rank,1);
+  assert.equal(planned[0].LocalScore,null,'preparation does not claim a multi-hook score');
+  assert.equal(planned[1].LocalRecommendation.best.action,'TH');
 });
 
 test('community strategy budgets Prize Catch before casting and exposes an unfunded recovery target separately', () => {

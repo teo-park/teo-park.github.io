@@ -208,6 +208,8 @@ for(const route of ['indigo','ruby'])test(`${route}: PiP mirrors filters, stop s
     ui.$('[data-stop="1"]').click();assert.equal(ui.p('#oceanPipStop1').getAttribute('aria-selected'),'true');sameRows(ui,1,'spectral');
     ui.p('#oceanPipStop1').dispatchEvent(new ui.child.KeyboardEvent('keydown',{key:'Home',bubbles:true}));sameRows(ui,0,'spectral');
     ui.$('[name=purpose][value=score]').click();sameRows(ui,0,'spectral');assert.match(ui.p('#oceanPipPurpose').textContent,/고득점 · 700 GP/);
+    const regular=sameRows(ui,0,'regular');assert.ok(regular.length);
+    assert.ok(regular.every(id=>fish.fish.find(f=>f.entryId===id)?.spectralTrigger),'PiP shows only spectral triggers in regular water');
     assert.ok(ui.p('.recommendation'));assert.match(ui.p('.recommendation').textContent,/1순위/);
     ui.input('#strategyGP',100);assert.match(ui.p('#oceanPipPurpose').textContent,/100 GP/);
     ui.input('[data-zone="0-spectral"] [data-zone-option=scoreSort]','name');sameRows(ui,0,'spectral');

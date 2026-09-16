@@ -190,7 +190,13 @@ for(const [route,targetName,requiredName,peerName] of [
   check();assert.equal(ui.$(`#fishPanels tr[data-fish-id="${peer.id}"]`),null,'caught competitor is absent from the filtered fish table');
   assert.equal(ui.$(`#fishPanels [data-bite-comparison="${target.id}"]`),null,'ordinary targets do not expand the whole fish list');
   const records=storage.getItem('teo-ffxiv.fishing.collection.v2'),baits=ui.$('#voyageBaits').textContent;
-  for(const mode of ['all','score','collection']){ui.$(`[name=purpose][value=${mode}]`).click();check();}
+  for(const mode of ['all','score','collection']){
+   ui.$(`[name=purpose][value=${mode}]`).click();
+   if(mode==='score'&&!required.spectral&&!required.spectralTrigger){
+    assert.equal(ui.$(`#fishPanels tr[data-fish-id="${required.id}"]`),null);
+    assert.equal(comparison(),null);
+   }else check();
+  }
   assert.equal(storage.getItem('teo-ffxiv.fishing.collection.v2'),records);assert.equal(ui.$('#voyageBaits').textContent,baits);
   ui.$(`[data-fish-id="${target.id}"] input[data-entry]`).click();assert.equal(comparison(),null,'comparison leaves once its last unfinished target is caught');
   ui.$('#undoCatch').click();check();
@@ -325,7 +331,7 @@ test('expired or invalid linked departures fall back to the current timetable',a
   try{assert.equal(Number(ui.$('[data-voyage][aria-pressed=true]').dataset.voyage),first);assert.deepEqual(ui.errors,[]);}finally{ui.close();}
  }
 });
-for(const route of ['indigo','ruby'])test(`${route}: score view defaults to ranked community strategy and keeps all fish and preferences`,async()=>{
+for(const route of ['indigo','ruby'])test(`${route}: score view keeps only regular triggers, all spectral fish and preferences`,async()=>{
   const storage=memory({'ocean:strategy':JSON.stringify({gp:900,objective:'efficiency'})});
   let ui=await open(route,storage);
   try{
@@ -335,7 +341,9 @@ for(const route of ['indigo','ruby'])test(`${route}: score view defaults to rank
     const all=ids();
     ui.$('[name=purpose][value=score]').click();
     assert.equal(ui.$('#strategyObjective').value,'community');assert.equal(ui.$('#strategyGP').value,'900');
-    assert.equal(ui.$('#scoreGuide').hidden,false);assert.deepEqual(ids(),all);
+    assert.equal(ui.$('#scoreGuide').hidden,false);
+    const expected=all.filter(id=>payload.fish.some(f=>String(f.id)===id&&(f.spectral||f.spectralTrigger)));
+    assert.ok(expected.length<all.length);assert.deepEqual(ids(),expected);
     assert.equal(ui.$('[data-zone="0-regular"] [data-zone-option="scoreSort"]').value,'recommendation');
     for(const zone of ui.d.querySelectorAll('.fishing-zone')){
       const tags=[...zone.querySelectorAll('tbody .recommendation')];
@@ -348,6 +356,7 @@ for(const route of ['indigo','ruby'])test(`${route}: score view defaults to rank
     ui.input('#strategyPrize',false,'change');
     for(const tag of ui.d.querySelectorAll('.spectral .recommendation'))assert.doesNotMatch(tag.textContent,/대물/);
     ui.input('#strategyObjective','efficiency','change');
+    assert.deepEqual(ids(),expected);
     assert.equal(ui.$('#strategyPrize').closest('label').hidden,true);
     ui.$('[name=purpose][value=all]').click();
     assert.equal(ui.$('#scoreGuide').hidden,true);
