@@ -12,8 +12,8 @@ const quest=name=>{const q=data.quests.find(q=>q.name===name);assert(q,`Missing 
 const cities=['gridania','limsa','uldah'];
 
 test('official scope, metadata, categories and route totals are intact',()=>{
-  assert.equal(data.sourceQuestCount,1042);
-  assert.equal(data.quests.length,1037);
+  assert.equal(data.sourceQuestCount,1047);
+  assert.equal(data.quests.length,1042);
   assert.equal(new Set(data.quests.map(q=>q.id)).size,data.quests.length);
   assert.equal(data.groups.length,15);
   for(const q of data.quests){
@@ -24,9 +24,9 @@ test('official scope, metadata, categories and route totals are intact',()=>{
     assert(q.cities.length>0&&q.companies.length>0);
     for(const id of q.previous){const previous=tracker.byId.get(id);assert(previous);assert(previous.group<=q.group);}
   }
-  assert.deepEqual(tracker.calculate(quest('인연을 따라서').id,'completed','gridania').overall.total,[987,987]);
-  assert.deepEqual(tracker.calculate(quest('인연을 따라서').id,'completed','uldah').overall.total,[988,988]);
-  assert.deepEqual(tracker.overview().map(e=>e.total),[[240,241],[138,138],[162,162],[157,157],[155,155],[135,135]]);
+  assert.deepEqual(tracker.calculate(quest('언젠가의 설경').id,'completed','gridania').overall.total,[992,992]);
+  assert.deepEqual(tracker.calculate(quest('언젠가의 설경').id,'completed','uldah').overall.total,[993,993]);
+  assert.deepEqual(tracker.overview().map(e=>e.total),[[240,241],[138,138],[162,162],[157,157],[155,155],[140,140]]);
 });
 
 test('Korean partial, whitespace, initials and expansion-filter searches',()=>{
@@ -89,9 +89,23 @@ test('class and company alternatives never count as unfinished parallel branches
   }
 });
 
-test('latest quest is below 100 while current, exactly 100 when completed',()=>{
+test('newly published quests extend the former endpoint in official prerequisite order',()=>{
+  const names=['인연을 따라서','이웃한 세계','발동','전파되는 빛','저 너머로 이르는 길','언젠가의 설경'];
+  for(let i=1;i<names.length;i++){
+    const q=quest(names[i]);
+    assert.deepEqual(q.previous,[quest(names[i-1]).id]);
+    assert.equal(q.level,100);
+    assert.equal(tracker.search(names[i],'dt')[0].id,q.id);
+    const result=tracker.calculate(q.id,'completed','gridania');
+    assert.deepEqual(result.expansion.done,[135+i,135+i]);
+    assert.deepEqual(result.overall.remaining,[5-i,5-i]);
+  }
+  assert.deepEqual(tracker.calculate(quest(names[0]).id,'completed').overall.remaining,[5,5]);
+});
+
+test('latest publicly listed quest is below 100 while current, exactly 100 when completed',()=>{
   for(const city of ['',...cities]){
-    const q=quest('인연을 따라서');
+    const q=quest('언젠가의 설경');
     const current=tracker.calculate(q.id,'current',city);
     const completed=tracker.calculate(q.id,'completed',city);
     assert(current.overall.percent[1]<100);
