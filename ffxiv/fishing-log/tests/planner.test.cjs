@@ -100,3 +100,30 @@ test('time cell toggles a live start/end countdown and leaves always fish untogg
   p.$('#planSearch').value='심해아귀';p.$('#planRefresh').click();const f=p.w.FISHING_DATA.fishes.find(f=>f.id===4912),step=p.w.FishingBook.create(p.w.FISHING_DATA,p.w.FISHING_BITE_TIMES).tacklePaths(f.routes[0])[0].steps[1];assert.ok(p.$('.plan-bait-samples').getAttribute('title').includes(p.w.FISHING_DATA.fishes.find(f=>f.id===step.id).name));
  }finally{p.close();}
 });
+
+
+test('refreshing the last minute keeps the current fish and its countdown until ET closes',()=>{
+ const F=require('../forecast.js'),W=require('../weather-data.js'),fish=D.fishes.find(f=>f.id===7924);
+ const window=F.create(D,W).windows(fish.routes[0],Date.UTC(2026,8,20),Date.UTC(2026,8,21))[0];
+ let now=window.end-59000;const p=open({plan:true,clock:()=>now});try{
+  p.$('#playtimeOff').click();p.$('#planSearch').value=fish.name;p.$('#planRefresh').click();
+  let button=p.$('[data-plan-countdown]');assert.equal(+button.dataset.planEnd,window.end);assert.match(p.$('.plan-now-badge').textContent,/지금/);
+  button.click();assert.match(p.$('[data-plan-countdown]').textContent,/종료까지 59초/);
+  now=window.end-1;p.$('#planRefresh').click();button=p.$('[data-plan-countdown]');assert.equal(+button.dataset.planEnd,window.end);assert.match(button.textContent,/종료까지 1초/);
+  now=window.end;p.$('#planRefresh').click();button=p.$('[data-plan-countdown]');assert.ok(+button.dataset.planStart>now);assert.match(button.textContent,/시작까지/);
+ }finally{p.close();}
+});
+
+test('playtime ending early is labeled separately from the fish closing time',async()=>{
+ const F=require('../forecast.js'),W=require('../weather-data.js'),fish=D.fishes.find(f=>f.id===7924);
+ const window=F.create(D,W).windows(fish.routes[0],Date.UTC(2026,8,20,3),Date.UTC(2026,8,21,3))[0];
+ const sessionEnd=Math.floor((window.end-90000)/F.MINUTE)*F.MINUTE;
+ const end=new Date(sessionEnd+F.KST).toISOString().slice(11,16),settings=F.defaults();settings.days.forEach(d=>{d.start='00:00';d.end=end;});
+ let now=sessionEnd-30000;const storage=memory({'teo-ffxiv.fishing.plan.v1':JSON.stringify({settings,usePlaytime:true})});
+ const p=open({plan:true,storage,clock:()=>now,hidden:false});try{
+  p.$('#planSearch').value=fish.name;p.$('#planRefresh').click();let button=p.$('[data-plan-countdown]');
+  assert.equal(+button.dataset.planEnd,sessionEnd);assert.equal(+button.dataset.planWindowEnd,window.end);assert.match(button.textContent,/접속 시간 기준/);
+  button.click();button=p.$('[data-plan-countdown]');assert.match(button.textContent,/접속 시간 종료까지/);
+  now=sessionEnd;await new Promise(r=>setTimeout(r,1100));assert.match(button.textContent,/접속 시간 종료/);assert.match(button.textContent,/물고기는 .*까지 출현/);assert.doesNotMatch(button.textContent,/이번 기회 종료/);
+ }finally{p.close();}
+});

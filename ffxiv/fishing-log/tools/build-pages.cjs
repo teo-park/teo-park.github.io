@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const {JSDOM}=require('../../ocean-fishing/node_modules/jsdom');
 const navigation=require('../../tools/site-navigation.cjs');
-const root=path.resolve(__dirname,'..'),version='20260916-pages1';
+const root=path.resolve(__dirname,'..'),version='20260920-active-window1';
 // Both documents share asset URLs and detail/record dialogs, but only mount their own workspace.
 for(const catalog of [false,true]){
  const dom=new JSDOM(fs.readFileSync(path.join(__dirname,'page-template.html'),'utf8')),d=dom.window.document;
@@ -41,7 +41,7 @@ for(const catalog of [false,true]){
   const info=d.createElement('div');info.className='forecast-info';info.append($('#planCount'),$('.plan-prep'),$('.plan-help'));$('.plan-results-scroll').before(info);
  }
  const css=d.createElement('link');css.rel='stylesheet';css.href='../fishing-pages.css?v=20260916-width1';d.head.append(css);
- for(const name of ['app.js','planner.js']){const s=$(`script[src^="./${name}?"]`);s.src='./'+name+'?v='+version;}
+ for(const name of ['app.js','planner.js','forecast.js']){const s=$(`script[src^="./${name}?"]`);s.src='./'+name+'?v='+version;}
  $('[data-navigation]').outerHTML=navigation.header(page);
  for(const el of d.querySelectorAll('script[src],link[href]'))if(/\/(navigation|select-options|visitor-counter|selection-counter)\.(js|css)\?/.test(el.getAttribute('src')||el.getAttribute('href')))el.remove();
  d.head.insertAdjacentHTML('beforeend',navigation.assets(page));

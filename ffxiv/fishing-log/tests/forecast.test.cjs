@@ -12,6 +12,34 @@ test('ET overnight windows merge across weather blocks and have exact boundaries
   assert.deepEqual(ranges.slice(1,3),[{start:23*F.ET_HOUR,end:26*F.ET_HOUR},{start:47*F.ET_HOUR,end:50*F.ET_HOUR}]);
   assert.deepEqual(m.windows(route({spawn:6,duration:4}),7*F.ET_HOUR,11*F.ET_HOUR),[{start:6*F.ET_HOUR,end:10*F.ET_HOUR}]);
 });
+
+test('ET 15:00 fish remain in the plan until their actual closing millisecond',()=>{
+  const real=F.create(D,W),settings={...F.defaults(),unrestricted:true},from=Date.UTC(2026,8,20);
+  const fishes=D.fishes.filter(f=>f.routes.some(r=>r.duration<24&&(r.spawn+r.duration)%24===15));
+  assert.ok(fishes.length>=8);
+  for(const fish of fishes){
+    const route=fish.routes.find(r=>r.duration<24&&(r.spawn+r.duration)%24===15);
+    const window=real.windows(route,from,from+30*F.DAY)[0];assert.ok(window,fish.name);
+    assert.equal(window.end%F.ET_DAY,15*F.ET_HOUR,fish.name);
+    for(const remaining of [59000,1000,1]){
+      const now=window.end-remaining,row=real.plan([fish],settings,now,1).rows[0];
+      assert.equal(row.windowStart,window.start,fish.name);
+      assert.equal(row.start,now);assert.equal(row.end,window.end);
+      const timeline=real.startTimeline(fish,now,{settings,count:1});
+      assert.equal(timeline.result.chances[0].end,window.end);
+    }
+    assert.ok(real.plan([fish],settings,window.end,30).rows[0].start>=window.end);
+  }
+});
+
+test('preserving active list windows does not loosen alert or genuinely short-window limits',()=>{
+  const fish={id:1,routes:[route({spawn:12,duration:3})]},settings={...F.defaults(),unrestricted:true};
+  const end=15*F.ET_HOUR,now=end-1000;
+  assert.equal(m.opportunities(fish,settings,now,end+F.ET_DAY)[0].windowStart,36*F.ET_HOUR,'new notifications still require enough remaining time');
+  assert.equal(m.opportunities(fish,settings,now,end+F.ET_DAY,{keepActive:true})[0].end,end);
+  settings.minMinutes=10;
+  assert.equal(m.plan([fish],settings,now,1).rows.length,0,'an entire window shorter than the setting is still excluded');
+});
 test('weather transitions inspect the previous weather period, not previous distinct weather',()=>{
   const r=route({weathers:[1],weathersFrom:[2]});const all=m.windows(r,100*F.WEATHER,200*F.WEATHER);
   assert.ok(all.length);for(const w of all){assert.equal(m.at(1,w.start),1);assert.equal(m.at(1,w.start-F.WEATHER),2);assert.equal(w.end-w.start,F.WEATHER);}

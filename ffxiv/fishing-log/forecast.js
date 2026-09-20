@@ -73,7 +73,7 @@
       }
       return merge(result).filter(w=>w.end>from&&w.start<to);
     }
-    function opportunities(fish,settings,from,to,{includeAlways=false}={}){
+    function opportunities(fish,settings,from,to,{includeAlways=false,keepActive=false}={}){
       const basePlay=sessions(settings,from,to),out=[];
       if(!basePlay.length)return out;
       for(const [index,route] of fish.routes.entries()){
@@ -85,7 +85,10 @@
           for(let i=cursor;i<play.length&&play[i].start<window.end;i++){
             const overlap=intersect(window,play[i]);if(!overlap)continue;
             const start=Math.max(from,overlap.start),end=Math.min(to,overlap.end);
-            if(end-start<settings.minMinutes*MINUTE)continue;
+            // List refreshes must not discard an eligible window's final minute.
+            // Alerts retain the remaining-duration threshold to avoid late alerts.
+            const active=keepActive&&overlap.start<=from&&from<overlap.end&&overlap.end-overlap.start>=settings.minMinutes*MINUTE;
+            if(end-start<settings.minMinutes*MINUTE&&!active)continue;
             // Untimed fish use the whole play session as their stable opportunity.
             const windowStart=always?play[i].start:window.start,windowEnd=always?play[i].end:window.end;
             out.push({id:fish.id,route:index,always,windowStart,windowEnd,start,end,sessionStart:play[i].start,sessionEnd:play[i].end,
@@ -101,7 +104,7 @@
         const supported=fish.routes.filter(r=>!reason(r));
         if(!supported.length){excluded.push(fish);continue;}
         if(supported.some(r=>!limited(r))){always.push(fish);continue;}
-        const chances=opportunities(fish,settings,from,to),first=chances[0];
+        const chances=opportunities(fish,settings,from,to,{keepActive:true}),first=chances[0];
         if(!first){absent.push(fish);continue;}
         // Other routes/overlaps for the same opportunity aren't a later chance.
         let currentEnd=first.end,next=null;
@@ -279,7 +282,7 @@
         if(!result.pending)return;
         if(weatherCache.size>100000)weatherCache.clear();
         const begin=Math.max(from,cursor-DAY),to=cursor+30*DAY;
-        const chances=settings?opportunities(fish,settings,begin,to+DAY):fish.routes.flatMap((route,index)=>
+        const chances=settings?opportunities(fish,settings,begin,to+DAY,{keepActive:true}):fish.routes.flatMap((route,index)=>
           reason(route)?[]:windows(route,begin,to+DAY).map(w=>({...w,route:index,windowStart:w.start,windowEnd:w.end})));
         // Revisit chunk boundaries, preserving complete windows and merging alternate
         // routes so a single continuous opportunity cannot occupy several slots.

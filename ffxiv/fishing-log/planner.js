@@ -199,7 +199,7 @@
     window.FishingPlanRows={bite:rowBite,tackle:rowTackle,place:rowPlace,forecast};
     if(catalogOnly)return;
     function remaining(ms){const seconds=Math.max(0,Math.ceil(ms/1000)),days=Math.floor(seconds/86400),hours=Math.floor(seconds%86400/3600),minutes=Math.floor(seconds%3600/60);return days?`${days}일 ${hours}시간 ${minutes}분`:hours?`${hours}시간 ${minutes}분`:minutes?`${minutes}분 ${seconds%60}초`:`${seconds}초`;}
-    function countdownText(start,end,now){return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>종료까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:'<strong>이번 기회 종료</strong><span>다음 갱신에서 새 기회를 표시합니다.</span>';}
+    function countdownText(start,end,now,windowEnd=end){const closing=windowEnd>end?'접속 시간':'이번 기회';return now<start?`<strong>시작까지 ${remaining(start-now)}</strong><span>${dateText(start)} 시작</span>`:now<end?`<strong>${windowEnd>end?'접속 시간 종료':'종료'}까지 ${remaining(end-now)}</strong><span>지금 도전 가능 · ${time.format(end)} 종료</span>`:`<strong>${closing} 종료</strong><span>${windowEnd>end&&now<windowEnd?'물고기는 '+time.format(windowEnd)+'까지 출현 · 접속 시간 설정을 확인하세요.':'다음 갱신에서 새 기회를 표시합니다.'}</span>`;}
     function windowCell(row){
       const fish=row.fish;
       if(preparationView?.timeOnly(fish,[fish.routes[row.route]]))return preparationView.intuitionSummary(fish,[fish.routes[row.route]],true);
@@ -207,12 +207,12 @@
       if(row.always)return '<div class="plan-window"><strong>상시 낚시</strong><span>시간·날씨 제한 없음</span></div>';
       if(row.start===null)return `<div class="plan-window"><strong>${row.unavailableReason?'접속 설정 확인':'다음 날짜 찾는 중'}</strong><span>${esc(row.unavailableReason||'기간 제한 없이 조회 중')}</span></div>`;
       const counting=countdowns.has(fish.id);
-      return `<button class="plan-window plan-time-toggle" data-plan-countdown="${fish.id}" data-plan-start="${row.start}" data-plan-end="${row.end}" aria-pressed="${counting}" aria-label="${esc(fish.name)} ${counting?'도전 시각 보기':'남은 시간 보기'}" title="눌러서 ${counting?'도전 시각':'남은 시간'} 보기">${counting?countdownText(row.start,row.end,Date.now()):`<strong>${dateText(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.start<=result.now?' · 지금부터':''}</span>`}</button>`;
+      return `<button class="plan-window plan-time-toggle" data-plan-countdown="${fish.id}" data-plan-start="${row.start}" data-plan-end="${row.end}" data-plan-window-end="${row.windowEnd??row.end}" aria-pressed="${counting}" aria-label="${esc(fish.name)} ${counting?'도전 시각 보기':'남은 시간 보기'}" title="눌러서 ${counting?'도전 시각':'남은 시간'} 보기">${counting?countdownText(row.start,row.end,Date.now(),row.windowEnd):`<strong>${dateText(row.start)}</strong><span>– ${time.format(row.end)} · ${Math.floor((row.end-row.start)/F.MINUTE)}분${row.windowEnd>row.end?' · 접속 시간 기준':''}${row.start<=result.now?' · 지금부터':''}</span>`}</button>`;
     }
     function timingBadge(state){return state?`<b class="${state.state==='now'?'plan-now-badge':'plan-soon-badge plan-soon-'+state.state}" title="${esc(state.title)}" aria-label="${esc(state.title)}">${state.label}</b>`:'';}
     function updateCountdowns(){
       if(!active||document.hidden)return;const now=Date.now();
-      for(const button of document.querySelectorAll('[data-plan-countdown][aria-pressed="true"]'))button.innerHTML=countdownText(+button.dataset.planStart,+button.dataset.planEnd,now);
+      for(const button of document.querySelectorAll('[data-plan-countdown][aria-pressed="true"]'))button.innerHTML=countdownText(+button.dataset.planStart,+button.dataset.planEnd,now,+button.dataset.planWindowEnd);
       for(const slot of document.querySelectorAll('[data-plan-timing]')){
         const number=v=>v===''?null:Number(v),row={always:slot.dataset.always==='true',start:number(slot.dataset.start),end:number(slot.dataset.end),windowStart:number(slot.dataset.opening)},state=timing(row,now,purpose),html=timingBadge(state);
         if(slot.innerHTML!==html)slot.innerHTML=html;
