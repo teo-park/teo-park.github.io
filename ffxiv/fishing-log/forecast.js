@@ -2,12 +2,12 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.FishingForecast=factory();})(globalThis,function(){
   'use strict';
   const MINUTE=60000,DAY=86400000,ET_HOUR=175000,ET_DAY=24*ET_HOUR,WEATHER=8*ET_HOUR,KST=9*60*MINUTE;
-  const defaults=()=>({days:Array.from({length:7},()=>({enabled:true,start:'20:00',end:'23:00'})),lead:10,minMinutes:1});
+  const defaults=()=>({days:Array.from({length:7},()=>({enabled:true,start:'20:00',end:'23:00'})),lead:10});
   function validate(settings){
     const clock=v=>typeof v==='string'&&/^([01]\d|2[0-3]):[0-5]\d$/.test(v);
     if(!settings||!Array.isArray(settings.days)||settings.days.length!==7||settings.days.some(d=>!d||typeof d.enabled!=='boolean'||!clock(d.start)||!clock(d.end)||d.enabled&&d.start===d.end))throw Error('요일별 시작·종료 시간을 확인해 주세요. 자정을 넘는 시간도 설정할 수 있습니다.');
-    if(![0,5,10,15,30].includes(settings.lead)||![1,3,5,10].includes(settings.minMinutes))throw Error('알림 시점·최소 도전 시간을 확인해 주세요.');
-    return {days:settings.days.map(d=>({enabled:d.enabled,start:d.start,end:d.end})),lead:settings.lead,minMinutes:settings.minMinutes};
+    if(![0,5,10,15,30].includes(settings.lead))throw Error('알림 시점을 확인해 주세요.');
+    return {days:settings.days.map(d=>({enabled:d.enabled,start:d.start,end:d.end})),lead:settings.lead};
   }
   function weatherTarget(time){
     const seconds=Math.floor(time/1000),hour=Math.floor(seconds/175),increment=(hour+8-hour%8)%24;
@@ -73,7 +73,7 @@
       }
       return merge(result).filter(w=>w.end>from&&w.start<to);
     }
-    function opportunities(fish,settings,from,to,{includeAlways=false,keepActive=false}={}){
+    function opportunities(fish,settings,from,to,{includeAlways=false}={}){
       const basePlay=sessions(settings,from,to),out=[];
       if(!basePlay.length)return out;
       for(const [index,route] of fish.routes.entries()){
@@ -85,10 +85,7 @@
           for(let i=cursor;i<play.length&&play[i].start<window.end;i++){
             const overlap=intersect(window,play[i]);if(!overlap)continue;
             const start=Math.max(from,overlap.start),end=Math.min(to,overlap.end);
-            // List refreshes must not discard an eligible window's final minute.
-            // Alerts retain the remaining-duration threshold to avoid late alerts.
-            const active=keepActive&&overlap.start<=from&&from<overlap.end&&overlap.end-overlap.start>=settings.minMinutes*MINUTE;
-            if(end-start<settings.minMinutes*MINUTE&&!active)continue;
+            if(end<=start)continue;
             // Untimed fish use the whole play session as their stable opportunity.
             const windowStart=always?play[i].start:window.start,windowEnd=always?play[i].end:window.end;
             out.push({id:fish.id,route:index,always,windowStart,windowEnd,start,end,sessionStart:play[i].start,sessionEnd:play[i].end,
@@ -104,7 +101,7 @@
         const supported=fish.routes.filter(r=>!reason(r));
         if(!supported.length){excluded.push(fish);continue;}
         if(supported.some(r=>!limited(r))){always.push(fish);continue;}
-        const chances=opportunities(fish,settings,from,to,{keepActive:true}),first=chances[0];
+        const chances=opportunities(fish,settings,from,to),first=chances[0];
         if(!first){absent.push(fish);continue;}
         // Other routes/overlaps for the same opportunity aren't a later chance.
         let currentEnd=first.end,next=null;
@@ -114,15 +111,14 @@
       return {rows:rows.sort((a,b)=>a.start-b.start),excluded,always,absent,to};
     }
     function playable(route,settings,from){
-      const minimum=settings.minMinutes*MINUTE,play=sessions(settings,from,from+8*DAY);
-      if(!play.some(p=>p.end-p.start>=minimum))return false;
+      const play=sessions(settings,from,from+8*DAY);
+      if(!play.some(p=>p.end>p.start))return false;
       const timed=Number.isFinite(route.spawn)&&route.duration<24;
       if(!timed)return true;
-      if(route.duration*ET_HOUR<minimum)return false;
       // The weekly play schedule and ET clock repeat together every seven days.
       for(let day=Math.floor(from/ET_DAY)-1;day*ET_DAY<from+8*DAY;day++){
         const start=day*ET_DAY+route.spawn*ET_HOUR,end=start+route.duration*ET_HOUR;
-        if(play.some(p=>Math.min(p.end,end)-Math.max(p.start,start)>=minimum))return true;
+        if(play.some(p=>Math.min(p.end,end)>Math.max(p.start,start)))return true;
       }
       return false;
     }
@@ -133,7 +129,7 @@
       for(const row of result.rows){
         if(row.nextStart!==null)continue;
         const supported=row.fish.routes.filter(r=>!reason(r));
-        if(!supported.some(r=>playable(r,settings,from))){row.pending=false;row.unavailableReason=(settings.unrestricted||settings.days.some(d=>d.enabled))?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';continue;}
+        if(!supported.some(r=>playable(r,settings,from))){row.pending=false;row.unavailableReason=(settings.unrestricted||settings.days.some(d=>d.enabled))?'접속 시간과 맞지 않음':'접속 요일 설정 필요';continue;}
         const state={row,to:result.to,currentEnd:row.currentEnd??row.end},old=previous?.signature===signature&&previous.states.get(row.fish.id);
         // Preserve distant searches across the minute refresh, without reusing
         // progress after route/filter changes or an expired first opportunity.
@@ -148,7 +144,7 @@
         const state=queue.shift();if(!state)return false;
         if(weatherCache.size>100000)weatherCache.clear();
         const row=state.row,to=state.to+30*DAY,previousStart=row.start,previousNext=row.nextStart;
-        // Overlap chunk edges so a short opening is never cut below minMinutes.
+        // Overlap chunk edges to preserve continuous opening boundaries.
         const chances=opportunities(row.fish,settings,Math.max(from,state.to-DAY),to+DAY).filter(c=>c.start<to);
         for(const chance of chances){
           if(row.start===null){Object.assign(row,chance,{pending:false});state.currentEnd=chance.end;}
@@ -275,14 +271,14 @@
       const result={chances:[],pending:false,always:false,reason:null};
       if(!supported.length)result.reason=fish.routes.map(reason).find(Boolean)||'조건 자료 확인 필요';
       else if(supported.some(r=>!limited(r)))result.always=true;
-      else if(settings&&!supported.some(r=>playable(r,settings,from)))result.reason=(settings.unrestricted||settings.days.some(d=>d.enabled))?'접속 시간·최소 도전 시간과 맞지 않음':'접속 요일 설정 필요';
+      else if(settings&&!supported.some(r=>playable(r,settings,from)))result.reason=(settings.unrestricted||settings.days.some(d=>d.enabled))?'접속 시간과 맞지 않음':'접속 요일 설정 필요';
       else result.pending=true;
       let cursor=from;
       function step(){
         if(!result.pending)return;
         if(weatherCache.size>100000)weatherCache.clear();
         const begin=Math.max(from,cursor-DAY),to=cursor+30*DAY;
-        const chances=settings?opportunities(fish,settings,begin,to+DAY,{keepActive:true}):fish.routes.flatMap((route,index)=>
+        const chances=settings?opportunities(fish,settings,begin,to+DAY):fish.routes.flatMap((route,index)=>
           reason(route)?[]:windows(route,begin,to+DAY).map(w=>({...w,route:index,windowStart:w.start,windowEnd:w.end})));
         // Revisit chunk boundaries, preserving complete windows and merging alternate
         // routes so a single continuous opportunity cannot occupy several slots.

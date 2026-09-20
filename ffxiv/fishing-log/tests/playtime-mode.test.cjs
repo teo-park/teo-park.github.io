@@ -1,14 +1,25 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const F=require('../forecast.js'),N=require('../notification-engine.js'),{open,memory}=require('./helpers.cjs');
 const data={spots:{'rod:1':{map:1}},related:{},fishes:[{id:1,kind:'rod',routes:[{verified:true,spotKey:'rod:1',spawn:23,duration:3}]},{id:2,kind:'rod',routes:[{verified:true,spotKey:'rod:1'}]}]},weather={byMap:{1:[{rate:100,weatherId:1}]},specialMaps:[]};
-test('unrestricted play keeps real ET boundaries, bridges midnight, and respects minimum duration',()=>{
+
+test('old minimum preferences load without a control and are removed on save',()=>{
+ const settings={...F.defaults(),minMinutes:10},key='teo-ffxiv.fishing.plan.v1';settings.days[1].start='21:00';
+ const storage=memory({[key]:JSON.stringify({settings,usePlaytime:false})}),p=open({plan:true,storage});try{
+  assert.equal(p.$('#planMinimum'),null);assert.equal(p.planSnapshot().settings.minMinutes,undefined);
+  assert.equal(p.$('#playStart1').value,'21:00');assert.equal(p.planSnapshot().settings.unrestricted,true);
+  p.change('#planLead','5');p.$('#savePlay').click();
+  const saved=JSON.parse(storage.getItem(key));assert.equal('minMinutes' in saved.settings,false);
+  assert.equal(saved.settings.lead,5);assert.equal(saved.settings.days[1].start,'21:00');assert.equal(saved.usePlaytime,false);
+  assert.doesNotMatch(p.$('#playtimeHelp').textContent,/최소 도전/);
+ }finally{p.close();}
+});
+test('unrestricted play keeps real ET boundaries, bridges midnight, and includes short remaining windows',()=>{
  const settings={...F.defaults(),unrestricted:true};settings.days.forEach(d=>d.enabled=false);
  const model=F.create(data,weather),from=24*F.ET_HOUR;
  const chances=model.opportunities(data.fishes[0],settings,from,from+F.DAY);
  assert.ok(chances.length);assert.equal(chances[0].windowStart,23*F.ET_HOUR);assert.equal(chances[0].end,26*F.ET_HOUR);
  assert.deepEqual(F.sessions(settings,from,from+F.DAY),F.sessions(settings,from+F.DAY,from+2*F.DAY));
- settings.minMinutes=10;assert.equal(model.opportunities(data.fishes[0],settings,from,from+F.DAY).length,0);
- assert.match(model.startSearch([data.fishes[0]],settings,from).result.rows[0].unavailableReason,/最小|최소/);
+ const last=model.opportunities(data.fishes[0],settings,26*F.ET_HOUR-1,from+F.DAY)[0];assert.equal(last.end,26*F.ET_HOUR);
 });
 test('unrestricted alerts deduplicate timed windows and always fish once per KST day',()=>{
  const settings={...F.defaults(),unrestricted:true},now=Date.parse('2026-09-13T23:59:00+09:00');

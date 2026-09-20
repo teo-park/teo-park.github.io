@@ -1,6 +1,16 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),F=require('../forecast.js'),E=require('../notification-engine.js'),Book=require('../engine.js'),{open}=require('./helpers.cjs');
 const data={spots:{'rod:1':{map:1,name:'낚시터',area:'지역'}},related:{1:{id:1,name:'미끼',fish:false}},fishes:[{id:2,name:'물고기',kind:'rod',routes:[{verified:true,spotKey:'rod:1',spawn:0,duration:12,bait:1}]}]},weather={byMap:{1:[{rate:100,weatherId:1}]},specialMaps:[]};
 const prefs={ids:[2],settings:F.defaults(),sent:[],saved:true},start=Date.parse('2026-09-08T19:00:00+09:00');
+
+test('notifications include short windows until closing and ignore a saved minimum duration',()=>{
+  const short={...data,fishes:[{...data.fishes[0],routes:[{...data.fishes[0].routes[0],spawn:1,duration:0.1}]}]};
+  const settings={...F.defaults(),unrestricted:true,minMinutes:10},end=192500;
+  const last=E.next(short,weather,{ids:[2],settings},end-1);
+  assert.equal(last.at,end-1);assert.equal(last.events[0].end,end);
+  const sent=E.remember([],last.events,end-1);
+  assert.ok(E.next(short,weather,{ids:[2],settings,sent},end-1).at>end,'the last-second alert still deduplicates');
+  assert.ok(E.next(short,weather,{ids:[2],settings},end).at>end,'expired windows do not notify');
+});
 test('upcoming notifications respect ontime, deduplicate overlaps and ignore caught selections',()=>{
   const batch=E.next(data,weather,prefs,start);assert.ok(batch.events.length);assert.ok(batch.at>=Date.parse('2026-09-08T20:00:00+09:00'));
   const sent=E.remember([],batch.events,batch.at),next=E.next(data,weather,{...prefs,sent},batch.at);assert.notEqual(next.events[0]?.key,batch.events[0].key);

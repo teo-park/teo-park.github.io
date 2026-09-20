@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const {JSDOM}=require('../../ocean-fishing/node_modules/jsdom');
 const navigation=require('../../tools/site-navigation.cjs');
-const root=path.resolve(__dirname,'..'),version='20260920-active-window1';
+const root=path.resolve(__dirname,'..'),version='20260920-no-minimum1';
 // Both documents share asset URLs and detail/record dialogs, but only mount their own workspace.
 for(const catalog of [false,true]){
  const dom=new JSDOM(fs.readFileSync(path.join(__dirname,'page-template.html'),'utf8')),d=dom.window.document;

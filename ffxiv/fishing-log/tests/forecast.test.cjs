@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),F=require('../forecast.js'),W=require('../weather-data.js'),{D}=require('./helpers.cjs');
 const route=(extra={})=>({spotKey:'rod:1',verified:true,...extra}),data={spots:{'rod:1':{map:1}},fishes:[],related:{}},weather={byMap:{1:[{rate:50,weatherId:1},{rate:100,weatherId:2}]},specialMaps:[]},m=F.create(data,weather);
-const daily=(start,end)=>({days:Array.from({length:7},()=>({enabled:true,start,end})),lead:10,minMinutes:1});
+const daily=(start,end)=>({days:Array.from({length:7},()=>({enabled:true,start,end})),lead:10});
 test('weather formula agrees with independent original unsigned algorithm, including bucket boundaries',()=>{
   function original(time){const unixSeconds=time/1000,bell=unixSeconds/175,increment=(bell+8-(bell%8))%24,totalDays=(unixSeconds/4200<<0)>>>0,calcBase=totalDays*100+increment,step1=((calcBase<<11)^calcBase)>>>0;return (((step1>>>8)^step1)>>>0)%100;}
   for(let t=Date.UTC(2026,0,1);t<Date.UTC(2026,0,5);t+=137291)assert.equal(F.weatherTarget(t),original(t));
@@ -32,14 +32,17 @@ test('ET 15:00 fish remain in the plan until their actual closing millisecond',(
   }
 });
 
-test('preserving active list windows does not loosen alert or genuinely short-window limits',()=>{
-  const fish={id:1,routes:[route({spawn:12,duration:3})]},settings={...F.defaults(),unrestricted:true};
-  const end=15*F.ET_HOUR,now=end-1000;
-  assert.equal(m.opportunities(fish,settings,now,end+F.ET_DAY)[0].windowStart,36*F.ET_HOUR,'new notifications still require enough remaining time');
-  assert.equal(m.opportunities(fish,settings,now,end+F.ET_DAY,{keepActive:true})[0].end,end);
-  settings.minMinutes=10;
-  assert.equal(m.plan([fish],settings,now,1).rows.length,0,'an entire window shorter than the setting is still excluded');
+test('short windows and their final millisecond remain eligible regardless of legacy minimum settings',()=>{
+  const fish={id:1,routes:[route({spawn:12,duration:0.1})]},settings={...F.defaults(),unrestricted:true,minMinutes:10};
+  const end=12.1*F.ET_HOUR,now=end-1;
+  assert.equal(m.opportunities(fish,settings,now,end+F.ET_DAY)[0].end,end);
+  assert.equal(m.plan([fish],settings,now,1).rows[0].end,end);
+  assert.equal(m.startSearch([fish],settings,now).result.rows[0].end,end);
+  assert.equal(m.startTimeline(fish,now,{settings,count:1}).result.chances[0].end,end);
+  assert.ok(m.opportunities(fish,settings,end,end+F.ET_DAY)[0].start>end,'a closed window is never included');
+  const validated=F.validate(settings);assert.equal('minMinutes' in validated,false);assert.equal('minMinutes' in F.defaults(),false);
 });
+
 test('weather transitions inspect the previous weather period, not previous distinct weather',()=>{
   const r=route({weathers:[1],weathersFrom:[2]});const all=m.windows(r,100*F.WEATHER,200*F.WEATHER);
   assert.ok(all.length);for(const w of all){assert.equal(m.at(1,w.start),1);assert.equal(m.at(1,w.start-F.WEATHER),2);assert.equal(w.end-w.start,F.WEATHER);}
@@ -52,7 +55,7 @@ test('a Friday overnight session includes Saturday early hours and is half-open'
 });
 test('playable minutes and alert lead are clipped to the session; no disabled-day alerts',()=>{
   const s=daily('20:00','23:00'),now=Date.parse('2026-09-08T19:00:00+09:00'),fish={id:1,routes:[route({spawn:0,duration:12})]};
-  const list=m.opportunities(fish,s,now,now+F.DAY);assert.ok(list.length);for(const c of list){assert.ok(c.notifyAt>=c.sessionStart);assert.ok(c.end<=c.sessionEnd);assert.ok(c.end-c.start>=F.MINUTE);}
+  const list=m.opportunities(fish,s,now,now+F.DAY);assert.ok(list.length);for(const c of list){assert.ok(c.notifyAt>=c.sessionStart);assert.ok(c.end<=c.sessionEnd);assert.ok(c.end>c.start);}
   s.days.forEach(d=>d.enabled=false);assert.deepEqual(m.opportunities(fish,s,now,now+F.DAY),[]);
 });
 test('catalog flags do not invent weather restrictions; unknown and special routes stay separate',()=>{
@@ -78,10 +81,9 @@ test('minute refresh resumes distant searches, while changed routes and schedule
   const changed={...fish,routes:fish.routes.map(r=>({...r,bait:999}))};assert.ok(real.startSearch([changed],settings,from+F.MINUTE,old).states.get(fish.id).to<cursor);
   const times=F.defaults();times.days[0].start='19:00';assert.ok(real.startSearch([fish],times,from+F.MINUTE,old).states.get(fish.id).to<cursor);
 });
-test('disabled sessions, too-short windows and unsupported weather cannot cause endless searches',()=>{
-  const fish={id:1,routes:[route({spawn:1,duration:1})]},settings=daily('20:00','23:00');settings.minMinutes=5;
-  const short=m.startSearch([fish],settings,Date.now());assert.equal(short.result.pending,0);assert.match(short.result.rows[0].unavailableReason,/최소 도전/);
-  settings.minMinutes=1;settings.days.forEach(d=>d.enabled=false);const disabled=m.startSearch([fish],settings,Date.now());assert.equal(disabled.result.pending,0);assert.equal(disabled.result.rows[0].start,null);assert.match(disabled.result.rows[0].unavailableReason,/접속 요일/);
+test('disabled sessions and unsupported weather cannot cause endless searches',()=>{
+  const fish={id:1,routes:[route({spawn:1,duration:1})]},settings=daily('20:00','23:00');
+  settings.days.forEach(d=>d.enabled=false);const disabled=m.startSearch([fish],settings,Date.now());assert.equal(disabled.result.pending,0);assert.equal(disabled.result.rows[0].start,null);assert.match(disabled.result.rows[0].unavailableReason,/접속 요일/);
   const invalid=m.startSearch([{id:2,routes:[route({weathers:[999]})]}],F.defaults(),Date.now());assert.equal(invalid.result.pending,0);assert.equal(invalid.result.excluded.length,1);
 });
 test('five-chance timeline merges duplicate routes and preserves active and midnight-spanning windows',()=>{

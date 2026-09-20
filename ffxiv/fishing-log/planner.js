@@ -70,8 +70,8 @@
       $('playtimeOn').setAttribute('aria-pressed',String(usePlaytime));$('playtimeOff').setAttribute('aria-pressed',String(!usePlaytime));
       $('customPlaytime').hidden=!usePlaytime;
       $('playtimeNote').textContent=usePlaytime?'설정한 요일·시간만 적용':'모든 요일 · 24시간 · 기존 설정은 보관';
-      $('playSummary').textContent=usePlaytime?(saved?'내 접속 시간 · 변경하기':'내 접속 시간 설정 · 예시 20:00–23:00'):'알림 시점·최소 도전 시간 변경';
-      $('playtimeHelp').textContent=usePlaytime?'알림 시각이 접속 시작 전이면 접속 시작 시각에 보냅니다. 요일을 모두 해제하면 시간·날씨 예보와 알림이 멈추고, 상시 물고기 목록은 유지됩니다.':'접속 시간 제한 없이 예보와 알림을 계산합니다. 물고기의 시간·날씨 조건과 최소 도전 시간은 적용됩니다. 상시 어종 알림은 한국 시간 기준 하루 한 번입니다.';
+      $('playSummary').textContent=usePlaytime?(saved?'내 접속 시간 · 변경하기':'내 접속 시간 설정 · 예시 20:00–23:00'):'알림 시점 변경';
+      $('playtimeHelp').textContent=usePlaytime?'알림 시각이 접속 시작 전이면 접속 시작 시각에 보냅니다. 요일을 모두 해제하면 시간·날씨 예보와 알림이 멈추고, 상시 물고기 목록은 유지됩니다.':'접속 시간 제한 없이 예보와 알림을 계산합니다. 물고기의 시간·날씨 조건은 적용됩니다. 상시 어종 알림은 한국 시간 기준 하루 한 번입니다.';
     }
     function choosePlaytime(value){const previous=usePlaytime;usePlaytime=value;try{store();playtimeControls();$('playSettings').open=value;calculate();changed();$('planMessage').textContent=value?'저장된 접속 시간을 적용했습니다.':'접속 시간을 해제했습니다. 모든 요일·시간에 도전할 수 있는 것으로 계산합니다.';}catch{usePlaytime=previous;playtimeControls();$('planMessage').textContent='접속 시간 적용 설정을 저장하지 못했습니다.';}}
     if(!catalogOnly){$('playtimeOn').onclick=()=>choosePlaytime(true);$('playtimeOff').onclick=()=>choosePlaytime(false);}
@@ -89,7 +89,7 @@
         if(!host.isConnected)return;
         const state=timeline.result;
         for(const button of host.querySelectorAll('[data-timeline-scope]'))button.setAttribute('aria-pressed',String(button.dataset.timelineScope===timelineScope));
-        host.querySelector('.timeline-note').textContent=(timelineScope==='play'?(usePlaytime?'내 접속 시간·최소 도전 시간에 맞는 구간입니다.':'모든 요일·24시간 기준이며 최소 도전 시간은 적용합니다.'):'접속 시간과 관계없는 실제 출현 구간입니다.')+' 현재 열린 구간도 포함하며, 직감·생미끼 등 선행 조건은 별도 준비해야 합니다.';
+        host.querySelector('.timeline-note').textContent=(timelineScope==='play'?(usePlaytime?'내 접속 시간에 맞는 구간입니다.':'모든 요일·24시간 기준입니다.'):'접속 시간과 관계없는 실제 출현 구간입니다.')+' 현재 열린 구간도 포함하며, 직감·생미끼 등 선행 조건은 별도 준비해야 합니다.';
         host.querySelector('.timeline-list').innerHTML=state.chances.map((chance,i)=>{
           const ongoing=chance.start<=now,places=[...new Set(chance.routes.map(index=>data.spots[fish.routes[index].spotKey]?.name).filter(Boolean))];
           return `<li data-timeline-start="${chance.start}" data-timeline-end="${chance.end}"${ongoing?' class="is-current"':''}><span class="timeline-number">${i+1}</span><div><strong>${stamp(chance.start)} – ${endText(chance.start,chance.end)}</strong><span>${esc(places.join(' · '))}</span></div><span class="timeline-remaining">${ongoing?'지금 · 종료까지 '+remaining(chance.end-now):remaining(chance.start-now)+' 후'}</span></li>`;
@@ -124,7 +124,7 @@
     }
     if(!catalogOnly){modeControls();
     $('playDays').innerHTML=[1,2,3,4,5,6,0].map(i=>`<div class="play-day"><label><input type="checkbox" data-day="${i}" ${settings.days[i].enabled?'checked':''}>${'일월화수목금토'[i]}요일</label><input type="time" id="playStart${i}" aria-label="${'일월화수목금토'[i]}요일 접속 시작" value="${settings.days[i].start}"><span>–</span><input type="time" id="playEnd${i}" aria-label="${'일월화수목금토'[i]}요일 접속 종료" value="${settings.days[i].end}"></div>`).join('');
-    $('planLead').value=settings.lead;$('planMinimum').value=settings.minMinutes;$('notificationScope').value=mode;
+    $('planLead').value=settings.lead;$('notificationScope').value=mode;
     playtimeControls();
     $('playSettings').open=!saved;
     const regionNames=[...new Set(data.fishes.filter(f=>f.kind==='rod'&&!model.isOceanFish(f)).flatMap(f=>f.routes.map(r=>data.spots[r.spotKey].region)))].sort((a,b)=>a.localeCompare(b,'ko'));
@@ -260,7 +260,7 @@
     }
     const updateCatalogLinks=()=>{for(const [id,view] of [['planToSpot','spot'],['planToBait','bait']]){const a=$(id);if(a?.tagName==='A')a.href=catalogUrl(view);}};
     $('copyPlayDays').onclick=()=>{for(let i=0;i<7;i++){$('playStart'+i).value=$('playStart1').value;$('playEnd'+i).value=$('playEnd1').value;}};
-    $('savePlay').onclick=()=>{try{const next=F.validate({days:Array.from({length:7},(_,i)=>({enabled:document.querySelector(`[data-day="${i}"]`).checked,start:$('playStart'+i).value,end:$('playEnd'+i).value})),lead:+$('planLead').value,minMinutes:+$('planMinimum').value});
+    $('savePlay').onclick=()=>{try{const next=F.validate({days:Array.from({length:7},(_,i)=>({enabled:document.querySelector(`[data-day="${i}"]`).checked,start:$('playStart'+i).value,end:$('playEnd'+i).value})),lead:+$('planLead').value});
       localStorage.setItem(KEY,serialized(next));settings=next;saved=true;playtimeControls();$('playSettings').open=false;$('planMessage').textContent=usePlaytime?'접속 시간을 저장했습니다. 알림은 이 시간 안에서만 보냅니다.':'설정을 저장했습니다. 접속 시간 제한 없이 알림을 보냅니다.';calculate();changed();}catch(e){$('planMessage').textContent=e.message;}};
     $('notificationScope').onchange=()=>{const prev=mode;mode=$('notificationScope').value;try{if(saved)store();targetCount();changed();}catch{mode=prev;$('notificationScope').value=prev;$('planMessage').textContent='알림 대상 설정을 저장하지 못했습니다.';}};
     $('notifyAlways').onchange=()=>{const previous=alwaysAlerts[purpose];alwaysAlerts[purpose]=$('notifyAlways').checked;try{if(saved)store();targetCount();changed();}catch{alwaysAlerts[purpose]=previous;$('notifyAlways').checked=previous;$('planMessage').textContent='상시 알림 설정을 저장하지 못했습니다.';}};
@@ -278,7 +278,7 @@
     setInterval(updateCountdowns,1000);
     document.addEventListener('fishing-collection-changed',()=>{if(observing())calculate();changed();});
     window.addEventListener('storage',e=>{if(e.key===KEY||e.key===null){try{const raw=localStorage.getItem(KEY);if(!raw){saved=false;return;}preferences(JSON.parse(raw));modeControls();playtimeControls();
-      for(let i=0;i<7;i++){document.querySelector(`[data-day="${i}"]`).checked=settings.days[i].enabled;$('playStart'+i).value=settings.days[i].start;$('playEnd'+i).value=settings.days[i].end;}$('planLead').value=settings.lead;$('planMinimum').value=settings.minMinutes;$('notificationScope').value=mode;$('planMessage').textContent='다른 탭에서 바꾼 계획을 반영했습니다.';if(observing())calculate();changed();}catch{$('planMessage').textContent='다른 탭의 계획을 읽지 못했습니다. 새로고침 후 확인해 주세요.';}}});
+      for(let i=0;i<7;i++){document.querySelector(`[data-day="${i}"]`).checked=settings.days[i].enabled;$('playStart'+i).value=settings.days[i].start;$('playEnd'+i).value=settings.days[i].end;}$('planLead').value=settings.lead;$('notificationScope').value=mode;$('planMessage').textContent='다른 탭에서 바꾼 계획을 반영했습니다.';if(observing())calculate();changed();}catch{$('planMessage').textContent='다른 탭의 계획을 읽지 못했습니다. 새로고침 후 확인해 주세요.';}}});
     setInterval(()=>{if(observing()&&visible()){forecast.clearCache();calculate();}},60000);
     document.addEventListener('visibilitychange',()=>{if(observing()&&visible())calculate();});
     const notifications=window.FishingNotifications?.mount({snapshot,data,model});
