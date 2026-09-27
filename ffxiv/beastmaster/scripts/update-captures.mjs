@@ -14,6 +14,7 @@ const npcChoices={'Lost Lamb':392,'Puk Hatchling':401,'Kurrea':2952};
 const unresolved={
   'Infernal Drake':'영문 대상명과 한국어 게임 데이터의 연결을 확인 중입니다.',
   'Antling':'원문은 마수 종 이름만 기재합니다. 개미 개체의 정확한 이름은 확인이 필요해요.',
+  'Myrmidon Marshall':'새 제보에 적힌 개체명입니다. 한국어 게임 데이터와의 연결은 확인이 필요해요.',
   'Behemoth':'원문은 베히모스로만 기재합니다. 임무 안의 정확한 포획 대상명은 확인이 필요해요.'
 };
 
@@ -22,13 +23,13 @@ export function buildCaptures({reports,beasts,sheets}){
   requireValue(reports.rows.length===50&&new Set(reports.rows.map(r=>r.beastId)).size===50,'Expected 50 unique source rows');
   function regionFor(english,type){
     const sheet=type==='field'?'PlaceName':'ContentFinderCondition';
-    const matches=[...sheets.en[sheet]].filter(([id,r])=>normal(r.Name)===normal(english)&&(type!=='field'||[...sheets.en.Map.values()].some(m=>+m.PlaceName===id&&+m.SizeFactor===100&&/^[a-z]\df\d\/0[01]$/.test(m.Id))));
+    const matches=[...sheets.en[sheet]].filter(([id,r])=>normal(r.Name)===normal(english)&&(type!=='field'||[...sheets.en.Map.values()].some(m=>+m.PlaceName===id&&+m.SizeFactor>0&&/^[a-z]\df\d\/0[01]$/.test(m.Id))));
     requireValue(matches.length===1,`Ambiguous ${sheet}: ${english} (${matches.map(([id])=>id)})`);
     const [id]=matches[0],name=requireValue(sheets.ko[sheet].get(id)?.Name,`Missing Korean place: ${english}`),key=`${type}:${id}`;
     if(regions.has(key))return regions.get(key);
     const region={key,id,name,englishName:english,type,mapId:null};
     if(type==='field'){
-      const choices=[...sheets.en.Map].filter(([,m])=>+m.PlaceName===id&&+m.SizeFactor===100&&/^[a-z]\df\d\/0[01]$/.test(m.Id));
+      const choices=[...sheets.en.Map].filter(([,m])=>+m.PlaceName===id&&+m.SizeFactor>0&&/^[a-z]\df\d\/0[01]$/.test(m.Id));
       requireValue(choices.length===1,`Ambiguous map: ${english}`);
       const [mapId,m]=choices[0];region.mapId=mapId;
       maps[mapId]={id:mapId,path:m.Id,name,sizeFactor:+m.SizeFactor,url:`https://v2.xivapi.com/api/asset/map/${m.Id}`};
@@ -67,7 +68,7 @@ export function buildCaptures({reports,beasts,sheets}){
         }else if(englishName!=='Infernal Drake')name=beast.name;
         if(conflict)note='도감과 Eorzea Weather는 중부 다날란, FFXIV Collect는 서부 다날란 (27,24)으로 안내합니다. 지역·좌표 확인 전까지 핀을 표시하지 않아요.';
         targets.push({id:`${beast.id}:${i+1}:${targets.filter(t=>t.beastId===beast.id).length+1}`,beastId:beast.id,name,englishName,npcNameIds,level,kind,event,
-          regionKey:region.key,coordinates,mapId:region.mapId,status:conflict?'conflict':unresolved[englishName]?'name-pending':'reported',note,
+          regionKey:region.key,coordinates:unresolved[englishName]?null:coordinates,mapId:region.mapId,status:conflict?'conflict':unresolved[englishName]?'name-pending':'reported',note,
           source:{name:'FFXIV Collect',url:`https://ffxivcollect.com/beasts/${beast.id}`,target:rawTarget,location:rawLocation},
           ...(conflict?{additionalSource:{name:'Eorzea Weather',url:'https://eorzea-weather.com/beastmaster'}}:{})});
       }

@@ -49,7 +49,7 @@ export function create(data,locationData=null,captureData=null){
     return [...found.values()].sort((a,b)=>Object.keys(methods).indexOf(a.type)-Object.keys(methods).indexOf(b.type)||a.name.localeCompare(b.name,'ko'));
   }
   const regionTargets=(key,beasts)=>{const ids=new Set(beasts.map(b=>b.id));return captures.filter(t=>t.regionKey===key&&ids.has(t.beastId));};
-  return {byId,items,routes,matchingRoutes,filter,groups,locations,maps,captures,regions,capturesByBeast,regionTargets,captureMaps:captureData?.maps||{},combat};
+  return {byId,items,routes,matchingRoutes,filter,groups,locations,maps,captures,regions,capturesByBeast,regionTargets,captureMaps:captureData?.maps||{},captureUpdatedAt:captureData?.updatedAt,combat};
 }
 export function parseNumbers(text,valid){
   const ids=new Set(),tokens=String(text).trim().replace(/[，、]/g,',').replace(/\s*[-~～–]\s*/g,'-').split(/[\s,]+/).filter(Boolean);

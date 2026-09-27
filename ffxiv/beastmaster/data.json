@@ -10,12 +10,12 @@
     },
     "en": {
       "repo": "xivapi/ffxiv-datamining",
-      "sha": "a67c23b00fe8cb254855d06b59845958b55d28f3"
+      "sha": "d71de329cc6ed30c6fb16b9108cdf7d29c653302"
     }
   },
   "source": {
     "korean": "https://github.com/Ra-Workspace/ffxiv-datamining-ko/blob/66eceba69eb2398958bdb133b241a69c13672b6c/csv/XBMPet.csv",
-    "global": "https://github.com/xivapi/ffxiv-datamining/blob/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/XBMPet.csv",
+    "global": "https://github.com/xivapi/ffxiv-datamining/blob/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/XBMPet.csv",
     "patchNotes": "https://www.ff14.co.kr/news/notice/view/2947"
   },
   "count": 50,

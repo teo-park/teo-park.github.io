@@ -19,13 +19,15 @@ const region=name=>captures.regions.find(r=>r.englishName===name).key;
 
 test('all reported targets survive source pairing, including alternatives, while gourds and starter are excluded',()=>{
   const expected=reports.rows.reduce((n,r)=>n+r.targets.filter(t=>/^Lv /.test(t)).reduce((n,t)=>n+t.split(' or ').length,0),0);
-  assert.equal(captures.targets.length,expected);assert.equal(expected,76);assert.equal(model.capturesByBeast.get(1).length,0);
+  assert.equal(captures.targets.length,expected);assert.equal(expected,95);assert.equal(model.capturesByBeast.get(1).length,0);
   assert.equal(new Set(captures.targets.map(t=>t.id)).size,expected);
   for(const t of captures.targets){assert.ok(t.source.url.endsWith(`/beasts/${t.beastId}`));assert.match(t.source.target,/^Lv /);assert.ok(captures.regions.some(r=>r.key===t.regionKey));if(t.coordinates){assert.equal(t.status,'reported');mapPosition(t.coordinates,captures.maps[t.mapId].sizeFactor);}}
   assert.deepEqual(model.capturesByBeast.get(2).map(t=>t.name),['청설모','마멋']);
   assert.equal(captures.targets.find(t=>t.englishName==='Black Eft').npcNameIds[0],196,'do not match the FATE boss called the Black Eft');
   const tortoise=model.capturesByBeast.get(25)[0];assert.equal(tortoise.status,'conflict');assert.equal(tortoise.coordinates,null);assert.match(tortoise.source.location,/Western Thanalan/);
-  for(const name of ['Antling','Behemoth','Infernal Drake']){const t=captures.targets.find(t=>t.englishName===name);assert.equal(t.status,'name-pending');assert.equal(t.npcNameIds.length,0);assert.ok(t.note);}
+  for(const name of ['Myrmidon Marshall','Behemoth','Infernal Drake']){const t=captures.targets.find(t=>t.englishName===name);assert.equal(t.status,'name-pending');assert.equal(t.npcNameIds.length,0);assert.ok(t.note);}
+  assert.deepEqual(model.capturesByBeast.get(47).map(t=>t.englishName),['Wandil','Ice Commander','Ice Soldier']);
+  assert.deepEqual(model.capturesByBeast.get(50).map(t=>t.englishName),['King Behemoth','Behemoth']);
 });
 
 test('actual target names and initials find beasts and alternate routes without duplicate species in a place',()=>{
@@ -61,7 +63,7 @@ test('co-located targets remain selectable, conflicting and missing coordinates 
     const shared=[...a.d.querySelectorAll('[data-pin-targets]')].find(b=>b.dataset.pinTargets.includes('2:')&&b.dataset.pinTargets.includes('10:'));assert.ok(shared);shared.click();assert.match(a.$('mapSelection').textContent,/마멋/);assert.match(a.$('mapSelection').textContent,/거대 말벌/);
     assert.match(a.$('regionAtlas').textContent,/위치 확인 필요/);assert.equal(a.d.querySelector('[data-pin-targets*="25:"]'),null);
     a.input('mapRegion',region('East Shroud'));assert.equal(a.d.querySelectorAll('.atlas-pin').length,0);assert.match(a.$('regionAtlas').textContent,/따끔한 소피.*→ 땅벌/);assert.match(a.$('mapCount').textContent,/좌표 미등록 1건/);
-    a.input('mapRegion',region('Cutter\'s Cry'));assert.equal(a.d.querySelector('.region-map'),null);assert.equal(a.d.querySelectorAll('.atlas-target').length,2);assert.match(a.$('regionAtlas').textContent,/개미 개체의 정확한 이름/);
+    a.input('mapRegion',region('Cutter\'s Cry'));assert.equal(a.d.querySelector('.region-map'),null);assert.equal(a.d.querySelectorAll('.atlas-target').length,7);assert.match(a.$('regionAtlas').textContent,/한국어 게임 데이터와의 연결/);
   }finally{a.close();}
 });
 

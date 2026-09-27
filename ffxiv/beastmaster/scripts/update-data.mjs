@@ -8,7 +8,7 @@ const root = new URL('../', import.meta.url);
 const cache = new URL('../../.cache/beastmaster/', root);
 export const revisions = {
   ko: {repo:'Ra-Workspace/ffxiv-datamining-ko', sha:'66eceba69eb2398958bdb133b241a69c13672b6c'},
-  en: {repo:'xivapi/ffxiv-datamining', sha:'a67c23b00fe8cb254855d06b59845958b55d28f3'}
+  en: {repo:'xivapi/ffxiv-datamining', sha:'d71de329cc6ed30c6fb16b9108cdf7d29c653302'}
 };
 const patchNotes = 'https://www.ff14.co.kr/news/notice/view/2947';
 // XBMPet physical column 1 identifies the eight families in Borrow (44895).
@@ -53,7 +53,7 @@ export function build(sheets) {
     const petId=integer(r['0'],'pet'),pet=lookup('Pet',petId),rawPet=ko.Pet.raw.get(petId);
     const name=requireValue(pet.Name,`Empty pet name ${id}`);
     const iconId=integer(r['4'],'icon'),locationType=integer(r['6'],'location type'),locationId=integer(r['7'],'location');
-    const checks={Pet:petId,Unknown3:iconId,Action:integer(r['5'],'action'),Location:locationId,LocationKey:locationType};
+    const checks={Pet:petId,Icon:iconId,Action:integer(r['5'],'action'),Location:locationId,LocationKey:locationType};
     for(const [field,value] of Object.entries(checks))if(integer(original[field],field)!==value)throw Error(`Korean/global join mismatch ${id} ${field}`);
     requireValue([0,1,2].includes(locationType),`Unknown location kind ${locationType}`);
     const locationSheet={1:'PlaceName',2:'ContentFinderCondition'}[locationType];

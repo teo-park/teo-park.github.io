@@ -1,34 +1,360 @@
 {
-  "checkedAt": "2026-09-08T08:57:01.779Z",
+  "checkedAt": "2026-09-27T00:27:28.943Z",
   "method": "HEAD",
-  "sampleOnly": true,
-  "note": "마수 아이콘 50종 중 3종을 표본 확인했습니다. 아이콘 ID는 확보했으나 응답 404인 URL의 이미지 파일은 아직 이용할 수 없습니다. 원인과 나머지 아이콘 상태는 단정하지 않습니다. 표본 404만으로 신규 이미지 서버의 반영 상태를 단정하지 않습니다.",
+  "sampleOnly": false,
+  "count": 50,
+  "available": 50,
+  "note": "50종의 XIVAPI 아이콘 URL을 확인했습니다. 응답 상태는 검사 시점의 결과이며 브라우저에서 이미지가 표시되는지는 네트워크 환경에 따라 달라질 수 있습니다.",
   "samples": [
     {
       "beastId": 1,
       "iconId": 242001,
       "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242001.tex&format=png",
-      "status": 404,
-      "contentType": "application/json"
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 2,
+      "iconId": 242002,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242002.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 3,
+      "iconId": 242003,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242003.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 4,
+      "iconId": 242004,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242004.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 5,
+      "iconId": 242005,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242005.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 6,
+      "iconId": 242006,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242006.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 7,
+      "iconId": 242007,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242007.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 8,
+      "iconId": 242008,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242008.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 9,
+      "iconId": 242009,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242009.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 10,
+      "iconId": 242010,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242010.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 11,
+      "iconId": 242011,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242011.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 12,
+      "iconId": 242012,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242012.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 13,
+      "iconId": 242013,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242013.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 14,
+      "iconId": 242014,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242014.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 15,
+      "iconId": 242015,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242015.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 16,
+      "iconId": 242016,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242016.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 17,
+      "iconId": 242017,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242017.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 18,
+      "iconId": 242018,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242018.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 19,
+      "iconId": 242019,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242019.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 20,
+      "iconId": 242020,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242020.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 21,
+      "iconId": 242021,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242021.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 22,
+      "iconId": 242022,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242022.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 23,
+      "iconId": 242023,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242023.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 24,
+      "iconId": 242024,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242024.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
     },
     {
       "beastId": 25,
       "iconId": 242025,
       "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242025.tex&format=png",
-      "status": 404,
-      "contentType": "application/json"
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 26,
+      "iconId": 242026,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242026.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 27,
+      "iconId": 242027,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242027.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 28,
+      "iconId": 242028,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242028.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 29,
+      "iconId": 242029,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242029.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 30,
+      "iconId": 242030,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242030.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 31,
+      "iconId": 242031,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242031.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 32,
+      "iconId": 242032,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242032.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 33,
+      "iconId": 242033,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242033.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 34,
+      "iconId": 242034,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242034.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 35,
+      "iconId": 242035,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242035.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 36,
+      "iconId": 242036,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242036.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 37,
+      "iconId": 242037,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242037.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 38,
+      "iconId": 242038,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242038.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 39,
+      "iconId": 242039,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242039.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 40,
+      "iconId": 242040,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242040.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 41,
+      "iconId": 242041,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242041.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 42,
+      "iconId": 242042,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242042.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 43,
+      "iconId": 242043,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242043.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 44,
+      "iconId": 242044,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242044.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 45,
+      "iconId": 242045,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242045.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 46,
+      "iconId": 242046,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242046.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 47,
+      "iconId": 242047,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242047.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 48,
+      "iconId": 242048,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242048.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "beastId": 49,
+      "iconId": 242049,
+      "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242049.tex&format=png",
+      "status": 200,
+      "contentType": "image/png"
     },
     {
       "beastId": 50,
       "iconId": 242050,
       "url": "https://v2.xivapi.com/api/asset?path=ui%2Ficon%2F242000%2F242050.tex&format=png",
-      "status": 404,
-      "contentType": "application/json"
+      "status": 200,
+      "contentType": "image/png"
     }
-  ],
-  "control": {
-    "description": "기존 어부 수첩의 말름미역 아이콘",
-    "url": "https://v2.xivapi.com/api/asset?path=ui/icon/029000/029063_hr1.tex&format=png",
-    "status": 200
-  }
+  ]
 }

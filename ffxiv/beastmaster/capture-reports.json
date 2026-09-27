@@ -1,16 +1,18 @@
 {
   "source": "https://ffxivcollect.com/beasts",
-  "observedAt": "2026-09-09",
-  "sourceSha256": "0e7db41afcdf034a108a1ab644d6a15d5c54847febc666eb132d0bda6d3ea997",
-  "note": "검토한 공개 포획 제보 스냅샷. 원문의 대상/장소 줄 순서를 유지합니다. 항아리 교환과 최초 지급은 포획에서 제외합니다.",
+  "observedAt": "2026-09-27",
+  "sourceSha256": "31a7d748c1b97ce25499f48c0ad3fc556e6848e12779240119cadccd5416de81",
+  "note": "FFXIV Collect의 공개 포획 제보. 원문 출처 종류와 문구를 sourceEntries에 보존합니다. 상점·퀘스트는 한국어 게임 데이터에서 연결하고, 지역을 특정할 수 없는 보물지도 제보에는 지도 핀을 만들지 않습니다.",
   "rows": [
     {
       "beastId": 1,
-      "targets": [
-        ""
-      ],
-      "places": [
-        "Tamed First"
+      "targets": [],
+      "places": [],
+      "sourceEntries": [
+        {
+          "kind": "quest",
+          "text": "Strangers in the Wood"
+        }
       ]
     },
     {
@@ -22,6 +24,16 @@
       "places": [
         "Central Shroud (23, 16)",
         "Central Thanalan (20,25)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 1 Ground Squirrel - Central Shroud (23, 16)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Lv 1 Star Marmot - Central Thanalan (20,25)"
+        }
       ]
     },
     {
@@ -31,24 +43,54 @@
       ],
       "places": [
         "Middle La Noscea (22, 25)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 3 Lost Lamb - Middle La Noscea (22, 25)"
+        }
       ]
     },
     {
       "beastId": 4,
       "targets": [
-        "Lv 4 Pugil"
+        "Lv 4 Pugil",
+        "Lv 32 Swamp Pugil"
       ],
       "places": [
-        "Middle La Noscea (21, 22)"
+        "Middle La Noscea (21, 22)",
+        "Brayflox's Longstop"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 4 Pugil - Middle La Noscea (21, 22)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 32 Swamp Pugil - Brayflox's Longstop"
+        }
       ]
     },
     {
       "beastId": 5,
       "targets": [
-        "Lv 5 Opo-opo"
+        "Lv 5 Opo-opo",
+        "Lv 32 Gully Galago"
       ],
       "places": [
-        "North Shroud (27, 25)"
+        "North Shroud (27, 25)",
+        "Brayflox's Longstop"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 5 Opo-opo - North Shroud (27, 25)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 32 Gully Galago - Brayflox's Longstop"
+        }
       ]
     },
     {
@@ -62,6 +104,20 @@
         "Lower La Noscea (28, 21)",
         "FATE: \"Don't Drink the Water\" - Lower La Noscea (21,34)",
         "FATE: \"Tender Buttons\" - Western La Noscea (32,28)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 4 Wild Dodo - Lower La Noscea (28, 21)"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 12 Ruffled Dodo - FATE: \"Don't Drink the Water\" - Lower La Noscea (21,34)"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 14 Gluttonous Gertrude - FATE: \"Tender Buttons\" - Western La Noscea (32,28)"
+        }
       ]
     },
     {
@@ -73,6 +129,16 @@
       "places": [
         "Western Thanalan (22, 27)",
         "Copperbell Mines"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 6 Rusty Coblyn - Western Thanalan (22, 27)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 17 Copperbell Coblyn - Copperbell Mines"
+        }
       ]
     },
     {
@@ -82,6 +148,12 @@
       ],
       "places": [
         "Central Shroud (20,19)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 10 Diremite - Central Shroud (20,19)"
+        }
       ]
     },
     {
@@ -91,6 +163,12 @@
       ],
       "places": [
         "Middle La Noscea (15, 15)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 10 Megalocrab - Middle La Noscea (15, 15)"
+        }
       ]
     },
     {
@@ -102,17 +180,43 @@
       "places": [
         "Central Thanalan (20,25)",
         "B Rank Hunt - East Shroud"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 1 Huge Hornet - Central Thanalan (20,25)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Stinging Sophie - B Rank Hunt - East Shroud"
+        }
       ]
     },
     {
       "beastId": 11,
       "targets": [
         "Lv 6 Nesting Buzzard",
-        "Lv 50 Vuokho"
+        "Lv 50 Vuokho",
+        "Lv 38 Canyon Condor"
       ],
       "places": [
         "Western Thanalan (21, 25)",
-        "B Rank Hunt - Outer La Noscea"
+        "B Rank Hunt - Outer La Noscea",
+        "Cutter's Cry"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 6 Nesting Buzzard - Western Thanalan (21, 25)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Vuokho - B Rank Hunt - Outer La Noscea"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Canyon Condor - Cutter's Cry"
+        }
       ]
     },
     {
@@ -122,6 +226,12 @@
       ],
       "places": [
         "Middle La Noscea (23, 18)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 5 Tiny Mandragora - Middle La Noscea (23, 18)"
+        }
       ]
     },
     {
@@ -131,6 +241,12 @@
       ],
       "places": [
         "Central Shroud (20, 27)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 14 Geshunpest - Central Shroud (20, 27)"
+        }
       ]
     },
     {
@@ -140,19 +256,37 @@
       ],
       "places": [
         "Middle La Noscea (21, 20)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 4 Puk Hatchling - Middle La Noscea (21, 20)"
+        }
       ]
     },
     {
       "beastId": 15,
       "targets": [
         "Lv 13 Thickshell",
-        "Crab Gourd",
         "Lv 21 Karkinos"
       ],
       "places": [
         "Western Thanalan (16, 17)",
-        "10 Faded Remnants of Resilience",
         "FATE: \"Giant Enemy Crab\" - Upper La Noscea (14,24)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 13 Thickshell - Western Thanalan (16, 17)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 10 Faded Remnants of Resilience"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 21 Karkinos - FATE: \"Giant Enemy Crab\" - Upper La Noscea (14,24)"
+        }
       ]
     },
     {
@@ -164,6 +298,16 @@
       "places": [
         "Western La Noscea (22,23)",
         "FATE: \"The King's Justice\" - Wesern La Noscea (14,34)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 16 Killer Mantis - Western La Noscea (22,23)"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 40 Mantis King - FATE: \"The King's Justice\" - Wesern La Noscea (14,34)"
+        }
       ]
     },
     {
@@ -171,23 +315,49 @@
       "targets": [
         "Lv 17 Ichorous Ire",
         "Lv 50 Sewer Syrup",
-        "Slime Gourd"
+        "Lv 38 Slipsand"
       ],
       "places": [
         "Copperbell Mines",
         "B Rank Hunt - Western Thanalan",
-        "20 Faded Remnants of Resilience"
+        "Cutter's Cry"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 17 Ichorous Ire - Copperbell Mines"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Sewer Syrup - B Rank Hunt - Western Thanalan"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 20 Faded Remnants of Resilience"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Slipsand - Cutter's Cry"
+        }
       ]
     },
     {
       "beastId": 18,
       "targets": [
-        "Lv 20 Doctore",
-        "Dullahan Gourd"
+        "Lv 20 Doctore"
       ],
       "places": [
-        "Halatali",
-        "20 Faded Remnants of Resilience"
+        "Halatali"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 20 Doctore - Halatali"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 20 Faded Remnants of Resilience"
+        }
       ]
     },
     {
@@ -201,6 +371,20 @@
         "Lower La Noscea (26, 16)",
         "B Rank Hunt - Lower La Noscea",
         "Sastasha"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 7 Cave Bat - Lower La Noscea (26, 16)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Barbastelle - B Rank Hunt - Lower La Noscea"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 15 Black Bat - Sastasha"
+        }
       ]
     },
     {
@@ -212,6 +396,16 @@
       "places": [
         "Central Shroud (23, 27)",
         "Western La Noscea (34,30)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 10 Roselet - Central Shroud (23, 27)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Lv 10 Roseling - Western La Noscea (34,30)"
+        }
       ]
     },
     {
@@ -223,15 +417,37 @@
       "places": [
         "Western La Noscea (23,24)",
         "Brayflox's Longstop"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 16 Rothlyt Pelican - Western La Noscea (23,24)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 32 Great Yellow Pelican - Brayflox's Longstop"
+        }
       ]
     },
     {
       "beastId": 22,
       "targets": [
-        "Lv 3 Cactuar"
+        "Lv 3 Cactuar",
+        "Lv 38 Sabotender Desertor"
       ],
       "places": [
-        "Western Thanalan (28, 25)"
+        "Western Thanalan (28, 25)",
+        "Cutter's Cry"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 3 Cactuar - Western Thanalan (28, 25)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Sabotender Desertor - Cutter's Cry"
+        }
       ]
     },
     {
@@ -239,12 +455,32 @@
       "targets": [
         "Lv 29 Sandstone Golem",
         "Lv 25 Stone Golem",
-        "Lv 28 Clay Golem"
+        "Lv 28 Clay Golem",
+        "Lv 38 Arkose Golem"
       ],
       "places": [
         "Southern Thanalan (22,12)",
         "FATE: \"That Which Binds Us\" - North Shroud (17,26)",
-        "North Shroud (17,27)"
+        "North Shroud (17,27)",
+        "Cutter's Cry"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 29 Sandstone Golem - Southern Thanalan (22,12)"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 25 Stone Golem - FATE: \"That Which Binds Us\" - North Shroud (17,26)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Lv 28 Clay Golem - North Shroud (17,27)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Arkose Golem - Cutter's Cry"
+        }
       ]
     },
     {
@@ -256,6 +492,16 @@
       "places": [
         "Eastern La Noscea (30, 34)",
         "B Rank Hunt - Eastern La Noscea"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 30 Apkallu  -  Eastern La Noscea (30, 34)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Bloody Mary - B Rank Hunt - Eastern La Noscea"
+        }
       ]
     },
     {
@@ -265,6 +511,12 @@
       ],
       "places": [
         "Western Thanalan (27, 24)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 12 Giant Tortoise - Western Thanalan (27, 24)"
+        }
       ]
     },
     {
@@ -274,6 +526,12 @@
       ],
       "places": [
         "Middle La Noscea (18,16)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 8 Wounded Aurochs - Middle La Noscea (18,16)"
+        }
       ]
     },
     {
@@ -287,17 +545,45 @@
         "Western Thanalan (17, 15)",
         "FATE: \"Shell Shocked\" - Upper La Noscea (29,24)",
         "Copperbell Mines"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 14 Scaphite - Western Thanalan (17, 15)"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 31 Zoredonite - FATE: \"Shell Shocked\" - Upper La Noscea (29,24)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 17 Living Fossil - Copperbell Mines"
+        }
       ]
     },
     {
       "beastId": 28,
       "targets": [
         "Lv 31 Sandworm",
-        "Worm Gourd"
+        "Lv 38 Giant Tunnel Worm"
       ],
       "places": [
         "Southern Thanalan (15, 33)",
-        "15 Faded Remnants of Resilience"
+        "Cutter's Cry"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 31 Sandworm -  Southern Thanalan (15, 33)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 15 Faded Remnants of Resilience"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Giant Tunnel Worm - Cutter's Cry"
+        }
       ]
     },
     {
@@ -309,15 +595,37 @@
       "places": [
         "Central Thanalan (17, 23)",
         "Copperbell Mines"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 7 Spriggan Graverobber - Central Thanalan (17, 23)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 17 Spriggan Copper Copper - Copperbell Mines"
+        }
       ]
     },
     {
       "beastId": 30,
       "targets": [
-        "Lv 12 Mossless Goobue"
+        "Lv 12 Mossless Goobue",
+        "Lv 50 Croque-Mitaine"
       ],
       "places": [
-        "Lower La Noscea (23, 24)"
+        "Lower La Noscea (23, 24)",
+        "S Rank Hunt - Middle La Noscea"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 12 Mossless Goobue - Lower La Noscea (23, 24)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Croque-Mitaine - S-Rank Hunt - Middle La Noscea"
+        }
       ]
     },
     {
@@ -327,17 +635,39 @@
       ],
       "places": [
         "Lower La Noscea (25, 23)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 4 Rivertoad - Lower La Noscea (25, 23)"
+        }
       ]
     },
     {
       "beastId": 32,
       "targets": [
         "Lv 33 Colibri",
-        "Lv 50 Myradrosh"
+        "Lv 50 Myradrosh",
+        "Lv 32 Painted Colibri"
       ],
       "places": [
         "Eastern La Noscea (30, 24)",
-        "B Rank Hunt - Upper La Noscea"
+        "B Rank Hunt - Upper La Noscea",
+        "Brayflox's Longstop"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 33 Colibri  -  Eastern La Noscea (30, 24)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Myradrosh - B Rank Hunt - Upper La Noscea"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 32 Painted Colibri - Brayflox's Longstop"
+        }
       ]
     },
     {
@@ -349,6 +679,16 @@
       "places": [
         "Upper La Noscea (9,21)",
         "Sastasha"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 24 Master Coeurl - Upper La Noscea (9,21)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 15 Chopper - Sastasha"
+        }
       ]
     },
     {
@@ -360,19 +700,41 @@
       "places": [
         "Central Shroud (31,20)",
         "FATE: \"Clever Girls\" - Central Shroud (25,19)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 9 Anole - Central Shroud (31,20)"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 3 Anole -  FATE: \"Clever Girls\" - Central Shroud (25,19)"
+        }
       ]
     },
     {
       "beastId": 35,
       "targets": [
         "Lv 32 Sundrake",
-        "Drake Gourd",
         "Lv 32 Ashdrake or Infernal Drake"
       ],
       "places": [
         "Southern Thanalan (23,38)",
-        "10 Faded Remnants of Resilience",
         "Brayflox's Longstop"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 32 Sundrake - Southern Thanalan (23,38)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 10 Faded Remnants of Resilience"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 32 Ashdrake or Infernal Drake - Brayflox's Longstop"
+        }
       ]
     },
     {
@@ -382,24 +744,54 @@
       ],
       "places": [
         "Central Shroud (28, 15)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 12 Treant Sapling - Central Shroud (28, 15)"
+        }
       ]
     },
     {
       "beastId": 37,
       "targets": [
-        "Lv 38 Antling"
+        "Lv 38 Myrmidon Marshall"
       ],
       "places": [
         "Cutter's Cry"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Myrmidon Marshall - Myrmidon Princess - Cutter's Cry"
+        }
       ]
     },
     {
       "beastId": 38,
       "targets": [
-        "Lv 38 Chimera"
+        "Lv 38 Chimera",
+        "Lv 50 Dhorme Chimera",
+        "Lv 49 Gorgimera"
       ],
       "places": [
-        "Cutter's Cry"
+        "Cutter's Cry",
+        "A Relic Reborn: The Chimera",
+        "FATE: \"Go, Go, Gorgimera\" - Northern Thanalan (17,14)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 38 Chimera - Cutter's Cry"
+        },
+        {
+          "kind": "trial",
+          "text": "Lv 50 Dhorme Chimera - A Relic Reborn: The Chimera"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 49 Gorgimera - FATE: \"Go, Go, Gorgimera\" - Northern Thanalan (17,14)"
+        }
       ]
     },
     {
@@ -409,6 +801,12 @@
       ],
       "places": [
         "Central Shroud (13,22)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 31 Stroper - Central Shroud (13,22)"
+        }
       ]
     },
     {
@@ -420,17 +818,43 @@
       "places": [
         "Middle La Noscea (20, 19)",
         "Copperbell Mines"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 7 Bogy - Middle La Noscea (20, 19)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 17 Errant Soul - Copperbell Mines"
+        }
       ]
     },
     {
       "beastId": 41,
       "targets": [
         "Lv 6 Black Eft",
-        "Lv 50 Kurrea"
+        "Lv 50 Kurrea",
+        "Lv 32 Surf Eft or Hellbender"
       ],
       "places": [
         "Central Shroud (26,18)",
-        "A Rank Hunt - Mor Dhona"
+        "A Rank Hunt - Mor Dhona",
+        "Brayflox's Longstop"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 6 Black Eft - Central Shroud (26,18)"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Kurrea - A Rank Hunt - Mor Dhona"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 32 Surf Eft or Hellbender - Brayflox's Longstop"
+        }
       ]
     },
     {
@@ -442,6 +866,16 @@
       "places": [
         "Mor Dhona (25, 12)",
         "Halatali"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "beastmaster",
+          "text": "Lv 45 Lake Cobra  -  Mor Dhona (25, 12)"
+        },
+        {
+          "kind": "dungeon",
+          "text": "Lv 20 Coliseum Python - Halatali"
+        }
       ]
     },
     {
@@ -451,15 +885,41 @@
       ],
       "places": [
         "A Relic Reborn: The Hydra"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "trial",
+          "text": "Lv 50 Hydra - A Relic Reborn: The Hydra"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 35 Bright Remnants of Resilience"
+        }
       ]
     },
     {
       "beastId": 44,
       "targets": [
-        "Lv 50 Gadfly"
+        "Lv 50 Gadfly",
+        "Lv 50 Monarch Ogrefly"
       ],
       "places": [
-        "The Lost City of Amdapor"
+        "The Lost City of Amdapor",
+        "B Rank Hunt - South Shroud"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 50 Gadfly - The Lost City of Amdapor"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 35 Bright Remnants of Resilience"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 - Monarch Ogrefly - B Rank Hunt - South Shroud"
+        }
       ]
     },
     {
@@ -469,24 +929,82 @@
       ],
       "places": [
         "The Lost City of Amdapor"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 50 Decaying Gourmand - The Lost City of Amdapor"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 35 Bright Remnants of Resilience"
+        }
       ]
     },
     {
       "beastId": 46,
       "targets": [
-        "Lv 50 Zu"
+        "Lv 50 Zu",
+        "Lv 50 Cornu",
+        "Lv 47 Anzu Crone"
       ],
       "places": [
-        "Pharos Sirius"
+        "Pharos Sirius",
+        "A Rank Hunt - Outer La Noscea",
+        "FATE: \"Anzu Trois\" - Sea of Clouds (29,35)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 50 Zu - Pharos Sirius"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 35 Bright Remnants of Resilience"
+        },
+        {
+          "kind": "hunts",
+          "text": "Lv 50 Cornu - A Rank Hunt - Outer La Noscea"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 47 Anzu Crone - FATE: \"Anzu Trois\" - Sea of Clouds (29,35)"
+        },
+        {
+          "kind": "treasure-hunt",
+          "text": "Lv 50 Alpha Zu - Unhidden Leather Map"
+        }
       ]
     },
     {
       "beastId": 47,
       "targets": [
-        "Lv 50 Ice Golem"
+        "Lv 50 Wandil",
+        "Lv 48 Ice Commander",
+        "Lv 50 Ice Soldier"
       ],
       "places": [
-        "Snowcloak"
+        "Snowcloak",
+        "FATE: \"In Command\" - Coerthas Western Highlands (17,13)",
+        "The Akh Afah Amphitheatre (Hard)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 50 Wandil - Snowcloak"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 35 Bright Remnants of Resilience"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 48 Ice Commander - FATE: \"In Command\" - Coerthas Western Highlands (17,13)"
+        },
+        {
+          "kind": "trial",
+          "text": "Lv 50 Ice Soldier - The Akh Afah Amphitheatre (Hard)"
+        }
       ]
     },
     {
@@ -496,6 +1014,16 @@
       ],
       "places": [
         "Sastasha (Hard)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "dungeon",
+          "text": "Lv 50 Karlabos - Sastasha (Hard)"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 35 Bright Remnants of Resilience"
+        }
       ]
     },
     {
@@ -505,15 +1033,41 @@
       ],
       "places": [
         "The Second Coil of Bahamut - Turn 1"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "raid",
+          "text": "Lv 50 Rafflesia - The Second Coil of Bahamut - Turn 1"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 40 Bright Remnants of Resilience"
+        }
       ]
     },
     {
       "beastId": 50,
       "targets": [
+        "Lv 50 King Behemoth",
         "Lv 50 Behemoth"
       ],
       "places": [
-        "Labyrinth of the Ancients"
+        "Labyrinth of the Ancients",
+        "FATE: \"He Taketh It with His Eyes\" - Coerthas Central Highlands (4,15)"
+      ],
+      "sourceEntries": [
+        {
+          "kind": "raid",
+          "text": "Lv 50 King Behemoth - Labyrinth of the Ancients"
+        },
+        {
+          "kind": "beastmaster",
+          "text": "Kornago Merchant - Bentbranch Meadows - 40 Bright Remnants of Resilience"
+        },
+        {
+          "kind": "fate",
+          "text": "Lv 50 Behemoth - FATE: \"He Taketh It with His Eyes\" - Coerthas Central Highlands (4,15)"
+        }
       ]
     }
   ]

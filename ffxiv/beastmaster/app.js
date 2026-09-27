@@ -1,5 +1,5 @@
-import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260909-borrow1';
-import {createAtlas,captureDetails} from './atlas.js?v=20260909-atlas1';
+import {KEY,methods,create,parseNumbers,parseBackup,backup,mapPosition} from './engine.js?v=20260927-captures1';
+import {createAtlas,captureDetails} from './atlas.js?v=20260927-captures1';
 import {initCombatFilters,combatRow,combatDetails} from './combat-view.js?v=20260909-borrow1';
 
 const PAGE_SIZE=25;
@@ -191,7 +191,7 @@ export function mount(win,data,locationData=null,captureData=null){
 
 if(typeof window!=='undefined'){
   const readJson=path=>fetch(new URL(path,import.meta.url)).then(r=>{if(!r.ok)throw Error(path);return r.json();});
-  Promise.all([readJson('./data.json?v=20260909-borrow1'),readJson('./locations.json?v=20260908-maps1').catch(()=>null),readJson('./captures.json?v=20260909-atlas1').catch(()=>null)]).then(([data,locations,captures])=>mount(window,data,locations,captures)).catch(()=>{
+  Promise.all([readJson('./data.json?v=20260927-assets1'),readJson('./locations.json?v=20260908-maps1').catch(()=>null),readJson('./captures.json?v=20260927-captures1').catch(()=>null)]).then(([data,locations,captures])=>mount(window,data,locations,captures)).catch(()=>{
     document.getElementById('loading').hidden=true;const fatal=document.getElementById('fatal');fatal.hidden=false;fatal.textContent='마수도감을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요. 저장된 수집 기록은 유지됩니다.';
   });
 }

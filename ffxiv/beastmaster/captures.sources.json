@@ -1,7 +1,7 @@
 {
   "source": "https://ffxivcollect.com/beasts",
-  "observedAt": "2026-09-09",
-  "sourceSha256": "0e7db41afcdf034a108a1ab644d6a15d5c54847febc666eb132d0bda6d3ea997",
+  "observedAt": "2026-09-27",
+  "sourceSha256": "31a7d748c1b97ce25499f48c0ad3fc556e6848e12779240119cadccd5416de81",
   "files": [
     {
       "url": "https://raw.githubusercontent.com/Ra-Workspace/ffxiv-datamining-ko/66eceba69eb2398958bdb133b241a69c13672b6c/csv/BNpcName.csv",
@@ -16,19 +16,19 @@
       "sha256": "99883e7fe914240aa2aff7cc903d06a11d2665b81f909ce6bf5ce21c780fd5bf"
     },
     {
-      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/BNpcName.csv",
+      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/BNpcName.csv",
       "sha256": "08614d48fd45ab0db1b8705425a363b71dc143cccb961a5b916723c81edc0449"
     },
     {
-      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/ContentFinderCondition.csv",
-      "sha256": "ab282d73157101fa1b86dcb2efa73d0025b3c10caa588de0c5d41292190c4e79"
+      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/ContentFinderCondition.csv",
+      "sha256": "3f822629b801c4d76af9007950ab975747e4f7dba97fd3410cfaab2ce92f3978"
     },
     {
-      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/Map.csv",
+      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/Map.csv",
       "sha256": "758afc0be55bcf020376fdbd8f135db435583b1840d477c3b3eb5651c34e396a"
     },
     {
-      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/PlaceName.csv",
+      "url": "https://raw.githubusercontent.com/xivapi/ffxiv-datamining/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/PlaceName.csv",
       "sha256": "99bccbf52017878380337211f19925beb72ce85968ca44391615bdc28d9a262e"
     }
   ]

@@ -7,23 +7,23 @@
     },
     "en": {
       "repo": "xivapi/ffxiv-datamining",
-      "sha": "a67c23b00fe8cb254855d06b59845958b55d28f3"
+      "sha": "d71de329cc6ed30c6fb16b9108cdf7d29c653302"
     }
   },
   "files": [
     {
       "language": "en",
       "path": "csv/en/Pet.csv",
-      "revision": "a67c23b00fe8cb254855d06b59845958b55d28f3",
-      "url": "https://github.com/xivapi/ffxiv-datamining/blob/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/Pet.csv",
+      "revision": "d71de329cc6ed30c6fb16b9108cdf7d29c653302",
+      "url": "https://github.com/xivapi/ffxiv-datamining/blob/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/Pet.csv",
       "sha256": "74d5a2111a4acdc2e86763e0f12d5b4e14f790a999f6e61075b5d2dca186a716"
     },
     {
       "language": "en",
       "path": "csv/en/XBMPet.csv",
-      "revision": "a67c23b00fe8cb254855d06b59845958b55d28f3",
-      "url": "https://github.com/xivapi/ffxiv-datamining/blob/a67c23b00fe8cb254855d06b59845958b55d28f3/csv/en/XBMPet.csv",
-      "sha256": "280c41c4f06077807d917a5ef22aaad7ea98b23d53e30d78fbd4dbe389b0ccd0"
+      "revision": "d71de329cc6ed30c6fb16b9108cdf7d29c653302",
+      "url": "https://github.com/xivapi/ffxiv-datamining/blob/d71de329cc6ed30c6fb16b9108cdf7d29c653302/csv/en/XBMPet.csv",
+      "sha256": "657b9efcd525323ad94ba0bab73d8594b641fa245b47af55bf6208b7ca7bfe1a"
     },
     {
       "language": "ko",
