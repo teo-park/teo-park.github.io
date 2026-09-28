@@ -44,16 +44,30 @@
       </section></div>`;
   }
   function paint(root){
+    const compact=root.ownerDocument.body.classList.contains('pip-body');
     const active=root.ownerDocument.activeElement;
     const focus=active && root.contains(active)?{field:active.dataset.field,value:active.dataset.value,action:active.dataset.action}:null;
     const details=root.querySelector('.tower-reference')?.open;
     root.innerHTML=markup();
     root.querySelector('.tower-reference').open=Boolean(details);
+    if(compact){
+      // Match the original 380×400 overlay: show only this phase's reminders.
+      const visibleRows=[[],[0],[1],[1],[2,3],[2,3],[3,4],[4,5],[0,5]][step];
+      root.querySelectorAll('.result-row').forEach((row,index)=>{if(!visibleRows.includes(index))row.remove();});
+      root.querySelectorAll('.result h2,.result-meta,.tower-reference,.step-note').forEach(el=>el.remove());
+      if(!visibleRows.length)root.querySelector('.result').remove();
+      root.querySelectorAll('.step[data-active="false"]').forEach(el=>el.remove());
+      const settings=root.querySelector('.settings');
+      settings.className='compact-settings';
+      settings.innerHTML=`<span>${L.strategies[state.strategy].name} · ${state.role} · ${L.calculate(state).group}</span><button type="button" data-action="reset">새 트라이</button>`;
+      const navigation=root.querySelector('.step-navigation');
+      navigation.innerHTML=`<button type="button" data-action="previous" ${step===0?'disabled':''}>← 이전</button><span>${step===8?'입력 완료':`${step+1} / 8 · ${labels[step]}`}</span><button type="button" data-action="next" ${step===8?'disabled':''}>다음 →</button>`;
+      root.append(navigation);
+    }
     if(focus){
       const target=focus.field?root.querySelector(`[data-field="${focus.field}"][data-value="${focus.value}"]`):focus.action?root.querySelector(`[data-action="${focus.action}"]`):null;
-      const compact=root.ownerDocument.body.classList.contains('pip-body');
       if(target && !(compact && target.closest('.step[data-active="false"]')))target.focus({preventScroll:true});
-      else if(compact)root.querySelector('.step[data-active="true"] button')?.focus({preventScroll:true});
+      else if(compact)(root.querySelector('.step[data-active="true"] button')||root.querySelector('[data-action="previous"]'))?.focus({preventScroll:true});
     }
   }
   function render(){paint(main);if(child && !child.closed){const root=child.document.getElementById('pipHelper');if(root)paint(root);}}
@@ -62,11 +76,11 @@
     if(b.dataset.action){
       if(b.dataset.action==='reset'){state=L.initial(state.strategy,state.role);step=0;}
       if(b.dataset.action==='previous')step=Math.max(0,step-1);
-      if(b.dataset.action==='next')step=Math.min(7,step+1);
+      if(b.dataset.action==='next')step=Math.min(8,step+1);
     }else if(b.dataset.field){
       const f=b.dataset.field,v=f==='clone'?Number(b.dataset.value):b.dataset.value;
       if(f==='strategy' && v!==state.strategy){state=L.initial(v,state.role);step=0;}
-      else {state[f]=v;if(L.fields.includes(f))step=Math.min(7,L.fields.indexOf(f)+1);}
+      else {state[f]=v;if(L.fields.includes(f))step=Math.min(8,L.fields.indexOf(f)+1);}
       if(f==='strategy'||f==='role')try{localStorage.setItem(storageKey,JSON.stringify({strategy:state.strategy,role:state.role}));}catch{}
     }else return;
     render();
@@ -82,13 +96,13 @@
     if(child&&!child.closed){child.focus();return;}
     opening=true;pipButton.disabled=true;
     try{
-      const opened=supported?await window.documentPictureInPicture.requestWindow({width:440,height:780}):window.open('about:blank','dream-helper-popup','popup,width=440,height=780');
+      const opened=supported?await window.documentPictureInPicture.requestWindow({width:380,height:400}):window.open('about:blank','dream-helper-popup','popup,width=380,height=400');
       if(!opened)throw new Error('popup blocked');
       child=opened;
       const d=opened.document;d.documentElement.lang='ko';d.title='헤비 영식 4층 · 드림 헬퍼';
-      for(const file of ['../theme.css','app.css']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(file,base).href;d.head.append(link);}
+      for(const file of ['../theme.css','app.css?v=20260928-compact']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(file,base).href;d.head.append(link);}
       const meta=d.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1';d.head.append(meta);
-      d.body.className='pip-body';d.body.innerHTML='<header class="pip-heading"><strong>헤비 영식 4층 · 드림 헬퍼</strong><button type="button" id="backToMain">본 페이지 ↗</button></header><main id="pipHelper"></main><p class="pip-footer">본 페이지를 열어 두세요. 입력과 결과가 서로 연동됩니다.</p>';
+      d.body.className='pip-body';d.body.innerHTML='<header class="pip-heading"><strong>드림 헬퍼</strong><button type="button" id="backToMain">설정 · 본 페이지 ↗</button></header><main id="pipHelper"></main>';
       d.getElementById('backToMain').addEventListener('click',()=>window.focus());
       d.getElementById('pipHelper').addEventListener('click',input);
       opened.addEventListener('pagehide',()=>cleanup(opened),{once:true});

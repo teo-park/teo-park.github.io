@@ -56,14 +56,14 @@ test('opening routes, island safety and missing data',()=>{
 });
 function open({pip=true,fail=false,blocked=false,stored=null}={}){
   const dom=new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8'),{url:'https://example.test/ffxiv/dream-helper/',runScripts:'outside-only'});
-  const w=dom.window;const children=[];
+  const w=dom.window;const children=[],requests=[];
   Object.defineProperty(w,'isSecureContext',{value:true});
   function makeChild(){const d=new JSDOM('<!doctype html><html><head></head><body></body></html>',{url:w.location.href});children.push(d);return d.window;}
-  if(pip)w.documentPictureInPicture={requestWindow:async()=>{if(fail)throw Error('denied');return makeChild();}};
+  if(pip)w.documentPictureInPicture={requestWindow:async options=>{requests.push(options);if(fail)throw Error('denied');return makeChild();}};
   else w.open=()=>blocked?null:makeChild();
   if(stored!==null)w.localStorage.setItem('ffxiv-dream-helper-settings-v1',stored);
   for(const file of ['logic.js','app.js'])w.eval(fs.readFileSync(path.join(root,file),'utf8'));
-  return {w,d:w.document,children,close(){children.forEach(c=>c.window.close());w.close();}};
+  return {w,d:w.document,children,requests,close(){children.forEach(c=>c.window.close());w.close();}};
 }
 const click=(d,f,v)=>d.querySelector(`[data-field="${f}"][data-value="${v}"]`).click();
 const tick=()=>new Promise(r=>setTimeout(r,0));
@@ -72,13 +72,16 @@ test('PiP is interactive, syncs in both directions, resets and reopens with stat
     const {d}=app;click(d,'role','D1');click(d,'shape','plus');
     d.getElementById('openPip').click();await tick();
     const p=app.children[0].window.document;
+    assert.equal(app.requests[0].width,380);assert.equal(app.requests[0].height,400);
     assert.equal(p.documentElement.lang,'ko');assert.equal(p.querySelectorAll('link').length,2);
     click(p,'clone',0);assert.match(d.querySelector('.result').textContent,/숫자 1 · 쉐어/);
+    click(p,'safe','C');
     click(d,'spread','spread');assert.equal(p.querySelectorAll('.route div').length,4);
     click(p,'tower','dark');click(p,'flash','D');assert.match(d.querySelector('.result').textContent,/교대하기 · 어둠 → 땅/);
-    click(p,'safe','C');click(p,'remaining','A');click(p,'island','B');
+    click(p,'remaining','A');click(p,'island','B');
     assert.match(d.querySelector('.result').textContent,/히트박스 바깥/);
-    p.querySelector('[data-action="previous"]').click();assert.match(p.querySelector('.step[data-active=true]').textContent,/남은 분신/);
+    assert.equal(p.querySelectorAll('.step').length,0);
+    p.querySelector('[data-action="previous"]').click();assert.match(p.querySelector('.step[data-active=true]').textContent,/이동한 섬/);
     app.children[0].window.dispatchEvent(new app.children[0].window.Event('pagehide'));
     assert.equal(d.getElementById('openPip').getAttribute('aria-pressed'),'false');
     d.getElementById('openPip').click();await tick();
@@ -86,6 +89,27 @@ test('PiP is interactive, syncs in both directions, resets and reopens with stat
     app.children[1].window.document.querySelector('[data-action="reset"]').click();
     assert.equal(d.querySelectorAll('.route div').length,0);assert.equal(d.querySelector('[data-field="role"][aria-pressed="true"]').textContent,'D1');
     click(d,'clone',1);click(d,'strategy','game8');assert.equal(d.querySelectorAll('[data-field="clone"][aria-pressed="true"]').length,0);
+  }finally{app.close();}
+});
+test('compact PiP shows only current input and phase reminders throughout the fight',async()=>{
+  const app=open();try{
+    app.d.getElementById('openPip').click();await tick();
+    const p=app.children[0].window.document;
+    const selections=[['shape','plus'],['clone',0],['safe','A'],['spread','spread'],['tower','wind'],['flash','TH'],['remaining','C'],['island','D']];
+    const expectedRows=[0,1,1,1,2,2,2,2,2];
+    for(let i=0;i<=8;i++){
+      assert.equal(p.querySelectorAll('.settings,.tower-reference,.result-meta,.pip-footer').length,0);
+      assert.equal(p.querySelectorAll('.step').length,i===8?0:1);
+      assert.equal(p.querySelectorAll('.result-row').length,expectedRows[i]);
+      assert.equal(app.d.querySelectorAll('.result-row').length,6);
+      if(i<8)click(p,...selections[i]);
+    }
+    assert.match(p.querySelector('.result').textContent,/12시 → 1시/);
+    assert.match(p.querySelector('.result').textContent,/히트박스 바깥/);
+    assert.doesNotMatch(p.querySelector('.result').textContent,/탑 교대|내 징/);
+    p.querySelector('[data-action="reset"]').click();
+    assert.equal(p.querySelectorAll('.result-row').length,0);
+    assert.match(p.querySelector('.step').textContent,/첫 분신 모양/);
   }finally{app.close();}
 });
 test('failed PiP, unsupported popup, blocked popup and invalid storage remain usable',async()=>{
