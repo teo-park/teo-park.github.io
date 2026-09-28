@@ -24,3 +24,16 @@
 .pip-body .step-navigation{margin:8px 0 0;gap:4px}
 .pip-body .step-navigation span{text-align:center;font-size:11px}
 .pip-body .result{align-self:stretch}
+.icon-label{display:inline-flex;align-items:center;justify-content:center;gap:5px;vertical-align:middle}
+.mechanic-icon{width:30px;height:30px;object-fit:contain;flex:none}
+.choices .mechanic-icon{width:34px;height:34px}
+.route .route-kind{display:flex;align-items:center;justify-content:center;gap:3px}
+.route-mechanic{width:20px;height:20px;object-fit:contain;flex:none}
+.route .icon-label{display:inline-flex;color:inherit;font-size:inherit}
+.route .icon-label>span{color:inherit;font-size:inherit}
+.route .mechanic-icon{width:25px;height:25px}
+.pip-body .choices .mechanic-icon{width:28px;height:28px}
+.pip-body .mechanic-icon{width:26px;height:26px}
+.pip-body .route .mechanic-icon{width:22px;height:22px}
+.pip-body .route-kind{font-size:10px;gap:2px}
+.pip-body .route-mechanic{width:18px;height:18px}
