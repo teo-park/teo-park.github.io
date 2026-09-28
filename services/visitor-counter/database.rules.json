@@ -91,6 +91,12 @@
           ".validate": "newData.getPriority() === null"
         }
       },
+      "dream-helper": {
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
+      },
       "ocean-fishing__checklist": {
         "$eventId": {
           ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",

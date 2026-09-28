@@ -16,8 +16,8 @@ test('all public pages have consistent navigation, valid relative destinations a
     const dom = open(page), d = dom.window.document;
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
-      assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 15);
+      assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부', '영식 헬퍼']);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 16);
       assert.equal(d.querySelector('#nav-beastmaster'),null);
       assert.deepEqual([...d.querySelectorAll('#nav-collection a[href*="beastmaster"]')].map(a=>a.textContent.replace('현재','')),['마수도감','마수조련사 공략']);
       const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
@@ -66,7 +66,7 @@ test('opening another category or clicking outside dismisses the previous dropdo
     assert.equal(groups[0].open, true);
     assert.equal(groups[0].querySelector('summary').getAttribute('aria-expanded'), 'true');
     groups[1].querySelector('summary').click(); await tick();
-    assert.deepEqual(groups.map(el => el.open), [false, true, false]);
+    assert.deepEqual(groups.map(el => el.open), [false, true, false, false]);
     dom.window.dispatchEvent(new dom.window.PageTransitionEvent('pageshow'));
     assert.equal(groups[1].open, true, 'finishing the initial load must not close a menu already opened by the user');
     dom.window.dispatchEvent(new dom.window.PageTransitionEvent('pageshow', { persisted: true }));

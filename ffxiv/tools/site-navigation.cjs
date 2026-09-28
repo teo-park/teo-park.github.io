@@ -28,6 +28,9 @@ const categories = [
     ['weapons/', '무기 수첩'],
   ] },
   { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
+  { id: 'raid', label: '영식 헬퍼', tools: [
+    ['dream-helper/', '헤비 영식 4층 드림 헬퍼'],
+  ] },
 ];
 const catalogPages = [['fishing-log/catalog/', '물고기 도감']];
 const journalPages = [
