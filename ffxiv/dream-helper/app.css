@@ -5,7 +5,7 @@
 .compact-settings{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--ff-cyan)}
 .compact-settings button{font-size:12px;padding:5px 8px}
 .pip-body .helper-layout{gap:8px;margin-top:8px}
-.pip-body .result{order:-1;padding:8px 10px;border-radius:10px}
+.pip-body .result{order:0;padding:8px 10px;border-radius:10px}
 .pip-body .result-row{padding:5px 0}
 .pip-body .result-row:first-child{border-top:0}
 .pip-body .result-row small{font-size:11px}
