@@ -58,8 +58,9 @@
     root.innerHTML=markup();
     root.querySelector('.tower-reference').open=Boolean(details);
     if(compact){
-      // Match the original 380×400 overlay: show only this phase's reminders.
-      const visibleRows=[[],[0],[1],[1],[2,3],[2,3],[3,4],[4,5],[0,5]][step];
+      // Combat order: inputs 1–4 → first safe spot, 5–6 → route/tower,
+      // then 7–8 → final dodge. Keep the previous result while a pair is incomplete.
+      const visibleRows=[[],[0],[1],[1],[2],[2],[3,4],[3,4],[0,5]][step];
       root.querySelectorAll('.result-row').forEach((row,index)=>{if(!visibleRows.includes(index))row.remove();});
       root.querySelectorAll('.result h2,.result-meta,.tower-reference,.step-note').forEach(el=>el.remove());
       if(!visibleRows.length)root.querySelector('.result').remove();
@@ -107,7 +108,7 @@
       if(!opened)throw new Error('popup blocked');
       child=opened;
       const d=opened.document;d.documentElement.lang='ko';d.title='헤비 영식 4층 · 드림 헬퍼';
-      for(const file of ['../theme.css','app.css?v=20260928-fixed-input']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(file,base).href;d.head.append(link);}
+      for(const file of ['../theme.css','app.css?v=20260928-combat-order']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(file,base).href;d.head.append(link);}
       const meta=d.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1';d.head.append(meta);
       d.body.className='pip-body';d.body.innerHTML='<header class="pip-heading"><strong>드림 헬퍼</strong><button type="button" id="backToMain">설정 · 본 페이지 ↗</button></header><main id="pipHelper"></main>';
       d.getElementById('backToMain').addEventListener('click',()=>window.focus());

@@ -76,12 +76,15 @@ test('PiP is interactive, syncs in both directions, resets and reopens with stat
     assert.equal(p.documentElement.lang,'ko');assert.equal(p.querySelectorAll('link').length,2);
     click(p,'clone',0);assert.match(d.querySelector('.result').textContent,/숫자 1 · 쉐어/);
     click(p,'safe','C');
-    click(d,'spread','spread');assert.equal(p.querySelectorAll('.route div').length,4);
+    click(d,'spread','spread');assert.equal(p.querySelectorAll('.route div').length,0);
     click(p,'tower','dark');click(p,'flash','D');assert.match(d.querySelector('.result').textContent,/교대하기 · 어둠 → 땅/);
+    assert.equal(p.querySelectorAll('.route div').length,4);
     click(p,'remaining','A');click(p,'island','B');
     assert.match(d.querySelector('.result').textContent,/히트박스 바깥/);
     assert.equal(p.querySelectorAll('.step').length,0);
     p.querySelector('[data-action="previous"]').click();assert.match(p.querySelector('.step[data-active=true]').textContent,/이동한 섬/);
+    assert.doesNotMatch(p.querySelector('.result').textContent,/히트박스 바깥/);
+    p.querySelector('[data-action="next"]').click();
     app.children[0].window.dispatchEvent(new app.children[0].window.Event('pagehide'));
     assert.equal(d.getElementById('openPip').getAttribute('aria-pressed'),'false');
     d.getElementById('openPip').click();await tick();
@@ -96,12 +99,21 @@ test('compact PiP shows only current input and phase reminders throughout the fi
     app.d.getElementById('openPip').click();await tick();
     const p=app.children[0].window.document;
     const selections=[['shape','plus'],['clone',0],['safe','A'],['spread','spread'],['tower','wind'],['flash','TH'],['remaining','C'],['island','D']];
-    const expectedRows=[0,1,1,1,2,2,2,2,2];
+    const expectedRows=[0,1,1,1,1,1,2,2,2];
     for(let i=0;i<=8;i++){
       assert.equal(p.querySelectorAll('.settings,.tower-reference,.result-meta,.pip-footer').length,0);
       assert.equal(p.querySelectorAll('.step').length,i===8?0:1);
       assert.equal(p.querySelectorAll('.result-row').length,expectedRows[i]);
       assert.equal(app.d.querySelectorAll('.result-row').length,6);
+      if(i===4||i===5){
+        assert.match(p.querySelector('.result').textContent,/첫 안전지대/);
+        assert.doesNotMatch(p.querySelector('.result').textContent,/산개·쉐어 동선|탑 교대|이동한 섬/);
+      }
+      if(i===6||i===7){
+        assert.match(p.querySelector('.result').textContent,/산개·쉐어 동선/);
+        assert.match(p.querySelector('.result').textContent,/탑 교대/);
+        assert.doesNotMatch(p.querySelector('.result').textContent,/첫 안전지대|이동한 섬|히트박스 바깥/);
+      }
       if(i<8)click(p,...selections[i]);
     }
     assert.match(p.querySelector('.result').textContent,/12시 → 1시/);
