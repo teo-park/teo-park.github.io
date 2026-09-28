@@ -70,7 +70,7 @@
       settings.innerHTML=`<span>${L.strategies[state.strategy].name} · ${state.role} · ${L.calculate(state).group}</span><button type="button" data-action="reset">새 트라이</button>`;
       const navigation=root.querySelector('.step-navigation');
       navigation.innerHTML=`<button type="button" data-action="previous" ${step===0?'disabled':''}>← 이전</button><span>${step===8?'입력 완료':`${step+1} / 8 · ${labels[step]}`}</span><button type="button" data-action="next" ${step===8?'disabled':''}>다음 →</button>`;
-      root.querySelector('.helper-layout').before(navigation);
+      root.append(navigation);
     }
     if(focus){
       const target=focus.field?root.querySelector(`[data-field="${focus.field}"][data-value="${focus.value}"]`):focus.action?root.querySelector(`[data-action="${focus.action}"]`):null;
@@ -108,7 +108,7 @@
       if(!opened)throw new Error('popup blocked');
       child=opened;
       const d=opened.document;d.documentElement.lang='ko';d.title='헤비 영식 4층 · 드림 헬퍼';
-      for(const file of ['../theme.css','app.css?v=20260928-combat-order']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(file,base).href;d.head.append(link);}
+      for(const file of ['../theme.css','app.css?v=20260928-bottom-input']){const link=d.createElement('link');link.rel='stylesheet';link.href=new URL(file,base).href;d.head.append(link);}
       const meta=d.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1';d.head.append(meta);
       d.body.className='pip-body';d.body.innerHTML='<header class="pip-heading"><strong>드림 헬퍼</strong><button type="button" id="backToMain">설정 · 본 페이지 ↗</button></header><main id="pipHelper"></main>';
       d.getElementById('backToMain').addEventListener('click',()=>window.focus());
