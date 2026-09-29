@@ -143,10 +143,14 @@
     head.append(rank, title, flag, chevron);
     const condition = document.createElement('p'); condition.className = 'card-condition'; explainedText(condition, item.condition);
     const match = document.createElement('span'); match.className = 'card-match';
-    match.textContent = `입력 ${hand.length}장 중 ${item.kept.length}장이 아래 예시와 일치`;
+    match.textContent = item.coreTotal < 14
+      ? `역 핵심 ${item.coreKept}/${item.coreTotal}장 · 예시 전체 ${item.kept.length}/${hand.length}장 일치`
+      : `예시 전체 ${item.kept.length}/${hand.length}장 일치`;
     summary.append(head, condition, match);
 
     const detail = document.createElement('div'); detail.className = 'card-detail';
+    if (item.coreTotal < 14 && item.coreMissing.length)
+      detailLine(detail, '이 예시의 역 핵심에 아직 필요한 패', item.coreMissing);
     detailLine(detail, '입력한 패 중 예시에 들어가는 패', item.kept);
     detailLine(detail, '이 예시에 더 필요한 패', item.missing);
     detailLine(detail, '대표 완성형 예시', item.example, item.highlighted);
@@ -197,7 +201,7 @@
     child.getElementById('pipResultCount').textContent = `${currentResults.length}개 후보`;
     child.getElementById('pipCaveat').textContent = currentWeakEvidence && hand.length
       ? '뚜렷한 역 단서가 없습니다. 아래 순서는 예시 비교용입니다.'
-      : '금색 테두리 = 역의 핵심 패 · 일치 장수는 화료 확률이 아닙니다.';
+      : '후보는 현재 성립한 역이 아닙니다. 핵심 패와 예시 전체를 구분해 보세요.';
     target.replaceChildren();
     if (!currentResults.length) {
       const empty = child.createElement('p');
@@ -210,10 +214,18 @@
       const card = child.createElement('article'); card.className = 'pip-result-card';
       const head = child.createElement('div'); head.className = 'pip-result-head';
       const name = child.createElement('strong'); name.textContent = `${index + 1}. ${item.name}`;
-      const match = child.createElement('span'); match.textContent = `${item.kept.length}/${hand.length}장 일치`;
+      const match = child.createElement('span'); match.textContent = item.coreTotal < 14
+        ? `핵심 ${item.coreKept}/${item.coreTotal} · 전체 ${item.kept.length}/${hand.length}`
+        : `전체 ${item.kept.length}/${hand.length}장`;
       head.append(name, match);
       const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
-      card.append(head, condition, miniTiles(item.example, `${item.name} 대표 완성형 예시`, child, item.highlighted));
+      card.append(head, condition);
+      if (item.coreTotal < 14 && item.coreMissing.length) {
+        const missing = child.createElement('p'); missing.className = 'pip-condition';
+        missing.textContent = `역 핵심에 필요한 패: ${item.coreMissing.map(tileName).join(' · ')}`;
+        card.append(missing);
+      }
+      card.append(miniTiles(item.example, `${item.name} 대표 완성형 예시`, child, item.highlighted));
       target.append(card);
     });
   }
@@ -244,15 +256,19 @@
       renderPip({ syncInput: syncPipInput });
       return;
     }
+    const lead = results[0];
+    const leadMatch = lead.coreTotal < 14
+      ? `역 핵심 ${lead.coreKept}/${lead.coreTotal}장`
+      : `예시 전체 ${lead.kept.length}/${hand.length}장 일치`;
     el('liveLead').textContent = weakEvidence
-      ? `뚜렷한 역 단서 없음 · ${results[0].name} 예시와 ${results[0].kept.length}/${hand.length}장 일치`
-      : `${results[0].name} · 예시와 ${results[0].kept.length}/${hand.length}장 일치`;
+      ? `뚜렷한 역 단서 없음 · ${lead.name} ${leadMatch}`
+      : `${lead.name} · ${leadMatch}`;
     el('resultCount').textContent = `${results.length}개 후보`;
     el('resultIntro').textContent = limitedEvidence
-      ? '아직 단서가 적습니다. 아래 순서는 대표 예시와의 일치도만 보여줍니다.'
+      ? '아직 단서가 적습니다. 아래 순서는 대표 예시의 역 핵심 패를 우선해 비교합니다.'
       : weakEvidence
       ? '뚜렷하게 가까운 역이 없습니다. 아래 후보는 대표 완성형과의 비교용입니다.'
-      : `입력한 ${hand.length}장과 겹치는 대표 완성형입니다. 펼쳐서 역 조건과 필요한 패를 비교해 보세요.`;
+      : `입력한 ${hand.length}장과 비교한 학습용 후보입니다. 현재 성립한 역은 아니며, 역 핵심 패와 필요한 패를 확인해 보세요.`;
     results.forEach((item, index) => target.append(createCard(item, index)));
     renderPip({ syncInput: syncPipInput });
   }
@@ -377,7 +393,7 @@
           <p id="pipMessage" class="pip-message" role="status"></p>
           <div id="pipContext"></div>
           <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>
-          <p id="pipCaveat" class="pip-caveat">금색 테두리 = 역의 핵심 패 · 일치 장수는 화료 확률이 아닙니다.</p>
+          <p id="pipCaveat" class="pip-caveat">후보는 현재 성립한 역이 아닙니다. 핵심 패와 예시 전체를 구분해 보세요.</p>
           <section id="pipResult" class="pip-result" aria-label="가까운 완성형 예시 전체"></section>
         </div>`;
         child.getElementById('backToMain').addEventListener('click', () => window.focus());

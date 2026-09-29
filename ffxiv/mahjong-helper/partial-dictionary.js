@@ -95,7 +95,7 @@ function affinity(id, counts, seat, round) {
   const triples = counts.filter(x => x >= 3).length;
   const maxSuit = Math.max(...suits);
   if (id === 'tanyao') return simple * 1.3 - (n - simple) * 1.8;
-  if (id === 'yakuhai') return Math.max(...[...new Set([seat, round, 31, 32, 33])].map(t => counts[t])) * 3;
+  if (id === 'yakuhai') return Math.max(...[...new Set([seat, round, 31, 32, 33])].map(t => counts[t])) * 5;
   if (id === 'chiitoitsu') return pairs * 3.5 - triples * 3;
   if (id === 'toitoi') return triples * 5 + pairs;
   if (id === 'honitsu') return maxSuit * 1.2 + honors * .7 - (n - maxSuit - honors) * 1.6;
@@ -192,12 +192,23 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, limit = catalog.
     let chosen;
     for (const example of examplesFor(entry, seat, round)) {
       const comparison = compareExample(counts, example);
-      const score = comparison.kept.length * 2 - comparison.toSetAside.length * 2 + bonus;
-      if (!chosen || score > chosen.score) chosen = { ...comparison, score };
+      const highlighted = highlightExample(entry.id, comparison.example, seat, round);
+      const focusCounts = tileCounts(comparison.example.filter((_, index) => highlighted[index]));
+      const coreKept = focusCounts.reduce((total, count, tile) => total + Math.min(counts[tile], count), 0);
+      const coreTotal = highlighted.filter(Boolean).length;
+      const coreMissing = [];
+      focusCounts.forEach((count, tile) => {
+        for (let i = counts[tile]; i < count; i++) coreMissing.push(tile);
+      });
+      // An example's filler tiles should not outweigh the tiles that define its yaku.
+      const score = coreKept * 2 + (comparison.kept.length - coreKept) * .5
+        - comparison.toSetAside.length * 2 + bonus;
+      if (!chosen || score > chosen.score) chosen = {
+        ...comparison, score, coreKept, coreTotal, coreMissing, highlighted
+      };
     }
     return { id: entry.id, name: entry.name, condition: entry.condition,
-      openAllowed: entry.openAllowed, source: catalog.source, ...chosen,
-      highlighted: highlightExample(entry.id, chosen.example, seat, round) };
+      openAllowed: entry.openAllowed, source: catalog.source, ...chosen };
   }).filter(entry => entry.kept.length > 0);
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));
   return { limitedEvidence: tiles.length < 4,

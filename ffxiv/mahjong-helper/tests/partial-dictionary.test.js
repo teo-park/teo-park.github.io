@@ -68,8 +68,19 @@ test('partial inputs return every matching yaku and explain required changes', (
       assert.equal(result.kept.length + result.toSetAside.length, input.length);
       assert.equal(result.kept.length + result.missing.length, 14);
       assert.equal(result.example.length, 14);
+      assert.equal(result.coreKept + result.coreMissing.length, result.coreTotal);
     }
   }
+});
+
+test('unrelated example tiles do not make a distant pure straight look complete', () => {
+  const { results } = D.lookup(D.parseTiles('2368m5569p13578s'));
+  const straight = results.find(result => result.id === 'ittsuu');
+  assert.notEqual(results[0].id, 'ittsuu');
+  assert.equal(straight.coreKept, 5);
+  assert.equal(straight.coreTotal, 9);
+  assert.deepEqual(straight.coreMissing, D.parseTiles('2469s'));
+  assert.ok(straight.kept.length > straight.coreKept);
 });
 
 test('gapped tiles across suits do not make sanshoku the leading pattern', () => {
