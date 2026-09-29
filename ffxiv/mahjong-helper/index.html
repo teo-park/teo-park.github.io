@@ -3,30 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#17191c">
+  <meta name="theme-color" content="#0b1220">
   <meta name="description" content="파판14 작패유희에서 갖고 있는 패 몇 장을 입력해 리치 마작의 역 조건과 완성 예시를 살펴보세요.">
   <title>작패유희 역 사전 · 파판14 도구함</title>
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/mahjong-helper/">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="dictionary.css?v=20260929-input2">
+  <link rel="stylesheet" href="../theme.css?v=20260909-line1">
+  <link rel="stylesheet" href="../navigation.css?v=20260916-pages1">
+  <link rel="stylesheet" href="dictionary.css?v=20260929-site1">
   <link rel="stylesheet" href="pip.css?v=20260929-pip3">
+  <link rel="stylesheet" href="site-alignment.css?v=20260929-site1">
+  <script src="../navigation.js?v=20260916-pages1" defer></script>
   <script src="core.js" defer></script>
   <script src="partial-dictionary.js?v=20260929-core1" defer></script>
   <script src="quick-input.js" defer></script>
-  <script src="dictionary-app.js?v=20260929-core1" defer></script>
+  <script src="dictionary-app.js?v=20260929-site1" defer></script>
 </head>
 <body>
-  <a class="skip" href="#quickMan">패 입력으로 이동</a>
-  <header class="topbar">
-    <a class="brand" href="../"><span class="brand-mark">작</span> 작패유희</a>
-    <span class="topbar-label">역 사전 <span>· 파판14 도구함</span></span>
-    <a class="topbar-link" href="../">도구 목록 ↗</a>
-  </header>
+  <a class="skip-link" href="#quickMan">패 입력으로 이동</a>
+  <header class="site-header" data-navigation><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="도구 카테고리"><details class="nav-category" data-current-category><summary aria-controls="nav-general">진행·검색<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-general"><ul><li><a href="../msq-tracker/">메인 퀘스트 진행률</a></li><li><a href="../pvp-series-calculator/">PvP 시리즈 계산기</a></li><li><a href="../duty-finder/">임무 초성 사전</a></li><li><a href="../mahjong-helper/" aria-current="page">작패유희 역 사전<span class="nav-current-label">현재</span></a></li></ul></div></details><details class="nav-category"><summary aria-controls="nav-collection">수집·육성<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-collection"><ul><li><a href="../triple-triad/">트리플 트라이어드 수첩</a></li><li><a href="../minions/">꼬마친구 수첩</a></li><li><a href="../blue-mage/">청마도사 스킬 수첩</a></li><li><a href="../beastmaster/">마수도감</a></li><li><a href="../beastmaster/guide/">마수조련사 공략</a></li><li><a href="../weapons/">무기 수첩</a></li></ul></div></details><details class="nav-category"><summary aria-controls="nav-fishing">어부<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-fishing"><ul><li class="nav-tool-group"><span class="nav-group-label" id="nav-fisher-guide-label">어부 가이드</span><ul aria-labelledby="nav-fisher-guide-label"><li><a href="../fisher-skills/">어부 스킬 안내</a></li><li><a href="../fisher-skills/big-fish/">터주 유형별 공략</a></li></ul></li><li class="nav-tool-group"><span class="nav-group-label" id="nav-fishing-log-label">낚시 도감</span><ul aria-labelledby="nav-fishing-log-label"><li><span class="nav-family-label">세계를 누비는 어부</span><ul class="nav-journal-pages" aria-label="세계를 누비는 어부 페이지"><li><a href="../fishing-log/" class="nav-subpage">낚시 예보</a></li><li><a href="../fishing-log/catalog/" class="nav-subpage">물고기 도감</a></li></ul></li><li><span class="nav-family-label">먼바다</span><ul class="nav-journal-pages" aria-label="먼바다 페이지"><li><a href="../ocean-fishing/" class="nav-subpage">항해 예보</a></li><li><a href="../ocean-fishing/checklist/" class="nav-subpage">물고기 도감</a></li></ul></li></ul></li></ul></div></details><details class="nav-category"><summary aria-controls="nav-raid">영식 헬퍼<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-raid"><ul><li><a href="../dream-helper/">헤비 영식 4층 드림 헬퍼</a></li></ul></div></details></nav><span class="header-note">FFXIV · KR</span></header>
+  <aside class="service-notice" aria-label="무료 운영 안내"><strong>모든 도구 무료</strong><p>광고·후원·유료 기능 없이 운영하는 비영리 팬 도구입니다.</p></aside>
 
   <main>
     <section class="intro" aria-labelledby="pageTitle">
       <div><p class="eyebrow">YAKU EXPLORER / 일부 패로 찾아보기</p>
-        <h1 id="pageTitle">몇 장만 적어, <em>역을 찾아보자.</em></h1>
+        <h1 id="pageTitle">역 사전</h1>
         <p>눈에 띄는 패를 종류별로 적어보세요. 가까운 완성형 예시와 그 역의 조건을 바로 비교합니다.</p>
       </div>
       <div class="intro-actions"><button type="button" id="openPip" class="pip-trigger" aria-pressed="false">PiP 작은 창</button><div class="intro-note"><span class="note-dot"></span><strong>예시 일치 기준</strong><span>순위는 화료 확률이 아닙니다.</span></div></div>
@@ -75,6 +76,16 @@
       </section>
     </div>
   </main>
-  <footer class="dictionary-footer"><a href="../">← 파판14 도구함</a><span>학습용 예시 비교 · 화료 확률 아님</span></footer>
+  <footer class="site-footer">
+    <div class="footer-top"><span>작패유희 역 사전 · 파판14 도구함</span><a href="README.md">역·패 그림 출처 및 이용 조건 ↗</a></div>
+    <div class="site-credits" aria-label="출처 및 권리 안내">
+      <p class="fan-notice">파판14 도구함은 무료·비영리로 운영하는 비공식 팬 제작 사이트입니다. SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p>
+      <p>리치 마작 역 규칙·패 그림: <a href="README.md">작패유희 역 사전 출처 및 이용 조건</a></p>
+      <p>글꼴: <a href="https://seed.line.me/index_kr.html" target="_blank" rel="noopener noreferrer">LINE Seed KR</a> · <a href="../fonts/line-seed-kr/OFL.txt">글꼴 라이선스</a></p>
+      <p>기재되어있는 회사 명 · 제품명 · 시스템 이름은 해당 소유자의 상표 또는 등록 상표입니다.</p>
+      <p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p>
+      <p><a href="https://www.ff14.co.kr/support/policy" target="_blank" rel="noopener noreferrer">파이널판타지14 저작물 이용 허락 조건 — 운영정책 10조 ↗</a></p>
+    </div>
+  </footer>
 </body>
 </html>
