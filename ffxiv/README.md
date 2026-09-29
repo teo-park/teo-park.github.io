@@ -9,6 +9,7 @@
 - [앱 설명과 데이터 갱신 안내](./msq-tracker/README.md)
 - [PvP 시리즈 계산기](https://teo-park.github.io/ffxiv/pvp-series-calculator/) — PvP 시리즈 목표 경험치·예상 판수·하루 목표 계산 ([앱 안내](./pvp-series-calculator/README.md))
 - [임무 초성 사전](https://teo-park.github.io/ffxiv/duty-finder/) — 던전·토벌전·레이드 등 공식 임무의 한글·초성 검색 ([앱 안내](./duty-finder/README.md))
+- [작패유희 역 사전](https://teo-park.github.io/ffxiv/mahjong-helper/) — 패 일부를 입력해 리치 마작 역 조건과 완성 예시 비교 ([앱 안내](./mahjong-helper/README.md))
 - [트리플 트라이어드 수첩](https://teo-park.github.io/ffxiv/triple-triad/) — 카드 수집 체크·획득처·규칙별 보유 카드 덱 추천 ([데이터와 추천 안내](./triple-triad/README.md))
 - [꼬마친구 수첩](https://teo-park.github.io/ffxiv/minions/) — 아이콘으로 빠른 보유 체크·초성 검색·획득처·확장팩 필터 ([데이터와 이용 안내](./minions/README.md))
 - [청마도사 스킬 수첩](https://teo-park.github.io/ffxiv/blue-mage/) — 청마법 습득 체크·번호와 초성 검색·장소별 습득처·우상 조건 ([데이터와 이용 안내](./blue-mage/README.md))
@@ -35,6 +36,7 @@
 - PvP 경험치·보상 수치: [FFXIV Console Games Wiki — Series Malmstones](https://ffxiv.consolegameswiki.com/wiki/Series_Malmstones)
 - 카드·NPC·획득처: [FFXIV Collect 공개 API](https://ffxivcollect.com/api), 한국어 명칭: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko), 규칙: [한국 공식 트리플 트라이어드 안내](https://guide.ff14.co.kr/Goldsaucer/tripletriad)
 - 글꼴: [LINE Seed KR](https://seed.line.me/index_kr.html), [SIL Open Font License 1.1](./fonts/line-seed-kr/OFL.txt). 보조 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum), [OFL](./fonts/nanum-square-round/OFL.txt).
+- 작패유희 패 그림: [pjura/mahjong_souls_tiles](https://huggingface.co/datasets/pjura/mahjong_souls_tiles), [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0). 역 사전에도 공통 글꼴 LINE Seed KR을 사용합니다.
 - 청마법 목록·습득처: [FFXIV Collect](https://ffxivcollect.com/spells), 체득 안내: [한국 공식 청마도사 가이드](https://guide.ff14.co.kr/job/BlueMage/18?type=E), 한국어 명칭과 수치: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko)
 - 마수도감 이름·장소·항아리 획득처: [한국어·글로벌 게임 데이터](./beastmaster/README.md), 기능과 교환 NPC 위치: [한국 공식 7.56 안내](https://www.ff14.co.kr/news/notice/view/2947)
 

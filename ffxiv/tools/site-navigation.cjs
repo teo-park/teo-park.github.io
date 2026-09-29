@@ -18,6 +18,7 @@ const categories = [
     ['msq-tracker/', '메인 퀘스트 진행률'],
     ['pvp-series-calculator/', 'PvP 시리즈 계산기'],
     ['duty-finder/', '임무 초성 사전'],
+    ['mahjong-helper/', '작패유희 역 사전'],
   ] },
   { id: 'collection', label: '수집·육성', tools: [
     ['triple-triad/', '트리플 트라이어드 수첩'],
@@ -37,7 +38,8 @@ const journalPages = [
   ['ocean-fishing/checklist/', '물고기 도감'],
 ];
 const journalAliases = ['ocean-fishing/indigo/', 'ocean-fishing/ruby/'];
-const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)), ...catalogPages.map(([url])=>url), ...journalPages.map(([url]) => url), ...journalAliases, 'ocean-fishing/sources/'];
+const standalonePages = ['mahjong-helper/'];
+const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)).filter(url => !standalonePages.includes(url)), ...catalogPages.map(([url])=>url), ...journalPages.map(([url]) => url), ...journalAliases, 'ocean-fishing/sources/'];
 const baseFor = page => page === 'fishing-log/catalog/' ? '../' : page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);

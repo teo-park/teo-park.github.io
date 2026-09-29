@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17191c">
+  <meta name="description" content="파판14 작패유희에서 갖고 있는 패 몇 장을 입력해 리치 마작의 역 조건과 완성 예시를 살펴보세요.">
+  <title>작패유희 역 사전 · 파판14 도구함</title>
+  <link rel="canonical" href="https://teo-park.github.io/ffxiv/mahjong-helper/">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="dictionary.css">
+  <script src="core.js" defer></script>
+  <script src="partial-dictionary.js" defer></script>
+  <script src="quick-input.js" defer></script>
+  <script src="dictionary-app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#tilePalette">패 선택으로 이동</a>
+  <header class="topbar">
+    <a class="brand" href="../"><span class="brand-mark">작</span> 작패유희</a>
+    <span class="topbar-label">역 사전 <span>· 파판14 도구함</span></span>
+    <a class="topbar-link" href="../">도구 목록 ↗</a>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="pageTitle">
+      <div><p class="eyebrow">YAKU EXPLORER / 일부 패로 찾아보기</p>
+        <h1 id="pageTitle">몇 장만 적어, <em>역을 찾아보자.</em></h1>
+        <p>눈에 띄는 패만 적거나 눌러보세요. 가까운 완성형 예시와 그 역의 조건을 바로 비교합니다.</p>
+      </div>
+      <div class="intro-note"><span class="note-dot"></span><strong>예시 일치 기준</strong><span>순위는 화료 확률이 아닙니다.</span></div>
+    </section>
+
+    <div class="workbench">
+      <section class="input-panel" aria-labelledby="inputTitle">
+        <div class="panel-top"><div><p class="step">01 · 패 입력</p><h2 id="inputTitle">아는 패만 골라 넣기</h2></div><div class="counter"><strong id="inputCount">0</strong><span>/ 14</span></div></div>
+        <p class="muted">완성 손패를 다 입력하지 않아도 됩니다. 같은 패는 네 장까지 선택할 수 있어요.</p>
+
+        <div class="quick-entry" aria-labelledby="quickTitle">
+          <div class="quick-head"><h3 id="quickTitle">빠른 입력</h3><span>입력하는 즉시 패에 반영</span></div>
+          <label class="compact-label">한 줄 입력<input id="quickCompact" type="text" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-describedby="quickHelp quickPending quickError"></label>
+          <p id="quickPending" class="quick-pending" hidden>끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.</p>
+          <details class="separate-entry"><summary>종류별로 입력하기</summary>
+            <div class="quick-grid">
+              <label>만<input id="quickMan" data-quick="man" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 111345" aria-describedby="quickHelp quickError"></label>
+              <label>통<input id="quickPin" data-quick="pin" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 1123" aria-describedby="quickHelp quickError"></label>
+              <label>삭<input id="quickSou" data-quick="sou" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 559" aria-describedby="quickHelp quickError"></label>
+              <label>자패<input id="quickHonors" data-quick="honors" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="예: 11557" aria-describedby="quickHelp quickError"></label>
+            </div>
+          </details>
+          <p id="quickHelp" class="quick-help"><b>ㅁ 만 · ㅌ 통 · ㅅ 삭 · ㅈ 자패</b><br>자패 <b>1동 2남 3서 4북 5백 6발 7중</b> · 종류별 자패 칸에서는 ㄷ·ㄴ·ㅅ·ㅂ, 백·발·중도 가능</p>
+          <p class="quick-notation">영문 표기 <code id="notationPreview">예: 123m123p123s5567z</code><span>m 만 · p 통 · s 삭 · z 자패</span></p>
+          <p id="quickError" class="quick-error" role="status" aria-live="polite" hidden></p>
+        </div>
+        <div class="live-hint"><span>현재 예시</span><strong id="liveLead">패를 넣으면 바로 나타납니다</strong><button type="button" id="jumpResults">조건 보기 ↓</button></div>
+
+        <div class="preset-row" aria-label="예시 패 불러오기">
+          <span>먼저 체험</span>
+          <button type="button" class="preset" data-spec="55z123m">백 한 쌍</button>
+          <button type="button" class="preset" data-spec="112233m44p">네 쌍</button>
+          <button type="button" class="preset" data-spec="123m123p123s">삼색 순자</button>
+        </div>
+
+        <div class="selection-head"><h3>내가 넣은 패</h3><div><button type="button" class="plain" id="undo">마지막 취소</button><button type="button" class="plain" id="clear">모두 지우기</button></div></div>
+        <div class="selected-hand" id="selectedHand" aria-label="입력한 패"><span class="empty-hand">위에 적거나 아래에서 패를 누르면 여기에 쌓입니다.</span></div>
+
+        <div class="palette-head"><h3>패 선택</h3><span>클릭 한 번에 한 장씩 추가</span></div>
+        <div id="tilePalette" class="palette" aria-label="패 종류"></div>
+        <div class="context" aria-label="대국 정보">
+          <div class="wind-group"><abbr title="내 자리의 바람입니다. 대국 화면에서 내 이름 옆의 동·남·서·북을 확인하세요.">자풍</abbr><div class="segments" data-wind="seat"><button type="button" data-value="27" aria-pressed="true">동</button><button type="button" data-value="28" aria-pressed="false">남</button><button type="button" data-value="29" aria-pressed="false">서</button><button type="button" data-value="30" aria-pressed="false">북</button></div></div>
+          <div class="wind-group"><abbr title="현재 국의 바람입니다. 동장·남장 등에 따라 정해집니다.">장풍</abbr><div class="segments" data-wind="round"><button type="button" data-value="27" aria-pressed="true">동</button><button type="button" data-value="28" aria-pressed="false">남</button><button type="button" data-value="29" aria-pressed="false">서</button><button type="button" data-value="30" aria-pressed="false">북</button></div></div>
+          <div class="wind-group"><span>내 패 상태</span><div class="segments" data-state><button type="button" data-opened="false" aria-pressed="true" title="멘젠: 다른 사람의 버린 패를 치·퐁·명깡으로 가져오지 않은 상태">멘젠</button><button type="button" data-opened="true" aria-pressed="false" title="치·퐁·명깡으로 다른 사람의 패를 가져온 상태">울었음</button></div></div>
+        </div>
+        <p class="helper-note">숫자 5의 색은 구분하지 않습니다. 치·퐁·깡 묶음은 별도 입력하지 않고, 멘젠 여부만 선택합니다.</p>
+      </section>
+
+      <section class="result-panel" aria-labelledby="resultsTitle">
+        <div class="result-top"><div><p class="step">02 · 역 비교</p><h2 id="resultsTitle">가까운 완성형</h2></div><span class="count-badge" id="resultCount">0개 후보</span></div>
+        <p class="result-intro" id="resultIntro" role="status" aria-live="polite">패를 몇 장 골라 넣으면 조건과 예시가 이곳에 나타납니다.</p>
+        <div id="resultCards" class="result-cards"></div>
+        <div class="interpretation"><strong>읽는 법</strong><p>‘일치’는 입력한 패와 대표 예시가 겹치는 장수입니다. 실제로 뽑을 확률, <abbr title="완성까지 필요한 최소 패 교환 횟수">샹텐</abbr>, 최선의 버릴 패를 뜻하지 않습니다.</p></div>
+      </section>
+    </div>
+  </main>
+  <footer class="dictionary-footer"><a href="../">← 파판14 도구함</a><span>학습용 예시 비교 · 화료 확률 아님</span></footer>
+</body>
+</html>

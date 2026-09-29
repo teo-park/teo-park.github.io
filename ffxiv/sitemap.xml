@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://teo-park.github.io/ffxiv/</loc>
-    <lastmod>2026-09-12</lastmod>
+    <lastmod>2026-09-29</lastmod>
   </url>
   <url>
     <loc>https://teo-park.github.io/ffxiv/msq-tracker/</loc>
@@ -75,5 +75,9 @@
   <url>
     <loc>https://teo-park.github.io/ffxiv/dream-helper/</loc>
     <lastmod>2026-09-28</lastmod>
+  </url>
+  <url>
+    <loc>https://teo-park.github.io/ffxiv/mahjong-helper/</loc>
+    <lastmod>2026-09-29</lastmod>
   </url>
 </urlset>

@@ -1,0 +1,83 @@
+{
+  "ruleset": "Four-player riichi mahjong; examples are closed 14-tile winning shapes",
+  "source": "https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf",
+  "entries": [
+    {
+      "id": "tanyao",
+      "name": "탕야오",
+      "condition": "1·9·자패 없이 2~8 수패만 사용",
+      "openAllowed": true,
+      "examples": ["234m345m456p678s55p", "223344m456p678s55s"]
+    },
+    {
+      "id": "yakuhai",
+      "name": "역패",
+      "condition": "백·발·중 또는 자풍·장풍 패를 3장 모음",
+      "openAllowed": true,
+      "examples": ["123m456p789s555z22m"]
+    },
+    {
+      "id": "chiitoitsu",
+      "name": "치또이츠",
+      "condition": "서로 다른 패 7종을 각각 2장씩 모음",
+      "openAllowed": false,
+      "examples": ["112233m445566p77s", "112233p445566s77m"]
+    },
+    {
+      "id": "toitoi",
+      "name": "또이또이",
+      "condition": "커쯔·깡 4묶음과 머리 1쌍",
+      "openAllowed": true,
+      "examples": ["111m222p333s555z77z"]
+    },
+    {
+      "id": "honitsu",
+      "name": "혼일색",
+      "condition": "수패 한 종류와 자패만 사용",
+      "openAllowed": true,
+      "examples": ["123m456m789m555z22z"]
+    },
+    {
+      "id": "chinitsu",
+      "name": "청일색",
+      "condition": "한 종류의 수패만 사용",
+      "openAllowed": true,
+      "examples": ["123m234m456m678m55m"]
+    },
+    {
+      "id": "kokushi",
+      "name": "국사무쌍",
+      "condition": "세 종류의 1·9와 자패 7종을 모두 모으고 그중 하나를 중복",
+      "openAllowed": false,
+      "examples": ["19m19p19s1234567z1m"]
+    },
+    {
+      "id": "pinfu",
+      "name": "핑후",
+      "condition": "멘젠 순자 4묶음·역패가 아닌 머리·양면 대기",
+      "openAllowed": false,
+      "examples": ["123m456m234p678s55p"]
+    },
+    {
+      "id": "sanshoku",
+      "name": "삼색동순",
+      "condition": "만·통·삭에 같은 숫자의 순자를 하나씩 만듦",
+      "openAllowed": true,
+      "examples": ["234m234p234s567m55p"]
+    },
+    {
+      "id": "ittsuu",
+      "name": "일기통관",
+      "condition": "한 종류의 수패로 123·456·789 순자를 만듦",
+      "openAllowed": true,
+      "examples": ["123m456m789m234p55s"]
+    },
+    {
+      "id": "iipeikou",
+      "name": "이페코",
+      "condition": "멘젠에서 같은 순자 두 묶음을 만듦",
+      "openAllowed": false,
+      "examples": ["234m234m567p789s55p"]
+    }
+  ]
+}

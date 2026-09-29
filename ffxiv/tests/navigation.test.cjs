@@ -17,7 +17,7 @@ test('all public pages have consistent navigation, valid relative destinations a
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
       assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부', '영식 헬퍼']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 16);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 17);
       assert.equal(d.querySelector('#nav-beastmaster'),null);
       assert.deepEqual([...d.querySelectorAll('#nav-collection a[href*="beastmaster"]')].map(a=>a.textContent.replace('현재','')),['마수도감','마수조련사 공략']);
       const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
