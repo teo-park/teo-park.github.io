@@ -10,6 +10,8 @@
 
 순위는 패 모양의 학습용 비교입니다. 삼색동순과 일기통관은 단순히 필요한 숫자가 흩어져 있는 것보다 완성된 순자와 이어진 두 패를 더 강한 단서로 봅니다. 어느 역도 뚜렷하게 맞지 않으면 화면에 약한 일치임을 표시합니다.
 
+치또이츠는 대표 예시와 같은 낱패보다 실제 또이츠(같은 패 2장) 수를 우선해 비교합니다. 후보 카드에는 현재 또이츠가 7쌍 중 몇 쌍인지 표시합니다.
+
 입문용 역 11개의 조건과 예시를 담았습니다. 역 조건의 참고 자료는 [유럽 마작 협회의 리치 규칙](https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf)입니다. 패 그림은 [pjura/mahjong_souls_tiles](https://huggingface.co/datasets/pjura/mahjong_souls_tiles)의 기본 이미지이며 [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)에 따라 사용했습니다. 서체는 도구함의 공통 글꼴인 [LINE Seed KR](../fonts/line-seed-kr/README.md)을 사용합니다.
 
 로컬에서 확인하려면 저장소 루트에서 `python -m http.server 8767`을 실행한 뒤 `http://localhost:8767/ffxiv/mahjong-helper/`을 엽니다. 로직 검증은 `node --test ffxiv/mahjong-helper/tests/*.test.js`를 사용합니다.

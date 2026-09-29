@@ -198,9 +198,12 @@
     head.append(rank, title, flag, chevron);
     const condition = document.createElement('p'); condition.className = 'card-condition'; explainedText(condition, item.condition);
     const match = document.createElement('span'); match.className = 'card-match';
-    match.textContent = item.coreTotal < 14
+    match.textContent = item.id === 'chiitoitsu'
+      ? `또이츠 ${item.pairCount}/7쌍 · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`
+      : item.coreTotal < 14
       ? `역 핵심 ${item.coreKept}/${item.coreTotal}장 · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`
       : `예시 전체 ${item.kept.length}/${inputTotal()}장 일치`;
+    if (item.id === 'chiitoitsu') match.title = '또이츠: 같은 패 2장으로 된 한 쌍입니다. 치또이츠에는 서로 다른 패 7쌍이 필요합니다.';
     summary.append(head, condition, match);
 
     const detail = document.createElement('div'); detail.className = 'card-detail';
@@ -211,7 +214,9 @@
     detailLine(detail, '대표 완성형 예시', item.example, item.highlighted);
     detailLine(detail, '이 예시와 다른 손패', item.toSetAside);
     const note = document.createElement('p'); note.className = 'detail-note';
-    note.textContent = '한 가지 대표 예시입니다. 같은 역을 만드는 다른 완성형도 있습니다.';
+    note.textContent = item.id === 'chiitoitsu'
+      ? '같은 패 2장이 또이츠 1쌍입니다. 낱패가 예시와 같아도 또이츠가 완성된 것은 아닙니다.'
+      : '한 가지 대표 예시입니다. 같은 역을 만드는 다른 완성형도 있습니다.';
     detail.append(note);
     card.append(summary, detail);
     return card;
@@ -275,9 +280,12 @@
       const card = child.createElement('article'); card.className = 'pip-result-card';
       const head = child.createElement('div'); head.className = 'pip-result-head';
       const name = child.createElement('strong'); name.textContent = `${index + 1}. ${item.name}`;
-      const match = child.createElement('span'); match.textContent = item.coreTotal < 14
+      const match = child.createElement('span'); match.textContent = item.id === 'chiitoitsu'
+        ? `또이츠 ${item.pairCount}/7쌍 · 전체 ${item.kept.length}/${inputTotal()}`
+        : item.coreTotal < 14
         ? `핵심 ${item.coreKept}/${item.coreTotal} · 전체 ${item.kept.length}/${inputTotal()}`
         : `전체 ${item.kept.length}/${inputTotal()}장`;
+      if (item.id === 'chiitoitsu') match.title = '또이츠: 같은 패 2장으로 된 한 쌍입니다. 치또이츠에는 서로 다른 패 7쌍이 필요합니다.';
       head.append(name, match);
       const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
       card.append(head, condition);
@@ -328,7 +336,9 @@
       return;
     }
     const lead = results[0];
-    const leadMatch = lead.coreTotal < 14
+    const leadMatch = lead.id === 'chiitoitsu'
+      ? `또이츠 ${lead.pairCount}/7쌍`
+      : lead.coreTotal < 14
       ? `역 핵심 ${lead.coreKept}/${lead.coreTotal}장`
       : `예시 전체 ${lead.kept.length}/${inputTotal()}장 일치`;
     el('liveLead').textContent = weakEvidence

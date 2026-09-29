@@ -170,10 +170,12 @@ function affinity(id, counts, seat, round) {
   const simple = counts.reduce((a, b, tile) => a + (H.isTerminal(tile) ? 0 : b), 0);
   const pairs = counts.filter(x => x >= 2).length;
   const triples = counts.filter(x => x >= 3).length;
+  const singletons = counts.filter(x => x === 1).length;
   const maxSuit = Math.max(...suits);
   if (id === 'tanyao') return simple * 1.3 - (n - simple) * 1.8;
   if (id === 'yakuhai') return Math.max(...[...new Set([seat, round, 31, 32, 33])].map(t => counts[t])) * 5;
-  if (id === 'chiitoitsu') return pairs * 3.5 - triples * 3;
+  // Matching an example's lone tiles does not create seven distinct pairs.
+  if (id === 'chiitoitsu') return pairs * 3.5 - triples * 3 - Math.max(0, singletons - 2) * 1.5;
   if (id === 'toitoi') return triples * 5 + pairs;
   if (id === 'honitsu') return maxSuit * 1.2 + honors * .7 - (n - maxSuit - honors) * 1.6;
   if (id === 'chinitsu') return maxSuit * 1.2 - (n - maxSuit) * 1.6;
@@ -293,6 +295,7 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limi
     }
     if (!chosen) return null;
     return { id: entry.id, name: entry.name, condition: entry.condition,
+      pairCount: entry.id === 'chiitoitsu' ? counts.filter(n => n >= 2).length : undefined,
       openAllowed: entry.openAllowed, source: catalog.source, ...chosen };
   }).filter(entry => entry && entry.kept.length > 0);
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));

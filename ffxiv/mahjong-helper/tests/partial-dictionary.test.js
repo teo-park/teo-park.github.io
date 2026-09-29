@@ -94,6 +94,17 @@ test('gapped tiles across suits do not make sanshoku the leading pattern', () =>
   assert.equal(completeRuns.weakEvidence, false);
 });
 
+test('two actual pairs in a thirteen-tile hand do not make seven pairs the leading yaku', () => {
+  const hand = D.parseTiles('34791m122358p44s');
+  const { results, weakEvidence } = D.lookup(hand);
+  const sevenPairs = results.find(result => result.id === 'chiitoitsu');
+  assert.equal(sevenPairs.pairCount, 2);
+  assert.notEqual(results[0].id, 'chiitoitsu');
+  assert.equal(weakEvidence, true);
+  assert.ok(sevenPairs.score < results[0].score);
+  assert.equal(D.lookup(D.parseTiles('112233m44p')).results[0].id, 'chiitoitsu');
+});
+
 test('seat wind affects yakuhai examples and an open hand excludes closed-only yaku', () => {
   const westPair = D.parseTiles('33z');
   const west = D.lookup(westPair, { seat: 29, round: 27, limit: 11 });
