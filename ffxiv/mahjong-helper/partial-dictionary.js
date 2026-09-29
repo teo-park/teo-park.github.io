@@ -136,6 +136,44 @@ function compareExample(inputCounts, example) {
   return { kept, toSetAside, missing, example: example.slice().sort((a, b) => a - b) };
 }
 
+function highlightExample(id, example, seat = 27, round = 27) {
+  if (!['yakuhai', 'toitoi', 'sanshoku', 'ittsuu', 'iipeikou'].includes(id))
+    return example.map(() => true);
+  const counts = tileCounts(example);
+  const focus = Array(34).fill(0);
+  if (id === 'yakuhai') {
+    const honor = [...new Set([seat, round, 31, 32, 33])].find(tile => counts[tile] >= 3);
+    if (honor !== undefined) focus[honor] = 3;
+  } else if (id === 'toitoi') {
+    counts.forEach((count, tile) => { if (count >= 3) focus[tile] = 3; });
+  } else if (id === 'sanshoku') {
+    for (let start = 0; start <= 6; start++) {
+      const sequence = [0, 1, 2].flatMap(suit => [0, 1, 2].map(offset => suit * 9 + start + offset));
+      if (sequence.every(tile => counts[tile] > 0)) {
+        sequence.forEach(tile => { focus[tile] = 1; });
+        break;
+      }
+    }
+  } else if (id === 'ittsuu') {
+    for (let suit = 0; suit < 3; suit++) {
+      const run = Array.from({ length: 9 }, (_, rank) => suit * 9 + rank);
+      if (run.every(tile => counts[tile] > 0)) {
+        run.forEach(tile => { focus[tile] = 1; });
+        break;
+      }
+    }
+  } else if (id === 'iipeikou') {
+    findDoubleRun: for (let suit = 0; suit < 3; suit++) for (let start = 0; start <= 6; start++) {
+      const run = [0, 1, 2].map(offset => suit * 9 + start + offset);
+      if (run.every(tile => counts[tile] >= 2)) {
+        run.forEach(tile => { focus[tile] = 2; });
+        break findDoubleRun;
+      }
+    }
+  }
+  return example.map(tile => focus[tile] > 0 ? (focus[tile]--, true) : false);
+}
+
 function lookup(tiles, { seat = 27, round = 27, opened = false, limit = 5 } = {}) {
   if (!Array.isArray(tiles) || tiles.length > 14) throw new Error('0~14장의 패를 입력해 주세요.');
   if (![seat, round].every(t => Number.isInteger(t) && t >= 27 && t <= 30)) throw new Error('자풍·장풍은 동·남·서·북 중 선택하세요.');
@@ -151,11 +189,12 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, limit = 5 } = {}
       if (!chosen || score > chosen.score) chosen = { ...comparison, score };
     }
     return { id: entry.id, name: entry.name, condition: entry.condition,
-      openAllowed: entry.openAllowed, source: catalog.source, ...chosen };
+      openAllowed: entry.openAllowed, source: catalog.source, ...chosen,
+      highlighted: highlightExample(entry.id, chosen.example, seat, round) };
   }).filter(entry => entry.kept.length > 0);
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));
   return { limitedEvidence: tiles.length < 4, results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
 }
 
-return { catalog, parseTiles, examplesFor, lookup };
+return { catalog, parseTiles, examplesFor, highlightExample, lookup };
 });

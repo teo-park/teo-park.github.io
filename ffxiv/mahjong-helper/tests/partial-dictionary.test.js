@@ -15,6 +15,10 @@ test('all catalog examples are physical, complete hands with the stated core pat
       assert.equal(tiles.length, 14, entry.id);
       assert.ok(c.every(n => n <= 4), entry.id);
       assert.equal(H.shanten(c), -1, entry.id);
+      const highlight = D.highlightExample(entry.id, tiles, 27, 28);
+      assert.equal(highlight.length, 14, entry.id);
+      assert.equal(highlight.filter(Boolean).length,
+        ({ yakuhai: 3, toitoi: 12, sanshoku: 9, ittsuu: 9, iipeikou: 6 })[entry.id] || 14, entry.id);
       if (entry.id === 'tanyao') assert.ok(tiles.every(t => !H.isTerminal(t)));
       if (entry.id === 'yakuhai') assert.ok([27, 28, 31, 32, 33].some(t => c[t] >= 3));
       if (entry.id === 'chiitoitsu') assert.equal(c.filter(n => n === 2).length, 7);
@@ -27,6 +31,22 @@ test('all catalog examples are physical, complete hands with the stated core pat
       if (entry.id === 'kokushi') assert.ok(H.KOKUSHI.every(t => c[t] >= 1));
     }
   }
+});
+
+test('highlight isolates the tiles that form the named yaku', () => {
+  const focused = (id, spec) => {
+    const tiles = D.parseTiles(spec).sort((a, b) => a - b);
+    const highlighted = D.highlightExample(id, tiles, 27, 28);
+    return tiles.filter((_, index) => highlighted[index]);
+  };
+  assert.deepEqual(counts(focused('sanshoku', '234m234p234s567m55p')),
+    counts(D.parseTiles('234m234p234s')));
+  assert.deepEqual(counts(focused('ittsuu', '123m456m789m234p55s')),
+    counts(D.parseTiles('123456789m')));
+  assert.deepEqual(counts(focused('iipeikou', '234m234m567p789s55p')),
+    counts(D.parseTiles('223344m')));
+  assert.deepEqual(counts(focused('yakuhai', '123m456p789s555z22m')),
+    counts(D.parseTiles('555z')));
 });
 
 test('partial inputs produce a bounded set of examples and explain required changes', () => {
