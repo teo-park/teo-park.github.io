@@ -49,7 +49,7 @@ test('highlight isolates the tiles that form the named yaku', () => {
     counts(D.parseTiles('555z')));
 });
 
-test('partial inputs produce a bounded set of examples and explain required changes', () => {
+test('partial inputs return every matching yaku and explain required changes', () => {
   const scenarios = [
     ['123m123p123s', 'sanshoku', 9],
     ['112233m44p', 'chiitoitsu', 8],
@@ -60,7 +60,8 @@ test('partial inputs produce a bounded set of examples and explain required chan
   for (const [spec, id, minimum] of scenarios) {
     const input = D.parseTiles(spec);
     const { results } = D.lookup(input);
-    assert.equal(results.length, 5);
+    assert.ok(results.length > 5);
+    assert.equal(results.length, D.lookup(input, { limit: D.catalog.entries.length }).results.length);
     assert.equal(results[0].id, id, spec);
     assert.ok(results[0].kept.length >= minimum, spec);
     for (const result of results) {

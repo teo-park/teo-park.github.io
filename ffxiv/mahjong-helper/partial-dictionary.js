@@ -174,7 +174,7 @@ function highlightExample(id, example, seat = 27, round = 27) {
   return example.map(tile => focus[tile] > 0 ? (focus[tile]--, true) : false);
 }
 
-function lookup(tiles, { seat = 27, round = 27, opened = false, limit = 5 } = {}) {
+function lookup(tiles, { seat = 27, round = 27, opened = false, limit = catalog.entries.length } = {}) {
   if (!Array.isArray(tiles) || tiles.length > 14) throw new Error('0~14장의 패를 입력해 주세요.');
   if (![seat, round].every(t => Number.isInteger(t) && t >= 27 && t <= 30)) throw new Error('자풍·장풍은 동·남·서·북 중 선택하세요.');
   const counts = tileCounts(tiles);

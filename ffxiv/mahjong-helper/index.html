@@ -8,15 +8,15 @@
   <title>작패유희 역 사전 · 파판14 도구함</title>
   <link rel="canonical" href="https://teo-park.github.io/ffxiv/mahjong-helper/">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="dictionary.css?v=20260929-pip1">
+  <link rel="stylesheet" href="dictionary.css?v=20260929-input2">
   <link rel="stylesheet" href="pip.css?v=20260929-pip1">
   <script src="core.js" defer></script>
-  <script src="partial-dictionary.js" defer></script>
+  <script src="partial-dictionary.js?v=20260929-input2" defer></script>
   <script src="quick-input.js" defer></script>
-  <script src="dictionary-app.js?v=20260929-pip1" defer></script>
+  <script src="dictionary-app.js?v=20260929-input2" defer></script>
 </head>
 <body>
-  <a class="skip" href="#quickCompact">한 줄 입력으로 이동</a>
+  <a class="skip" href="#quickMan">패 입력으로 이동</a>
   <header class="topbar">
     <a class="brand" href="../"><span class="brand-mark">작</span> 작패유희</a>
     <span class="topbar-label">역 사전 <span>· 파판14 도구함</span></span>
@@ -27,7 +27,7 @@
     <section class="intro" aria-labelledby="pageTitle">
       <div><p class="eyebrow">YAKU EXPLORER / 일부 패로 찾아보기</p>
         <h1 id="pageTitle">몇 장만 적어, <em>역을 찾아보자.</em></h1>
-        <p>눈에 띄는 패만 한 줄로 적어보세요. 가까운 완성형 예시와 그 역의 조건을 바로 비교합니다.</p>
+        <p>눈에 띄는 패를 종류별로 적어보세요. 가까운 완성형 예시와 그 역의 조건을 바로 비교합니다.</p>
       </div>
       <div class="intro-actions"><button type="button" id="openPip" class="pip-trigger" aria-pressed="false">PiP 작은 창</button><div class="intro-note"><span class="note-dot"></span><strong>예시 일치 기준</strong><span>순위는 화료 확률이 아닙니다.</span></div></div>
     </section>
@@ -39,18 +39,19 @@
         <p class="muted">완성 손패를 다 입력하지 않아도 됩니다. 같은 패는 네 장까지 적을 수 있어요.</p>
 
         <div class="quick-entry" aria-labelledby="quickTitle">
-          <div class="quick-head"><h3 id="quickTitle">빠른 입력</h3><span>입력하는 즉시 패에 반영</span></div>
-          <label class="compact-label">한 줄 입력<input id="quickCompact" type="text" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-describedby="quickHelp quickPending quickError"></label>
-          <p id="quickPending" class="quick-pending" hidden>끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.</p>
-          <details class="separate-entry"><summary>종류별로 입력하기</summary>
-            <div class="quick-grid">
-              <label>만<input id="quickMan" data-quick="man" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 111345" aria-describedby="quickHelp quickError"></label>
-              <label>통<input id="quickPin" data-quick="pin" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 1123" aria-describedby="quickHelp quickError"></label>
-              <label>삭<input id="quickSou" data-quick="sou" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 559" aria-describedby="quickHelp quickError"></label>
-              <label>자패<input id="quickHonors" data-quick="honors" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="예: 11557" aria-describedby="quickHelp quickError"></label>
-            </div>
+          <div class="quick-head"><h3 id="quickTitle">종류별 입력</h3><span>입력하는 즉시 패에 반영</span></div>
+          <div class="quick-grid">
+            <label>만<input id="quickMan" data-quick="man" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 111345" aria-describedby="quickHelp quickError"></label>
+            <label>통<input id="quickPin" data-quick="pin" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 1123" aria-describedby="quickHelp quickError"></label>
+            <label>삭<input id="quickSou" data-quick="sou" type="text" inputmode="numeric" enterkeyhint="next" autocomplete="off" spellcheck="false" placeholder="예: 559" aria-describedby="quickHelp quickError"></label>
+            <label>자패<input id="quickHonors" data-quick="honors" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="예: 11557" aria-describedby="quickHelp quickError"></label>
+          </div>
+          <p id="quickHelp" class="quick-help">자패 <b>1동 2남 3서 4북 5백 6발 7중</b> · 자패 칸에서는 ㄷ·ㄴ·ㅅ·ㅂ, 백·발·중도 가능</p>
+          <details class="separate-entry"><summary>한 줄로 입력하기</summary>
+            <label class="compact-label">한 줄 입력<input id="quickCompact" type="text" enterkeyhint="done" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-describedby="compactHelp quickPending quickError"></label>
+            <p id="compactHelp" class="quick-help"><b>ㅁ 만 · ㅌ 통 · ㅅ 삭 · ㅈ 자패</b></p>
+            <p id="quickPending" class="quick-pending" hidden>끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.</p>
           </details>
-          <p id="quickHelp" class="quick-help"><b>ㅁ 만 · ㅌ 통 · ㅅ 삭 · ㅈ 자패</b><br>자패 <b>1동 2남 3서 4북 5백 6발 7중</b> · 종류별 자패 칸에서는 ㄷ·ㄴ·ㅅ·ㅂ, 백·발·중도 가능</p>
           <p class="quick-notation">영문 표기 <code id="notationPreview">예: 123m123p123s5567z</code><span>m 만 · p 통 · s 삭 · z 자패</span></p>
           <p id="quickError" class="quick-error" role="status" aria-live="polite" hidden></p>
           <div class="context" aria-label="대국 정보">

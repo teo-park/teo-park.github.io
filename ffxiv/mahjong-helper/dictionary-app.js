@@ -216,12 +216,12 @@
       el('liveLead').textContent = '패를 넣으면 바로 나타납니다';
       const empty = document.createElement('div'); empty.className = 'placeholder';
       const title = document.createElement('strong'); title.textContent = '패 3~8장부터 시작해 보세요';
-      const hint = document.createElement('span'); hint.textContent = '예: 123ㅁ 123ㅌ 123ㅅ처럼 적어 보세요.';
+      const hint = document.createElement('span'); hint.textContent = '예: 만·통·삭 칸에 각각 123을 적어 보세요.';
       empty.append(title, hint); target.append(empty);
       renderPip({ syncInput: syncPipInput });
       return;
     }
-    const { limitedEvidence, results } = D.lookup(hand, { seat, round, opened, limit: 5 });
+    const { limitedEvidence, results } = D.lookup(hand, { seat, round, opened });
     currentResults = results;
     if (!results.length) {
       el('liveLead').textContent = '일치하는 예시가 없습니다';
