@@ -154,16 +154,45 @@ function contextualExamplesFor(entry, seat, round, melds) {
   return examples;
 }
 
-function runEvidence(counts, base, fullWeight) {
-  // A gap such as 2·4 needs its middle tile before it is a sequence clue.
-  const a = counts[base] > 0;
-  const b = counts[base + 1] > 0;
-  const c = counts[base + 2] > 0;
-  if (a && b && c) return fullWeight;
-  return (a && b) || (b && c) ? 1 : 0;
+function runProgress(counts, base) {
+  const a = counts[base] > 0, b = counts[base + 1] > 0, c = counts[base + 2] > 0;
+  const complete = a && b && c;
+  return { complete: Number(complete), adjacent: Number(!complete && ((a && b) || (b && c))) };
 }
 
-function affinity(id, counts, seat, round) {
+function bestThreeRuns(counts, starts, fixedChiStarts = new Set()) {
+  let best = { complete: 0, adjacent: 0, score: -Infinity };
+  for (const group of starts) {
+    const progress = group.map(start => fixedChiStarts.has(start)
+      ? { complete: 1, adjacent: 0 } : runProgress(counts, start));
+    const complete = progress.reduce((sum, part) => sum + part.complete, 0);
+    const adjacent = progress.reduce((sum, part) => sum + part.adjacent, 0);
+    const score = complete * 7.5 + adjacent * 1.2 - 3;
+    if (score > best.score) best = { complete, adjacent, score };
+  }
+  return best;
+}
+
+function maxDisjointRuns(source) {
+  const counts = source.slice();
+  const memo = new Map();
+  const walk = start => {
+    if (start >= 27) return 0;
+    const key = `${start}|${counts.join('')}`;
+    if (memo.has(key)) return memo.get(key);
+    let best = walk(start + 1);
+    if (start % 9 <= 6 && counts[start] && counts[start + 1] && counts[start + 2]) {
+      counts[start]--; counts[start + 1]--; counts[start + 2]--;
+      best = Math.max(best, 1 + walk(start));
+      counts[start]++; counts[start + 1]++; counts[start + 2]++;
+    }
+    memo.set(key, best);
+    return best;
+  };
+  return walk(0);
+}
+
+function structuralEvidence(id, counts, seat, round, concealedCounts, melds) {
   const n = counts.reduce((sum, count) => sum + count, 0);
   const suits = [0, 1, 2].map(suit => counts.slice(suit * 9, suit * 9 + 9).reduce((a, b) => a + b, 0));
   const honors = counts.slice(27).reduce((a, b) => a + b, 0);
@@ -172,43 +201,73 @@ function affinity(id, counts, seat, round) {
   const triples = counts.filter(x => x >= 3).length;
   const singletons = counts.filter(x => x === 1).length;
   const maxSuit = Math.max(...suits);
-  if (id === 'tanyao') return simple * 1.3 - (n - simple) * 1.8;
-  if (id === 'yakuhai') return Math.max(...[...new Set([seat, round, 31, 32, 33])].map(t => counts[t])) * 5;
-  // Matching an example's lone tiles does not create seven distinct pairs.
-  if (id === 'chiitoitsu') return pairs * 3.5 - triples * 3 - Math.max(0, singletons - 2) * 1.5;
-  if (id === 'toitoi') return triples * 5 + pairs;
-  if (id === 'honitsu') return maxSuit * 1.2 + honors * .7 - (n - maxSuit - honors) * 1.6;
-  if (id === 'chinitsu') return maxSuit * 1.2 - (n - maxSuit) * 1.6;
-  if (id === 'kokushi') return H.KOKUSHI.filter(t => counts[t]).length * 2 - simple * 2;
+  const fixedChiStarts = new Set(melds.filter(meld => meld.type === 'chi').map(meld => Math.min(...meld.tiles)));
+  if (id === 'tanyao') return { score: simple * 1.2 - (n - simple) * 3, label: `2~8 수패 ${simple}/${n}장` };
+  if (id === 'yakuhai') {
+    const count = Math.max(...[...new Set([seat, round, 31, 32, 33])].map(tile => counts[tile]));
+    return { score: [0, 1, 6, 16, 16][count], label: `역패 최대 ${Math.min(count, 3)}/3장` };
+  }
+  if (id === 'chiitoitsu') return {
+    score: pairs * 5 - Math.max(0, singletons - 2) * 2 - triples * 4,
+    label: `또이츠 ${pairs}/7쌍`
+  };
+  if (id === 'toitoi') {
+    const fixedTriples = melds.filter(meld => meld.type !== 'chi').length;
+    const triplets = fixedTriples + concealedCounts.filter(count => count >= 3).length;
+    const loosePairs = concealedCounts.filter(count => count === 2).length;
+    const looseTiles = concealedCounts.reduce((sum, count) => sum + count, 0);
+    return { score: triplets * 8 + loosePairs * 2 - maxDisjointRuns(concealedCounts) * 2
+      - Math.max(0, looseTiles - (triplets - fixedTriples) * 3 - loosePairs * 2 - 3) * .5,
+      label: `커쯔·깡 ${Math.min(triplets, 4)}/4묶음` };
+  }
+  if (id === 'honitsu') return {
+    score: maxSuit * 1.4 + honors * .9 - (n - maxSuit - honors) * 3.2,
+    label: `한 수종·자패 ${maxSuit + honors}/${n}장`
+  };
+  if (id === 'chinitsu') return {
+    score: maxSuit * 1.6 - (n - maxSuit) * 3.5,
+    label: `한 수종 ${maxSuit}/${n}장`
+  };
+  if (id === 'kokushi') {
+    const unique = H.KOKUSHI.filter(tile => counts[tile] > 0).length;
+    const nonOrphans = n - H.KOKUSHI.reduce((sum, tile) => sum + counts[tile], 0);
+    return { score: unique * 2.2 - nonOrphans * 3.5 + Number(H.KOKUSHI.some(tile => counts[tile] >= 2)) * 2,
+      label: `필수 1·9·자패 ${unique}/13종` };
+  }
   if (id === 'pinfu') {
     let links = 0;
     for (let suit = 0; suit < 3; suit++) for (let rank = 0; rank < 8; rank++)
       if (counts[suit * 9 + rank] && counts[suit * 9 + rank + 1]) links++;
-    return links * 1.5 - triples * 2 - honors * .5;
+    const runs = maxDisjointRuns(counts);
+    const extraLinks = Math.min(4 - runs, Math.max(0, links - runs * 2));
+    const validPair = counts.some((count, tile) => count >= 2 && ![seat, round, 31, 32, 33].includes(tile));
+    return { score: runs * 5 + extraLinks * 1.2 + Number(validPair) * 2 - triples * 5 - honors * 1.5,
+      label: `순자 ${runs}/4묶음` };
   }
   if (id === 'sanshoku') {
-    let best = -5;
-    for (let start = 0; start <= 6; start++)
-      best = Math.max(best, -5 + [0, 1, 2].reduce((score, suit) =>
-        score + runEvidence(counts, suit * 9 + start, 4), 0));
-    return best;
+    const groups = Array.from({ length: 7 }, (_, start) => [0, 1, 2].map(suit => suit * 9 + start));
+    const best = bestThreeRuns(concealedCounts, groups, fixedChiStarts);
+    return { score: best.score, label: `같은 숫자 순자 ${best.complete}/3종` };
   }
   if (id === 'ittsuu') {
-    let best = -2;
-    for (let suit = 0; suit < 3; suit++)
-      best = Math.max(best, -2 + [0, 3, 6].reduce((score, block) =>
-        score + runEvidence(counts, suit * 9 + block, 4.5), 0));
-    return best;
+    const groups = [0, 1, 2].map(suit => [0, 3, 6].map(block => suit * 9 + block));
+    const best = bestThreeRuns(concealedCounts, groups, fixedChiStarts);
+    return { score: best.score, label: `123·456·789 ${best.complete}/3묶음` };
   }
   if (id === 'iipeikou') {
-    let best = 0;
+    let best = { score: 0, complete: 0 };
     for (let suit = 0; suit < 3; suit++) for (let start = 0; start <= 6; start++) {
       const base = suit * 9 + start;
-      best = Math.max(best, Math.min(2, counts[base]) + Math.min(2, counts[base + 1]) + Math.min(2, counts[base + 2]));
+      const paired = [0, 1, 2].filter(offset => counts[base + offset] >= 2).length;
+      const present = [0, 1, 2].filter(offset => counts[base + offset] >= 1).length;
+      const complete = present === 3 ? (paired === 3 ? 2 : 1) : 0;
+      const score = paired === 3 ? 18 : paired === 2 && present === 3 ? 8
+        : paired === 2 ? 5 : present === 3 ? 3 + paired : 0;
+      if (score > best.score) best = { score, complete };
     }
-    return best * 1.5;
+    return { score: best.score, label: `같은 순자 ${best.complete}/2묶음` };
   }
-  return 0;
+  return { score: 0, label: '' };
 }
 
 function compareExample(inputCounts, example) {
@@ -271,10 +330,11 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limi
   const input = [...tiles, ...melds.flatMap(meld => meld.tiles.slice(0, 3))];
   if (input.length > 14) throw new Error('손패와 오른쪽 묶음을 합쳐 14장 구조를 넘었어요. 손패를 줄여 주세요.');
   const counts = tileCounts(input);
+  const concealedCounts = tileCounts(tiles);
   if (!input.length) return { limitedEvidence: true, weakEvidence: true, results: [] };
   const isOpened = opened || melds.some(meld => meld.open);
   const results = catalog.entries.filter(entry => !isOpened || entry.openAllowed).map(entry => {
-    const bonus = affinity(entry.id, counts, seat, round);
+    const evidence = structuralEvidence(entry.id, counts, seat, round, concealedCounts, melds);
     let chosen;
     for (const example of contextualExamplesFor(entry, seat, round, melds)) {
       const comparison = compareExample(counts, example);
@@ -287,20 +347,22 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limi
         for (let i = counts[tile]; i < count; i++) coreMissing.push(tile);
       });
       // An example's filler tiles should not outweigh the tiles that define its yaku.
-      const score = coreKept * 2 + (comparison.kept.length - coreKept) * .5
-        - comparison.toSetAside.length * 2 + bonus;
-      if (!chosen || score > chosen.score) chosen = {
-        ...comparison, score, coreKept, coreTotal, coreMissing, highlighted
+      const exampleFit = coreKept * 2 + (comparison.kept.length - coreKept) * .5
+        - comparison.toSetAside.length * 2;
+      if (!chosen || exampleFit > chosen.exampleFit) chosen = {
+        ...comparison, exampleFit, coreKept, coreTotal, coreMissing, highlighted
       };
     }
     if (!chosen) return null;
     return { id: entry.id, name: entry.name, condition: entry.condition,
       pairCount: entry.id === 'chiitoitsu' ? counts.filter(n => n >= 2).length : undefined,
-      openAllowed: entry.openAllowed, source: catalog.source, ...chosen };
+      openAllowed: entry.openAllowed, source: catalog.source, ...chosen,
+      evidenceLabel: evidence.label,
+      score: evidence.score + chosen.kept.length * .3 - chosen.toSetAside.length * .1 };
   }).filter(entry => entry && entry.kept.length > 0);
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));
   return { limitedEvidence: input.length < 4,
-    weakEvidence: !results.length || results[0].score < Math.max(4, input.length * .5),
+    weakEvidence: !results.length || results[0].score < Math.max(8, input.length * 1.25),
     results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
 }
 

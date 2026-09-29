@@ -55,3 +55,15 @@ test('multiple melds remain fixed and two kans use six structural tiles', () => 
   assert.ok(kanResults.every(result => result.openAllowed));
   assert.throws(() => D.lookup(D.parseTiles('123456789m'), { melds: twoKans }), /14장/);
 });
+
+test('locked chi counts as a run but locked pon tiles cannot be borrowed into one', () => {
+  const hand = D.parseTiles('123p123s');
+  const chi = D.lookup(hand, { melds: M.parse('123ㅁ').melds });
+  const pon = D.lookup(hand, { melds: M.parse('111ㅁ').melds });
+  assert.equal(chi.results.find(result => result.id === 'sanshoku').evidenceLabel,
+    '같은 숫자 순자 3/3종');
+  assert.equal(pon.results.find(result => result.id === 'sanshoku').evidenceLabel,
+    '같은 숫자 순자 2/3종');
+  assert.equal(D.lookup(D.parseTiles('22p333s'), { melds: M.parse('111ㅁ').melds })
+    .results.find(result => result.id === 'toitoi').evidenceLabel, '커쯔·깡 2/4묶음');
+});

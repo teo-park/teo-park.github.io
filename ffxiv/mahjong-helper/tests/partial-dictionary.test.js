@@ -105,6 +105,25 @@ test('two actual pairs in a thirteen-tile hand do not make seven pairs the leadi
   assert.equal(D.lookup(D.parseTiles('112233m44p')).results[0].id, 'chiitoitsu');
 });
 
+test('completed groups outweigh matching isolated tiles across group-based yaku', () => {
+  const cases = [
+    ['111m222p333s55z', 'toitoi', '커쯔·깡 3/4묶음'],
+    ['112233m', 'iipeikou', '같은 순자 2/2묶음'],
+    ['123m123p123s', 'sanshoku', '같은 숫자 순자 3/3종'],
+    ['123456m', 'ittsuu', '123·456·789 2/3묶음'],
+    ['123m456p789s22p', 'pinfu', '순자 3/4묶음'],
+    ['555z', 'yakuhai', '역패 최대 3/3장']
+  ];
+  for (const [spec, expected, label] of cases) {
+    const output = D.lookup(D.parseTiles(spec));
+    assert.equal(output.results[0].id, expected, spec);
+    assert.equal(output.results[0].evidenceLabel, label, spec);
+  }
+  assert.notEqual(D.lookup(D.parseTiles('123m')).results[0].id, 'iipeikou');
+  assert.notEqual(D.lookup(D.parseTiles('1247m2447p2249s5z')).results[0].id, 'toitoi');
+  assert.equal(D.lookup(D.parseTiles('112233m445566p7s')).results[0].id, 'chiitoitsu');
+});
+
 test('seat wind affects yakuhai examples and an open hand excludes closed-only yaku', () => {
   const westPair = D.parseTiles('33z');
   const west = D.lookup(westPair, { seat: 29, round: 27, limit: 11 });

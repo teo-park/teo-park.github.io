@@ -19,6 +19,14 @@
     '멘젠': '다른 사람의 버린 패를 치·퐁·명깡으로 가져오지 않은 손패입니다.',
     '양면 대기': '연속된 두 패의 양끝 숫자를 기다리는 형태입니다. 예: 2·3에서 1 또는 4.'
   };
+  const evidenceHints = {
+    chiitoitsu: '또이츠: 같은 패 2장으로 된 한 쌍입니다. 치또이츠에는 서로 다른 패 7쌍이 필요합니다.',
+    toitoi: '커쯔는 같은 패 3장, 깡은 같은 패 4장으로 만든 묶음입니다.',
+    pinfu: glossary['순자'],
+    sanshoku: glossary['순자'],
+    ittsuu: glossary['순자'],
+    iipeikou: glossary['순자']
+  };
   let D;
   let hand = [];
   let melds = [];
@@ -198,12 +206,8 @@
     head.append(rank, title, flag, chevron);
     const condition = document.createElement('p'); condition.className = 'card-condition'; explainedText(condition, item.condition);
     const match = document.createElement('span'); match.className = 'card-match';
-    match.textContent = item.id === 'chiitoitsu'
-      ? `또이츠 ${item.pairCount}/7쌍 · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`
-      : item.coreTotal < 14
-      ? `역 핵심 ${item.coreKept}/${item.coreTotal}장 · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`
-      : `예시 전체 ${item.kept.length}/${inputTotal()}장 일치`;
-    if (item.id === 'chiitoitsu') match.title = '또이츠: 같은 패 2장으로 된 한 쌍입니다. 치또이츠에는 서로 다른 패 7쌍이 필요합니다.';
+    match.textContent = `${item.evidenceLabel} · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`;
+    if (evidenceHints[item.id]) match.title = evidenceHints[item.id];
     summary.append(head, condition, match);
 
     const detail = document.createElement('div'); detail.className = 'card-detail';
@@ -280,12 +284,8 @@
       const card = child.createElement('article'); card.className = 'pip-result-card';
       const head = child.createElement('div'); head.className = 'pip-result-head';
       const name = child.createElement('strong'); name.textContent = `${index + 1}. ${item.name}`;
-      const match = child.createElement('span'); match.textContent = item.id === 'chiitoitsu'
-        ? `또이츠 ${item.pairCount}/7쌍 · 전체 ${item.kept.length}/${inputTotal()}`
-        : item.coreTotal < 14
-        ? `핵심 ${item.coreKept}/${item.coreTotal} · 전체 ${item.kept.length}/${inputTotal()}`
-        : `전체 ${item.kept.length}/${inputTotal()}장`;
-      if (item.id === 'chiitoitsu') match.title = '또이츠: 같은 패 2장으로 된 한 쌍입니다. 치또이츠에는 서로 다른 패 7쌍이 필요합니다.';
+      const match = child.createElement('span'); match.textContent = `${item.evidenceLabel} · 전체 ${item.kept.length}/${inputTotal()}`;
+      if (evidenceHints[item.id]) match.title = evidenceHints[item.id];
       head.append(name, match);
       const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
       card.append(head, condition);
@@ -336,17 +336,13 @@
       return;
     }
     const lead = results[0];
-    const leadMatch = lead.id === 'chiitoitsu'
-      ? `또이츠 ${lead.pairCount}/7쌍`
-      : lead.coreTotal < 14
-      ? `역 핵심 ${lead.coreKept}/${lead.coreTotal}장`
-      : `예시 전체 ${lead.kept.length}/${inputTotal()}장 일치`;
+    const leadMatch = lead.evidenceLabel;
     el('liveLead').textContent = weakEvidence
       ? `뚜렷한 역 단서 없음 · ${lead.name} ${leadMatch}`
       : `${lead.name} · ${leadMatch}`;
     el('resultCount').textContent = `${results.length}개 후보`;
     el('resultIntro').textContent = limitedEvidence
-      ? '아직 단서가 적습니다. 아래 순서는 대표 예시의 역 핵심 패를 우선해 비교합니다.'
+      ? '아직 단서가 적습니다. 아래 순서는 완성된 묶음과 역 조건을 우선해 비교합니다.'
       : weakEvidence
       ? '뚜렷하게 가까운 역이 없습니다. 아래 후보는 대표 완성형과의 비교용입니다.'
       : `손패와 옆 패 ${inputTotal()}장을 비교한 학습용 후보입니다. 현재 성립한 역은 아니며, 역 핵심 패와 필요한 패를 확인해 보세요.`;
