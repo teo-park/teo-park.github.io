@@ -12,12 +12,13 @@
   <link rel="stylesheet" href="../navigation.css?v=20260916-pages1">
   <link rel="stylesheet" href="dictionary.css?v=20260929-site1">
   <link rel="stylesheet" href="pip.css?v=20260929-pip3">
-  <link rel="stylesheet" href="site-alignment.css?v=20260929-site1">
+  <link rel="stylesheet" href="site-alignment.css?v=20260930-meld1">
   <script src="../navigation.js?v=20260916-pages1" defer></script>
   <script src="core.js" defer></script>
-  <script src="partial-dictionary.js?v=20260929-core1" defer></script>
+  <script src="partial-dictionary.js?v=20260930-meld1" defer></script>
   <script src="quick-input.js" defer></script>
-  <script src="dictionary-app.js?v=20260929-site1" defer></script>
+  <script src="meld-input.js?v=20260930-meld1" defer></script>
+  <script src="dictionary-app.js?v=20260930-meld1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#quickMan">패 입력으로 이동</a>
@@ -36,7 +37,7 @@
 
     <div class="workbench">
       <section class="input-panel" aria-labelledby="inputTitle">
-        <div class="panel-top"><div><p class="step">01 · 패 입력</p><h2 id="inputTitle">아는 패만 적어 넣기</h2></div><div class="counter"><strong id="inputCount">0</strong><span>/ 14</span></div></div>
+        <div class="panel-top"><div><p class="step">01 · 패 입력</p><h2 id="inputTitle">아는 패만 적어 넣기</h2></div><div class="counter"><strong id="inputCount">0</strong><span id="handCapacity">/ 14</span></div></div>
         <p class="muted">완성 손패를 다 입력하지 않아도 됩니다. 같은 패는 네 장까지 적을 수 있어요.</p>
 
         <div class="quick-entry" aria-labelledby="quickTitle">
@@ -55,12 +56,19 @@
           </details>
           <p class="quick-notation">영문 표기 <code id="notationPreview">예: 123m123p123s5567z</code><span>m 만 · p 통 · s 삭 · z 자패</span></p>
           <p id="quickError" class="quick-error" role="status" aria-live="polite" hidden></p>
+          <div class="meld-entry">
+            <div class="quick-head"><h3 id="meldTitle">옆으로 낸 패</h3><span id="meldCount">0/4묶음</span></div>
+            <label class="compact-label" for="meldInput">치·퐁·깡 묶음<input id="meldInput" type="text" autocomplete="off" spellcheck="false" placeholder="예: 123ㅅ 555ㅈ 7777ㅌ" aria-describedby="meldHelp meldError"></label>
+            <p id="meldHelp" class="quick-help">묶음마다 띄어쓰기 · <b>123ㅅ</b> 치 · <b>555ㅈ</b> 퐁 · <b>7777ㅌ</b> 명깡<br>안깡은 <b>안깡:7777ㅌ</b>처럼 적어요.</p>
+            <p id="meldError" class="quick-error" role="status" aria-live="polite" hidden></p>
+            <div id="meldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div>
+          </div>
           <div class="context" aria-label="대국 정보">
             <div class="wind-group"><abbr title="내 자리의 바람입니다. 대국 화면에서 내 이름 옆의 동·남·서·북을 확인하세요.">자풍</abbr><div class="segments" data-wind="seat"><button type="button" data-value="27" aria-pressed="true">동</button><button type="button" data-value="28" aria-pressed="false">남</button><button type="button" data-value="29" aria-pressed="false">서</button><button type="button" data-value="30" aria-pressed="false">북</button></div></div>
             <div class="wind-group"><abbr title="현재 국의 바람입니다. 동장·남장 등에 따라 정해집니다.">장풍</abbr><div class="segments" data-wind="round"><button type="button" data-value="27" aria-pressed="true">동</button><button type="button" data-value="28" aria-pressed="false">남</button><button type="button" data-value="29" aria-pressed="false">서</button><button type="button" data-value="30" aria-pressed="false">북</button></div></div>
             <div class="wind-group"><span>내 패 상태</span><div class="segments" data-state><button type="button" data-opened="false" aria-pressed="true" title="멘젠: 다른 사람의 버린 패를 치·퐁·명깡으로 가져오지 않은 상태">멘젠</button><button type="button" data-opened="true" aria-pressed="false" title="치·퐁·명깡으로 다른 사람의 패를 가져온 상태">울었음</button></div></div>
           </div>
-          <p class="helper-note">숫자 5의 색은 구분하지 않습니다. 치·퐁·깡 묶음은 별도 입력하지 않고, 멘젠 여부만 선택합니다.</p>
+          <p id="openedHint" class="helper-note">옆으로 낸 패는 위 손패 칸에서 빼고 적어 주세요. 숫자 5의 색은 구분하지 않습니다.</p>
         </div>
         <div class="live-hint"><span>현재 예시</span><strong id="liveLead">패를 넣으면 바로 나타납니다</strong><button type="button" id="jumpResults">조건 보기 ↓</button></div>
 

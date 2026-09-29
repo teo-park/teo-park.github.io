@@ -77,6 +77,83 @@ function examplesFor(entry, seat, round) {
   return examples;
 }
 
+function decompositions(example) {
+  const counts = tileCounts(example);
+  const found = [];
+  for (let pair = 0; pair < 34; pair++) {
+    if (counts[pair] < 2) continue;
+    counts[pair] -= 2;
+    const walk = groups => {
+      const first = counts.findIndex(Boolean);
+      if (first < 0) { if (groups.length === 4) found.push({ pair, groups }); return; }
+      if (counts[first] >= 3) {
+        counts[first] -= 3;
+        walk([...groups, [first, first, first]]);
+        counts[first] += 3;
+      }
+      if (first < 27 && first % 9 <= 6 && counts[first + 1] && counts[first + 2]) {
+        counts[first]--; counts[first + 1]--; counts[first + 2]--;
+        walk([...groups, [first, first + 1, first + 2]]);
+        counts[first]++; counts[first + 1]++; counts[first + 2]++;
+      }
+    };
+    walk([]);
+    counts[pair] += 2;
+  }
+  return found;
+}
+
+function validGroups(id, groups, pair, seat, round) {
+  const all = [...groups.flat(), pair, pair];
+  const runs = groups.filter(group => group[0] !== group[1]);
+  const triples = groups.filter(group => group[0] === group[1]);
+  const suited = all.filter(tile => tile < 27);
+  const suits = new Set(suited.map(tile => Math.floor(tile / 9)));
+  if (id === 'tanyao') return all.every(tile => !H.isTerminal(tile));
+  if (id === 'yakuhai') return triples.some(group => [seat, round, 31, 32, 33].includes(group[0]));
+  if (id === 'toitoi') return triples.length === 4;
+  if (id === 'honitsu') return suits.size === 1 && all.some(tile => tile >= 27);
+  if (id === 'chinitsu') return suits.size === 1 && all.every(tile => tile < 27);
+  if (id === 'pinfu') return runs.length === 4 && ![seat, round, 31, 32, 33].includes(pair);
+  if (id === 'sanshoku') return Array.from({ length: 7 }, (_, start) => start).some(start =>
+    [0, 1, 2].every(suit => runs.some(group => group[0] === suit * 9 + start)));
+  if (id === 'ittsuu') return [0, 1, 2].some(suit =>
+    [0, 3, 6].every(start => runs.some(group => group[0] === suit * 9 + start)));
+  if (id === 'iipeikou') return runs.some((group, index) =>
+    runs.some((other, otherIndex) => index !== otherIndex && group[0] === other[0]));
+  return false;
+}
+
+const contextualCache = new Map();
+function contextualExamplesFor(entry, seat, round, melds) {
+  if (!melds.length) return examplesFor(entry, seat, round);
+  if (entry.id === 'chiitoitsu' || entry.id === 'kokushi') return [];
+  const fixed = melds.map(meld => meld.tiles.slice(0, 3).sort((a, b) => a - b));
+  const cacheKey = `${entry.id}|${seat}|${round}|${fixed.map(group => group.join(',')).sort().join(';')}`;
+  if (contextualCache.has(cacheKey)) return contextualCache.get(cacheKey);
+  const examples = [];
+  const seen = new Set();
+  const chooseReplacements = (groups, count, start = 0, selected = []) => {
+    if (selected.length === count) return [selected];
+    const combinations = [];
+    for (let index = start; index <= groups.length - (count - selected.length); index++)
+      combinations.push(...chooseReplacements(groups, count, index + 1, [...selected, index]));
+    return combinations;
+  };
+  for (const base of examplesFor(entry, seat, round)) for (const { pair, groups } of decompositions(base)) {
+    for (const replaced of chooseReplacements(groups, fixed.length)) {
+      const candidateGroups = [...groups.filter((_, index) => !replaced.includes(index)), ...fixed];
+      if (!validGroups(entry.id, candidateGroups, pair, seat, round)) continue;
+      const tiles = [...candidateGroups.flat(), pair, pair];
+      if (tileCounts(tiles).some(n => n > 4)) continue;
+      const key = tileCounts(tiles).join(',');
+      if (!seen.has(key)) { seen.add(key); examples.push(tiles); }
+    }
+  }
+  contextualCache.set(cacheKey, examples);
+  return examples;
+}
+
 function runEvidence(counts, base, fullWeight) {
   // A gap such as 2·4 needs its middle tile before it is a sequence clue.
   const a = counts[base] > 0;
@@ -181,16 +258,23 @@ function highlightExample(id, example, seat = 27, round = 27) {
   return example.map(tile => focus[tile] > 0 ? (focus[tile]--, true) : false);
 }
 
-function lookup(tiles, { seat = 27, round = 27, opened = false, limit = catalog.entries.length } = {}) {
+function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limit = catalog.entries.length } = {}) {
   if (!Array.isArray(tiles) || tiles.length > 14) throw new Error('0~14장의 패를 입력해 주세요.');
   if (![seat, round].every(t => Number.isInteger(t) && t >= 27 && t <= 30)) throw new Error('자풍·장풍은 동·남·서·북 중 선택하세요.');
-  const counts = tileCounts(tiles);
-  if (counts.some(n => n > 4)) throw new Error('같은 패는 네 장까지입니다.');
-  if (!tiles.length) return { limitedEvidence: true, weakEvidence: true, results: [] };
-  const results = catalog.entries.filter(entry => !opened || entry.openAllowed).map(entry => {
+  if (!Array.isArray(melds) || melds.length > 4 || melds.some(meld =>
+    !['chi', 'pon', 'kan'].includes(meld.type) || !Array.isArray(meld.tiles) ||
+    meld.tiles.length !== (meld.type === 'kan' ? 4 : 3))) throw new Error('옆으로 낸 패 묶음이 올바르지 않습니다.');
+  const physical = tileCounts([...tiles, ...melds.flatMap(meld => meld.tiles)]);
+  if (physical.some(n => n > 4)) throw new Error('손패와 오른쪽 묶음을 합쳐 같은 패는 네 장까지입니다.');
+  const input = [...tiles, ...melds.flatMap(meld => meld.tiles.slice(0, 3))];
+  if (input.length > 14) throw new Error('손패와 오른쪽 묶음을 합쳐 14장 구조를 넘었어요. 손패를 줄여 주세요.');
+  const counts = tileCounts(input);
+  if (!input.length) return { limitedEvidence: true, weakEvidence: true, results: [] };
+  const isOpened = opened || melds.some(meld => meld.open);
+  const results = catalog.entries.filter(entry => !isOpened || entry.openAllowed).map(entry => {
     const bonus = affinity(entry.id, counts, seat, round);
     let chosen;
-    for (const example of examplesFor(entry, seat, round)) {
+    for (const example of contextualExamplesFor(entry, seat, round, melds)) {
       const comparison = compareExample(counts, example);
       const highlighted = highlightExample(entry.id, comparison.example, seat, round);
       const focusCounts = tileCounts(comparison.example.filter((_, index) => highlighted[index]));
@@ -207,12 +291,13 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, limit = catalog.
         ...comparison, score, coreKept, coreTotal, coreMissing, highlighted
       };
     }
+    if (!chosen) return null;
     return { id: entry.id, name: entry.name, condition: entry.condition,
       openAllowed: entry.openAllowed, source: catalog.source, ...chosen };
-  }).filter(entry => entry.kept.length > 0);
+  }).filter(entry => entry && entry.kept.length > 0);
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));
-  return { limitedEvidence: tiles.length < 4,
-    weakEvidence: !results.length || results[0].score < Math.max(4, tiles.length * .5),
+  return { limitedEvidence: input.length < 4,
+    weakEvidence: !results.length || results[0].score < Math.max(4, input.length * .5),
     results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
 }
 

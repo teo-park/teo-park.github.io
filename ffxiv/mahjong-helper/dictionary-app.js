@@ -1,6 +1,7 @@
 (async function () {
   const H = window.MahjongHelper;
   const Q = window.MahjongQuickInput;
+  const M = window.MahjongMeldInput;
   const el = id => document.getElementById(id);
   const labels = [
     ...Array.from({ length: 9 }, (_, i) => `${i + 1}n`),
@@ -20,14 +21,44 @@
   };
   let D;
   let hand = [];
+  let melds = [];
   let seat = 27;
   let round = 27;
-  let opened = false;
+  let manualOpened = false;
   let currentResults = [];
   let currentWeakEvidence = false;
+  let meldSyntaxError = '';
   let pipWindow = null;
   let pipOpening = false;
   const quickInputs = {};
+  const inputTotal = () => hand.length + melds.length * 3;
+  const isOpened = () => manualOpened || melds.some(meld => meld.open);
+
+  function stateError() {
+    const counts = Array(34).fill(0);
+    for (const tile of [...hand, ...melds.flatMap(meld => meld.tiles)])
+      if (++counts[tile] > 4) return '손패와 옆 패를 합쳐 같은 패는 네 장까지입니다.';
+    if (inputTotal() > 14) return `옆 패 ${melds.length}묶음이면 손패는 ${14 - 3 * melds.length}장까지입니다. 손패 칸에서 패를 줄여 주세요.`;
+    return '';
+  }
+
+  function syncOpenedControls() {
+    const forced = melds.some(meld => meld.open);
+    for (const root of [document, pipWindow?.document]) {
+      const group = root?.querySelector('[data-state]');
+      if (!group) continue;
+      group.querySelectorAll('button').forEach(button => {
+        button.disabled = forced;
+        button.setAttribute('aria-pressed', String((button.dataset.opened === 'true') === isOpened()));
+      });
+    }
+    const hint = forced ? '치·퐁·명깡 묶음이 있어 자동으로 울었음 처리했어요.'
+      : '옆으로 낸 패는 손패 칸에서 빼고 적어 주세요. 안깡만 했다면 멘젠을 유지해요.';
+    el('openedHint').textContent = hint;
+    el('openedHint').classList.toggle('opened-hint-auto', forced);
+    const pipHint = pipWindow?.document.getElementById('pipOpenedHint');
+    if (pipHint) pipHint.textContent = hint;
+  }
 
   function keepInputOrder(previous, parsed) {
     const remaining = Array(34).fill(0);
@@ -78,6 +109,13 @@
     render({ syncCompact: false });
   }
 
+  function readMeldInput(input, fromPip = false) {
+    const parsed = M.parse(input.value);
+    meldSyntaxError = parsed.error?.message || '';
+    if (!parsed.error) melds = parsed.melds;
+    render({ syncMeldText: fromPip, syncPipInput: !fromPip });
+  }
+
   function tileImage(tile, owner = document) {
     const image = owner.createElement('img');
     image.src = new URL(`overlay/templates/${labels[tile]}.png`, document.baseURI).href;
@@ -106,6 +144,23 @@
       row.append(wrapper);
     });
     return row;
+  }
+
+  function renderMeldPreview(owner, target) {
+    if (!target) return;
+    target.replaceChildren();
+    melds.forEach((meld, index) => {
+      const chip = owner.createElement('div'); chip.className = 'meld-chip';
+      const head = owner.createElement('div'); head.className = 'meld-chip-head';
+      const name = owner.createElement('span');
+      name.textContent = meld.type === 'chi' ? '치' : meld.type === 'pon' ? '퐁' : meld.open ? '명깡' : '안깡';
+      const remove = owner.createElement('button'); remove.type = 'button'; remove.textContent = '×';
+      remove.setAttribute('aria-label', `${name.textContent} ${meld.tiles.map(tileName).join(', ')} 제거`);
+      remove.addEventListener('click', () => { melds.splice(index, 1); meldSyntaxError = ''; render(); });
+      head.append(name, remove);
+      chip.append(head, miniTiles(meld.tiles, `${name.textContent} 묶음`, owner));
+      target.append(chip);
+    });
   }
 
   function detailLine(parent, title, tiles, highlighted = null) {
@@ -144,17 +199,17 @@
     const condition = document.createElement('p'); condition.className = 'card-condition'; explainedText(condition, item.condition);
     const match = document.createElement('span'); match.className = 'card-match';
     match.textContent = item.coreTotal < 14
-      ? `역 핵심 ${item.coreKept}/${item.coreTotal}장 · 예시 전체 ${item.kept.length}/${hand.length}장 일치`
-      : `예시 전체 ${item.kept.length}/${hand.length}장 일치`;
+      ? `역 핵심 ${item.coreKept}/${item.coreTotal}장 · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`
+      : `예시 전체 ${item.kept.length}/${inputTotal()}장 일치`;
     summary.append(head, condition, match);
 
     const detail = document.createElement('div'); detail.className = 'card-detail';
     if (item.coreTotal < 14 && item.coreMissing.length)
       detailLine(detail, '이 예시의 역 핵심에 아직 필요한 패', item.coreMissing);
-    detailLine(detail, '입력한 패 중 예시에 들어가는 패', item.kept);
+    detailLine(detail, '손패·옆 패 중 예시에 들어가는 패', item.kept);
     detailLine(detail, '이 예시에 더 필요한 패', item.missing);
     detailLine(detail, '대표 완성형 예시', item.example, item.highlighted);
-    detailLine(detail, '이 예시와 다른 입력 패', item.toSetAside);
+    detailLine(detail, '이 예시와 다른 손패', item.toSetAside);
     const note = document.createElement('p'); note.className = 'detail-note';
     note.textContent = '한 가지 대표 예시입니다. 같은 역을 만드는 다른 완성형도 있습니다.';
     detail.append(note);
@@ -195,18 +250,24 @@
       const compact = child.getElementById('pipQuickCompact');
       compact.value = Q.formatCompact(hand);
       compact.setAttribute('aria-invalid', 'false');
+      child.getElementById('pipMeldInput').value = M.format(melds);
       child.getElementById('pipMessage').textContent = '';
     }
-    child.getElementById('pipInputCount').textContent = `${hand.length}/14장`;
+    child.getElementById('pipInputCount').textContent = `손패 ${hand.length}/${14 - melds.length * 3}장`;
+    child.getElementById('pipMeldCount').textContent = `${melds.length}/4묶음`;
+    child.getElementById('pipMeldError').textContent = meldSyntaxError || stateError();
+    child.getElementById('pipMeldInput').setAttribute('aria-invalid', String(Boolean(meldSyntaxError || stateError())));
+    renderMeldPreview(child, child.getElementById('pipMeldPreview'));
+    syncOpenedControls();
     child.getElementById('pipResultCount').textContent = `${currentResults.length}개 후보`;
-    child.getElementById('pipCaveat').textContent = currentWeakEvidence && hand.length
+    child.getElementById('pipCaveat').textContent = currentWeakEvidence && inputTotal()
       ? '뚜렷한 역 단서가 없습니다. 아래 순서는 예시 비교용입니다.'
       : '후보는 현재 성립한 역이 아닙니다. 핵심 패와 예시 전체를 구분해 보세요.';
     target.replaceChildren();
     if (!currentResults.length) {
       const empty = child.createElement('p');
       empty.className = 'pip-empty';
-      empty.textContent = hand.length ? '겹치는 예시가 없습니다. 패를 조정해 보세요.' : '패를 입력하면 겹치는 역 후보의 대표 완성형이 나타납니다.';
+      empty.textContent = inputTotal() ? '겹치는 예시가 없습니다. 패를 조정해 보세요.' : '패를 입력하면 겹치는 역 후보의 대표 완성형이 나타납니다.';
       target.append(empty);
       return;
     }
@@ -215,8 +276,8 @@
       const head = child.createElement('div'); head.className = 'pip-result-head';
       const name = child.createElement('strong'); name.textContent = `${index + 1}. ${item.name}`;
       const match = child.createElement('span'); match.textContent = item.coreTotal < 14
-        ? `핵심 ${item.coreKept}/${item.coreTotal} · 전체 ${item.kept.length}/${hand.length}`
-        : `전체 ${item.kept.length}/${hand.length}장`;
+        ? `핵심 ${item.coreKept}/${item.coreTotal} · 전체 ${item.kept.length}/${inputTotal()}`
+        : `전체 ${item.kept.length}/${inputTotal()}장`;
       head.append(name, match);
       const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
       card.append(head, condition);
@@ -233,7 +294,17 @@
   function renderResults({ syncPipInput = true } = {}) {
     const target = el('resultCards');
     target.replaceChildren();
-    if (!hand.length) {
+    const invalid = stateError();
+    if (invalid) {
+      currentResults = [];
+      currentWeakEvidence = false;
+      el('resultCount').textContent = '입력 확인';
+      el('resultIntro').textContent = invalid;
+      el('liveLead').textContent = '입력한 패 수를 확인해 주세요';
+      renderPip({ syncInput: syncPipInput });
+      return;
+    }
+    if (!inputTotal()) {
       currentResults = [];
       currentWeakEvidence = false;
       el('resultCount').textContent = '0개 후보';
@@ -246,7 +317,7 @@
       renderPip({ syncInput: syncPipInput });
       return;
     }
-    const { limitedEvidence, weakEvidence, results } = D.lookup(hand, { seat, round, opened });
+    const { limitedEvidence, weakEvidence, results } = D.lookup(hand, { seat, round, opened: isOpened(), melds });
     currentResults = results;
     currentWeakEvidence = weakEvidence;
     if (!results.length) {
@@ -259,7 +330,7 @@
     const lead = results[0];
     const leadMatch = lead.coreTotal < 14
       ? `역 핵심 ${lead.coreKept}/${lead.coreTotal}장`
-      : `예시 전체 ${lead.kept.length}/${hand.length}장 일치`;
+      : `예시 전체 ${lead.kept.length}/${inputTotal()}장 일치`;
     el('liveLead').textContent = weakEvidence
       ? `뚜렷한 역 단서 없음 · ${lead.name} ${leadMatch}`
       : `${lead.name} · ${leadMatch}`;
@@ -268,18 +339,27 @@
       ? '아직 단서가 적습니다. 아래 순서는 대표 예시의 역 핵심 패를 우선해 비교합니다.'
       : weakEvidence
       ? '뚜렷하게 가까운 역이 없습니다. 아래 후보는 대표 완성형과의 비교용입니다.'
-      : `입력한 ${hand.length}장과 비교한 학습용 후보입니다. 현재 성립한 역은 아니며, 역 핵심 패와 필요한 패를 확인해 보세요.`;
+      : `손패와 옆 패 ${inputTotal()}장을 비교한 학습용 후보입니다. 현재 성립한 역은 아니며, 역 핵심 패와 필요한 패를 확인해 보세요.`;
     results.forEach((item, index) => target.append(createCard(item, index)));
     renderPip({ syncInput: syncPipInput });
   }
 
-  function render({ syncText = true, syncCompact = true, syncPipInput = true } = {}) {
+  function render({ syncText = true, syncCompact = true, syncMeldText = true, syncPipInput = true } = {}) {
     if (syncText) syncQuickInputs();
     if (syncCompact) syncCompactInput();
+    if (syncMeldText) el('meldInput').value = M.format(melds);
     el('notationPreview').textContent = Q.formatNotation(hand) || '예: 123m123p123s5567z';
     el('inputCount').textContent = hand.length;
+    el('handCapacity').textContent = `/ ${14 - melds.length * 3}`;
+    el('meldCount').textContent = `${melds.length}/4묶음`;
+    const meldMessage = meldSyntaxError || stateError();
+    el('meldError').hidden = !meldMessage;
+    el('meldError').textContent = meldMessage;
+    el('meldInput').setAttribute('aria-invalid', String(Boolean(meldMessage)));
     el('undo').disabled = !hand.length;
-    el('clear').disabled = !hand.length;
+    el('clear').disabled = !hand.length && !melds.length;
+    renderMeldPreview(document, el('meldPreview'));
+    syncOpenedControls();
     renderHand();
     renderResults({ syncPipInput });
   }
@@ -324,7 +404,10 @@
       if (!button || !group.contains(button)) return;
       if (group.dataset.wind === 'seat') seat = Number(button.dataset.value);
       if (group.dataset.wind === 'round') round = Number(button.dataset.value);
-      if (group.hasAttribute('data-state')) opened = button.dataset.opened === 'true';
+      if (group.hasAttribute('data-state')) {
+        if (melds.some(meld => meld.open)) return;
+        manualOpened = button.dataset.opened === 'true';
+      }
       const selector = group.dataset.wind ? `[data-wind="${group.dataset.wind}"]` : '[data-state]';
       for (const root of [document, pipWindow?.document]) {
         const matchingGroup = root?.querySelector(selector);
@@ -332,10 +415,11 @@
         matchingGroup.querySelectorAll('button').forEach(option => {
           const matches = group.dataset.wind
             ? option.dataset.value === button.dataset.value
-            : option.dataset.opened === button.dataset.opened;
+            : (option.dataset.opened === 'true') === isOpened();
           option.setAttribute('aria-pressed', String(matches));
         });
       }
+      syncOpenedControls();
       renderResults();
     }));
   }
@@ -372,7 +456,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260929-site1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-meld1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
@@ -391,7 +475,13 @@
           <p id="pipHelp" class="pip-input-help">자패 1동 · 2남 · 3서 · 4북 · 5백 · 6발 · 7중</p>
           <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipQuickCompact" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-label="한 줄 패 입력" aria-describedby="pipMessage"></details>
           <p id="pipMessage" class="pip-message" role="status"></p>
+          <div class="pip-meld-entry"><div class="pip-input-heading"><strong>옆으로 낸 패</strong><span id="pipMeldCount">0/4묶음</span></div>
+            <label>치·퐁·깡<input id="pipMeldInput" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅅ 555ㅈ 7777ㅌ" aria-describedby="pipMeldHelp pipMeldError"></label>
+            <p id="pipMeldHelp" class="pip-input-help">공백으로 구분 · 안깡:7777ㅌ</p>
+            <p id="pipMeldError" class="pip-message" role="status"></p>
+            <div id="pipMeldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div></div>
           <div id="pipContext"></div>
+          <p id="pipOpenedHint" class="pip-input-help"></p>
           <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>
           <p id="pipCaveat" class="pip-caveat">후보는 현재 성립한 역이 아닙니다. 핵심 패와 예시 전체를 구분해 보세요.</p>
           <section id="pipResult" class="pip-result" aria-label="가까운 완성형 예시 전체"></section>
@@ -417,6 +507,9 @@
         compact.addEventListener('keydown', event => {
           if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); compact.blur(); }
         });
+        const pipMeldInput = child.getElementById('pipMeldInput');
+        pipMeldInput.addEventListener('input', event => { if (!event.isComposing) readMeldInput(pipMeldInput, true); });
+        pipMeldInput.addEventListener('compositionend', () => readMeldInput(pipMeldInput, true));
         openedWindow.addEventListener('pagehide', () => cleanup(openedWindow), { once: true });
         button.setAttribute('aria-pressed', 'true');
         button.textContent = '작은 창으로 이동';
@@ -441,6 +534,9 @@
   }
 
   function connectControls() {
+    const meldInput = el('meldInput');
+    meldInput.addEventListener('input', event => { if (!event.isComposing) readMeldInput(meldInput); });
+    meldInput.addEventListener('compositionend', () => readMeldInput(meldInput));
     const compact = el('quickCompact');
     compact.addEventListener('input', event => { if (!event.isComposing) readCompactInput(); });
     compact.addEventListener('compositionend', readCompactInput);
@@ -462,7 +558,7 @@
       });
     });
     el('undo').addEventListener('click', () => { hand.pop(); render(); });
-    el('clear').addEventListener('click', () => { hand = []; render(); });
+    el('clear').addEventListener('click', () => { hand = []; melds = []; manualOpened = false; meldSyntaxError = ''; render(); });
     el('jumpResults').addEventListener('click', () => el('resultsTitle').scrollIntoView({ behavior: 'smooth', block: 'start' }));
     connectContextControls(document.querySelector('.context'));
     document.addEventListener('keydown', event => {
