@@ -179,31 +179,39 @@
   function renderPip({ syncInput = true } = {}) {
     if (!pipWindow || pipWindow.closed) return;
     const child = pipWindow.document;
-    const input = child.getElementById('pipQuickCompact');
     const target = child.getElementById('pipResult');
-    if (!input || !target) return;
+    if (!target) return;
     if (syncInput) {
-      input.value = Q.formatCompact(hand);
-      input.setAttribute('aria-invalid', 'false');
+      const values = Q.format(hand);
+      child.querySelectorAll('[data-pip-quick]').forEach(input => {
+        input.value = values[input.dataset.pipQuick];
+        input.setAttribute('aria-invalid', 'false');
+      });
+      const compact = child.getElementById('pipQuickCompact');
+      compact.value = Q.formatCompact(hand);
+      compact.setAttribute('aria-invalid', 'false');
       child.getElementById('pipMessage').textContent = '';
     }
     child.getElementById('pipInputCount').textContent = `${hand.length}/14장`;
+    child.getElementById('pipResultCount').textContent = `${currentResults.length}개 후보`;
     target.replaceChildren();
-    const item = currentResults[0];
-    if (!item) {
+    if (!currentResults.length) {
       const empty = child.createElement('p');
       empty.className = 'pip-empty';
-      empty.textContent = hand.length ? '겹치는 예시가 없습니다. 패를 조정해 보세요.' : '패를 입력하면 가장 가까운 완성형의 대표 예시가 나타납니다.';
+      empty.textContent = hand.length ? '겹치는 예시가 없습니다. 패를 조정해 보세요.' : '패를 입력하면 겹치는 역 후보의 대표 완성형이 나타납니다.';
       target.append(empty);
       return;
     }
-    const head = child.createElement('div'); head.className = 'pip-result-head';
-    const name = child.createElement('strong'); name.textContent = item.name;
-    const match = child.createElement('span'); match.textContent = `예시와 ${item.kept.length}/${hand.length}장 일치`;
-    head.append(name, match);
-    const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
-    const label = child.createElement('p'); label.className = 'pip-example-label'; label.textContent = '대표 완성형 예시 · 금색 테두리 = 역의 핵심 패';
-    target.append(head, condition, label, miniTiles(item.example, '대표 완성형 예시', child, item.highlighted));
+    currentResults.forEach((item, index) => {
+      const card = child.createElement('article'); card.className = 'pip-result-card';
+      const head = child.createElement('div'); head.className = 'pip-result-head';
+      const name = child.createElement('strong'); name.textContent = `${index + 1}. ${item.name}`;
+      const match = child.createElement('span'); match.textContent = `${item.kept.length}/${hand.length}장 일치`;
+      head.append(name, match);
+      const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
+      card.append(head, condition, miniTiles(item.example, `${item.name} 대표 완성형 예시`, child, item.highlighted));
+      target.append(card);
+    });
   }
 
   function renderResults({ syncPipInput = true } = {}) {
@@ -250,7 +258,22 @@
     renderResults({ syncPipInput });
   }
 
-  function readPipInput() {
+  function readPipFields() {
+    if (!pipWindow || pipWindow.closed) return;
+    const child = pipWindow.document;
+    const inputs = [...child.querySelectorAll('[data-pip-quick]')];
+    const values = Object.fromEntries(inputs.map(input => [input.dataset.pipQuick, input.value]));
+    const { tiles, error } = Q.parse(values);
+    child.getElementById('pipMessage').textContent = error ? `${error.message} · 마지막 정상 입력을 표시합니다.` : '';
+    inputs.forEach(input => input.setAttribute('aria-invalid', String(Boolean(error && (!error.field || error.field === input.dataset.pipQuick)))));
+    if (error) return;
+    hand = keepInputOrder(hand, tiles);
+    child.getElementById('pipQuickCompact').value = Q.formatCompact(hand);
+    child.getElementById('pipQuickCompact').setAttribute('aria-invalid', 'false');
+    render({ syncPipInput: false });
+  }
+
+  function readPipCompactInput() {
     if (!pipWindow || pipWindow.closed) return;
     const child = pipWindow.document;
     const input = child.getElementById('pipQuickCompact');
@@ -261,6 +284,11 @@
       : pending ? '끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.' : '';
     if (error) return;
     hand = keepInputOrder(hand, tiles);
+    const values = Q.format(hand);
+    child.querySelectorAll('[data-pip-quick]').forEach(field => {
+      field.value = values[field.dataset.pipQuick];
+      field.setAttribute('aria-invalid', 'false');
+    });
     render({ syncPipInput: false });
   }
 
@@ -308,8 +336,8 @@
       button.disabled = true;
       try {
         const openedWindow = supported
-          ? await window.documentPictureInPicture.requestWindow({ width: 500, height: 490 })
-          : window.open('about:blank', 'mahjong-dictionary-pip', 'popup,width=500,height=490');
+          ? await window.documentPictureInPicture.requestWindow({ width: 500, height: 620 })
+          : window.open('about:blank', 'mahjong-dictionary-pip', 'popup,width=500,height=620');
         if (!openedWindow) throw new Error('작은 창을 열지 못했습니다.');
         pipWindow = openedWindow;
         const child = openedWindow.document;
@@ -318,23 +346,50 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['dictionary.css?v=20260929-pip1', 'pip.css?v=20260929-pip1']) {
+        for (const file of ['dictionary.css?v=20260929-input2', 'pip.css?v=20260929-pip3']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
           child.head.append(stylesheet);
         }
         child.body.className = 'pip-body';
-        child.body.innerHTML = '<div class="pip-shell"><header class="pip-heading"><strong>작패유희 역 사전</strong><button type="button" id="backToMain">본 페이지 ↗</button></header><label class="pip-input">한 줄 패 입력 <span id="pipInputCount">0/14장</span><input id="pipQuickCompact" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-describedby="pipHelp pipMessage"></label><p id="pipHelp" class="pip-input-help">ㅁ 만 · ㅌ 통 · ㅅ 삭 · ㅈ 자패 (1동~7중)</p><p id="pipMessage" class="pip-message" role="status"></p><div id="pipContext"></div><section id="pipResult" class="pip-result" aria-label="가장 가까운 완성형 예시"></section><p class="pip-caveat">대표 예시와 겹치는 장수입니다. 화료 확률은 아닙니다.</p></div>';
+        child.body.innerHTML = `<div class="pip-shell">
+          <header class="pip-heading"><strong>작패유희 역 사전</strong><button type="button" id="backToMain">본 페이지 ↗</button></header>
+          <div class="pip-input-heading"><strong>종류별 입력</strong><span id="pipInputCount">0/14장</span></div>
+          <div class="pip-fields">
+            <label>만<input data-pip-quick="man" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="111345" aria-describedby="pipHelp pipMessage"></label>
+            <label>통<input data-pip-quick="pin" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="1123" aria-describedby="pipHelp pipMessage"></label>
+            <label>삭<input data-pip-quick="sou" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="559" aria-describedby="pipHelp pipMessage"></label>
+            <label>자패<input data-pip-quick="honors" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="11557" aria-describedby="pipHelp pipMessage"></label>
+          </div>
+          <p id="pipHelp" class="pip-input-help">자패 1동 · 2남 · 3서 · 4북 · 5백 · 6발 · 7중</p>
+          <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipQuickCompact" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-label="한 줄 패 입력" aria-describedby="pipMessage"></details>
+          <p id="pipMessage" class="pip-message" role="status"></p>
+          <div id="pipContext"></div>
+          <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>
+          <p class="pip-caveat">금색 테두리 = 역의 핵심 패 · 일치 장수는 화료 확률이 아닙니다.</p>
+          <section id="pipResult" class="pip-result" aria-label="가까운 완성형 예시 전체"></section>
+        </div>`;
         child.getElementById('backToMain').addEventListener('click', () => window.focus());
         const context = document.querySelector('.context').cloneNode(true);
         child.getElementById('pipContext').append(context);
         connectContextControls(context);
-        const input = child.getElementById('pipQuickCompact');
-        input.addEventListener('input', event => { if (!event.isComposing) readPipInput(); });
-        input.addEventListener('compositionend', readPipInput);
-        input.addEventListener('keydown', event => {
-          if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); input.blur(); }
+        const fields = [...child.querySelectorAll('[data-pip-quick]')];
+        fields.forEach((field, index) => {
+          field.addEventListener('input', event => { if (!event.isComposing) readPipFields(); });
+          field.addEventListener('compositionend', readPipFields);
+          field.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' || event.isComposing) return;
+            event.preventDefault();
+            if (fields[index + 1]) fields[index + 1].focus();
+            else field.blur();
+          });
+        });
+        const compact = child.getElementById('pipQuickCompact');
+        compact.addEventListener('input', event => { if (!event.isComposing) readPipCompactInput(); });
+        compact.addEventListener('compositionend', readPipCompactInput);
+        compact.addEventListener('keydown', event => {
+          if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); compact.blur(); }
         });
         openedWindow.addEventListener('pagehide', () => cleanup(openedWindow), { once: true });
         button.setAttribute('aria-pressed', 'true');
@@ -343,7 +398,7 @@
           ? 'PiP 실행 중 · 작은 창에서 입력하면 이 페이지에도 반영됩니다.'
           : '일반 작은 창 실행 중 · 항상 위 고정은 지원하지 않습니다.';
         renderPip();
-        input.focus();
+        fields[0].focus();
       } catch (error) {
         if (pipWindow && !pipWindow.closed) pipWindow.close();
         pipWindow = null;
