@@ -72,6 +72,17 @@ test('partial inputs return every matching yaku and explain required changes', (
   }
 });
 
+test('gapped tiles across suits do not make sanshoku the leading pattern', () => {
+  const reportedHand = D.lookup(D.parseTiles('1247m2447p2249s5z'));
+  assert.equal(reportedHand.results[0].id, 'tanyao');
+  assert.equal(reportedHand.weakEvidence, true);
+  assert.ok(reportedHand.results.find(result => result.id === 'sanshoku').score < reportedHand.results[0].score);
+  assert.equal(D.lookup(D.parseTiles('24m24p24s')).results[0].id, 'tanyao');
+  const completeRuns = D.lookup(D.parseTiles('123m123p123s'));
+  assert.equal(completeRuns.results[0].id, 'sanshoku');
+  assert.equal(completeRuns.weakEvidence, false);
+});
+
 test('seat wind affects yakuhai examples and an open hand excludes closed-only yaku', () => {
   const westPair = D.parseTiles('33z');
   const west = D.lookup(westPair, { seat: 29, round: 27, limit: 11 });

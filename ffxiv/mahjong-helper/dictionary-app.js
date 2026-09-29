@@ -24,6 +24,7 @@
   let round = 27;
   let opened = false;
   let currentResults = [];
+  let currentWeakEvidence = false;
   let pipWindow = null;
   let pipOpening = false;
   const quickInputs = {};
@@ -194,6 +195,9 @@
     }
     child.getElementById('pipInputCount').textContent = `${hand.length}/14장`;
     child.getElementById('pipResultCount').textContent = `${currentResults.length}개 후보`;
+    child.getElementById('pipCaveat').textContent = currentWeakEvidence && hand.length
+      ? '뚜렷한 역 단서가 없습니다. 아래 순서는 예시 비교용입니다.'
+      : '금색 테두리 = 역의 핵심 패 · 일치 장수는 화료 확률이 아닙니다.';
     target.replaceChildren();
     if (!currentResults.length) {
       const empty = child.createElement('p');
@@ -219,6 +223,7 @@
     target.replaceChildren();
     if (!hand.length) {
       currentResults = [];
+      currentWeakEvidence = false;
       el('resultCount').textContent = '0개 후보';
       el('resultIntro').textContent = '패를 몇 장 적으면 조건과 예시가 이곳에 나타납니다.';
       el('liveLead').textContent = '패를 넣으면 바로 나타납니다';
@@ -229,8 +234,9 @@
       renderPip({ syncInput: syncPipInput });
       return;
     }
-    const { limitedEvidence, results } = D.lookup(hand, { seat, round, opened });
+    const { limitedEvidence, weakEvidence, results } = D.lookup(hand, { seat, round, opened });
     currentResults = results;
+    currentWeakEvidence = weakEvidence;
     if (!results.length) {
       el('liveLead').textContent = '일치하는 예시가 없습니다';
       el('resultCount').textContent = '0개 후보';
@@ -238,10 +244,14 @@
       renderPip({ syncInput: syncPipInput });
       return;
     }
-    el('liveLead').textContent = `${results[0].name} · 예시와 ${results[0].kept.length}/${hand.length}장 일치`;
+    el('liveLead').textContent = weakEvidence
+      ? `뚜렷한 역 단서 없음 · ${results[0].name} 예시와 ${results[0].kept.length}/${hand.length}장 일치`
+      : `${results[0].name} · 예시와 ${results[0].kept.length}/${hand.length}장 일치`;
     el('resultCount').textContent = `${results.length}개 후보`;
     el('resultIntro').textContent = limitedEvidence
       ? '아직 단서가 적습니다. 아래 순서는 대표 예시와의 일치도만 보여줍니다.'
+      : weakEvidence
+      ? '뚜렷하게 가까운 역이 없습니다. 아래 후보는 대표 완성형과의 비교용입니다.'
       : `입력한 ${hand.length}장과 겹치는 대표 완성형입니다. 펼쳐서 역 조건과 필요한 패를 비교해 보세요.`;
     results.forEach((item, index) => target.append(createCard(item, index)));
     renderPip({ syncInput: syncPipInput });
@@ -367,7 +377,7 @@
           <p id="pipMessage" class="pip-message" role="status"></p>
           <div id="pipContext"></div>
           <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>
-          <p class="pip-caveat">금색 테두리 = 역의 핵심 패 · 일치 장수는 화료 확률이 아닙니다.</p>
+          <p id="pipCaveat" class="pip-caveat">금색 테두리 = 역의 핵심 패 · 일치 장수는 화료 확률이 아닙니다.</p>
           <section id="pipResult" class="pip-result" aria-label="가까운 완성형 예시 전체"></section>
         </div>`;
         child.getElementById('backToMain').addEventListener('click', () => window.focus());

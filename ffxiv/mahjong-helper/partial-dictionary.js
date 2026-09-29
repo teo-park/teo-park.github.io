@@ -77,6 +77,15 @@ function examplesFor(entry, seat, round) {
   return examples;
 }
 
+function runEvidence(counts, base, fullWeight) {
+  // A gap such as 2·4 needs its middle tile before it is a sequence clue.
+  const a = counts[base] > 0;
+  const b = counts[base + 1] > 0;
+  const c = counts[base + 2] > 0;
+  if (a && b && c) return fullWeight;
+  return (a && b) || (b && c) ? 1 : 0;
+}
+
 function affinity(id, counts, seat, round) {
   const n = counts.reduce((sum, count) => sum + count, 0);
   const suits = [0, 1, 2].map(suit => counts.slice(suit * 9, suit * 9 + 9).reduce((a, b) => a + b, 0));
@@ -87,7 +96,7 @@ function affinity(id, counts, seat, round) {
   const maxSuit = Math.max(...suits);
   if (id === 'tanyao') return simple * 1.3 - (n - simple) * 1.8;
   if (id === 'yakuhai') return Math.max(...[...new Set([seat, round, 31, 32, 33])].map(t => counts[t])) * 3;
-  if (id === 'chiitoitsu') return pairs * 4 - triples * 3;
+  if (id === 'chiitoitsu') return pairs * 3.5 - triples * 3;
   if (id === 'toitoi') return triples * 5 + pairs;
   if (id === 'honitsu') return maxSuit * 1.2 + honors * .7 - (n - maxSuit - honors) * 1.6;
   if (id === 'chinitsu') return maxSuit * 1.2 - (n - maxSuit) * 1.6;
@@ -99,20 +108,18 @@ function affinity(id, counts, seat, round) {
     return links * 1.5 - triples * 2 - honors * .5;
   }
   if (id === 'sanshoku') {
-    let best = 0;
-    for (let start = 0; start <= 6; start++) {
-      let members = 0;
-      for (let suit = 0; suit < 3; suit++) for (let rank = start; rank < start + 3; rank++)
-        members += counts[suit * 9 + rank] > 0 ? 1 : 0;
-      best = Math.max(best, members);
-    }
-    return best * 1.3;
+    let best = -5;
+    for (let start = 0; start <= 6; start++)
+      best = Math.max(best, -5 + [0, 1, 2].reduce((score, suit) =>
+        score + runEvidence(counts, suit * 9 + start, 4), 0));
+    return best;
   }
   if (id === 'ittsuu') {
-    let best = 0;
+    let best = -2;
     for (let suit = 0; suit < 3; suit++)
-      best = Math.max(best, counts.slice(suit * 9, suit * 9 + 9).filter(x => x).length);
-    return best * 1.3;
+      best = Math.max(best, -2 + [0, 3, 6].reduce((score, block) =>
+        score + runEvidence(counts, suit * 9 + block, 4.5), 0));
+    return best;
   }
   if (id === 'iipeikou') {
     let best = 0;
@@ -179,7 +186,7 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, limit = catalog.
   if (![seat, round].every(t => Number.isInteger(t) && t >= 27 && t <= 30)) throw new Error('자풍·장풍은 동·남·서·북 중 선택하세요.');
   const counts = tileCounts(tiles);
   if (counts.some(n => n > 4)) throw new Error('같은 패는 네 장까지입니다.');
-  if (!tiles.length) return { limitedEvidence: true, results: [] };
+  if (!tiles.length) return { limitedEvidence: true, weakEvidence: true, results: [] };
   const results = catalog.entries.filter(entry => !opened || entry.openAllowed).map(entry => {
     const bonus = affinity(entry.id, counts, seat, round);
     let chosen;
@@ -193,7 +200,9 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, limit = catalog.
       highlighted: highlightExample(entry.id, chosen.example, seat, round) };
   }).filter(entry => entry.kept.length > 0);
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));
-  return { limitedEvidence: tiles.length < 4, results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
+  return { limitedEvidence: tiles.length < 4,
+    weakEvidence: !results.length || results[0].score < Math.max(4, tiles.length * .5),
+    results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
 }
 
 return { catalog, parseTiles, examplesFor, highlightExample, lookup };

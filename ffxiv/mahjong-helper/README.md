@@ -6,6 +6,8 @@
 
 입력한 패와 대표 완성 예시가 겹치는 정도를 비교하고, 입력한 패와 겹치는 역 후보를 개수 제한 없이 표시합니다. 대표 예시에서는 역을 구성하는 핵심 패를 금색 테두리로 강조합니다. PiP 작은 창에서도 종류별 입력 네 칸, 접어서 쓰는 한 줄 입력, 자풍·장풍·멘젠 버튼, 겹치는 역 후보 전체의 대표 예시를 볼 수 있습니다. PiP 미지원 브라우저에서는 일반 작은 창으로 열립니다. 화료 확률, 최적 버림패, 점수는 계산하지 않습니다. 치·퐁·깡의 공개 패 묶음도 별도로 입력하지 않습니다.
 
+순위는 패 모양의 학습용 비교입니다. 삼색동순과 일기통관은 단순히 필요한 숫자가 흩어져 있는 것보다 완성된 순자와 이어진 두 패를 더 강한 단서로 봅니다. 어느 역도 뚜렷하게 맞지 않으면 화면에 약한 일치임을 표시합니다.
+
 입문용 역 11개의 조건과 예시를 담았습니다. 역 조건의 참고 자료는 [유럽 마작 협회의 리치 규칙](https://mahjong-europe.org/portal/images/docs/Riichi-rules-2025-EN.pdf)입니다. 패 그림은 [pjura/mahjong_souls_tiles](https://huggingface.co/datasets/pjura/mahjong_souls_tiles)의 기본 이미지이며 [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)에 따라 사용했습니다. 서체는 도구함의 공통 글꼴인 [LINE Seed KR](../fonts/line-seed-kr/README.md)을 사용합니다.
 
 로컬에서 확인하려면 저장소 루트에서 `python -m http.server 8767`을 실행한 뒤 `http://localhost:8767/ffxiv/mahjong-helper/`을 엽니다. 로직 검증은 `node --test ffxiv/mahjong-helper/tests/*.test.js`를 사용합니다.
