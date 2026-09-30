@@ -2,6 +2,7 @@
   const H = window.MahjongHelper;
   const Q = window.MahjongQuickInput;
   const M = window.MahjongMeldInput;
+  const U = window.MahjongUnavailableInput;
   const el = id => document.getElementById(id);
   const labels = [
     ...Array.from({ length: 9 }, (_, i) => `${i + 1}n`),
@@ -30,12 +31,16 @@
   let D;
   let hand = [];
   let melds = [];
+  let unavailable = [];
   let seat = 27;
   let round = 27;
   let manualOpened = false;
   let currentResults = [];
   let currentWeakEvidence = false;
   let meldSyntaxError = '';
+  let unavailableSyntaxError = '';
+  let unavailablePending = false;
+  let currentBlockedByUnavailable = false;
   let pipWindow = null;
   let pipOpening = false;
   const quickInputs = {};
@@ -124,6 +129,14 @@
     render({ syncMeldText: fromPip, syncPipInput: !fromPip });
   }
 
+  function readUnavailableInput(input, fromPip = false) {
+    const parsed = U.parse(input.value);
+    unavailableSyntaxError = parsed.error?.message || '';
+    unavailablePending = parsed.pending;
+    if (!parsed.error) unavailable = parsed.tiles;
+    render({ syncUnavailableText: fromPip, syncPipInput: !fromPip });
+  }
+
   function tileImage(tile, owner = document) {
     const image = owner.createElement('img');
     image.src = new URL(`overlay/templates/${labels[tile]}.png`, document.baseURI).href;
@@ -168,6 +181,32 @@
       head.append(name, remove);
       chip.append(head, miniTiles(meld.tiles, `${name.textContent} 묶음`, owner));
       target.append(chip);
+    });
+  }
+
+  function renderUnavailablePreview(owner, target) {
+    if (!target) return;
+    target.replaceChildren();
+    unavailable.forEach(tile => {
+      const button = owner.createElement('button');
+      button.type = 'button';
+      button.className = 'unavailable-chip';
+      button.title = `${tileName(tile)} 0장 표시 제거`;
+      button.setAttribute('aria-label', button.title);
+      const image = owner.createElement('span');
+      image.className = 'mini-tile';
+      image.append(tileImage(tile, owner));
+      const remove = owner.createElement('span');
+      remove.setAttribute('aria-hidden', 'true');
+      remove.textContent = '×';
+      button.append(image, remove);
+      button.addEventListener('click', () => {
+        unavailable = unavailable.filter(value => value !== tile);
+        unavailableSyntaxError = '';
+        unavailablePending = false;
+        render();
+      });
+      target.append(button);
     });
   }
 
@@ -260,6 +299,7 @@
       compact.value = Q.formatCompact(hand);
       compact.setAttribute('aria-invalid', 'false');
       child.getElementById('pipMeldInput').value = M.format(melds);
+      child.getElementById('pipUnavailableInput').value = U.format(unavailable);
       child.getElementById('pipMessage').textContent = '';
     }
     child.getElementById('pipInputCount').textContent = `손패 ${hand.length}/${14 - melds.length * 3}장`;
@@ -267,6 +307,10 @@
     child.getElementById('pipMeldError').textContent = meldSyntaxError || stateError();
     child.getElementById('pipMeldInput').setAttribute('aria-invalid', String(Boolean(meldSyntaxError || stateError())));
     renderMeldPreview(child, child.getElementById('pipMeldPreview'));
+    child.getElementById('pipUnavailableError').textContent = unavailableSyntaxError ||
+      (unavailablePending ? '끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.' : '');
+    child.getElementById('pipUnavailableInput').setAttribute('aria-invalid', String(Boolean(unavailableSyntaxError)));
+    renderUnavailablePreview(child, child.getElementById('pipUnavailablePreview'));
     syncOpenedControls();
     child.getElementById('pipResultCount').textContent = `${currentResults.length}개 후보`;
     child.getElementById('pipCaveat').textContent = currentWeakEvidence && inputTotal()
@@ -276,7 +320,9 @@
     if (!currentResults.length) {
       const empty = child.createElement('p');
       empty.className = 'pip-empty';
-      empty.textContent = inputTotal() ? '겹치는 예시가 없습니다. 패를 조정해 보세요.' : '패를 입력하면 겹치는 역 후보의 대표 완성형이 나타납니다.';
+      empty.textContent = inputTotal()
+        ? currentBlockedByUnavailable ? '0장 남은 패를 추가로 쓰지 않는 대표 예시가 없습니다. 표시를 확인해 보세요.' : '겹치는 예시가 없습니다. 패를 조정해 보세요.'
+        : '패를 입력하면 겹치는 역 후보의 대표 완성형이 나타납니다.';
       target.append(empty);
       return;
     }
@@ -306,6 +352,7 @@
     if (invalid) {
       currentResults = [];
       currentWeakEvidence = false;
+      currentBlockedByUnavailable = false;
       el('resultCount').textContent = '입력 확인';
       el('resultIntro').textContent = invalid;
       el('liveLead').textContent = '입력한 패 수를 확인해 주세요';
@@ -315,6 +362,7 @@
     if (!inputTotal()) {
       currentResults = [];
       currentWeakEvidence = false;
+      currentBlockedByUnavailable = false;
       el('resultCount').textContent = '0개 후보';
       el('resultIntro').textContent = '패를 몇 장 적으면 조건과 예시가 이곳에 나타납니다.';
       el('liveLead').textContent = '패를 넣으면 바로 나타납니다';
@@ -325,13 +373,16 @@
       renderPip({ syncInput: syncPipInput });
       return;
     }
-    const { limitedEvidence, weakEvidence, results } = D.lookup(hand, { seat, round, opened: isOpened(), melds });
+    const { limitedEvidence, weakEvidence, blockedByUnavailable, results } = D.lookup(hand, { seat, round, opened: isOpened(), melds, unavailable });
     currentResults = results;
     currentWeakEvidence = weakEvidence;
+    currentBlockedByUnavailable = blockedByUnavailable;
     if (!results.length) {
       el('liveLead').textContent = '일치하는 예시가 없습니다';
       el('resultCount').textContent = '0개 후보';
-      el('resultIntro').textContent = '입력한 패와 겹치는 대표 예시가 없습니다. 패를 더 넣거나 일부를 지워 보세요.';
+      el('resultIntro').textContent = blockedByUnavailable
+        ? '0장 남은 패를 추가로 쓰지 않는 대표 완성형 예시가 없습니다. 0장 표시를 확인해 보세요. 다른 완성형은 가능할 수 있습니다.'
+        : '입력한 패와 겹치는 대표 예시가 없습니다. 패를 더 넣거나 일부를 지워 보세요.';
       renderPip({ syncInput: syncPipInput });
       return;
     }
@@ -346,14 +397,17 @@
       : weakEvidence
       ? '뚜렷하게 가까운 역이 없습니다. 아래 후보는 대표 완성형과의 비교용입니다.'
       : `손패와 옆 패 ${inputTotal()}장을 비교한 학습용 후보입니다. 현재 성립한 역은 아니며, 역 핵심 패와 필요한 패를 확인해 보세요.`;
+    if (unavailable.length && blockedByUnavailable)
+      el('resultIntro').textContent += ' 0장 남은 패가 추가로 필요한 대표 예시는 제외했어요.';
     results.forEach((item, index) => target.append(createCard(item, index)));
     renderPip({ syncInput: syncPipInput });
   }
 
-  function render({ syncText = true, syncCompact = true, syncMeldText = true, syncPipInput = true } = {}) {
+  function render({ syncText = true, syncCompact = true, syncMeldText = true, syncUnavailableText = true, syncPipInput = true } = {}) {
     if (syncText) syncQuickInputs();
     if (syncCompact) syncCompactInput();
     if (syncMeldText) el('meldInput').value = M.format(melds);
+    if (syncUnavailableText) el('unavailableInput').value = U.format(unavailable);
     el('notationPreview').textContent = Q.formatNotation(hand) || '예: 123m123p123s5567z';
     el('inputCount').textContent = hand.length;
     el('handCapacity').textContent = `/ ${14 - melds.length * 3}`;
@@ -362,9 +416,14 @@
     el('meldError').hidden = !meldMessage;
     el('meldError').textContent = meldMessage;
     el('meldInput').setAttribute('aria-invalid', String(Boolean(meldMessage)));
+    el('unavailableError').hidden = !unavailableSyntaxError;
+    el('unavailableError').textContent = unavailableSyntaxError;
+    el('unavailablePending').hidden = !unavailablePending || Boolean(unavailableSyntaxError);
+    el('unavailableInput').setAttribute('aria-invalid', String(Boolean(unavailableSyntaxError)));
     el('undo').disabled = !hand.length;
-    el('clear').disabled = !hand.length && !melds.length;
+    el('clear').disabled = !hand.length && !melds.length && !unavailable.length;
     renderMeldPreview(document, el('meldPreview'));
+    renderUnavailablePreview(document, el('unavailablePreview'));
     syncOpenedControls();
     renderHand();
     renderResults({ syncPipInput });
@@ -462,7 +521,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-meld1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-unavailable1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
@@ -486,6 +545,11 @@
             <p id="pipMeldHelp" class="pip-input-help">공백으로 구분 · 안깡:7777ㅌ</p>
             <p id="pipMeldError" class="pip-message" role="status"></p>
             <div id="pipMeldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div></div>
+          <div class="pip-unavailable-entry"><div class="pip-input-heading"><strong>0장 남은 패</strong></div>
+            <label>더 가져올 수 없는 패<input id="pipUnavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="1ㅁ 7ㅌ 5ㅈ" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
+            <p id="pipUnavailableHelp" class="pip-input-help">이미 손에 든 패는 사용 가능 · 추가로 필요한 예시만 제외</p>
+            <p id="pipUnavailableError" class="pip-message" role="status"></p>
+            <div id="pipUnavailablePreview" class="unavailable-preview" aria-label="0장 남은 패"></div></div>
           <div id="pipContext"></div>
           <p id="pipOpenedHint" class="pip-input-help"></p>
           <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>
@@ -516,6 +580,9 @@
         const pipMeldInput = child.getElementById('pipMeldInput');
         pipMeldInput.addEventListener('input', event => { if (!event.isComposing) readMeldInput(pipMeldInput, true); });
         pipMeldInput.addEventListener('compositionend', () => readMeldInput(pipMeldInput, true));
+        const pipUnavailableInput = child.getElementById('pipUnavailableInput');
+        pipUnavailableInput.addEventListener('input', event => { if (!event.isComposing) readUnavailableInput(pipUnavailableInput, true); });
+        pipUnavailableInput.addEventListener('compositionend', () => readUnavailableInput(pipUnavailableInput, true));
         openedWindow.addEventListener('pagehide', () => cleanup(openedWindow), { once: true });
         button.setAttribute('aria-pressed', 'true');
         button.textContent = '작은 창으로 이동';
@@ -543,6 +610,9 @@
     const meldInput = el('meldInput');
     meldInput.addEventListener('input', event => { if (!event.isComposing) readMeldInput(meldInput); });
     meldInput.addEventListener('compositionend', () => readMeldInput(meldInput));
+    const unavailableInput = el('unavailableInput');
+    unavailableInput.addEventListener('input', event => { if (!event.isComposing) readUnavailableInput(unavailableInput); });
+    unavailableInput.addEventListener('compositionend', () => readUnavailableInput(unavailableInput));
     const compact = el('quickCompact');
     compact.addEventListener('input', event => { if (!event.isComposing) readCompactInput(); });
     compact.addEventListener('compositionend', readCompactInput);
@@ -564,7 +634,11 @@
       });
     });
     el('undo').addEventListener('click', () => { hand.pop(); render(); });
-    el('clear').addEventListener('click', () => { hand = []; melds = []; manualOpened = false; meldSyntaxError = ''; render(); });
+    el('clear').addEventListener('click', () => {
+      hand = []; melds = []; unavailable = []; manualOpened = false;
+      meldSyntaxError = ''; unavailableSyntaxError = ''; unavailablePending = false;
+      render();
+    });
     el('jumpResults').addEventListener('click', () => el('resultsTitle').scrollIntoView({ behavior: 'smooth', block: 'start' }));
     connectContextControls(document.querySelector('.context'));
     document.addEventListener('keydown', event => {

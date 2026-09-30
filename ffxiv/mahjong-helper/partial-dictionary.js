@@ -319,9 +319,11 @@ function highlightExample(id, example, seat = 27, round = 27) {
   return example.map(tile => focus[tile] > 0 ? (focus[tile]--, true) : false);
 }
 
-function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limit = catalog.entries.length } = {}) {
+function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unavailable = [], limit = catalog.entries.length } = {}) {
   if (!Array.isArray(tiles) || tiles.length > 14) throw new Error('0~14장의 패를 입력해 주세요.');
   if (![seat, round].every(t => Number.isInteger(t) && t >= 27 && t <= 30)) throw new Error('자풍·장풍은 동·남·서·북 중 선택하세요.');
+  if (!Array.isArray(unavailable) || unavailable.some(t => !Number.isInteger(t) || t < 0 || t >= 34))
+    throw new Error('0장 남은 패는 올바른 패 종류로 입력해 주세요.');
   if (!Array.isArray(melds) || melds.length > 4 || melds.some(meld =>
     !['chi', 'pon', 'kan'].includes(meld.type) || !Array.isArray(meld.tiles) ||
     meld.tiles.length !== (meld.type === 'kan' ? 4 : 3))) throw new Error('옆으로 낸 패 묶음이 올바르지 않습니다.');
@@ -331,13 +333,19 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limi
   if (input.length > 14) throw new Error('손패와 오른쪽 묶음을 합쳐 14장 구조를 넘었어요. 손패를 줄여 주세요.');
   const counts = tileCounts(input);
   const concealedCounts = tileCounts(tiles);
-  if (!input.length) return { limitedEvidence: true, weakEvidence: true, results: [] };
+  if (!input.length) return { limitedEvidence: true, weakEvidence: true, blockedByUnavailable: false, results: [] };
+  const unavailableSet = new Set(unavailable);
+  let blockedByUnavailable = false;
   const isOpened = opened || melds.some(meld => meld.open);
   const results = catalog.entries.filter(entry => !isOpened || entry.openAllowed).map(entry => {
     const evidence = structuralEvidence(entry.id, counts, seat, round, concealedCounts, melds);
     let chosen;
     for (const example of contextualExamplesFor(entry, seat, round, melds)) {
       const comparison = compareExample(counts, example);
+      if (comparison.missing.some(tile => unavailableSet.has(tile))) {
+        blockedByUnavailable = true;
+        continue;
+      }
       const highlighted = highlightExample(entry.id, comparison.example, seat, round);
       const focusCounts = tileCounts(comparison.example.filter((_, index) => highlighted[index]));
       const coreKept = focusCounts.reduce((total, count, tile) => total + Math.min(counts[tile], count), 0);
@@ -363,6 +371,7 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], limi
   results.sort((a, b) => b.score - a.score || b.kept.length - a.kept.length || a.name.localeCompare(b.name, 'ko'));
   return { limitedEvidence: input.length < 4,
     weakEvidence: !results.length || results[0].score < Math.max(8, input.length * 1.25),
+    blockedByUnavailable,
     results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
 }
 

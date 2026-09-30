@@ -12,13 +12,14 @@
   <link rel="stylesheet" href="../navigation.css?v=20260916-pages1">
   <link rel="stylesheet" href="dictionary.css?v=20260929-site1">
   <link rel="stylesheet" href="pip.css?v=20260929-pip3">
-  <link rel="stylesheet" href="site-alignment.css?v=20260930-pairs1">
+  <link rel="stylesheet" href="site-alignment.css?v=20260930-unavailable1">
   <script src="../navigation.js?v=20260916-pages1" defer></script>
   <script src="core.js" defer></script>
-  <script src="partial-dictionary.js?v=20260930-structure1" defer></script>
+  <script src="partial-dictionary.js?v=20260930-unavailable1" defer></script>
   <script src="quick-input.js" defer></script>
   <script src="meld-input.js?v=20260930-meld1" defer></script>
-  <script src="dictionary-app.js?v=20260930-structure1" defer></script>
+  <script src="unavailable-input.js?v=20260930-unavailable1" defer></script>
+  <script src="dictionary-app.js?v=20260930-unavailable1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#quickMan">패 입력으로 이동</a>
@@ -62,6 +63,14 @@
             <p id="meldHelp" class="quick-help">묶음마다 띄어쓰기 · <b>123ㅅ</b> 치 · <b>555ㅈ</b> 퐁 · <b>7777ㅌ</b> 명깡<br>안깡은 <b>안깡:7777ㅌ</b>처럼 적어요.</p>
             <p id="meldError" class="quick-error" role="status" aria-live="polite" hidden></p>
             <div id="meldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div>
+          </div>
+          <div class="unavailable-entry">
+            <div class="quick-head"><h3>0장 남은 패</h3><span>추가로 가져올 수 없는 패</span></div>
+            <label class="compact-label" for="unavailableInput">패 종류<input id="unavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="예: 1ㅁ 7ㅌ 5ㅈ" aria-describedby="unavailableHelp unavailablePending unavailableError"></label>
+            <p id="unavailableHelp" class="quick-help">만·통·삭·자패를 <b>숫자+종류</b>로 적어요. 이미 손에 든 같은 패는 그대로 쓰고, 추가로 필요한 대표 예시만 제외합니다.</p>
+            <p id="unavailablePending" class="quick-pending" hidden>끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.</p>
+            <p id="unavailableError" class="quick-error" role="status" aria-live="polite" hidden></p>
+            <div id="unavailablePreview" class="unavailable-preview" aria-label="0장 남은 패"></div>
           </div>
           <div class="context" aria-label="대국 정보">
             <div class="wind-group"><abbr title="내 자리의 바람입니다. 대국 화면에서 내 이름 옆의 동·남·서·북을 확인하세요.">자풍</abbr><div class="segments" data-wind="seat"><button type="button" data-value="27" aria-pressed="true">동</button><button type="button" data-value="28" aria-pressed="false">남</button><button type="button" data-value="29" aria-pressed="false">서</button><button type="button" data-value="30" aria-pressed="false">북</button></div></div>

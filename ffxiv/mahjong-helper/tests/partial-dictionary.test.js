@@ -141,3 +141,27 @@ test('few tiles are marked as weak evidence and invalid tile inputs are rejected
   assert.throws(() => D.parseTiles('8z'));
   assert.throws(() => D.lookup([0, 0, 0, 0, 0]));
 });
+
+test('zero remaining tiles are excluded only when an example needs another copy', () => {
+  const hand = D.parseTiles('123m123p123s');
+  const base = D.lookup(hand);
+  assert.ok(base.results.some(item => item.missing.includes(3)));
+  const filtered = D.lookup(hand, { unavailable: [3] });
+  assert.equal(filtered.blockedByUnavailable, true);
+  assert.ok(filtered.results.length > 0);
+  assert.ok(filtered.results.every(item => !item.missing.includes(3)));
+  assert.ok(filtered.results.find(item => item.id === 'sanshoku'));
+
+  const held = D.lookup(hand, { unavailable: [0, 9, 18] });
+  const sanshoku = held.results.find(item => item.id === 'sanshoku');
+  assert.ok(sanshoku);
+  assert.ok([0, 9, 18].every(tile => !sanshoku.missing.includes(tile)));
+});
+
+test('exhausting all tile types can leave no representative examples', () => {
+  const output = D.lookup(D.parseTiles('123m'), { unavailable: Array.from({ length: 34 }, (_, i) => i) });
+  assert.equal(output.blockedByUnavailable, true);
+  assert.deepEqual(output.results, []);
+  assert.throws(() => D.lookup([0], { unavailable: [34] }));
+  assert.throws(() => D.lookup([0], { unavailable: '1m' }));
+});
