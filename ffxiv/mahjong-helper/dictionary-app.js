@@ -277,6 +277,14 @@
     parent.append(document.createTextNode(value.slice(start)));
   }
 
+  function menzenTag(owner) {
+    const tag = owner.createElement('span');
+    tag.className = 'menzen-tag';
+    tag.textContent = '멘젠 필수';
+    tag.title = '치·퐁·명깡을 하지 않은 손패에서만 성립합니다. 안깡은 멘젠을 유지합니다.';
+    return tag;
+  }
+
   function createCard(item, index) {
     const card = document.createElement('details');
     card.className = 'result-card';
@@ -286,8 +294,9 @@
     head.className = 'card-head';
     const rank = document.createElement('span'); rank.className = 'card-rank'; rank.textContent = String(index + 1).padStart(2, '0');
     const title = document.createElement('strong'); title.className = 'card-title'; title.textContent = item.name;
-    const flag = document.createElement('span'); flag.className = 'card-flag'; flag.textContent = item.openAllowed ? '울기 가능' : '멘젠 전용';
-    flag.title = item.openAllowed ? '치·퐁·명깡을 해도 성립할 수 있는 역' : '치·퐁·명깡을 하지 않은 손패에서만 성립하는 역';
+    const flag = item.openAllowed ? document.createElement('span') : menzenTag(document);
+    flag.classList.add('card-flag');
+    if (item.openAllowed) { flag.textContent = '울기 가능'; flag.title = '치·퐁·명깡을 해도 성립할 수 있는 역'; }
     const chevron = document.createElement('span'); chevron.className = 'card-chevron'; chevron.setAttribute('aria-hidden', 'true'); chevron.textContent = '⌄';
     head.append(rank, title, flag, chevron);
     const condition = document.createElement('p'); condition.className = 'card-condition'; explainedText(condition, item.condition);
@@ -344,6 +353,7 @@
       const brief = owner.createElement('div'); brief.className = 'opening-brief';
       brief.append(text('strong', `${path.name} 핵심 · ${path.missing.length ? percent(path.probability) : '갖춤'}`, `${model.draws}번의 내 뽑기 안에 이 역의 핵심 패를 모을 확률입니다. 화료 확률은 아닙니다. 핵심에 필요한 패가 2장 이하이고 이 확률이 1% 이상인 후보만 최대 2개 표시합니다.`),
         text('span', path.missing.length ? `필요: ${path.missing.map(tileName).join(' · ')}` : '나머지 묶음·머리도 확인하세요.'));
+      if (D.catalog.entries.find(entry => entry.id === path.id)?.openAllowed === false) brief.firstChild.append(' ', menzenTag(owner));
       target.append(brief);
     }
     if (!promising.length) {
@@ -381,6 +391,7 @@
       const row = owner.createElement('div'); row.className = 'opening-path';
       const heading = owner.createElement('div'); heading.className = 'opening-path-head';
       heading.append(text('strong', path.name), text('strong', path.missing.length ? percent(path.probability) : '핵심 갖춤'));
+      if (D.catalog.entries.find(entry => entry.id === path.id)?.openAllowed === false) heading.firstChild.append(' ', menzenTag(owner));
       row.append(heading, miniTiles(path.core.slice().sort((a, b) => a - b), `${path.name} 비교하는 핵심 패`, owner));
       row.append(text('p', path.missing.length ? `더 필요한 패: ${path.missing.map(tileName).join(' · ')}` : '이 역의 핵심 모양은 이미 있습니다.'));
       expanded.append(row);
@@ -461,6 +472,7 @@
       const card = child.createElement('article'); card.className = 'pip-result-card';
       const head = child.createElement('div'); head.className = 'pip-result-head';
       const name = child.createElement('strong'); name.textContent = `${index + 1}. ${item.name}`;
+      if (!item.openAllowed) name.append(' ', menzenTag(child));
       const match = child.createElement('span'); match.textContent = `${item.evidenceLabel} · 전체 ${item.kept.length}/${inputTotal()}`;
       if (evidenceHints[item.id]) match.title = evidenceHints[item.id];
       head.append(name, match);
@@ -669,7 +681,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260930-winds1', 'site-alignment.css?v=20260930-compact1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260930-winds1', 'site-alignment.css?v=20261001-menzen1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
