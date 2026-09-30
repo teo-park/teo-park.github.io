@@ -26,6 +26,11 @@
       "label": "임무 초성 사전"
     },
     {
+      "key": "mahjong-helper",
+      "path": "/ffxiv/mahjong-helper/",
+      "label": "작패유희 역 사전"
+    },
+    {
       "key": "triple-triad",
       "path": "/ffxiv/triple-triad/",
       "label": "트리플 트라이어드 수첩"

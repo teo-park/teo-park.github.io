@@ -14,6 +14,7 @@ function open(options={}){
 }
 test('canonical pages and legacy aliases resolve, admin and unknown pages do not count',()=>{
  for(const p of pages){assert.ok(api.pageFor(config,'/ffxiv/'+p));assert.ok(api.pageFor(config,'/ffxiv/'+p+'index.html'));}
+ assert.equal(api.pageFor(config,'/ffxiv/mahjong-helper/').key,'mahjong-helper');
  for(const route of ['indigo','ruby'])assert.equal(api.pageFor(config,'/ffxiv/ocean-fishing/'+route+'/').key,'ocean-fishing');
  assert.equal(api.pageFor(config,'/ffxiv/counter-admin/'),undefined);
 });
@@ -29,6 +30,13 @@ test('public client writes only an opaque event and never reads totals or expose
  assert.ok(ui.calls.every(c=>c.credentials==='omit'&&c.referrerPolicy==='no-referrer'));
  assert.equal(ui.w.document.body.textContent,'출처');
  await api.start(ui.w,'https://site.example/config.json');assert.equal(ui.writes().length,1);
+ }finally{ui.w.close();}
+});
+test('mahjong dictionary visits use their own counter key',async()=>{
+ const ui=open({url:'https://teo-park.github.io/ffxiv/mahjong-helper/'});try{
+ await api.start(ui.w,'https://site.example/config.json');
+ assert.equal(ui.writes().length,1);
+ assert.match(ui.writes()[0].url,/\/visits\/mahjong-helper\/[a-f0-9]{32}\.json$/);
  }finally{ui.w.close();}
 });
 test('simultaneous tabs and refresh share browser deduplication, failures are not retried',async()=>{
@@ -64,6 +72,8 @@ test('rules make old counters immutable, gate reads to verified Google owner and
 });
 test('public pages have only a background collector and no admin links or old counter CSS',()=>{
  for(const p of pages){const html=fs.readFileSync(path.resolve(__dirname,'..',p,'index.html'),'utf8');assert.equal((html.match(/src="[^"]*visitor-counter\.js/g)||[]).length,1,p);assert.doesNotMatch(html,/visitor-counter\.css|counter-admin\//);}
+ const mahjong=fs.readFileSync(path.resolve(__dirname,'../mahjong-helper/index.html'),'utf8');
+ assert.equal((mahjong.match(/src="[^"]*visitor-counter\.js/g)||[]).length,1);
  assert.doesNotMatch(fs.readFileSync(path.resolve(__dirname,'../../sitemap.xml'),'utf8'),/counter-admin/);
 });
 

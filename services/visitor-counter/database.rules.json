@@ -31,6 +31,12 @@
           ".validate": "newData.getPriority() === null"
         }
       },
+      "mahjong-helper": {
+        "$eventId": {
+          ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.getPriority() === null"
+        }
+      },
       "triple-triad": {
         "$eventId": {
           ".write": "!data.exists() && newData.val() === true && $eventId.matches(/^[a-f0-9]{32}$/)",
