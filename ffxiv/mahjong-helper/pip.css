@@ -24,9 +24,8 @@
 .pip-input-help,.pip-message,.pip-caveat{margin:0;color:var(--soft);font-size:.73rem;line-height:1.35}
 .pip-message{color:#ffb7ac}
 .pip-message:empty{display:none}
-.pip-body .context{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.pip-body .context{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
 .pip-body .wind-group{display:grid;gap:4px;min-width:0}
-.pip-body .context>.wind-group:last-child{grid-column:1/-1}
 .pip-body .wind-group>span,.pip-body .wind-group>abbr{font-size:.75rem}
 .pip-body .segments{width:max-content;max-width:100%}
 .pip-body .segments button{min-width:30px;height:29px;font-size:.78rem}
@@ -45,3 +44,4 @@
 .pip-empty{margin:0;padding:14px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:.85rem;line-height:1.5}
 @media(max-width:620px){.intro-actions{justify-content:flex-start}.pip-status{padding:0 17px;margin:-9px auto 13px}}
 @media(max-width:420px){.pip-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.pip-result .mini-tiles{flex-wrap:wrap}.pip-result .mini-tile{flex:0 0 24px;max-width:24px;height:40px}}
+@media(max-width:480px){.pip-body .context{grid-template-columns:minmax(0,1fr)}}
