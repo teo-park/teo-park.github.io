@@ -3,6 +3,7 @@
   const Q = window.MahjongQuickInput;
   const M = window.MahjongMeldInput;
   const U = window.MahjongUnavailableInput;
+  const O = window.MahjongOpening;
   const el = id => document.getElementById(id);
   const labels = [
     ...Array.from({ length: 9 }, (_, i) => `${i + 1}n`),
@@ -13,7 +14,7 @@
   const honorNames = ['동', '남', '서', '북', '백', '발', '중'];
   const tileName = tile => tile < 27 ? H.name(tile) : honorNames[tile - 27];
   const glossary = {
-    '샹텐': '화료 형태까지 남은 최소 패 교환 횟수입니다.',
+    '샹텐': '텐파이까지 남은 최소 패 교환 횟수입니다. 0샹텐은 한 장을 기다리는 텐파이입니다.',
     '순자': '같은 종류의 연속된 숫자 패 3장입니다. 예: 2·3·4만.',
     '커쯔': '같은 패 3장으로 만든 묶음입니다.',
     '머리': '같은 패 2장으로 만든 한 쌍입니다.',
@@ -45,6 +46,7 @@
   let unavailableEditedField = '';
   let unavailablePending = false;
   let currentBlockedByUnavailable = false;
+  let currentOpening = null;
   let pipWindow = null;
   let pipOpening = false;
   const quickInputs = {};
@@ -310,6 +312,65 @@
     return card;
   }
 
+  const percent = probability => probability === 0 ? '0%' : probability < .0001 ? '<0.01%'
+    : `${(probability * 100).toFixed(probability < .01 ? 2 : 1)}%`;
+  function renderOpening(owner, target) {
+    if (!target) return;
+    target.replaceChildren();
+    const text = (tag, value, title = '') => {
+      const node = owner.createElement(tag); node.textContent = value;
+      if (title) { node.title = title; node.className = 'term'; }
+      return node;
+    };
+    target.append(text('h3', '첫 손패 분석'));
+    const model = currentOpening;
+    if (!model) {
+      target.append(text('p', '멘젠 손패 13장을 모두 입력하면 샹텐·유효패와 역 핵심 확률을 비교합니다. 첫 뽑기 후 14장은 버릴 패도 비교해요. 옆 패·0장 패를 기록한 대국 중에는 첫 손패 분석을 적용하지 않습니다.'));
+      return;
+    }
+    if (model.complete) {
+      target.append(text('p', '14장의 화료 형태가 완성됐어요. 화료하려면 역과 대기 조건도 확인하세요.'));
+      return;
+    }
+    const stats = owner.createElement('div'); stats.className = 'opening-stats';
+    stats.append(text('strong', model.shanten === 0 ? '텐파이' : `${model.shanten}샹텐`, '샹텐은 텐파이까지 필요한 최소 패 교환 횟수입니다. 0샹텐은 한 장을 기다리는 텐파이입니다.'),
+      text('strong', `유효패 ${model.effective.total}장`, '유효패는 뽑으면 샹텐이 줄어드는 패입니다. 각 패 4장에서 내 손패와 이번 버림패를 뺀 장수를 셉니다.'),
+      text('span', `다음 뽑기 개선 ${percent(model.nextChance)}`));
+    target.append(stats);
+    if (model.discards.length) {
+      const details = owner.createElement('details'); details.className = 'opening-discards'; details.open = true;
+      details.append(text('summary', `버림패 비교 · ${tileName(model.analyzedDiscard)}을 버린 뒤 기준`));
+      const table = owner.createElement('table');
+      const head = owner.createElement('tr');
+      for (const label of ['버릴 패', '샹텐', '유효패']) head.append(text('th', label));
+      const thead = owner.createElement('thead'); thead.append(head); table.append(thead);
+      const body = owner.createElement('tbody');
+      for (const discard of model.discards) {
+        const row = owner.createElement('tr');
+        if (discard.shanten === model.discards[0].shanten && discard.effective === model.discards[0].effective) row.className = 'opening-best';
+        row.append(text('td', tileName(discard.index)), text('td', String(discard.shanten)), text('td', `${discard.effective}장`)); body.append(row);
+      }
+      table.append(body); details.append(table); target.append(details);
+    }
+    const effective = owner.createElement('div'); effective.className = 'opening-effective';
+    for (const tile of model.effective.tiles) {
+      const chip = owner.createElement('span'); chip.className = 'opening-chip';
+      chip.setAttribute('aria-label', `${tileName(tile.index)} 남은 ${tile.remaining}장`);
+      chip.append(tileImage(tile.index, owner), text('span', `${tile.remaining}장`)); effective.append(chip);
+    }
+    target.append(effective, text('h4', `${model.draws}번의 내 뽑기 안에 역 핵심 모으기`),
+      text('p', `안 보이는 ${model.unseen}장이 무작위이고 필요한 패를 보유한다고 가정합니다. 각 역에서 가장 유리한 한 가지 핵심 모양을 비교해요. 나머지 묶음·머리와 실제 화료는 별도로 완성해야 합니다.`));
+    for (const path of model.paths) {
+      const row = owner.createElement('div'); row.className = 'opening-path';
+      const heading = owner.createElement('div'); heading.className = 'opening-path-head';
+      heading.append(text('strong', path.name), text('strong', path.missing.length ? percent(path.probability) : '핵심 갖춤'));
+      row.append(heading, miniTiles(path.core.slice().sort((a, b) => a - b), `${path.name} 비교하는 핵심 패`, owner));
+      row.append(text('p', path.missing.length ? `더 필요한 패: ${path.missing.map(tileName).join(' · ')}` : '이 역의 핵심 모양은 이미 있습니다.'));
+      target.append(row);
+    }
+    target.append(text('p', '비교 범위: 이페코·삼색동순·일기통관·역패. 서로 다른 핵심 모양의 확률을 합한 값이나 화료 확률은 아닙니다. 상대의 버림패·치·퐁·깡·대국 종료는 반영하지 않습니다.'));
+  }
+
   function renderHand() {
     const selected = el('selectedHand');
     selected.replaceChildren();
@@ -334,6 +395,7 @@
     const child = pipWindow.document;
     const target = child.getElementById('pipResult');
     if (!target) return;
+    renderOpening(child, child.getElementById('pipOpeningGuide'));
     if (syncInput) {
       const values = Q.format(hand);
       child.querySelectorAll('[data-pip-quick]').forEach(input => {
@@ -401,6 +463,9 @@
     const target = el('resultCards');
     target.replaceChildren();
     const invalid = stateError();
+    currentOpening = !invalid && !isOpened() && !melds.length && !unavailable.length && [13, 14].includes(hand.length)
+      ? O.analyze(hand, { seat, round }) : null;
+    renderOpening(document, el('openingGuide'));
     if (invalid) {
       currentResults = [];
       currentWeakEvidence = false;
@@ -587,7 +652,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260930-winds1', 'site-alignment.css?v=20260930-collapse1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260930-winds1', 'site-alignment.css?v=20260930-opening1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
@@ -632,6 +697,7 @@
           <p id="pipOpenedHint" class="pip-input-help"></p>
           <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>
           <p id="pipCaveat" class="pip-caveat">후보는 현재 성립한 역이 아닙니다. 핵심 패와 예시 전체를 구분해 보세요.</p>
+          <section id="pipOpeningGuide" class="opening-guide" aria-label="첫 손패 분석"></section>
           <section id="pipResult" class="pip-result" aria-label="가까운 완성형 예시 전체"></section>
         </div>`;
         child.getElementById('backToMain').addEventListener('click', () => window.focus());
