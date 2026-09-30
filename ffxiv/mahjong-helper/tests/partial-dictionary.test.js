@@ -5,6 +5,33 @@ const D = require('../partial-dictionary.js');
 
 const counts = tiles => tiles.reduce((array, tile) => (array[tile]++, array), Array(34).fill(0));
 
+test('toitoi completion retains reported triplet and pairs instead of fixed catalog tiles', () => {
+  const result = D.lookup(D.parseTiles('66699m63p236779s')).results.find(item => item.id === 'toitoi');
+  const target = counts(result.example);
+  assert.equal(target[5], 3);
+  assert.ok(target[8] >= 2);
+  assert.ok(target[24] >= 2);
+  assert.equal(result.kept.length, 9);
+  assert.equal(result.missing.length, 5);
+  assert.equal(target[0], 0);
+  assert.equal(target[31], 0);
+  assert.deepEqual(target.filter(Boolean).sort(), [2, 3, 3, 3, 3]);
+  assert.equal(H.shanten(target), -1);
+});
+
+test('adaptive toitoi respects fixed kan, exhausted tiles and chi incompatibility', () => {
+  const kan = { type: 'kan', open: true, tiles: [31, 31, 31, 31] };
+  const hand = D.parseTiles('66699m3377s');
+  const result = D.lookup(hand, { melds: [kan], unavailable: [8] }).results.find(item => item.id === 'toitoi');
+  const target = counts(result.example);
+  assert.equal(target[31], 3);
+  assert.equal(target[8], 2);
+  assert.equal(result.missing.includes(8), false);
+  assert.deepEqual(target.filter(Boolean).sort(), [2, 3, 3, 3, 3]);
+  const chi = { type: 'chi', open: true, tiles: [0, 1, 2] };
+  assert.equal(D.lookup(hand, { melds: [chi] }).results.some(item => item.id === 'toitoi'), false);
+});
+
 test('all catalog examples are physical, complete hands with the stated core pattern', () => {
   assert.equal(D.catalog.entries.length, 11);
   for (const entry of D.catalog.entries) {

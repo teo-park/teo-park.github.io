@@ -125,6 +125,25 @@ function validGroups(id, groups, pair, seat, round) {
 }
 
 const contextualCache = new Map();
+// A toitoi hand consists of four distinct triplets and a distinct pair.
+// For each possible pair, the triplets retaining most input tiles give an
+// exact minimum-missing completion, without enumerating every combination.
+function toitoiExamples(counts, melds, unavailable) {
+  if (melds.some(meld => meld.type === 'chi')) return [];
+  const fixed = melds.map(meld => meld.tiles[0]);
+  const examples = [];
+  for (let pair = 0; pair < 34; pair++) {
+    if (fixed.includes(pair) || unavailable.has(pair) && counts[pair] < 2) continue;
+    const candidates = Array.from({ length: 34 }, (_, tile) => tile)
+      .filter(tile => tile !== pair && !fixed.includes(tile) && (!unavailable.has(tile) || counts[tile] >= 3))
+      .sort((a, b) => Math.min(counts[b], 3) - Math.min(counts[a], 3) || a - b);
+    const needed = 4 - fixed.length;
+    if (candidates.length < needed) continue;
+    examples.push([...fixed, ...candidates.slice(0, needed)].flatMap(tile => [tile, tile, tile]).concat(pair, pair));
+  }
+  return examples;
+}
+
 function contextualExamplesFor(entry, seat, round, melds) {
   if (!melds.length) return examplesFor(entry, seat, round);
   if (entry.id === 'chiitoitsu' || entry.id === 'kokushi') return [];
@@ -340,7 +359,9 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unav
   const results = catalog.entries.filter(entry => !isOpened || entry.openAllowed).map(entry => {
     const evidence = structuralEvidence(entry.id, counts, seat, round, concealedCounts, melds);
     let chosen;
-    for (const example of contextualExamplesFor(entry, seat, round, melds)) {
+    const examples = entry.id === 'toitoi' ? toitoiExamples(counts, melds, unavailableSet)
+      : contextualExamplesFor(entry, seat, round, melds);
+    for (const example of examples) {
       const comparison = compareExample(counts, example);
       if (comparison.missing.some(tile => unavailableSet.has(tile))) {
         blockedByUnavailable = true;
@@ -361,7 +382,8 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unav
       // Filler tiles in a sample hand must not select a more distant double run.
       const closerDoubleRun = entry.id === 'iipeikou' && chosen &&
         coreMissing.length !== chosen.coreMissing.length;
-      if (!chosen || (closerDoubleRun
+      const closerToitoi = entry.id === 'toitoi' && chosen && comparison.missing.length !== chosen.missing.length;
+      if (!chosen || (closerToitoi ? comparison.missing.length < chosen.missing.length : closerDoubleRun
         ? coreMissing.length < chosen.coreMissing.length
         : exampleFit > chosen.exampleFit)) chosen = {
         ...comparison, exampleFit, coreKept, coreTotal, coreMissing, highlighted
