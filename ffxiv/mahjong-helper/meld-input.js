@@ -38,5 +38,32 @@
     return melds.map(meld => `${meld.open ? '' : '안깡:'}${Q.formatCompact(meld.tiles).replaceAll(' ', '')}`).join(' ');
   }
 
-  return { parse, format };
+  const fieldSuffix = { man: 'ㅁ', pin: 'ㅌ', sou: 'ㅅ', honors: 'ㅈ' };
+  function parseFields(values) {
+    const groups = [];
+    for (const [field, suffix] of Object.entries(fieldSuffix)) {
+      const tokens = String(values[field] || '').trim().split(/[\s,/|]+/u).filter(Boolean);
+      for (const token of tokens) {
+        const match = /^(안깡:|안:|안)?([1-9]+)$/u.exec(token);
+        if (!match || (field === 'honors' && /[89]/u.test(match[2])))
+          return { ...error(`${field === 'honors' ? '자패는 1~7' : '수패는 1~9'} 숫자로 묶음을 적어 주세요. 예: 123 또는 안깡:7777`), field };
+        groups.push(`${match[1] || ''}${match[2]}${suffix}`);
+      }
+    }
+    return parse(groups.join(' '));
+  }
+
+  function formatFields(melds) {
+    const values = { man: '', pin: '', sou: '', honors: '' };
+    for (const meld of melds) {
+      const tile = meld.tiles[0];
+      const field = tile < 9 ? 'man' : tile < 18 ? 'pin' : tile < 27 ? 'sou' : 'honors';
+      const digits = meld.tiles.map(value => field === 'man' ? value + 1
+        : field === 'pin' ? value - 8 : field === 'sou' ? value - 17 : value - 26).join('');
+      values[field] += `${values[field] ? ' ' : ''}${meld.open ? '' : '안깡:'}${digits}`;
+    }
+    return values;
+  }
+
+  return { parse, format, parseFields, formatFields };
 });

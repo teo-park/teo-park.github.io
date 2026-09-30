@@ -30,5 +30,21 @@
 
   function format(tiles) { return Q.formatCompact([...new Set(tiles)].sort((a, b) => a - b)); }
 
-  return { parse, format };
+  function parseFields(values) {
+    const tiles = new Set();
+    for (const [field, base, max, name] of [
+      ['man', 0, 9, '만'], ['pin', 9, 9, '통'], ['sou', 18, 9, '삭'], ['honors', 27, 7, '자패']
+    ]) {
+      for (const digit of String(values[field] || '').replace(/[\s,·/|]/gu, '')) {
+        if (!/^[1-9]$/u.test(digit) || Number(digit) > max)
+          return { tiles: null, error: { field, message: `${name}에는 1~${max} 숫자만 적어 주세요.` }, pending: false };
+        tiles.add(base + Number(digit) - 1);
+      }
+    }
+    return { tiles: [...tiles].sort((a, b) => a - b), error: null, pending: false };
+  }
+
+  function formatFields(tiles) { return Q.format([...new Set(tiles)].sort((a, b) => a - b)); }
+
+  return { parse, format, parseFields, formatFields };
 });

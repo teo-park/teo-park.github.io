@@ -12,14 +12,14 @@
   <link rel="stylesheet" href="../navigation.css?v=20260916-pages1">
   <link rel="stylesheet" href="dictionary.css?v=20260929-site1">
   <link rel="stylesheet" href="pip.css?v=20260929-pip3">
-  <link rel="stylesheet" href="site-alignment.css?v=20260930-unavailable1">
+  <link rel="stylesheet" href="site-alignment.css?v=20260930-split1">
   <script src="../navigation.js?v=20260916-pages1" defer></script>
   <script src="core.js" defer></script>
   <script src="partial-dictionary.js?v=20260930-unavailable1" defer></script>
   <script src="quick-input.js" defer></script>
-  <script src="meld-input.js?v=20260930-meld1" defer></script>
-  <script src="unavailable-input.js?v=20260930-unavailable1" defer></script>
-  <script src="dictionary-app.js?v=20260930-unavailable1" defer></script>
+  <script src="meld-input.js?v=20260930-split1" defer></script>
+  <script src="unavailable-input.js?v=20260930-split1" defer></script>
+  <script src="dictionary-app.js?v=20260930-split1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#quickMan">패 입력으로 이동</a>
@@ -59,15 +59,27 @@
           <p id="quickError" class="quick-error" role="status" aria-live="polite" hidden></p>
           <div class="meld-entry">
             <div class="quick-head"><h3 id="meldTitle">옆으로 낸 패</h3><span id="meldCount">0/4묶음</span></div>
-            <label class="compact-label" for="meldInput">치·퐁·깡 묶음<input id="meldInput" type="text" autocomplete="off" spellcheck="false" placeholder="예: 123ㅅ 555ㅈ 7777ㅌ" aria-describedby="meldHelp meldError"></label>
-            <p id="meldHelp" class="quick-help">묶음마다 띄어쓰기 · <b>123ㅅ</b> 치 · <b>555ㅈ</b> 퐁 · <b>7777ㅌ</b> 명깡<br>안깡은 <b>안깡:7777ㅌ</b>처럼 적어요.</p>
+            <div class="quick-grid secondary-grid" aria-label="옆으로 낸 패 종류별 입력">
+              <label>만<input data-meld="man" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="123 555" aria-describedby="meldHelp meldError"></label>
+              <label>통<input data-meld="pin" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="7777" aria-describedby="meldHelp meldError"></label>
+              <label>삭<input data-meld="sou" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="123" aria-describedby="meldHelp meldError"></label>
+              <label>자패<input data-meld="honors" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="555" aria-describedby="meldHelp meldError"></label>
+            </div>
+            <p id="meldHelp" class="quick-help">묶음마다 띄어쓰기 · 같은 수패 <b>123</b> 치 · <b>555</b> 퐁 · <b>7777</b> 명깡 · 안깡은 <b>안깡:7777</b> · 자패 1동~7중</p>
+            <details class="separate-entry"><summary>한 줄로 입력하기</summary><label class="compact-label" for="meldInput">옆 패 한 줄 입력<input id="meldInput" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅅ 555ㅈ 7777ㅌ" aria-describedby="meldHelp meldError"></label></details>
             <p id="meldError" class="quick-error" role="status" aria-live="polite" hidden></p>
             <div id="meldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div>
           </div>
           <div class="unavailable-entry">
             <div class="quick-head"><h3>0장 남은 패</h3><span>추가로 가져올 수 없는 패</span></div>
-            <label class="compact-label" for="unavailableInput">패 종류<input id="unavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="예: 1ㅁ 7ㅌ 5ㅈ" aria-describedby="unavailableHelp unavailablePending unavailableError"></label>
-            <p id="unavailableHelp" class="quick-help">만·통·삭·자패를 <b>숫자+종류</b>로 적어요. 이미 손에 든 같은 패는 그대로 쓰고, 추가로 필요한 대표 예시만 제외합니다.</p>
+            <div class="quick-grid secondary-grid" aria-label="0장 남은 패 종류별 입력">
+              <label>만<input data-unavailable="man" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="예: 15" aria-describedby="unavailableHelp unavailableError"></label>
+              <label>통<input data-unavailable="pin" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="예: 7" aria-describedby="unavailableHelp unavailableError"></label>
+              <label>삭<input data-unavailable="sou" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="예: 39" aria-describedby="unavailableHelp unavailableError"></label>
+              <label>자패<input data-unavailable="honors" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="예: 5" aria-describedby="unavailableHelp unavailableError"></label>
+            </div>
+            <p id="unavailableHelp" class="quick-help">자패 <b>1동 2남 3서 4북 5백 6발 7중</b> · 이미 손에 든 같은 패는 그대로 쓰고, 추가로 필요한 대표 예시만 제외합니다.</p>
+            <details class="separate-entry"><summary>한 줄로 입력하기</summary><label class="compact-label" for="unavailableInput">0장 패 한 줄 입력<input id="unavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="1ㅁ 7ㅌ 5ㅈ" aria-describedby="unavailableHelp unavailablePending unavailableError"></label></details>
             <p id="unavailablePending" class="quick-pending" hidden>끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.</p>
             <p id="unavailableError" class="quick-error" role="status" aria-live="polite" hidden></p>
             <div id="unavailablePreview" class="unavailable-preview" aria-label="0장 남은 패"></div>

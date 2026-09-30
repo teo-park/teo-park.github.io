@@ -13,6 +13,17 @@ test('chi, pon, open kan, and concealed kan are separate groups', () => {
     [['kan', false]]);
 });
 
+test('meld groups can be entered separately by suit', () => {
+  const values = { man: '123 안깡:7777', pin: '', sou: '456', honors: '555' };
+  const parsed = M.parseFields(values);
+  assert.equal(parsed.error, null);
+  assert.deepEqual(parsed.melds.map(meld => [meld.type, meld.open]),
+    [['chi', true], ['kan', false], ['chi', true], ['pon', true]]);
+  assert.deepEqual(M.formatFields(parsed.melds), values);
+  assert.ok(M.parseFields({ honors: '888' }).error);
+  assert.ok(M.parseFields({ man: '124' }).error);
+});
+
 test('invalid meld shapes and too many physical copies are rejected', () => {
   for (const spec of ['124ㅅ', '112ㅅ', '1234ㅅ', '안깡:111ㅈ', '555ㅈ 555ㅈ'])
     assert.ok(M.parse(spec).error, spec);

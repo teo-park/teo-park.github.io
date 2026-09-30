@@ -16,3 +16,13 @@ test('incomplete suffix stays pending and invalid tile types report an error', (
   assert.ok(U.parse('8ㅈ').error);
   assert.ok(U.parse('1q').error);
 });
+
+test('zero remaining tile types can be entered separately by suit', () => {
+  const values = { man: '15', pin: '7', sou: '39', honors: '5' };
+  const parsed = U.parseFields(values);
+  assert.equal(parsed.error, null);
+  assert.deepEqual(parsed.tiles, [0, 4, 15, 20, 26, 31]);
+  assert.deepEqual(U.formatFields(parsed.tiles), values);
+  assert.deepEqual(U.parseFields({ man: '11' }).tiles, [0]);
+  assert.ok(U.parseFields({ honors: '8' }).error);
+});

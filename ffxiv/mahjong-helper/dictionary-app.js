@@ -38,7 +38,11 @@
   let currentResults = [];
   let currentWeakEvidence = false;
   let meldSyntaxError = '';
+  let meldEditSource = 'fields';
+  let meldEditedField = '';
   let unavailableSyntaxError = '';
+  let unavailableEditSource = 'fields';
+  let unavailableEditedField = '';
   let unavailablePending = false;
   let currentBlockedByUnavailable = false;
   let pipWindow = null;
@@ -124,17 +128,58 @@
 
   function readMeldInput(input, fromPip = false) {
     const parsed = M.parse(input.value);
+    meldEditSource = 'compact';
     meldSyntaxError = parsed.error?.message || '';
     if (!parsed.error) melds = parsed.melds;
     render({ syncMeldText: fromPip, syncPipInput: !fromPip });
+    if (fromPip && !parsed.error) syncPipMeldFields();
+  }
+
+  function readMeldFields(root, fromPip = false, editedField = '') {
+    const inputs = [...root.querySelectorAll(fromPip ? '[data-pip-meld]' : '[data-meld]')];
+    const values = Object.fromEntries(inputs.map(input => [fromPip ? input.dataset.pipMeld : input.dataset.meld, input.value]));
+    const parsed = M.parseFields(values);
+    meldEditSource = 'fields';
+    meldEditedField = parsed.field || editedField;
+    meldSyntaxError = parsed.error?.message || '';
+    if (!parsed.error) melds = parsed.melds;
+    render({ syncMeldFields: fromPip, syncPipInput: !fromPip });
+    if (fromPip && !parsed.error) root.getElementById('pipMeldInput').value = M.format(melds);
   }
 
   function readUnavailableInput(input, fromPip = false) {
     const parsed = U.parse(input.value);
+    unavailableEditSource = 'compact';
     unavailableSyntaxError = parsed.error?.message || '';
     unavailablePending = parsed.pending;
     if (!parsed.error) unavailable = parsed.tiles;
     render({ syncUnavailableText: fromPip, syncPipInput: !fromPip });
+    if (fromPip && !parsed.error) syncPipUnavailableFields();
+  }
+
+  function readUnavailableFields(root, fromPip = false, editedField = '') {
+    const inputs = [...root.querySelectorAll(fromPip ? '[data-pip-unavailable]' : '[data-unavailable]')];
+    const values = Object.fromEntries(inputs.map(input => [fromPip ? input.dataset.pipUnavailable : input.dataset.unavailable, input.value]));
+    const parsed = U.parseFields(values);
+    unavailableEditSource = 'fields';
+    unavailableEditedField = parsed.error?.field || editedField;
+    unavailableSyntaxError = parsed.error?.message || '';
+    unavailablePending = false;
+    if (!parsed.error) unavailable = parsed.tiles;
+    render({ syncUnavailableFields: fromPip, syncPipInput: !fromPip });
+    if (fromPip && !parsed.error) root.getElementById('pipUnavailableInput').value = U.format(unavailable);
+  }
+
+  function syncPipMeldFields() {
+    if (!pipWindow || pipWindow.closed) return;
+    const values = M.formatFields(melds);
+    pipWindow.document.querySelectorAll('[data-pip-meld]').forEach(input => { input.value = values[input.dataset.pipMeld]; });
+  }
+
+  function syncPipUnavailableFields() {
+    if (!pipWindow || pipWindow.closed) return;
+    const values = U.formatFields(unavailable);
+    pipWindow.document.querySelectorAll('[data-pip-unavailable]').forEach(input => { input.value = values[input.dataset.pipUnavailable]; });
   }
 
   function tileImage(tile, owner = document) {
@@ -300,16 +345,22 @@
       compact.setAttribute('aria-invalid', 'false');
       child.getElementById('pipMeldInput').value = M.format(melds);
       child.getElementById('pipUnavailableInput').value = U.format(unavailable);
+      syncPipMeldFields();
+      syncPipUnavailableFields();
       child.getElementById('pipMessage').textContent = '';
     }
     child.getElementById('pipInputCount').textContent = `손패 ${hand.length}/${14 - melds.length * 3}장`;
     child.getElementById('pipMeldCount').textContent = `${melds.length}/4묶음`;
     child.getElementById('pipMeldError').textContent = meldSyntaxError || stateError();
-    child.getElementById('pipMeldInput').setAttribute('aria-invalid', String(Boolean(meldSyntaxError || stateError())));
+    child.getElementById('pipMeldInput').setAttribute('aria-invalid', String(Boolean(meldSyntaxError && meldEditSource === 'compact')));
+    child.querySelectorAll('[data-pip-meld]').forEach(input => input.setAttribute('aria-invalid',
+      String(Boolean(meldSyntaxError && meldEditSource === 'fields' && (!meldEditedField || meldEditedField === input.dataset.pipMeld)))));
     renderMeldPreview(child, child.getElementById('pipMeldPreview'));
     child.getElementById('pipUnavailableError').textContent = unavailableSyntaxError ||
       (unavailablePending ? '끝에 종류 기호를 붙이면 마지막 숫자도 반영됩니다.' : '');
-    child.getElementById('pipUnavailableInput').setAttribute('aria-invalid', String(Boolean(unavailableSyntaxError)));
+    child.getElementById('pipUnavailableInput').setAttribute('aria-invalid', String(Boolean(unavailableSyntaxError && unavailableEditSource === 'compact')));
+    child.querySelectorAll('[data-pip-unavailable]').forEach(input => input.setAttribute('aria-invalid',
+      String(Boolean(unavailableSyntaxError && unavailableEditSource === 'fields' && (!unavailableEditedField || unavailableEditedField === input.dataset.pipUnavailable)))));
     renderUnavailablePreview(child, child.getElementById('pipUnavailablePreview'));
     syncOpenedControls();
     child.getElementById('pipResultCount').textContent = `${currentResults.length}개 후보`;
@@ -403,11 +454,20 @@
     renderPip({ syncInput: syncPipInput });
   }
 
-  function render({ syncText = true, syncCompact = true, syncMeldText = true, syncUnavailableText = true, syncPipInput = true } = {}) {
+  function render({ syncText = true, syncCompact = true, syncMeldText = true, syncMeldFields = true,
+    syncUnavailableText = true, syncUnavailableFields = true, syncPipInput = true } = {}) {
     if (syncText) syncQuickInputs();
     if (syncCompact) syncCompactInput();
     if (syncMeldText) el('meldInput').value = M.format(melds);
     if (syncUnavailableText) el('unavailableInput').value = U.format(unavailable);
+    if (syncMeldFields) {
+      const values = M.formatFields(melds);
+      document.querySelectorAll('[data-meld]').forEach(input => { input.value = values[input.dataset.meld]; });
+    }
+    if (syncUnavailableFields) {
+      const values = U.formatFields(unavailable);
+      document.querySelectorAll('[data-unavailable]').forEach(input => { input.value = values[input.dataset.unavailable]; });
+    }
     el('notationPreview').textContent = Q.formatNotation(hand) || '예: 123m123p123s5567z';
     el('inputCount').textContent = hand.length;
     el('handCapacity').textContent = `/ ${14 - melds.length * 3}`;
@@ -415,11 +475,15 @@
     const meldMessage = meldSyntaxError || stateError();
     el('meldError').hidden = !meldMessage;
     el('meldError').textContent = meldMessage;
-    el('meldInput').setAttribute('aria-invalid', String(Boolean(meldMessage)));
+    el('meldInput').setAttribute('aria-invalid', String(Boolean(meldSyntaxError && meldEditSource === 'compact')));
+    document.querySelectorAll('[data-meld]').forEach(input => input.setAttribute('aria-invalid',
+      String(Boolean(meldSyntaxError && meldEditSource === 'fields' && (!meldEditedField || meldEditedField === input.dataset.meld)))));
     el('unavailableError').hidden = !unavailableSyntaxError;
     el('unavailableError').textContent = unavailableSyntaxError;
     el('unavailablePending').hidden = !unavailablePending || Boolean(unavailableSyntaxError);
-    el('unavailableInput').setAttribute('aria-invalid', String(Boolean(unavailableSyntaxError)));
+    el('unavailableInput').setAttribute('aria-invalid', String(Boolean(unavailableSyntaxError && unavailableEditSource === 'compact')));
+    document.querySelectorAll('[data-unavailable]').forEach(input => input.setAttribute('aria-invalid',
+      String(Boolean(unavailableSyntaxError && unavailableEditSource === 'fields' && (!unavailableEditedField || unavailableEditedField === input.dataset.unavailable)))));
     el('undo').disabled = !hand.length;
     el('clear').disabled = !hand.length && !melds.length && !unavailable.length;
     renderMeldPreview(document, el('meldPreview'));
@@ -521,7 +585,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-unavailable1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-split1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
@@ -541,13 +605,25 @@
           <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipQuickCompact" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-label="한 줄 패 입력" aria-describedby="pipMessage"></details>
           <p id="pipMessage" class="pip-message" role="status"></p>
           <div class="pip-meld-entry"><div class="pip-input-heading"><strong>옆으로 낸 패</strong><span id="pipMeldCount">0/4묶음</span></div>
-            <label>치·퐁·깡<input id="pipMeldInput" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅅ 555ㅈ 7777ㅌ" aria-describedby="pipMeldHelp pipMeldError"></label>
-            <p id="pipMeldHelp" class="pip-input-help">공백으로 구분 · 안깡:7777ㅌ</p>
+            <div class="pip-fields pip-secondary-fields">
+              <label>만<input data-pip-meld="man" type="text" autocomplete="off" spellcheck="false" placeholder="123 555" aria-describedby="pipMeldHelp pipMeldError"></label>
+              <label>통<input data-pip-meld="pin" type="text" autocomplete="off" spellcheck="false" placeholder="7777" aria-describedby="pipMeldHelp pipMeldError"></label>
+              <label>삭<input data-pip-meld="sou" type="text" autocomplete="off" spellcheck="false" placeholder="123" aria-describedby="pipMeldHelp pipMeldError"></label>
+              <label>자패<input data-pip-meld="honors" type="text" autocomplete="off" spellcheck="false" placeholder="555" aria-describedby="pipMeldHelp pipMeldError"></label>
+            </div>
+            <p id="pipMeldHelp" class="pip-input-help">묶음마다 공백 · 안깡:7777</p>
+            <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipMeldInput" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅅ 555ㅈ 7777ㅌ" aria-label="옆 패 한 줄 입력" aria-describedby="pipMeldError"></details>
             <p id="pipMeldError" class="pip-message" role="status"></p>
             <div id="pipMeldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div></div>
           <div class="pip-unavailable-entry"><div class="pip-input-heading"><strong>0장 남은 패</strong></div>
-            <label>더 가져올 수 없는 패<input id="pipUnavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="1ㅁ 7ㅌ 5ㅈ" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
+            <div class="pip-fields pip-secondary-fields">
+              <label>만<input data-pip-unavailable="man" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="15" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
+              <label>통<input data-pip-unavailable="pin" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="7" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
+              <label>삭<input data-pip-unavailable="sou" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="39" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
+              <label>자패<input data-pip-unavailable="honors" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="5" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
+            </div>
             <p id="pipUnavailableHelp" class="pip-input-help">이미 손에 든 패는 사용 가능 · 추가로 필요한 예시만 제외</p>
+            <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipUnavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="1ㅁ 7ㅌ 5ㅈ" aria-label="0장 패 한 줄 입력" aria-describedby="pipUnavailableError"></details>
             <p id="pipUnavailableError" class="pip-message" role="status"></p>
             <div id="pipUnavailablePreview" class="unavailable-preview" aria-label="0장 남은 패"></div></div>
           <div id="pipContext"></div>
@@ -580,9 +656,17 @@
         const pipMeldInput = child.getElementById('pipMeldInput');
         pipMeldInput.addEventListener('input', event => { if (!event.isComposing) readMeldInput(pipMeldInput, true); });
         pipMeldInput.addEventListener('compositionend', () => readMeldInput(pipMeldInput, true));
+        child.querySelectorAll('[data-pip-meld]').forEach(input => {
+          input.addEventListener('input', event => { if (!event.isComposing) readMeldFields(child, true, input.dataset.pipMeld); });
+          input.addEventListener('compositionend', () => readMeldFields(child, true, input.dataset.pipMeld));
+        });
         const pipUnavailableInput = child.getElementById('pipUnavailableInput');
         pipUnavailableInput.addEventListener('input', event => { if (!event.isComposing) readUnavailableInput(pipUnavailableInput, true); });
         pipUnavailableInput.addEventListener('compositionend', () => readUnavailableInput(pipUnavailableInput, true));
+        child.querySelectorAll('[data-pip-unavailable]').forEach(input => {
+          input.addEventListener('input', event => { if (!event.isComposing) readUnavailableFields(child, true, input.dataset.pipUnavailable); });
+          input.addEventListener('compositionend', () => readUnavailableFields(child, true, input.dataset.pipUnavailable));
+        });
         openedWindow.addEventListener('pagehide', () => cleanup(openedWindow), { once: true });
         button.setAttribute('aria-pressed', 'true');
         button.textContent = '작은 창으로 이동';
@@ -610,9 +694,17 @@
     const meldInput = el('meldInput');
     meldInput.addEventListener('input', event => { if (!event.isComposing) readMeldInput(meldInput); });
     meldInput.addEventListener('compositionend', () => readMeldInput(meldInput));
+    document.querySelectorAll('[data-meld]').forEach(input => {
+      input.addEventListener('input', event => { if (!event.isComposing) readMeldFields(document, false, input.dataset.meld); });
+      input.addEventListener('compositionend', () => readMeldFields(document, false, input.dataset.meld));
+    });
     const unavailableInput = el('unavailableInput');
     unavailableInput.addEventListener('input', event => { if (!event.isComposing) readUnavailableInput(unavailableInput); });
     unavailableInput.addEventListener('compositionend', () => readUnavailableInput(unavailableInput));
+    document.querySelectorAll('[data-unavailable]').forEach(input => {
+      input.addEventListener('input', event => { if (!event.isComposing) readUnavailableFields(document, false, input.dataset.unavailable); });
+      input.addEventListener('compositionend', () => readUnavailableFields(document, false, input.dataset.unavailable));
+    });
     const compact = el('quickCompact');
     compact.addEventListener('input', event => { if (!event.isComposing) readCompactInput(); });
     compact.addEventListener('compositionend', readCompactInput);
