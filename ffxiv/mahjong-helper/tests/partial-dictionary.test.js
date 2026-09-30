@@ -83,6 +83,15 @@ test('unrelated example tiles do not make a distant pure straight look complete'
   assert.ok(straight.kept.length > straight.coreKept);
 });
 
+test('identical-run example follows the closest pair of sequences, not matching filler', () => {
+  const hand = D.parseTiles('23m55567p114889s');
+  const iipeikou = D.lookup(hand).results.find(result => result.id === 'iipeikou');
+  const highlighted = iipeikou.example.filter((_, index) => iipeikou.highlighted[index]);
+  assert.deepEqual(counts(highlighted), counts(D.parseTiles('556677p')));
+  assert.deepEqual(iipeikou.coreMissing, D.parseTiles('67p'));
+  assert.equal(iipeikou.coreKept, 4);
+});
+
 test('gapped tiles across suits do not make sanshoku the leading pattern', () => {
   const reportedHand = D.lookup(D.parseTiles('1247m2447p2249s5z'));
   assert.equal(reportedHand.results[0].id, 'tanyao');

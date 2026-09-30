@@ -357,7 +357,13 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unav
       // An example's filler tiles should not outweigh the tiles that define its yaku.
       const exampleFit = coreKept * 2 + (comparison.kept.length - coreKept) * .5
         - comparison.toSetAside.length * 2;
-      if (!chosen || exampleFit > chosen.exampleFit) chosen = {
+      // For two identical runs, favor the pattern needing fewer core tiles.
+      // Filler tiles in a sample hand must not select a more distant double run.
+      const closerDoubleRun = entry.id === 'iipeikou' && chosen &&
+        coreMissing.length !== chosen.coreMissing.length;
+      if (!chosen || (closerDoubleRun
+        ? coreMissing.length < chosen.coreMissing.length
+        : exampleFit > chosen.exampleFit)) chosen = {
         ...comparison, exampleFit, coreKept, coreTotal, coreMissing, highlighted
       };
     }
