@@ -351,6 +351,7 @@
     }
     child.getElementById('pipInputCount').textContent = `손패 ${hand.length}/${14 - melds.length * 3}장`;
     child.getElementById('pipMeldCount').textContent = `${melds.length}/4묶음`;
+    child.getElementById('pipUnavailableCount').textContent = `${unavailable.length}종`;
     child.getElementById('pipMeldError').textContent = meldSyntaxError || stateError();
     child.getElementById('pipMeldInput').setAttribute('aria-invalid', String(Boolean(meldSyntaxError && meldEditSource === 'compact')));
     child.querySelectorAll('[data-pip-meld]').forEach(input => input.setAttribute('aria-invalid',
@@ -472,6 +473,7 @@
     el('inputCount').textContent = hand.length;
     el('handCapacity').textContent = `/ ${14 - melds.length * 3}`;
     el('meldCount').textContent = `${melds.length}/4묶음`;
+    el('unavailableCount').textContent = `${unavailable.length}종`;
     const meldMessage = meldSyntaxError || stateError();
     el('meldError').hidden = !meldMessage;
     el('meldError').textContent = meldMessage;
@@ -585,7 +587,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-split1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260929-pip3', 'site-alignment.css?v=20260930-collapse1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;
@@ -604,7 +606,7 @@
           <p id="pipHelp" class="pip-input-help">자패 1동 · 2남 · 3서 · 4북 · 5백 · 6발 · 7중</p>
           <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipQuickCompact" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅁ 123ㅌ 123ㅅ 5567ㅈ" aria-label="한 줄 패 입력" aria-describedby="pipMessage"></details>
           <p id="pipMessage" class="pip-message" role="status"></p>
-          <div class="pip-meld-entry"><div class="pip-input-heading"><strong>옆으로 낸 패</strong><span id="pipMeldCount">0/4묶음</span></div>
+          <details class="pip-meld-entry pip-collapsible-entry"><summary class="pip-input-heading"><strong>옆으로 낸 패</strong><span id="pipMeldCount">0/4묶음</span></summary>
             <div class="pip-fields pip-secondary-fields">
               <label>만<input data-pip-meld="man" type="text" autocomplete="off" spellcheck="false" placeholder="123 555" aria-describedby="pipMeldHelp pipMeldError"></label>
               <label>통<input data-pip-meld="pin" type="text" autocomplete="off" spellcheck="false" placeholder="7777" aria-describedby="pipMeldHelp pipMeldError"></label>
@@ -614,8 +616,8 @@
             <p id="pipMeldHelp" class="pip-input-help">묶음마다 공백 · 안깡:7777</p>
             <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipMeldInput" type="text" autocomplete="off" spellcheck="false" placeholder="123ㅅ 555ㅈ 7777ㅌ" aria-label="옆 패 한 줄 입력" aria-describedby="pipMeldError"></details>
             <p id="pipMeldError" class="pip-message" role="status"></p>
-            <div id="pipMeldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div></div>
-          <div class="pip-unavailable-entry"><div class="pip-input-heading"><strong>0장 남은 패</strong></div>
+            <div id="pipMeldPreview" class="meld-preview" aria-label="입력한 옆 패 묶음"></div></details>
+          <details class="pip-unavailable-entry pip-collapsible-entry"><summary class="pip-input-heading"><strong>0장 남은 패</strong><span id="pipUnavailableCount">0종</span></summary>
             <div class="pip-fields pip-secondary-fields">
               <label>만<input data-pip-unavailable="man" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="15" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
               <label>통<input data-pip-unavailable="pin" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="7" aria-describedby="pipUnavailableHelp pipUnavailableError"></label>
@@ -625,7 +627,7 @@
             <p id="pipUnavailableHelp" class="pip-input-help">이미 손에 든 패는 사용 가능 · 추가로 필요한 예시만 제외</p>
             <details class="pip-compact"><summary>한 줄로 입력하기</summary><input id="pipUnavailableInput" type="text" autocomplete="off" spellcheck="false" placeholder="1ㅁ 7ㅌ 5ㅈ" aria-label="0장 패 한 줄 입력" aria-describedby="pipUnavailableError"></details>
             <p id="pipUnavailableError" class="pip-message" role="status"></p>
-            <div id="pipUnavailablePreview" class="unavailable-preview" aria-label="0장 남은 패"></div></div>
+            <div id="pipUnavailablePreview" class="unavailable-preview" aria-label="0장 남은 패"></div></details>
           <div id="pipContext"></div>
           <p id="pipOpenedHint" class="pip-input-help"></p>
           <div class="pip-results-heading"><strong>가까운 완성형</strong><span id="pipResultCount">0개 후보</span></div>

@@ -40,6 +40,14 @@ h2 { font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
 
 .quick-entry { border: 1px solid var(--ff-line); border-radius: 4px; background: #132239; }
 .meld-entry, .unavailable-entry { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--ff-line); }
+.collapsible-entry > summary, .pip-collapsible-entry > summary { list-style: none; cursor: pointer; }
+.collapsible-entry > summary::-webkit-details-marker, .pip-collapsible-entry > summary::-webkit-details-marker { display: none; }
+.collapsible-entry > summary.quick-head { justify-content: flex-start; margin-bottom: 0; }
+.collapsible-entry[open] > summary.quick-head { margin-bottom: 12px; }
+.collapsible-entry > summary.quick-head h3 { margin-right: auto; }
+.collapsible-entry > summary.quick-head::after, .pip-collapsible-entry > summary.pip-input-heading::after { content: '⌄'; color: var(--ff-cyan); font-size: 1.1rem; line-height: 1; transition: transform .15s ease; }
+.collapsible-entry[open] > summary.quick-head::after, .pip-collapsible-entry[open] > summary.pip-input-heading::after { transform: rotate(180deg); }
+.collapsible-entry > summary:focus-visible, .pip-collapsible-entry > summary:focus-visible { outline: 2px solid var(--ff-cyan); outline-offset: 3px; }
 .meld-entry .compact-label, .unavailable-entry .compact-label { font-weight: 700; }
 .meld-entry .compact-label input, .unavailable-entry .compact-label input { margin-top: 2px; }
 .meld-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
@@ -89,6 +97,9 @@ h2 { font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
 
 .pip-body { background: var(--ff-bg); }
 .pip-meld-entry, .pip-unavailable-entry { padding: 9px 0 7px; border-top: 1px solid var(--ff-line); }
+.pip-collapsible-entry > summary.pip-input-heading { justify-content: flex-start; }
+.pip-collapsible-entry > summary.pip-input-heading strong { margin-right: auto; }
+.pip-collapsible-entry[open] > summary.pip-input-heading { margin-bottom: 7px; }
 .pip-meld-entry label, .pip-unavailable-entry label { display: grid; gap: 4px; color: var(--ff-muted); font-size: .78rem; }
 .pip-meld-entry input, .pip-unavailable-entry input { width: 100%; min-width: 0; height: 40px; border: 1px solid #405571; border-radius: 4px; background: #0d1728; color: var(--ff-text); padding: 0 8px; }
 .pip-meld-entry input:focus, .pip-unavailable-entry input:focus { border-color: var(--ff-cyan); outline: 2px solid #85d8ef55; outline-offset: 1px; }
