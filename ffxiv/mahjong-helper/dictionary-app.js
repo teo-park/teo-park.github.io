@@ -285,6 +285,18 @@
     return tag;
   }
 
+  function speedSummary(owner, item) {
+    const row = owner.createElement('div'); row.className = 'yaku-speed';
+    const tag = owner.createElement('span'); tag.className = `speed-tag speed-${item.speed.level}`;
+    tag.textContent = `예시 기준 · ${item.speed.label}`;
+    tag.title = item.speed.reason;
+    const needed = owner.createElement('span'); needed.className = 'speed-needed';
+    needed.textContent = item.speed.level === 'unknown' ? '전체 손패 입력 필요'
+      : item.speed.needed ? `핵심 ${item.speed.needed}장 더 필요` : '핵심 패 갖춤';
+    row.append(tag, needed);
+    return row;
+  }
+
   function createCard(item, index) {
     const card = document.createElement('details');
     card.className = 'result-card';
@@ -303,9 +315,12 @@
     const match = document.createElement('span'); match.className = 'card-match';
     match.textContent = `${item.evidenceLabel} · 예시 전체 ${item.kept.length}/${inputTotal()}장 일치`;
     if (evidenceHints[item.id]) match.title = evidenceHints[item.id];
-    summary.append(head, condition, match);
+    summary.append(head, speedSummary(document, item), condition, match);
 
     const detail = document.createElement('div'); detail.className = 'card-detail';
+    const speedReason = document.createElement('p'); speedReason.className = 'detail-note speed-reason';
+    speedReason.textContent = item.speed.reason;
+    detail.append(speedReason);
     if (item.coreTotal < 14 && item.coreMissing.length)
       detailLine(detail, '이 예시의 역 핵심에 아직 필요한 패', item.coreMissing);
     detailLine(detail, '손패·옆 패 중 예시에 들어가는 패', item.kept);
@@ -477,7 +492,7 @@
       if (evidenceHints[item.id]) match.title = evidenceHints[item.id];
       head.append(name, match);
       const condition = child.createElement('p'); condition.className = 'pip-condition'; condition.textContent = item.condition;
-      card.append(head, condition);
+      card.append(head, speedSummary(child, item), condition);
       if (item.coreTotal < 14 && item.coreMissing.length) {
         const missing = child.createElement('p'); missing.className = 'pip-condition';
         missing.textContent = `역 핵심에 필요한 패: ${item.coreMissing.map(tileName).join(' · ')}`;
@@ -681,7 +696,7 @@
         const viewport = child.createElement('meta');
         viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
         child.head.append(viewport);
-        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260930-winds1', 'site-alignment.css?v=20261001-menzen1']) {
+        for (const file of ['../theme.css?v=20260909-line1', 'dictionary.css?v=20260929-site1', 'pip.css?v=20260930-winds1', 'site-alignment.css?v=20261003-speed1']) {
           const stylesheet = child.createElement('link');
           stylesheet.rel = 'stylesheet';
           stylesheet.href = new URL(file, document.baseURI).href;

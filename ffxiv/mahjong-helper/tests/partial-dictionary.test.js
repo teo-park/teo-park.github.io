@@ -5,6 +5,18 @@ const D = require('../partial-dictionary.js');
 
 const counts = tiles => tiles.reduce((array, tile) => (array[tile]++, array), Array(34).fill(0));
 
+test('speed is a conservative example distance and incomplete inputs are not classified', () => {
+  const example = { coreMissing: [0], missing: [0, 9, 18] };
+  assert.equal(D.assessSpeed(example, 8, true).level, 'unknown');
+  assert.equal(D.assessSpeed(example, 13, true).level, 'fast');
+  assert.equal(D.assessSpeed(example, 13, false).level, 'normal');
+  assert.equal(D.assessSpeed({ coreMissing: [], missing: [0, 0, 9, 9, 18, 18] }, 13, true).level, 'slow');
+  assert.match(D.assessSpeed(example, 13, false).reason, /화료 확률.*아닙니다/);
+  const result = D.lookup(D.parseTiles('66699m63p236779s')).results.find(item => item.id === 'toitoi');
+  assert.equal(result.speed.level, 'normal');
+  assert.equal(result.speed.needed, result.coreMissing.length);
+});
+
 test('toitoi completion retains reported triplet and pairs instead of fixed catalog tiles', () => {
   const result = D.lookup(D.parseTiles('66699m63p236779s')).results.find(item => item.id === 'toitoi');
   const target = counts(result.example);

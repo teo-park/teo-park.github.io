@@ -14,6 +14,7 @@ test('main page and small window update first-hand analysis from input', async (
   input.value = '23m55567p114889s'; input.dispatchEvent(new w.Event('input', { bubbles: true }));
   const guide = w.document.getElementById('openingGuide');
   assert.match(guide.textContent, /3\.0%/);
+  assert.ok(w.document.querySelector('#resultCards .speed-tag'));
   assert.match(guide.textContent, /123장/);
   assert.match(guide.querySelector('.opening-path').textContent, /이페코/);
   assert.match(guide.querySelector('.opening-brief').textContent, /이페코 핵심 · 3\.0%/);
@@ -32,6 +33,7 @@ test('main page and small window update first-hand analysis from input', async (
   w.document.getElementById('openPip').click();
   await new Promise(resolve => setTimeout(resolve, 20));
   assert.match(child.window.document.getElementById('pipOpeningGuide').textContent, /9만을 버린 뒤/);
+  assert.ok(child.window.document.querySelector('#pipResult .speed-tag'));
   assert.equal(child.window.document.querySelector('#pipOpeningGuide .opening-details').open, false);
   const pipInput = child.window.document.getElementById('pipQuickCompact');
   pipInput.value = '23m55567p114889s'; pipInput.dispatchEvent(new child.window.Event('input', { bubbles: true }));

@@ -89,6 +89,14 @@ h2 { font-size: 20px; font-weight: 700; letter-spacing: -.03em; }
 .card-rank { border-color: #45677e; border-radius: 4px; color: var(--ff-cyan); }
 .card-title { font-weight: 700; }
 .card-flag { border-color: #405571; border-radius: 4px; color: var(--ff-muted); }
+.yaku-speed { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 9px; margin-top: 8px; }
+.speed-tag { display: inline-flex; border: 1px solid; border-radius: 4px; padding: 3px 7px; font-size: .76rem; font-weight: 700; line-height: 1.3; cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
+.speed-fast { color: #b1f1d1; border-color: #559e80; background: #183d32; }
+.speed-normal { color: #c8e5ff; border-color: #658bb1; background: #21354f; }
+.speed-slow { color: #ffe0a3; border-color: #b68d4a; background: #44331c; }
+.speed-unknown { color: #c3cbd6; border-color: #69778b; background: #273244; }
+.speed-needed { color: var(--ff-muted); font-size: .8rem; }
+.speed-reason { margin-top: 0; margin-bottom: 14px; }
 .menzen-tag, .card-flag.menzen-tag, .pip-result-head .menzen-tag, .opening-brief .menzen-tag {
   display: inline-flex; align-items: center; padding: 3px 7px; border: 1px solid #d3a85d;
   border-radius: 4px; background: #44331c; color: #ffe0a3; font-size: .76rem;

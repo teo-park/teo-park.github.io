@@ -338,6 +338,20 @@ function highlightExample(id, example, seat = 27, round = 27) {
   return example.map(tile => focus[tile] > 0 ? (focus[tile]--, true) : false);
 }
 
+function assessSpeed(example, inputSize, openAllowed) {
+  const needed = example.coreMissing.length;
+  const totalNeeded = example.missing.length;
+  const types = new Set(example.coreMissing).size;
+  const basis = '선택된 대표 예시 기준의 거리 분류입니다. 실제 화료 확률이나 정확한 샹텐은 아닙니다.';
+  if (inputSize < 13) return { level: 'unknown', label: '판단 보류', needed,
+    reason: `손패를 모두 입력하면 속도를 비교할 수 있어요. ${basis}` };
+  const fast = needed <= 2 && totalNeeded <= (openAllowed ? 3 : 2);
+  const level = fast ? 'fast' : totalNeeded <= 5 && needed <= 4 ? 'normal' : 'slow';
+  return { level, label: { fast: '빠름', normal: '보통', slow: '느림' }[level], needed,
+    reason: `이 예시의 역 핵심에 ${types}종 ${needed}장, 예시 전체에 ${totalNeeded}장이 더 필요해요. ` +
+      (openAllowed ? '치·퐁·명깡을 활용할 수 있어요. ' : '멘젠을 유지해야 하므로 필요한 패를 직접 뽑거나 마지막 패로 론해야 해요. ') + basis };
+}
+
 function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unavailable = [], limit = catalog.entries.length } = {}) {
   if (!Array.isArray(tiles) || tiles.length > 14) throw new Error('0~14장의 패를 입력해 주세요.');
   if (![seat, round].every(t => Number.isInteger(t) && t >= 27 && t <= 30)) throw new Error('자풍·장풍은 동·남·서·북 중 선택하세요.');
@@ -393,6 +407,7 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unav
     return { id: entry.id, name: entry.name, condition: entry.condition,
       pairCount: entry.id === 'chiitoitsu' ? counts.filter(n => n >= 2).length : undefined,
       openAllowed: entry.openAllowed, source: catalog.source, ...chosen,
+      speed: assessSpeed(chosen, input.length, entry.openAllowed),
       evidenceLabel: evidence.label,
       score: evidence.score + chosen.kept.length * .3 - chosen.toSetAside.length * .1 };
   }).filter(entry => entry && entry.kept.length > 0);
@@ -403,5 +418,5 @@ function lookup(tiles, { seat = 27, round = 27, opened = false, melds = [], unav
     results: results.slice(0, Math.max(0, Math.min(limit, results.length))) };
 }
 
-return { catalog, parseTiles, examplesFor, highlightExample, lookup };
+return { catalog, parseTiles, examplesFor, highlightExample, lookup, assessSpeed };
 });
