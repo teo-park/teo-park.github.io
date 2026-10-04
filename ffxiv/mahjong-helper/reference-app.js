@@ -27,7 +27,7 @@
   function card(entry) {
     const article = node('article', '', 'reference-card'); article.dataset.yaku = entry.id;
     const head = node('div', '', 'reference-card-head');
-    head.append(node('h3', entry.name), node('span', entry.han, 'reference-han'));
+    head.append(node('h3', entry.aliases.length ? `${entry.name} (${entry.aliases[0]})` : entry.name), node('span', entry.han, 'reference-han'));
     const badges = node('div', '', 'reference-badges');
     const status = node('span', entry.closed ? '멘젠 필수' : '울기 가능', entry.closed ? 'menzen-tag' : 'reference-open');
     status.title = entry.closed ? '치·퐁·명깡을 하지 않은 상태가 필요합니다. 일반적으로 안깡은 멘젠을 유지하지만 첫 순·일발 등 상황 조건은 별도로 확인하세요.' : '울어도 조건을 충족하면 성립합니다. 탕야오는 쿠이탕 설정을 확인하세요.';
@@ -54,7 +54,7 @@
     const category = get('referenceCategory').value;
     const filtered = R.entries.filter(entry =>
       (category === 'all' || entry.category === category) && (!get('referenceClosed').checked || entry.closed) &&
-      `${entry.name} ${entry.description} ${entry.note} ${entry.han} ${entry.closed ? '멘젠' : '울기'}`.toLocaleLowerCase().includes(query));
+      `${entry.name} ${entry.aliases.join(' ')} ${entry.description} ${entry.note} ${entry.han} ${entry.closed ? '멘젠' : '울기'}`.toLocaleLowerCase().includes(query));
     get('referenceCards').replaceChildren(...filtered.map(card));
     if (!filtered.length) get('referenceCards').append(node('p', '검색 결과가 없습니다. 다른 이름이나 조건으로 찾아보세요.', 'reference-empty'));
     get('referenceCount').textContent = `${filtered.length}개 항목 · 전체 ${R.entries.filter(entry=>!entry.bonus).length}역 + 보너스 3종`;

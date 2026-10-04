@@ -32,6 +32,11 @@ test('reference tabs preserve hand inputs, support keyboard navigation and filte
   assert.equal(doc.querySelectorAll('.reference-card').length, 42);
   const search = doc.getElementById('referenceSearch'); search.value = '삼색'; search.dispatchEvent(new w.Event('input'));
   assert.equal(doc.querySelectorAll('.reference-card').length, 2);
+  for (const alias of ['산안커', '산안코', 'sanankou', '삼암각']) {
+    search.value = alias; search.dispatchEvent(new w.Event('input'));
+    assert.equal(doc.querySelectorAll('.reference-card').length, 1);
+    assert.match(doc.querySelector('.reference-card h3').textContent, /삼암각 \(산안커\)/);
+  }
   search.value = ''; search.dispatchEvent(new w.Event('input'));
   const category = doc.getElementById('referenceCategory'); category.value = '역만'; category.dispatchEvent(new w.Event('change'));
   assert.equal(doc.querySelectorAll('.reference-card').length, 12);

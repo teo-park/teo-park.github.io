@@ -51,8 +51,9 @@
     ['aka-dora','적도라','특수·보너스','해당 패마다 +1판',false,'빨간 5패를 사용하는 규칙이라면 적도라 한 장당 1판을 더합니다.',basic,[4],'그림은 일반 5통입니다. 실제 적도라 여부는 빨간 패와 대국 설정을 확인하세요. 파판14 공식 역 목록의 역은 아닙니다.']
   ];
   const bonus = new Set(['dora','ura-dora','aka-dora']);
+  const aliases = { sanankou: ['산안커', '산안코', '산안코우', 'sanankou', '三暗刻'] };
   const entries = rows.map(([id,name,category,han,closed,description,groups,focus,note]) =>
-    ({ id,name,category,han,closed,description,groups,focus,note,bonus:bonus.has(id) }));
+    ({ id,name,category,han,closed,description,groups,focus,note,aliases:aliases[id] || [],bonus:bonus.has(id) }));
   function parseGroup(spec) {
     const match = /^([1-9]+)([mpsz])$/.exec(spec);
     if (!match || match[2] === 'z' && /[89]/.test(match[1])) throw new Error('잘못된 예시 패');
