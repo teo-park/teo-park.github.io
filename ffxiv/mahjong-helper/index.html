@@ -22,6 +22,9 @@
   <script src="meld-input.js?v=20260930-split1" defer></script>
   <script src="unavailable-input.js?v=20260930-split1" defer></script>
   <script src="dictionary-app.js?v=20261003-speed1" defer></script>
+  <link rel="stylesheet" href="yaku-reference.css?v=20261004-reference1">
+  <script src="yaku-reference.js?v=20261004-reference1" defer></script>
+  <script src="reference-app.js?v=20261004-reference1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#quickMan">패 입력으로 이동</a>
@@ -38,7 +41,11 @@
     </section>
     <p id="pipStatus" class="pip-status" role="status" aria-live="polite">PiP에서도 종류별 입력과 가까운 완성형 예시 전체를 볼 수 있어요.</p>
 
-    <div class="workbench">
+    <div class="reference-tabs" role="tablist" aria-label="역 사전 보기 방식">
+      <button id="handTab" type="button" role="tab" aria-selected="true" aria-controls="handPanel">내 패로 찾아보기</button>
+      <button id="referenceTab" type="button" role="tab" aria-selected="false" aria-controls="referencePanel" tabindex="-1">전체 역 사전</button>
+    </div>
+    <div class="workbench" id="handPanel" role="tabpanel" aria-labelledby="handTab">
       <section class="input-panel" aria-labelledby="inputTitle">
         <div class="panel-top"><div><p class="step">01 · 패 입력</p><h2 id="inputTitle">아는 패만 적어 넣기</h2></div><div class="counter"><strong id="inputCount">0</strong><span id="handCapacity">/ 14</span></div></div>
         <p class="muted">완성 손패를 다 입력하지 않아도 됩니다. 같은 패는 네 장까지 적을 수 있어요.</p>
@@ -107,6 +114,18 @@
         <div class="interpretation"><strong>읽는 법</strong><p>또이츠·순자·커쯔 수는 입력한 패로 실제 만든 묶음입니다. 금색 테두리는 예시에서 역을 구성하는 패를 가리킵니다. ‘예시 전체’에는 역과 관계없는 나머지 패도 포함됩니다. 이 순위는 현재 성립한 역이나 실제 화료 확률, <abbr title="완성까지 필요한 최소 패 교환 횟수">샹텐</abbr>, 최선의 버릴 패를 뜻하지 않습니다.</p></div>
       </section>
     </div>
+    <section id="referencePanel" class="reference-panel" role="tabpanel" aria-labelledby="referenceTab" hidden>
+      <div class="reference-top"><div><p class="step">YAKU LIBRARY</p><h2>전체 역 사전</h2></div><span id="referenceCount" class="count-badge" role="status"></span></div>
+      <p class="muted">손패 입력 없이 조건과 예시를 살펴보세요. 판수는 해당 역만의 값이며, 다른 역과 함께 성립할 수 있습니다.</p>
+      <div class="reference-controls">
+        <label>역 이름·조건 검색<input id="referenceSearch" type="search" placeholder="예: 삼색, 멘젠, 깡" autocomplete="off"></label>
+        <label>분류<select id="referenceCategory"><option value="all">전체</option><option>상황역</option><option>1판</option><option>2판</option><option>3판 이상</option><option>역만</option><option>특수·보너스</option></select></label>
+        <label class="reference-checkbox"><input id="referenceClosed" type="checkbox">멘젠 필수만</label>
+      </div>
+      <p class="reference-help">금색 테두리 = 예시의 핵심 묶음 · 깡은 4장 묶음 · 상황역은 패 모양 외의 조건도 충족해야 합니다. 탕야오의 울기 허용은 쿠이탕 설정에 따릅니다.</p>
+      <div id="referenceCards" class="reference-grid"></div>
+      <p class="reference-source">기준: <a href="https://na.finalfantasyxiv.com/lodestone/playguide/contentsguide/goldsaucer/doman-mahjong/yaku_list/" target="_blank" rel="noopener noreferrer">파판14 공식 작패유희 역 목록 ↗</a>. 더블 역만·로컬 역은 규칙에 따라 달라 이 목록에 추가하지 않았습니다.</p>
+    </section>
   </main>
   <footer class="site-footer">
     <div class="footer-top"><span>작패유희 역 사전 · 파판14 도구함</span><a href="README.md">역·패 그림 출처 및 이용 조건 ↗</a></div>
