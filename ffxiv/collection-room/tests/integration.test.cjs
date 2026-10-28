@@ -26,12 +26,16 @@ test('room mount view filters expansions, counts required mounts, and preserves 
     const w=dom.window,d=w.document;w.CollectionRoomModel=M;w.__catalog=catalog;
     w.__sync={localBooks:()=>({mounts:{28:{value:1,wanted:false},47:{value:1,wanted:false},22:{value:1,wanted:false}}})};
     const source=fs.readFileSync(path.join(root,'collection-room/app.js'),'utf8').replace(/^import .*;\r?\n/,'const {localBooks}=globalThis.__sync;\n').replace(/^init\(\)\.catch\([^\n]+/m,'');
-    w.eval(source+`;catalog=globalThis.__catalog;user={uid:'self'};roomId='test';meta={owner:'self'};members={self:{name:'테스트',sharing:{mounts:true}},old:{name:'기존 참여자',sharing:{'blue-mage':true}}};linked=true;view='mine';globalThis.__room={renderResults,renderMembers,sharingFields};`);
-    d.getElementById('bookSelect').innerHTML='<option value="mounts">극 탈것</option>';
+    w.eval(source+`;catalog=globalThis.__catalog;user={uid:'self'};roomId='test';meta={owner:'self'};members={self:{name:'테스트',sharing:{mounts:true}},old:{name:'기존 참여자',sharing:{'blue-mage':true}}};linked=true;view='mine';wire();globalThis.__room={renderResults,renderMembers,sharingFields};`);
+    assert.equal(d.getElementById('bookSelect'),null);assert.equal(d.querySelectorAll('#bookTabs button').length,M.BOOKS.length);
+    d.querySelector('[data-book=mounts]').click();assert.equal(d.querySelector('#bookTabs [aria-pressed=true]').textContent,'극 탈것');
     d.getElementById('expansionSelect').innerHTML='<option value="all">전체</option><option value="arr">신생</option><option value="dt">황금</option>';
     d.getElementById('itemFilter').value='all';d.getElementById('expansionSelect').value='arr';w.__room.renderResults();
     assert.equal(d.getElementById('expansionFilterLabel').hidden,false);assert.match(d.getElementById('resultSummary').textContent,/8/);assert.match(d.getElementById('results').textContent,/아이톤/);assert.doesNotMatch(d.getElementById('results').textContent,/재앙의 날개/);
     d.getElementById('expansionSelect').value='dt';w.__room.renderResults();assert.match(d.getElementById('resultSummary').textContent,/9/);assert.match(d.getElementById('results').textContent,/재앙의 날개/);
+    d.querySelector('[data-book=minions]').click();assert.equal(d.getElementById('expansionFilterLabel').hidden,true);assert.equal(d.querySelectorAll('#bookTabs [aria-pressed=true]').length,1);
+    d.querySelector('[data-view=members]').click();assert.equal(d.getElementById('catalogControls').hidden,true);
+    d.querySelector('[data-view=together]').click();assert.equal(d.getElementById('catalogControls').hidden,false);assert.equal(d.querySelector('#bookTabs [aria-pressed=true]').dataset.book,'minions');assert.match(d.getElementById('results').textContent,/공유하면/);
     w.__room.renderMembers();const cards=d.querySelectorAll('.member-card');assert.match(cards[0].querySelector('.mount-expansion-summary').textContent,/신생\s+1 \/ 6/);assert.equal(cards[1].querySelector('.mount-expansion-summary'),null);
     w.__room.sharingFields(d.getElementById('sharingOptions'),{'blue-mage':true});assert.equal(d.querySelector('#sharingOptions input[value=mounts]').checked,false);
   }finally{dom.window.close();}

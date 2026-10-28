@@ -3,7 +3,7 @@ import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,chan
 const M=globalThis.CollectionRoomModel,$=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PAGE_SIZE=30;
-let b,catalog,user=null,session=0,roomId=null,meta=null,members={},view='together',page=1,linked=false,linking=false;
+let b,catalog,user=null,session=0,roomId=null,meta=null,members={},view='together',selectedBook='blue-mage',page=1,linked=false,linking=false;
 let userRoomsOff,roomOff=[],listOff=new Map(),peerOff=new Map(),peers=new Map(),roomNames=new Map(),localCache={};
 const statusLabels={disconnected:'이 브라우저의 기록',connecting:'연결 중',synced:'동기화됨',pending:'변경 사항 전송 중',offline:'연결 대기 · 브라우저에 보관',error:'동기화 확인 필요'};
 function message(text,error=false){$('message').textContent=text;$('message').hidden=false;$('message').classList.toggle('error',error);}
@@ -129,12 +129,18 @@ function itemControls(book,item,record){
   const collect=book==='weapons'?`<label>단계 <select data-stage="${item.id}" ${enabled?'':'disabled'} aria-label="${esc(item.name)} 수집 단계"><option value="0">미수집</option>${item.stages.map(s=>`<option value="${s.id}" ${record?.value===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>`:`<button type="button" data-id="${item.id}" data-field="value" aria-pressed="${owned}" ${enabled?'':'disabled'}>${owned?'✓ 내 수집 완료':'내 수집 체크'}</button>`;
   return `${collect}<button type="button" data-id="${item.id}" data-field="wanted" aria-pressed="${!!record?.wanted}" ${enabled?'':'disabled'}>${record?.wanted?'★':'☆'} 같이하고 싶어요</button>`;
 }
+function selectBook(id){
+  if(!M.BOOKS.some(book=>book.id===id))return;
+  selectedBook=id;page=1;
+  for(const tab of $('bookTabs').querySelectorAll('[data-book]'))tab.setAttribute('aria-pressed',String(tab.dataset.book===id));
+  renderResults();
+}
 function renderResults(){
   if(!catalog||!roomId||!meta||!user||!members[user.uid])return;
   try{localCache=linked?localBooks():{};}catch{localCache={};}
   $('catalogControls').hidden=view==='members';$('pagination').hidden=true;
   if(view==='members'){renderMembers();return;}
-  const book=$('bookSelect').value,all=catalog.books[book].items,query=$('search').value,filter=$('itemFilter').value;
+  const book=selectedBook,all=catalog.books[book].items,query=$('search').value,filter=$('itemFilter').value;
   $('expansionFilterLabel').hidden=book!=='mounts';
   if(view==='mine'&&!linked){$('resultSummary').textContent='';$('results').innerHTML='<div class="inline-empty">위에서 내 수첩을 연결하면 여기서도 기록을 수정할 수 있어요.</div>';return;}
   if(view==='together'&&!members[user.uid]?.sharing?.[book]){$('resultSummary').textContent='';$('results').innerHTML='<div class="inline-empty">이 수첩을 공유하면 나와 목표가 겹치는 사람을 찾을 수 있어요.<br>위의 ‘내 이름과 공유할 수첩 설정’에서 선택해 주세요.</div>';return;}
@@ -162,7 +168,8 @@ async function enterRoom(id,proof,name,sharing){
 }
 function wire(){
   for(const id of ['createSharing','joinSharing'])sharingFields($(id),Object.fromEntries(M.BOOKS.map(book=>[book.id,true])));
-  $('bookSelect').innerHTML=M.BOOKS.map(book=>`<option value="${book.id}">${book.label}</option>`).join('');
+  $('bookTabs').innerHTML=M.BOOKS.map(book=>`<button type="button" data-book="${book.id}" aria-pressed="${book.id===selectedBook}">${book.label}</button>`).join('');
+  $('bookTabs').addEventListener('click',event=>{const tab=event.target.closest('[data-book]');if(tab)selectBook(tab.dataset.book);});
   $('expansionSelect').innerHTML='<option value="all">모든 확장팩</option>'+catalog.books.mounts.expansions.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
   $('login').addEventListener('click',()=>action($('login'),async()=>{await b.login();}));
   $('logout').addEventListener('click',()=>action($('logout'),async()=>{clearSession();await b.logout();message('로그아웃했어요. 이 브라우저의 수첩 기록은 그대로 보관돼요.');}));
@@ -200,13 +207,13 @@ function wire(){
     await b.DB.update(b.ref(''),updates);clearRoom();history.replaceState(null,'',location.pathname);message('방에서 나왔어요. 내 수집 기록은 유지돼요.');
   }));
   for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;page=1;const common=$('itemFilter').querySelector('option[value=common]');common.hidden=view==='mine';common.disabled=view==='mine';if(view==='mine'&&$('itemFilter').value==='common')$('itemFilter').value='all';for(const tab of document.querySelectorAll('[data-view]'))tab.setAttribute('aria-pressed',String(tab===button));renderResults();});
-  for(const id of ['bookSelect','itemFilter','expansionSelect'])$(id).addEventListener('change',()=>{page=1;renderResults();});$('search').addEventListener('input',()=>{page=1;renderResults();});
+  for(const id of ['itemFilter','expansionSelect'])$(id).addEventListener('change',()=>{page=1;renderResults();});$('search').addEventListener('input',()=>{page=1;renderResults();});
   $('prevPage').addEventListener('click',()=>{page--;renderResults();});$('nextPage').addEventListener('click',()=>{page++;renderResults();});
-  $('results').addEventListener('change',event=>{const select=event.target.closest('[data-stage]');if(select){try{editItem($('bookSelect').value,select.dataset.stage,'value',+select.value);}catch(error){message(errorMessage(error),true);}renderResults();}});
+  $('results').addEventListener('change',event=>{const select=event.target.closest('[data-stage]');if(select){try{editItem(selectedBook,select.dataset.stage,'value',+select.value);}catch(error){message(errorMessage(error),true);}renderResults();}});
   $('results').addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button)return;
-    if(button.dataset.field){try{const book=$('bookSelect').value,id=button.dataset.id,field=button.dataset.field,old=localBooks()[book]?.[id]||M.empty();editItem(book,id,field,field==='value'?(old.value?0:1):!old.wanted);renderResults();}catch(error){message(errorMessage(error),true);}}
-    if(button.dataset.invite)void action(button,async()=>{const book=$('bookSelect').value,item=catalog.books[book].items.find(i=>i.id===button.dataset.invite),s=stats(book,item),names=s.missing.filter(([uid])=>uid!==user.uid).map(([,p])=>p.name+'님');await navigator.clipboard.writeText(`[${meta.name}] ${item.name} 같이 모으실래요?${names.length?' '+names.join(', '):''}`);message('모집 문구를 복사했어요. 부대 채팅에 붙여넣어 보세요.');});
+    if(button.dataset.field){try{const book=selectedBook,id=button.dataset.id,field=button.dataset.field,old=localBooks()[book]?.[id]||M.empty();editItem(book,id,field,field==='value'?(old.value?0:1):!old.wanted);renderResults();}catch(error){message(errorMessage(error),true);}}
+    if(button.dataset.invite)void action(button,async()=>{const book=selectedBook,item=catalog.books[book].items.find(i=>i.id===button.dataset.invite),s=stats(book,item),names=s.missing.filter(([uid])=>uid!==user.uid).map(([,p])=>p.name+'님');await navigator.clipboard.writeText(`[${meta.name}] ${item.name} 같이 모으실래요?${names.length?' '+names.join(', '):''}`);message('모집 문구를 복사했어요. 부대 채팅에 붙여넣어 보세요.');});
     if(button.dataset.kick)void action(button,async()=>{const id=roomId,uid=button.dataset.kick;requireUser();const updates={[`bans/${id}/${uid}`]:true,[`access/${id}/${uid}`]:null,[`rooms/${id}/members/${uid}`]:null};for(const book of M.BOOKS)updates[`shared/${id}/${uid}/${book.id}`]=null;await b.DB.update(b.ref(''),updates);message('참여자를 내보냈어요. 이 계정은 같은 비밀번호로 다시 들어올 수 없어요.');});
   });
   window.addEventListener('ffxiv:collection-render',()=>{renderLocal();renderResults();});
