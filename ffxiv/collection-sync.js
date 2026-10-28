@@ -1,5 +1,6 @@
-import './collection-room/model.js?v=20261028-password4';
+import './collection-room/model.js?v=20261028-syncfix1';
 import './collection-room/sync-engine.js?v=20261028-project2';
+import './collection-room/share-sync.js?v=20261028-syncfix1';
 import './ocean-fishing/scripts/teamcraft-ids.js';
 import './fishing-collection.js';
 import {connect} from './collection-room/firebase.js?v=20261028-project2';
@@ -42,23 +43,28 @@ function applyLocal(books){
 }
 async function runSync(uid,token){
   if(token!==epoch||user?.uid!==uid||getBinding()?.uid!==uid)return;
-  const {DB,ref}=backend;let cloud={},roomShares=new Map(),roomOff=new Map(),publishing=false,dirty=false,connected=false;
+  const {DB,ref}=backend;let cloud={},roomShares=new Map(),roomOff=new Map(),connected=false;
   const alive=()=>token===epoch&&user?.uid===uid;
-  async function publish(){
-    if(!alive())return;dirty=true;if(publishing)return;publishing=true;
-    try{while(dirty&&alive()){
-      dirty=false;const writes=[];
-      for(const [room,sharing] of roomShares)for(const book of M.BOOKS)if(sharing[book.id])writes.push(DB.set(ref(`shared/${room}/${uid}/${book.id}`),{ready:true,entries:cloud[book.id]||null}).catch(()=>{}));
-      await Promise.all(writes);
-    }}finally{publishing=false;}
+  function shareError(cause){
+    const error=Error('수집 기록은 저장했지만 방 공유 현황을 갱신하지 못했어요. 연결을 확인하면 자동으로 다시 시도해요.',{cause});
+    error.code='collection/share-failed';return error;
   }
+  const publisher=globalThis.CollectionShareSync.create({books:M.BOOKS,readCloud:()=>cloud,readShares:()=>roomShares,isActive:alive,
+    writeShared:(room,book,payload)=>DB.set(ref(`shared/${room}/${uid}/${book}`),payload),
+    onError:error=>announce('error',shareError(error)),
+    onSettled:()=>{if(engine?.ready&&!Object.keys(engine.pending).length)announce(connected?'synced':'offline');},
+  });
+  const publish=()=>publisher.publish();
   try{
     localBooks();
-    engine=globalThis.CollectionSyncEngine.create({model:M,storage:localStorage,uid,applyLocal,onStatus:(next,error)=>announce(!connected&&['pending','synced'].includes(next)?'offline':next,error),writeRemote:patch=>DB.update(ref(`users/${uid}/books`),patch)});
+    engine=globalThis.CollectionSyncEngine.create({model:M,storage:localStorage,uid,applyLocal,onStatus:(next,error)=>{
+      if(next==='synced'&&publisher.error)announce('error',shareError(publisher.error));
+      else announce(!connected&&['pending','synced'].includes(next)?'offline':next,error);
+    },writeRemote:patch=>DB.update(ref(`users/${uid}/books`),patch)});
     engine.observe();announce('connecting');
     stopListeners.push(DB.onValue(DB.ref(backend.db,'.info/connected'),snapshot=>{
       if(!alive())return;connected=snapshot.val()===true;
-      if(!connected)announce('offline');else if(engine.ready){engine.change();announce(Object.keys(engine.pending).length?'pending':'synced');}
+      if(!connected)announce('offline');else if(engine.ready){engine.change();void publish();}
     }));
     stopListeners.push(DB.onValue(ref(`users/${uid}/books`),snapshot=>{
       if(!alive())return;
@@ -78,7 +84,7 @@ async function runSync(uid,token){
       }
     },error=>{if(alive())announce('error',error);}));
     stopListeners.push(()=>{for(const off of roomOff.values())off();roomOff.clear();roomShares.clear();});
-    const changed=()=>{if(!alive())return;try{engine.change();}catch(error){announce('error',error);}};
+    const changed=()=>{if(!alive())return;try{engine.change();if(connected)void publisher.retry();}catch(error){announce('error',error);}};
     const storageChanged=e=>{if(e.key===null||e.key===M.WISH_KEY||M.BOOKS.some(b=>b.key===e.key))changed();};
     window.addEventListener('ffxiv:collection-change',changed);window.addEventListener('storage',storageChanged);window.addEventListener('online',changed);window.addEventListener('focus',changed);window.addEventListener('pagehide',changed);
     // Also catches a legacy notebook tab that has not loaded the new change hook yet.

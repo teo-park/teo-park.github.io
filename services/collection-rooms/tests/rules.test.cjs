@@ -66,6 +66,18 @@ test('shared books require membership and per-book consent, including on atomic 
   await assertSucceeds(update(r(member),{[`rooms/${room}/members/member/sharing/minions`]:false,[`shared/${room}/member/minions`]:null}));
   await assertFails(get(r(owner,`shared/${room}/member/minions`)));
 });
+test('real Firebase dense numeric snapshots can be imported, published, and read by another member',async()=>{
+  const M=require('../../../ffxiv/collection-room/model.js'),owner=await create(),member=await join();
+  const original={'blue-mage':{'1':{value:1,wanted:false},'2':{value:1,wanted:true},'4':{value:0,wanted:false}}};
+  await set(r(member,'users/member/books'),original);
+  const received=(await get(r(member,'users/member/books'))).val();assert.equal(Array.isArray(received['blue-mage']),true);
+  const decoded=M.normalize(received);assert.deepEqual(decoded,original);
+  await set(r(member,`shared/${room}/member/blue-mage`),{ready:true,entries:decoded['blue-mage']});
+  const published=(await get(r(owner,`shared/${room}/member/blue-mage`))).val();assert.equal(Array.isArray(published.entries),true);
+  assert.deepEqual(M.normalize({'blue-mage':published.entries}),original);
+  await update(r(member,'users/member/books'),{'blue-mage/1/value':0});
+  const latest=M.normalize((await get(r(member,'users/member/books'))).val());assert.equal(latest['blue-mage']['1'].value,0);assert.equal(latest['blue-mage']['2'].wanted,true);
+});
 test('membership in one room never grants access to another room',async()=>{
   const owner=await create();await create(otherRoom);const member=await join();
   await set(r(owner,`shared/${otherRoom}/owner/blue-mage`),{ready:true,entries:{1:{value:1,wanted:false}}});

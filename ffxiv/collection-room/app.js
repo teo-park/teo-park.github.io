@@ -1,4 +1,4 @@
-import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,changeItem} from '../collection-sync.js?v=20261028-password4';
+import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,changeItem} from '../collection-sync.js?v=20261028-syncfix1';
 
 const M=globalThis.CollectionRoomModel,$=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -73,7 +73,7 @@ function profileWatch(){
     if(!peerOff.has(key)){
       peerOff.set(key,b.DB.onValue(b.ref(`shared/${current}/${key}`),snapshot=>{
         if(token!==session||roomId!==current)return;
-        try{const published=snapshot.val();if(published?.ready===true)peers.set(key,M.normalize({[book.id]:published.entries||{}})[book.id]);else peers.delete(key);renderResults();}catch{peers.delete(key);renderResults();}
+        try{const published=snapshot.val();if(published?.ready===true)peers.set(key,M.normalize({[book.id]:published.entries||{}})[book.id]);else peers.delete(key);renderResults();}catch{peers.delete(key);message('공유된 수첩 기록을 읽지 못했어요. 페이지를 새로고침해 주세요.',true);renderResults();}
       },()=>{if(token!==session||roomId!==current)return;peers.delete(key);renderResults();}));
     }
   }

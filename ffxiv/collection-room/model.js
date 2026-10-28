@@ -24,9 +24,14 @@
     const result={};
     for(const book of BOOKS){
       if(books[book.id]==null)continue;
-      if(!object(books[book.id])||Object.keys(books[book.id]).length>30000)throw Error('수집 기록이 올바르지 않습니다.');
+      // Realtime Database returns dense numeric-key maps as arrays, including
+      // null slots for IDs that are absent. Decode both wire representations.
+      const entries=books[book.id],numericArray=book.id!=='weapons'&&Array.isArray(entries);
+      if(!object(entries)&&!numericArray)throw Error('수집 기록이 올바르지 않습니다.');
+      const records=Object.entries(entries).filter(([,v])=>v!==null);
+      if(records.length>30000)throw Error('수집 기록이 올바르지 않습니다.');
       result[book.id]={};
-      for(const [id,v] of Object.entries(books[book.id])){if(!validId(book.id,id))throw Error('수집 항목 ID가 올바르지 않습니다.');const c=cell(v);if(book.id!=='weapons'&&c.value>1)throw Error('수집 체크가 올바르지 않습니다.');result[book.id][id]=c;}
+      for(const [id,v] of records){if(!validId(book.id,id))throw Error('수집 항목 ID가 올바르지 않습니다.');const c=cell(v);if(book.id!=='weapons'&&c.value>1)throw Error('수집 체크가 올바르지 않습니다.');result[book.id][id]=c;}
     }
     return result;
   }

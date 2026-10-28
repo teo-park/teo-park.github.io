@@ -32,6 +32,21 @@ test('initial merge unions collections and wishes, using weapon stage order inst
 test('diff records both unchecks and wish removals without resending unrelated fields',()=>{
   assert.deepEqual(M.diff({'blue-mage':{'1':{value:1,wanted:true},'2':{value:1,wanted:false}}},{'blue-mage':{'2':{value:1,wanted:false}}}),{'blue-mage/1/value':0,'blue-mage/1/wanted':false});
 });
+test('Firebase numeric arrays decode into ID maps without treating null holes as collected items',()=>{
+  const data=[null,{value:1,wanted:false},null,{value:0,wanted:true},{value:1}];
+  const books=M.normalize({'blue-mage':data,'triple-triad':data,minions:data,beastmaster:data,fishing:data});
+  for(const book of ['blue-mage','triple-triad','minions','beastmaster','fishing'])assert.deepEqual(books[book],{'1':{value:1,wanted:false},'3':{value:0,wanted:true},'4':{value:1,wanted:false}});
+  assert.throws(()=>M.normalize({weapons:data}));assert.throws(()=>M.normalize({'blue-mage':[{value:1,wanted:false}]}));
+});
+test('initial import, room snapshots and realtime unchecks accept Firebase array snapshots',async()=>{
+  const h=harness();h.e.receive({'blue-mage':[null,{value:1,wanted:false},{value:1,wanted:true}]});
+  assert.deepEqual(JSON.parse(h.s.getItem(M.BOOKS[0].key)).learned,[1,2]);
+  h.e.receive({'blue-mage':[null,{value:0,wanted:false},{value:1,wanted:true}]});
+  assert.deepEqual(JSON.parse(h.s.getItem(M.BOOKS[0].key)).learned,[2]);
+  mark(h.s,'blue-mage','3');h.e.change();await tick();assert.deepEqual(h.writes.at(-1),{'blue-mage/3/value':1});
+  const merged=M.mergeInitial({'blue-mage':[null,{value:1}]},{'blue-mage':{'2':{value:1,wanted:false}}},catalog);
+  assert.equal(merged['blue-mage']['1'].value,1);assert.equal(merged['blue-mage']['2'].value,1);
+});
 test('notebook checks and room checks use the same local store and send only changed fields',async()=>{
   const h=harness();h.e.receive({});mark(h.s,'blue-mage','1');h.e.change();await tick();
   assert.deepEqual(h.writes,[{'blue-mage/1/value':1}]);assert.deepEqual(h.e.pending,{});
