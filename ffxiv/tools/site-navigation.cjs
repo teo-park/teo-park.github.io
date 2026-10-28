@@ -27,6 +27,7 @@ const categories = [
     ['beastmaster/', '마수도감'],
     ['beastmaster/guide/', '마수조련사 공략'],
     ['weapons/', '무기 수첩'],
+    ['extreme-mounts/', '극 토벌전 탈것 수첩'],
     ['collection-room/', '부대 수집방'],
   ] },
   { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
@@ -44,7 +45,7 @@ const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)).filte
 const baseFor = page => page === 'fishing-log/catalog/' ? '../' : page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
-  const sync = ['blue-mage/','weapons/','fishing-log/','fishing-log/catalog/','ocean-fishing/','ocean-fishing/checklist/','minions/','triple-triad/','beastmaster/'].includes(page) ? `<script type="module" src="${base}collection-sync.js?v=20261028-syncfix1"></script>` : '';
+  const sync = ['blue-mage/','weapons/','extreme-mounts/','fishing-log/','fishing-log/catalog/','ocean-fishing/','ocean-fishing/checklist/','minions/','triple-triad/','beastmaster/'].includes(page) ? `<script type="module" src="${base}collection-sync.js?v=20261028-mounts1"></script>` : '';
   return `${sync}<script defer src="${base}visitor-counter.js?v=20260916-pages1"></script><script defer src="${base}selection-counter.js?v=20260916-pages1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
 }
 function header(page) {

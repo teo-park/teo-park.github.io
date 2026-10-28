@@ -103,3 +103,12 @@ test('application project never accepts statistics writes or exposes counter dat
   const member=db('member');await assertFails(get(ref(member,'visits')));await assertFails(get(ref(member,'counters')));await assertFails(set(ref(member,'counters/home'),42));
   await assertFails(set(ref(env.unauthenticatedContext().database(),'visits/home/'+'e'.repeat(32)),true));
 });
+test('mount collection preserves old notebooks and needs separate room consent',async()=>{
+  const M=require('../../../ffxiv/collection-room/model.js'),catalog=require('../../../ffxiv/collection-room/catalog.json'),owner=await create(),member=await join();
+  await set(r(member,'users/member/books/blue-mage/1'),{value:1,wanted:false});
+  await runTransaction(r(member,'users/member/books'),remote=>M.mergeInitial(remote,{mounts:{'28':{value:1,wanted:false},'29':{value:0,wanted:true}}},catalog));
+  const books=M.normalize((await get(r(member,'users/member/books'))).val());assert.equal(books['blue-mage']['1'].value,1);assert.equal(books.mounts['28'].value,1);assert.equal(books.mounts['29'].wanted,true);
+  const value={ready:true,entries:books.mounts};await assertFails(set(r(member,`shared/${room}/member/mounts`),value));await assertFails(get(r(owner,'users/member/books/mounts')));
+  await assertSucceeds(update(r(member),{[`rooms/${room}/members/member/sharing/mounts`]:true,[`shared/${room}/member/mounts`]:value}));
+  const shared=(await get(r(owner,`shared/${room}/member/mounts`))).val();assert.deepEqual(M.normalize({mounts:shared.entries}).mounts,books.mounts);
+});

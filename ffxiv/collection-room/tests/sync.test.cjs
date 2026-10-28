@@ -8,7 +8,7 @@ function harness({s=storage(),write=async()=>{}}={}){
   const writes=[],statuses=[];
   const e=create({model:M,storage:s,uid:'alice',applyLocal:books=>{for(const b of M.BOOKS)M.writeBook(s,b,books[b.id]||{});},writeRemote:async patch=>{writes.push(patch);await write(patch);},onStatus:(status,error)=>statuses.push([status,error])});return {e,s,writes,statuses};
 }
-test('all six existing notebook formats round-trip; notes, fishing sync metadata and unknown IDs survive',()=>{
+test('all seven notebook formats round-trip; notes, fishing sync metadata and unknown IDs survive',()=>{
   const s=storage();
   for(const b of M.BOOKS.filter(b=>b.id!=='weapons'))s.setItem(b.key,JSON.stringify({type:b.type,schemaVersion:1,[b.field]:[1,999999],sync:{version:1,book:[1],ocean:[],extras:{indigo:{},ruby:{}}}}));
   const weapon=M.BOOKS.find(b=>b.id==='weapons');s.setItem(weapon.key,JSON.stringify({format:'teo-ffxiv-weapons',version:1,records:{'zodiac.PLD.weapon':{itemId:10054,target:true,note:'개인 메모'}}}));

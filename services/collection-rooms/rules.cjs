@@ -3,7 +3,7 @@ const signed="auth != null && auth.token.email_verified === true && auth.token.f
 const own=`${signed} && auth.uid === $uid`;
 const owner=`${signed} && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid`;
 const member=`${signed} && root.child('collectionRooms/access').child($room).child(auth.uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child(auth.uid).exists()`;
-const books=['blue-mage','weapons','fishing','triple-triad','minions','beastmaster'];
+const books=['blue-mage','weapons','mounts','fishing','triple-triad','minions','beastmaster'];
 function scalar(expression){return {'.validate':expression+' && newData.getPriority() === null'};}
 function entries(){return {
   '.validate':"newData.getPriority() === null",

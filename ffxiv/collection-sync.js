@@ -1,6 +1,7 @@
-import './collection-room/model.js?v=20261028-syncfix1';
+import './collection-room/model.js?v=20261028-mounts1';
 import './collection-room/sync-engine.js?v=20261028-project2';
 import './collection-room/share-sync.js?v=20261028-syncfix1';
+import './collection-room/sync-leader.js?v=20261028-mounts1';
 import './ocean-fishing/scripts/teamcraft-ids.js';
 import './fishing-collection.js';
 import {connect} from './collection-room/firebase.js?v=20261028-project2';
@@ -93,16 +94,16 @@ async function runSync(uid,token){
   }catch(error){announce('error',error);}
 }
 function start(){
-  stop();const token=epoch,uid=user?.uid;
-  if(!uid||getBinding()?.uid!==uid){announce('disconnected');return;}
+  stop();const token=epoch,uid=user?.uid,binding=getBinding();
+  if(!uid||binding?.uid!==uid){announce('disconnected');return;}
   notebookBanner();
   if(navigator.locks){
     lockAbort=new AbortController();
-    navigator.locks.request('ffxiv-collection-sync-teo-ffxiv-v1',{signal:lockAbort.signal},async()=>{
+    globalThis.CollectionSyncLeader.request({locks:navigator.locks,name:'ffxiv-collection-sync-teo-ffxiv-v1',signal:lockAbort.signal,storage:localStorage,bindingKey:M.BINDING_KEY,binding,version:'20261028-mounts1',run:async()=>{
       if(token!==epoch)return;
       await runSync(uid,token);
       await new Promise(resolve=>{releaseLock=resolve;});
-    }).catch(error=>{if(error.name!=='AbortError'&&token===epoch)announce('error',error);});
+    }}).catch(error=>{if(error.name!=='AbortError'&&token===epoch)announce('error',error);});
     // The owning tab processes this tab's storage changes as well.
     announce('connecting');
     channel?.postMessage({uid,request:true});

@@ -9,6 +9,9 @@ function build(){
   add('blue-mage','청마법',bundled('blue-mage/data.js','BLUE_MAGE_DATA').spells.map(s=>({id:s.id,name:s.name,source:[...new Set(s.sources.map(x=>x.location))].join(' · ')})));
   const weapons=json('weapons/data/weapons.json'),series=new Map(weapons.series.map(s=>[s.id,s])),jobs=new Map(weapons.jobs.map(j=>[j.id,j]));
   add('weapons','무기',weapons.tracks.map(t=>({id:t.id.replaceAll('.','~'),name:series.get(t.seriesId).name+' · '+jobs.get(t.jobId).name+(t.slot==='shield'?' 방패':''),source:series.get(t.seriesId).name,stages:t.items.map(i=>({id:i.id,name:i.stage||i.name}))})));
+  const mounts=json('extreme-mounts/data.json'),expansions=new Map(mounts.expansions.map(e=>[e.id,e]));
+  add('mounts','극 탈것',mounts.mounts.map(m=>({id:m.id,name:m.name,expansion:m.expansion,kind:m.kind,source:expansions.get(m.expansion).name+' · '+(m.kind==='reward'?'완성 보상 · '+m.quest.name:m.sources.map(s=>s.name).join(' · '))})));
+  books.mounts.expansions=mounts.expansions;
   const fish=bundled('fishing-log/data.js','FISHING_DATA'),ocean=json('ocean-fishing/data/fish.json').fish;
   const fishes=new Map(fish.fishes.map(f=>[f.id,{id:f.id,name:f.name,source:[...new Set((f.routes||[]).map(r=>fish.spots[r.spotKey]?.name).filter(Boolean))].join(' · ')}]));
   for(const f of ocean)if(f.id&&!fishes.has(f.id))fishes.set(f.id,{id:f.id,name:f.FishTranslated,source:'먼바다 낚시'});

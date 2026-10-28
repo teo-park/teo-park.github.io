@@ -4,6 +4,7 @@
   const BOOKS=[
     {id:'blue-mage',label:'청마법',path:'blue-mage/',key:'teo-ffxiv.blue-mage.collection.v1',type:'ffxiv-blue-mage',field:'learned'},
     {id:'weapons',label:'무기',path:'weapons/',key:'teo-ffxiv.weapons.collection.v1'},
+    {id:'mounts',label:'극 탈것',path:'extreme-mounts/',key:'teo-ffxiv.extreme-mounts.collection.v1',type:'ffxiv-extreme-mounts',field:'collected'},
     {id:'fishing',label:'어부 수첩',path:'fishing-log/',key:'teo-ffxiv.fishing.collection.v2',type:'ffxiv-fishing-log',field:'caught'},
     {id:'triple-triad',label:'카드',path:'triple-triad/',key:'teo-ffxiv.triple-triad.collection.v1',type:'ffxiv-triple-triad',field:'collected'},
     {id:'minions',label:'꼬마친구',path:'minions/',key:'teo-ffxiv.minions.collection.v1',type:'ffxiv-minions',field:'collected'},

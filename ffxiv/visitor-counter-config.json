@@ -61,6 +61,11 @@
       "label": "무기 수첩"
     },
     {
+      "key": "extreme-mounts",
+      "path": "/ffxiv/extreme-mounts/",
+      "label": "극 토벌전 탈것 수첩"
+    },
+    {
       "key": "collection-room",
       "path": "/ffxiv/collection-room/",
       "label": "부대 수집방"

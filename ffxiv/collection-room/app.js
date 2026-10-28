@@ -1,4 +1,4 @@
-import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,changeItem} from '../collection-sync.js?v=20261028-syncfix1';
+import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,changeItem} from '../collection-sync.js?v=20261028-mounts1';
 
 const M=globalThis.CollectionRoomModel,$=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -120,7 +120,8 @@ function renderMembers(){
     if(!p.sharing?.[book.id])return `<div class="member-book"><span>${book.label}</span><strong>공유 안 함</strong></div>`;
     const records=bookRecords(uid,book.id);if(records===null)return `<div class="member-book"><span>${book.label}</span><strong>수첩 연결 대기</strong></div>`;
     const items=catalog.books[book.id].items,count=items.filter(item=>M.complete(book.id,item,records[item.id])).length;
-    return `<div class="member-book"><span>${book.label}</span><strong>${count} / ${items.length}</strong><progress value="${count}" max="${items.length}" aria-label="${esc(p.name)} ${book.label} 수집률"></progress></div>`;
+    const expansionDetail=book.id==='mounts'?`<details class="mount-expansion-summary"><summary>확장팩별 필수 탈것</summary>${catalog.books.mounts.expansions.map(e=>`<div>${e.short} <b>${e.required.filter(id=>records[String(id)]?.value===1).length} / ${e.required.length}</b></div>`).join('')}</details>`:'';
+    return `<div class="member-book"><span>${book.label}</span><strong>${count} / ${items.length}</strong><progress value="${count}" max="${items.length}" aria-label="${esc(p.name)} ${book.label} 수집률"></progress>${expansionDetail}</div>`;
   }).join('')}</div></article>`).join('');
 }
 function itemControls(book,item,record){
@@ -134,9 +135,11 @@ function renderResults(){
   $('catalogControls').hidden=view==='members';$('pagination').hidden=true;
   if(view==='members'){renderMembers();return;}
   const book=$('bookSelect').value,all=catalog.books[book].items,query=$('search').value,filter=$('itemFilter').value;
+  $('expansionFilterLabel').hidden=book!=='mounts';
   if(view==='mine'&&!linked){$('resultSummary').textContent='';$('results').innerHTML='<div class="inline-empty">위에서 내 수첩을 연결하면 여기서도 기록을 수정할 수 있어요.</div>';return;}
   if(view==='together'&&!members[user.uid]?.sharing?.[book]){$('resultSummary').textContent='';$('results').innerHTML='<div class="inline-empty">이 수첩을 공유하면 나와 목표가 겹치는 사람을 찾을 수 있어요.<br>위의 ‘내 이름과 공유할 수첩 설정’에서 선택해 주세요.</div>';return;}
   const mine=bookRecords(user.uid,book)||{},matched=all.filter(item=>{
+    if(book==='mounts'&&$('expansionSelect').value!=='all'&&item.expansion!==$('expansionSelect').value)return false;
     if(!M.matches(item.name+' '+item.source,query))return false;
     const s=stats(book,item),completed=M.complete(book,item,mine[item.id]);
     if(view==='mine'){if(filter==='wanted')return !!mine[item.id]?.wanted&&!completed;if(filter==='all')return true;return !completed;}
@@ -160,6 +163,7 @@ async function enterRoom(id,proof,name,sharing){
 function wire(){
   for(const id of ['createSharing','joinSharing'])sharingFields($(id),Object.fromEntries(M.BOOKS.map(book=>[book.id,true])));
   $('bookSelect').innerHTML=M.BOOKS.map(book=>`<option value="${book.id}">${book.label}</option>`).join('');
+  $('expansionSelect').innerHTML='<option value="all">모든 확장팩</option>'+catalog.books.mounts.expansions.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
   $('login').addEventListener('click',()=>action($('login'),async()=>{await b.login();}));
   $('logout').addEventListener('click',()=>action($('logout'),async()=>{clearSession();await b.logout();message('로그아웃했어요. 이 브라우저의 수첩 기록은 그대로 보관돼요.');}));
   $('linkNotebooks').addEventListener('click',()=>action($('linkNotebooks'),async()=>{linking=true;try{await linkNotebooks(catalog);message('기존 수첩 기록을 불러왔어요. 이제 수첩과 수집방 어디에서 체크해도 함께 반영돼요.');}finally{linking=false;}}));
@@ -196,7 +200,7 @@ function wire(){
     await b.DB.update(b.ref(''),updates);clearRoom();history.replaceState(null,'',location.pathname);message('방에서 나왔어요. 내 수집 기록은 유지돼요.');
   }));
   for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>{view=button.dataset.view;page=1;const common=$('itemFilter').querySelector('option[value=common]');common.hidden=view==='mine';common.disabled=view==='mine';if(view==='mine'&&$('itemFilter').value==='common')$('itemFilter').value='all';for(const tab of document.querySelectorAll('[data-view]'))tab.setAttribute('aria-pressed',String(tab===button));renderResults();});
-  for(const id of ['bookSelect','itemFilter'])$(id).addEventListener('change',()=>{page=1;renderResults();});$('search').addEventListener('input',()=>{page=1;renderResults();});
+  for(const id of ['bookSelect','itemFilter','expansionSelect'])$(id).addEventListener('change',()=>{page=1;renderResults();});$('search').addEventListener('input',()=>{page=1;renderResults();});
   $('prevPage').addEventListener('click',()=>{page--;renderResults();});$('nextPage').addEventListener('click',()=>{page++;renderResults();});
   $('results').addEventListener('change',event=>{const select=event.target.closest('[data-stage]');if(select){try{editItem($('bookSelect').value,select.dataset.stage,'value',+select.value);}catch(error){message(errorMessage(error),true);}renderResults();}});
   $('results').addEventListener('click',event=>{
@@ -213,7 +217,7 @@ function wire(){
 }
 async function init(){
   renderLocal();
-  const response=await fetch('./catalog.json?v=20261028-room1');if(!response.ok)throw Error('수집 목록을 불러오지 못했어요. 새로고침해 주세요.');catalog=await response.json();renderLocal();
+  const response=await fetch('./catalog.json?v=20261028-mounts1');if(!response.ok)throw Error('수집 목록을 불러오지 못했어요. 새로고침해 주세요.');catalog=await response.json();renderLocal();
   b=await ensureConnection();wire();
   subscribe(state=>{
     linked=!!state.user&&state.binding?.uid===state.user.uid;

@@ -64,4 +64,4 @@ npm --prefix services/collection-rooms test
 
 에뮬레이터에는 Java 21 이상이 필요합니다. 테스트 명령은 `demo-collection-rooms` 프로젝트만 사용합니다. 비밀번호·개인 기록 보호, 다른 방 격리, 공유 설정, 내보내기, 기존 통계 권한, 동기화 대기열·해제·오프라인 복원 등을 검사합니다.
 
-공개 게임 목록을 갱신한 뒤 `node ffxiv/tools/collection-catalog.cjs`를 실행하면 방의 검색 목록을 같은 데이터로 재생성합니다. 탈것은 원본 수첩·한국어 목록이 아직 없어서 이 버전에 포함하지 않습니다.
+공개 게임 목록을 갱신한 뒤 `node ffxiv/tools/collection-catalog.cjs`를 실행하면 방의 검색 목록을 같은 데이터로 재생성합니다. 극 탈것은 `ffxiv/extreme-mounts/`에서 확장팩별로 관리합니다. 기존 방에 새 수첩을 자동 공유하지 않으며 참여자가 공유 설정에서 선택합니다. 새 버전의 클라이언트는 연결 버전을 기록해 이전 탭의 통신 담당을 안전하게 인계받습니다.

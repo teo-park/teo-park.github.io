@@ -1,0 +1,8 @@
+[
+  {"id":"arr","name":"신생 에오르제아","short":"신생","version":"2.x","level":50,"theme":"말","required":[28,29,30,31,40,43],"reward":47,"extras":[22]},
+  {"id":"hw","name":"창천의 이슈가르드","short":"창천","version":"3.x","level":60,"theme":"송골매","required":[75,76,77,78,90,98,104],"reward":105,"extras":[]},
+  {"id":"sb","name":"홍련의 해방자","short":"홍련","version":"4.x","level":70,"theme":"견신","required":[115,116,133,144,158,172,182],"reward":181,"extras":[161]},
+  {"id":"shb","name":"칠흑의 반역자","short":"칠흑","version":"5.x","level":80,"theme":"귀베르","required":[189,192,205,217,226,238,249],"reward":245,"extras":[]},
+  {"id":"ew","name":"효월의 종언","short":"효월","version":"6.x","level":90,"theme":"스라소니","required":[261,262,293,306,315,325,332],"reward":328,"extras":[]},
+  {"id":"dt","name":"황금의 유산","short":"황금","version":"7.x","level":100,"theme":"날개","required":[345,346,363,389,407,422,444],"reward":420,"extras":[399]}
+]
