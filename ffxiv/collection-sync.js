@@ -1,13 +1,13 @@
-import './collection-room/model.js';
-import './collection-room/sync-engine.js';
+import './collection-room/model.js?v=20261028-project2';
+import './collection-room/sync-engine.js?v=20261028-project2';
 import './ocean-fishing/scripts/teamcraft-ids.js';
 import './fishing-collection.js';
-import {connect} from './collection-room/firebase.js';
+import {connect} from './collection-room/firebase.js?v=20261028-project2';
 
 const M=globalThis.CollectionRoomModel;
 let backend,user,engine,releaseLock,lockAbort,stopListeners=[],status='disconnected',epoch=0,starting;
 const subscribers=new Set();
-const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('ffxiv-collection-sync-v1'):null;
+const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('ffxiv-collection-sync-teo-ffxiv-v1'):null;
 function getBinding(){try{return JSON.parse(localStorage.getItem(M.BINDING_KEY)||'null');}catch{return null;}}
 function announce(next,error,broadcast=true){
   status=next;
@@ -92,7 +92,7 @@ function start(){
   notebookBanner();
   if(navigator.locks){
     lockAbort=new AbortController();
-    navigator.locks.request('ffxiv-collection-sync-v1',{signal:lockAbort.signal},async()=>{
+    navigator.locks.request('ffxiv-collection-sync-teo-ffxiv-v1',{signal:lockAbort.signal},async()=>{
       if(token!==epoch)return;
       await runSync(uid,token);
       await new Promise(resolve=>{releaseLock=resolve;});
@@ -124,13 +124,13 @@ export async function linkNotebooks(catalog){
   const during=M.diff(local,M.readLocal(localStorage));
   const merged=M.overlay(result.snapshot.val(),during);
   applyLocal(merged);
-  const key='teo-ffxiv.collection-outbox.v1.'+uid;
+  const key=M.OUTBOX_PREFIX+uid;
   localStorage.setItem(key,JSON.stringify({base:M.readLocal(localStorage),pending:during}));
   localStorage.setItem(M.BINDING_KEY,JSON.stringify({uid,linkedAt:new Date().toISOString()}));
   start();
 }
 export function unlinkNotebooks(){
-  const binding=getBinding(),saved=binding?JSON.parse(localStorage.getItem('teo-ffxiv.collection-outbox.v1.'+binding.uid)||'null'):null;
+  const binding=getBinding(),saved=binding?JSON.parse(localStorage.getItem(M.OUTBOX_PREFIX+binding.uid)||'null'):null;
   if(Object.keys(engine?.pending||saved?.pending||{}).length)throw Error('아직 전송하지 못한 변경이 있습니다. 연결을 복구한 뒤 해제해 주세요.');
   stop();localStorage.removeItem(M.BINDING_KEY);announce('disconnected');
 }

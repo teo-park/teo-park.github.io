@@ -74,3 +74,7 @@ test('password proofs are deterministic per room, salted across rooms, and rejec
 test('matching distinguishes missing, wanted, and completed stages and supports Korean initials',()=>{
   assert.equal(M.matches('물대포 · 아마쟈','ㅁㄷㅍ'),true);assert.equal(M.complete('blue-mage',{id:'1'},{value:1,wanted:false}),true);const item=catalog.books.weapons.items[0];assert.equal(M.complete('weapons',item,{value:item.stages[0].id}),false);assert.equal(M.complete('weapons',item,{value:item.stages.at(-1).id}),true);
 });
+test('new project uses a separate binding and outbox while preserving legacy state and notebook checks',()=>{
+  const s=storage(),legacy='teo-ffxiv.collection-outbox.v1.alice',old='legacy queue stays intact';s.setItem(legacy,old);s.setItem('teo-ffxiv.collection-binding.v1',JSON.stringify({uid:'old-project-user'}));mark(s,'blue-mage','2');
+  const h=harness({s});assert.notEqual(M.BINDING_KEY,'teo-ffxiv.collection-binding.v1');assert.notEqual(h.e.key,legacy);assert.match(h.e.key,/teo-ffxiv/);assert.equal(s.getItem(legacy),old);assert.equal(M.readLocal(s)['blue-mage']['2'].value,1);
+});

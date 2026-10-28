@@ -1,22 +1,29 @@
 # 비공개 부대 수집방
 
-`ffxiv/collection-room/`의 정적 페이지와 기존 `teo-ffxiv-counter` 프로젝트의 Google 인증·Realtime Database를 사용합니다. 별도 서버 함수나 유료 요금제 전환은 필요하지 않습니다. Firebase의 사용량 제한은 적용됩니다.
+`ffxiv/collection-room/`의 정적 페이지와 전용 `teo-ffxiv` 프로젝트의 Google 인증·Realtime Database를 사용합니다. 웹 앱 이름도 `teo-ffxiv`입니다. 방문 통계 프로젝트 `teo-ffxiv-counter`와 앱·사용자·데이터베이스·규칙을 분리합니다. 별도 서버 함수나 유료 요금제 전환은 필요하지 않습니다. Firebase의 사용량 제한은 적용됩니다.
 
 ## 실제 서비스 연결
 
 1. `npm --prefix services/collection-rooms ci --ignore-scripts`
-2. 해당 Firebase 프로젝트에 권한이 있는 계정으로 Firebase CLI에 로그인합니다. 기존 통계 프로젝트의 소유 계정은 `teo.ffxiv.kr@gmail.com`입니다.
-3. 저장소 루트에서 `node ffxiv/tools/visitor-counter.cjs`로 통계와 수집방을 합친 규칙을 생성합니다.
-4. 소유 계정으로 아래 명령을 실행하거나 Firebase Console의 Realtime Database 규칙에 `services/visitor-counter/database.rules.json`을 게시합니다.
+2. `teo-ffxiv` 프로젝트에 권한이 있는 계정으로 Firebase CLI에 로그인합니다. 현재 소유 계정은 `teo.ffxiv.kr@gmail.com`입니다.
+3. 저장소 루트에서 `node services/collection-rooms/rules.cjs`로 수집방 전용 규칙을 생성합니다.
+4. 소유 계정으로 아래 명령을 실행하거나 Firebase Console의 Realtime Database 규칙에 `services/collection-rooms/database.rules.json`을 게시합니다.
 
 ```powershell
 node services/collection-rooms/node_modules/firebase-tools/lib/bin/firebase.js login:add
-node services/collection-rooms/node_modules/firebase-tools/lib/bin/firebase.js deploy --only database --project teo-ffxiv-counter --account teo.ffxiv.kr@gmail.com --config firebase.json
+node services/collection-rooms/node_modules/firebase-tools/lib/bin/firebase.js deploy --only auth,database --project teo-ffxiv --account teo.ffxiv.kr@gmail.com --config firebase.json
 ```
 
-5. 기존 GitHub Pages 배포 과정으로 정적 파일을 배포합니다. 인증 허용 도메인에 `teo-park.github.io`가 있어야 합니다. 기존 관리자 페이지에서 이미 사용 중인 Google 로그인 공급자를 재사용합니다. 로컬에서 실제 Google 로그인을 테스트할 경우에만 `localhost`를 별도로 허용합니다.
+5. 기존 GitHub Pages 배포 과정으로 정적 파일을 배포합니다. `teo-ffxiv`의 인증 허용 도메인에 `teo-park.github.io`가 있어야 합니다. Google 로그인 공급자와 `https://teo-ffxiv.firebaseapp.com/__/auth/handler`를 전용 프로젝트에서 설정합니다. 로컬에서 실제 Google 로그인을 테스트할 경우에만 `localhost`를 별도로 허용합니다.
 
-규칙 게시 전에는 수집방 데이터에 대한 접근이 거부됩니다. 테스트는 `demo-collection-rooms` 에뮬레이터에서만 진행하며 실제 서비스에 테스트 방이나 사용자 기록을 생성하지 않습니다. 기존 방문 통계·관리자 읽기 권한은 유지됩니다. 규칙을 생성한 뒤 수집방 부분만 수동으로 공개 읽기로 바꾸지 마세요.
+규칙 게시 전에는 수집방 데이터에 대한 접근이 거부됩니다. 테스트는 `demo-collection-rooms` 에뮬레이터에서만 진행하며 실제 서비스에 테스트 방이나 사용자 기록을 생성하지 않습니다. 루트 `firebase.json`과 `.firebaserc`의 기본 프로젝트는 수집방 앱용입니다. 통계 프로젝트는 `firebase.counter.json`으로 별도 배포합니다. 수집방 규칙을 공개 읽기로 바꾸지 마세요.
+
+```powershell
+node ffxiv/tools/visitor-counter.cjs
+node services/collection-rooms/node_modules/firebase-tools/lib/bin/firebase.js deploy --only database --project teo-ffxiv-counter --account teo.ffxiv.kr@gmail.com --config firebase.counter.json
+```
+
+2026-10-28에 통계 프로젝트를 점검했을 때 `collectionRooms` 데이터는 없었습니다. 분리 시 기존 브라우저의 수첩·같이하기 기록은 보존하고, 연결·전송 대기열·탭 통신은 새 프로젝트 전용 이름을 사용합니다. 이전 배포를 열어 둔 브라우저는 새로고침한 뒤 Google 로그인과 수첩 연결을 다시 진행합니다. 과거 프로젝트의 브라우저 연결 정보와 대기열은 자동 삭제하지 않습니다.
 
 ## 데이터와 접근 권한
 

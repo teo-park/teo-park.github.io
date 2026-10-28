@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "teo-ffxiv",
+    "counter": "teo-ffxiv-counter"
+  }
+}

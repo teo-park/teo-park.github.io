@@ -1,0 +1,157 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "collectionRooms": {
+      "secrets": {
+        "$room": {
+          ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && $room.matches(/^[a-f0-9]{32}$/) && newData.exists() && ((!data.exists() && newData.child('owner').val() === auth.uid) || data.child('owner').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['owner','verifier']) && newData.getPriority() === null",
+          "owner": {
+            ".validate": "newData.isString() && newData.val() === auth.uid && (!data.exists() || newData.val() === data.val()) && newData.getPriority() === null"
+          },
+          "verifier": {
+            ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{64}$/) && newData.getPriority() === null"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "access": {
+        "$room": {
+          "$uid": {
+            ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+            ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid && (!newData.exists() || (!root.child('collectionRooms/bans').child($room).child($uid).exists() && root.child('collectionRooms/rooms').child($room).child('meta/locked').val() !== true && newData.child('proof').val() === root.child('collectionRooms/secrets').child($room).child('verifier').val()))) || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid && !newData.exists())",
+            ".validate": "newData.hasChildren(['active','proof']) && newData.getPriority() === null",
+            "active": {
+              ".validate": "newData.val() === true && newData.getPriority() === null"
+            },
+            "proof": {
+              ".validate": "newData.isString() && newData.val().matches(/^[a-f0-9]{64}$/) && newData.getPriority() === null"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      },
+      "bans": {
+        "$room": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid",
+          "$uid": {
+            ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid && $uid !== auth.uid",
+            ".validate": "newData.val() === true"
+          }
+        }
+      },
+      "rooms": {
+        "$room": {
+          "meta": {
+            ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/access').child($room).child(auth.uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child(auth.uid).exists()",
+            ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid && newData.exists()",
+            ".validate": "newData.hasChildren(['name','owner','locked','createdAt']) && newData.getPriority() === null",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60 && newData.getPriority() === null"
+            },
+            "owner": {
+              ".validate": "newData.val() === auth.uid && newData.val() === root.child('collectionRooms/secrets').child($room).child('owner').val() && newData.getPriority() === null"
+            },
+            "locked": {
+              ".validate": "newData.isBoolean() && newData.getPriority() === null"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber() && ((!data.exists() && newData.val() === now) || newData.val() === data.val()) && newData.getPriority() === null"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "members": {
+            ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/access').child($room).child(auth.uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child(auth.uid).exists()",
+            "$uid": {
+              ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid && ((!newData.exists() && root.child('collectionRooms/secrets').child($room).child('owner').val() !== auth.uid) || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/access').child($room).child(auth.uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child(auth.uid).exists() && newData.exists()))) || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid && $uid !== auth.uid && !newData.exists())",
+              ".validate": "newData.hasChildren(['name']) && newData.getPriority() === null",
+              "name": {
+                ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 30 && newData.getPriority() === null"
+              },
+              "sharing": {
+                "$book": {
+                  ".validate": "($book === 'blue-mage' || $book === 'weapons' || $book === 'fishing' || $book === 'triple-triad' || $book === 'minions' || $book === 'beastmaster') && newData.isBoolean() && newData.getPriority() === null"
+                },
+                ".validate": "newData.getPriority() === null"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        }
+      },
+      "userRooms": {
+        "$uid": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+          "$room": {
+            ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+            ".validate": "newData.val() === true && root.child('collectionRooms/access').child($room).child($uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child($uid).exists()"
+          }
+        }
+      },
+      "users": {
+        "$uid": {
+          ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+          "books": {
+            ".write": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid",
+            "$book": {
+              ".validate": "($book === 'blue-mage' || $book === 'weapons' || $book === 'fishing' || $book === 'triple-triad' || $book === 'minions' || $book === 'beastmaster') && newData.getPriority() === null",
+              "$id": {
+                ".validate": "(($book === 'weapons' && $id.matches(/^[a-z0-9-]+~[A-Z]{3}~(weapon|shield)$/)) || ($book !== 'weapons' && $id.matches(/^[1-9][0-9]{0,9}$/))) && (newData.hasChild('value') || newData.hasChild('wanted')) && newData.getPriority() === null",
+                "value": {
+                  ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0 && newData.val() <= ($book === 'weapons' ? 2147483647 : 1) && newData.getPriority() === null"
+                },
+                "wanted": {
+                  ".validate": "newData.isBoolean() && newData.getPriority() === null"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "shared": {
+        "$room": {
+          "$uid": {
+            "$book": {
+              ".read": "auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/access').child($room).child(auth.uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child(auth.uid).exists() && root.child('collectionRooms/access').child($room).child($uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child($uid).exists() && root.child('collectionRooms/rooms').child($room).child('members').child($uid).child('sharing').child($book).val() === true",
+              ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && auth.uid === $uid && (!newData.exists() || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/access').child($room).child(auth.uid).child('active').val() === true && !root.child('collectionRooms/bans').child($room).child(auth.uid).exists() && newData.parent().parent().parent().parent().child('rooms').child($room).child('members').child($uid).child('sharing').child($book).val() === true))) || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid && !newData.exists())",
+              ".validate": "($book === 'blue-mage' || $book === 'weapons' || $book === 'fishing' || $book === 'triple-triad' || $book === 'minions' || $book === 'beastmaster') && newData.child('ready').val() === true && newData.getPriority() === null",
+              "ready": {
+                ".validate": "newData.val() === true && newData.getPriority() === null"
+              },
+              "entries": {
+                ".validate": "newData.getPriority() === null",
+                "$id": {
+                  ".validate": "(($book === 'weapons' && $id.matches(/^[a-z0-9-]+~[A-Z]{3}~(weapon|shield)$/)) || ($book !== 'weapons' && $id.matches(/^[1-9][0-9]{0,9}$/))) && (newData.hasChild('value') || newData.hasChild('wanted')) && newData.getPriority() === null",
+                  "value": {
+                    ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0 && newData.val() <= ($book === 'weapons' ? 2147483647 : 1) && newData.getPriority() === null"
+                  },
+                  "wanted": {
+                    ".validate": "newData.isBoolean() && newData.getPriority() === null"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

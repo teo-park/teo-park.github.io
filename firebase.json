@@ -1,5 +1,14 @@
 {
-  "database": { "rules": "services/visitor-counter/database.rules.json" },
+  "database": { "rules": "services/collection-rooms/database.rules.json" },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "teo-ffxiv",
+        "supportEmail": "teo.ffxiv.kr@gmail.com",
+        "authorizedRedirectUris": ["https://teo-ffxiv.firebaseapp.com/__/auth/handler"]
+      }
+    }
+  },
   "emulators": {
     "database": { "host": "127.0.0.1", "port": 9150 },
     "ui": { "enabled": false },

@@ -2,6 +2,8 @@
 
 프로젝트 `teo-ffxiv-counter` / 소유 계정 `teo.ffxiv.kr@gmail.com` / Spark 무료 요금제 / Realtime Database 싱가포르.
 
+통계 전용 프로젝트입니다. 부대 수집방은 별도 `teo-ffxiv` 프로젝트에서 운영하며, 이 프로젝트의 웹 앱·인증·데이터베이스를 사용하지 않습니다. 통계 규칙을 배포할 때에는 `--project teo-ffxiv-counter --config firebase.counter.json --only database`를 지정합니다. 루트 `firebase.json`과 기본 프로젝트는 수집방용입니다.
+
 관리자 주소: `https://teo-park.github.io/ffxiv/counter-admin/`
 메뉴·포털·사이트맵에 링크하지 않고 `noindex,nofollow,noarchive`를 적용한다. 주소와 소스는 공개 저장소에서 발견할 수 있지만 보안은 Firebase 규칙으로 강제한다.
 

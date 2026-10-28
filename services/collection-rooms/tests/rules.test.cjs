@@ -4,7 +4,7 @@ const {initializeTestEnvironment,assertSucceeds,assertFails}=require('@firebase/
 const {ref,set,get,update,remove,serverTimestamp,runTransaction}=require('firebase/database');
 const room='a'.repeat(32),otherRoom='b'.repeat(32),proof='c'.repeat(64),wrong='d'.repeat(64);
 let env;
-before(async()=>{env=await initializeTestEnvironment({projectId:'demo-collection-rooms',database:{host:'127.0.0.1',port:9150,rules:fs.readFileSync(path.resolve(__dirname,'../../visitor-counter/database.rules.json'),'utf8')}});});
+before(async()=>{env=await initializeTestEnvironment({projectId:'demo-collection-rooms',database:{host:'127.0.0.1',port:9150,rules:fs.readFileSync(path.resolve(__dirname,'../database.rules.json'),'utf8')}});});
 after(async()=>{await env?.cleanup();});beforeEach(async()=>{await env.clearDatabase();});
 const db=(uid,extra={})=>uid?env.authenticatedContext(uid,{email_verified:true,firebase:{sign_in_provider:'google.com'},...extra}).database():env.unauthenticatedContext().database();
 const r=(database,p='')=>ref(database,'collectionRooms/'+p);
@@ -87,7 +87,7 @@ test('leaving removes room copies without removing personal collection',async()=
   await assertSucceeds(update(r(member),{[`rooms/${room}/members/member`]:null,[`access/${room}/member`]:null,[`userRooms/member/${room}`]:null,[`shared/${room}/member/blue-mage`]:null,[`shared/${room}/member/minions`]:null}));
   await assertFails(get(r(member,`rooms/${room}/meta`)));await assertSucceeds(get(r(member,'users/member/books')));
 });
-test('original visitor counter and admin access remain restricted',async()=>{
+test('application project never accepts statistics writes or exposes counter data',async()=>{
   const member=db('member');await assertFails(get(ref(member,'visits')));await assertFails(get(ref(member,'counters')));await assertFails(set(ref(member,'counters/home'),42));
-  await assertSucceeds(set(ref(env.unauthenticatedContext().database(),'visits/home/'+'e'.repeat(32)),true));
+  await assertFails(set(ref(env.unauthenticatedContext().database(),'visits/home/'+'e'.repeat(32)),true));
 });

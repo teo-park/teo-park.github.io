@@ -1,4 +1,4 @@
-import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,changeItem} from '../collection-sync.js';
+import {ensureConnection,subscribe,linkNotebooks,unlinkNotebooks,localBooks,changeItem} from '../collection-sync.js?v=20261028-project2';
 
 const M=globalThis.CollectionRoomModel,$=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

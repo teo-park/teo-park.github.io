@@ -1,4 +1,4 @@
-// Merged by the existing generator so counter deployments cannot erase room rules.
+// Standalone application rules. Statistics use a separate Firebase project.
 const signed="auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'";
 const own=`${signed} && auth.uid === $uid`;
 const owner=`${signed} && root.child('collectionRooms/secrets').child($room).child('owner').val() === auth.uid`;
@@ -61,4 +61,6 @@ function build(){
     }}}},
   };
 }
-module.exports={build};
+function databaseRules(){return {rules:{'.read':false,'.write':false,collectionRooms:build()}};}
+if(require.main===module){const fs=require('node:fs'),path=require('node:path');fs.writeFileSync(path.join(__dirname,'database.rules.json'),JSON.stringify(databaseRules(),null,2)+'\n');}
+module.exports={build,databaseRules};

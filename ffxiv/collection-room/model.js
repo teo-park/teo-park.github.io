@@ -9,7 +9,7 @@
     {id:'minions',label:'꼬마친구',path:'minions/',key:'teo-ffxiv.minions.collection.v1',type:'ffxiv-minions',field:'collected'},
     {id:'beastmaster',label:'마수도감',path:'beastmaster/',key:'teo-ffxiv.beastmaster.collection.v1',type:'ffxiv-beastmaster',field:'collected'},
   ];
-  const WISH_KEY='teo-ffxiv.collection-wishes.v1',BINDING_KEY='teo-ffxiv.collection-binding.v1';
+  const WISH_KEY='teo-ffxiv.collection-wishes.v1',BINDING_KEY='teo-ffxiv.collection-binding.teo-ffxiv.v1',OUTBOX_PREFIX='teo-ffxiv.collection-outbox.teo-ffxiv.v1.';
   const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
   const encode=id=>String(id).replaceAll('.','~'),decode=id=>String(id).replaceAll('~','.');
   const empty=()=>({value:0,wanted:false});
@@ -108,5 +108,5 @@
     const bits=await cryptoApi.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode('ffxiv-collection-room-v1:'+roomId),iterations:210000,hash:'SHA-256'},key,256);
     return [...new Uint8Array(bits)].map(v=>v.toString(16).padStart(2,'0')).join('');
   }
-  return {BOOKS,WISH_KEY,BINDING_KEY,encode,decode,empty,normalize,readBook,readLocal,writeBook,diff,overlay,mergeInitial,complete,matches,passwordProof};
+  return {BOOKS,WISH_KEY,BINDING_KEY,OUTBOX_PREFIX,encode,decode,empty,normalize,readBook,readLocal,writeBook,diff,overlay,mergeInitial,complete,matches,passwordProof};
 });

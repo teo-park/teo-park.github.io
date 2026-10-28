@@ -26,3 +26,14 @@ test('legacy fishing stores are imported before the first room connection withou
     const data=M.readLocal(s);assert.equal(data.fishing['4776'].value,1);assert.equal(data.fishing['999999'].value,1);assert.equal(s.getItem(w.FishingCollection.BOOK_KEY),old);
   }finally{dom.window.close();}
 });
+test('collection application and statistics have separate projects, rules, and deploy configurations',()=>{
+  const repo=path.resolve(root,'..'),read=p=>JSON.parse(fs.readFileSync(path.join(repo,p),'utf8'));
+  const app=read('firebase.json'),counter=read('firebase.counter.json'),aliases=read('.firebaserc').projects;
+  assert.equal(aliases.default,'teo-ffxiv');assert.equal(aliases.counter,'teo-ffxiv-counter');
+  assert.equal(app.database.rules,'services/collection-rooms/database.rules.json');assert.equal(counter.database.rules,'services/visitor-counter/database.rules.json');
+  const appRules=read(app.database.rules).rules,counterRules=read(counter.database.rules).rules;
+  assert.ok(appRules.collectionRooms);assert.equal(appRules.visits,undefined);assert.equal(counterRules.collectionRooms,undefined);assert.ok(counterRules.visits);
+  const sdk=fs.readFileSync(path.join(root,'collection-room/firebase.js'),'utf8'),config=JSON.parse(sdk.match(/const firebaseConfig=(\{[^\n]+\});/)[1]);
+  assert.equal(config.projectId,'teo-ffxiv');assert.equal(config.authDomain,'teo-ffxiv.firebaseapp.com');assert.match(config.databaseURL,/\/\/teo-ffxiv-default-rtdb\./);assert.equal(sdk.includes('teo-ffxiv-counter'),false);
+  assert.match(fs.readFileSync(path.join(root,'counter-admin/app.js'),'utf8'),/teo-ffxiv-counter/);
+});

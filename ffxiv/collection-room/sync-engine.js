@@ -2,7 +2,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.CollectionSyncEngine=api;})(globalThis,function(){
   'use strict';
   function create({model:M,storage,uid,writeRemote,readLocal=()=>M.readLocal(storage),applyLocal,onStatus=()=>{}}){
-    const key='teo-ffxiv.collection-outbox.v1.'+uid;
+    const key=M.OUTBOX_PREFIX+uid;
     let state,cloud={},ready=false,sending=false,stopped=false,applying=false;
     const raw=storage.getItem(key);
     try{state=raw===null?{base:readLocal(),pending:{}}:JSON.parse(raw);M.normalize(state.base);M.overlay({},state.pending);}catch{throw Error('동기화 대기 기록을 읽지 못했습니다. 기존 데이터를 보존했습니다.');}
