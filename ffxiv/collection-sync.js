@@ -1,4 +1,4 @@
-import './collection-room/model.js?v=20261028-project2';
+import './collection-room/model.js?v=20261028-password4';
 import './collection-room/sync-engine.js?v=20261028-project2';
 import './ocean-fishing/scripts/teamcraft-ids.js';
 import './fishing-collection.js';

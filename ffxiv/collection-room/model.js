@@ -102,7 +102,7 @@
   function complete(book,item,record){return book==='weapons'?record?.value===item.stages.at(-1)?.id:record?.value===1;}
   function matches(text,query){const norm=v=>String(v||'').normalize('NFKC').toLowerCase().replace(/\s/g,'');const initials=v=>[...v].map(c=>{const n=c.charCodeAt(0)-44032;return n>=0&&n<=11171?'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ'[Math.floor(n/588)]:c;}).join('');return norm(text).includes(norm(query))||norm(initials(text)).includes(norm(query));}
   async function passwordProof(password,roomId,cryptoApi=globalThis.crypto){
-    if(typeof password!=='string'||password.length<8||password.length>128)throw Error('방 비밀번호는 8~128자로 입력해 주세요.');
+    if(typeof password!=='string'||password.length<4||password.length>128)throw Error('방 비밀번호는 4~128자로 입력해 주세요.');
     if(!/^[a-f0-9]{32}$/.test(roomId))throw Error('방 코드를 확인해 주세요.');
     const key=await cryptoApi.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
     const bits=await cryptoApi.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode('ffxiv-collection-room-v1:'+roomId),iterations:210000,hash:'SHA-256'},key,256);

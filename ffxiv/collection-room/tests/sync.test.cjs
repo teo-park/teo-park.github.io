@@ -69,7 +69,7 @@ test('late data after logout cannot restore records or clear the persisted outbo
   assert.equal(M.readLocal(h.s)['blue-mage']['2'],undefined);assert.equal(h.e.pending['blue-mage/1/value'],1);
 });
 test('password proofs are deterministic per room, salted across rooms, and reject short passwords',async()=>{
-  const p=await M.passwordProof('우리부대123456','a'.repeat(32));assert.match(p,/^[a-f0-9]{64}$/);assert.equal(await M.passwordProof('우리부대123456','a'.repeat(32)),p);assert.notEqual(await M.passwordProof('우리부대123456','b'.repeat(32)),p);await assert.rejects(M.passwordProof('short','a'.repeat(32)));
+  const p=await M.passwordProof('우리부대123456','a'.repeat(32));assert.match(p,/^[a-f0-9]{64}$/);assert.equal(await M.passwordProof('우리부대123456','a'.repeat(32)),p);assert.notEqual(await M.passwordProof('우리부대123456','b'.repeat(32)),p);assert.match(await M.passwordProof('1234','a'.repeat(32)),/^[a-f0-9]{64}$/);await assert.rejects(M.passwordProof('123','a'.repeat(32)),/4~128/);
 });
 test('matching distinguishes missing, wanted, and completed stages and supports Korean initials',()=>{
   assert.equal(M.matches('물대포 · 아마쟈','ㅁㄷㅍ'),true);assert.equal(M.complete('blue-mage',{id:'1'},{value:1,wanted:false}),true);const item=catalog.books.weapons.items[0];assert.equal(M.complete('weapons',item,{value:item.stages[0].id}),false);assert.equal(M.complete('weapons',item,{value:item.stages.at(-1).id}),true);
