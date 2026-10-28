@@ -20,7 +20,7 @@
   try { owned = readStored(); }
   catch { fatal('저장된 기록을 읽을 수 없어요. 브라우저의 저장 권한을 확인하거나 백업 파일을 가져와 주세요. 기존 기록을 덮어쓰지 않았어요.'); }
   function save(ids) {
-    try { localStorage.setItem(STORAGE_KEY, T.backup(ids)); owned = ids; fatal(''); return true; }
+    try { localStorage.setItem(STORAGE_KEY, T.backup(ids)); window.dispatchEvent(new CustomEvent('ffxiv:collection-change')); owned = ids; fatal(''); return true; }
     catch { fatal('수집 기록을 저장하지 못했어요. 브라우저의 저장 공간·권한을 확인해 주세요. 마지막으로 저장된 체크 상태를 유지합니다.'); return false; }
   }
   function toast(message) {

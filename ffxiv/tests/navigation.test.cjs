@@ -17,7 +17,7 @@ test('all public pages have consistent navigation, valid relative destinations a
     try {
       assert.equal(d.querySelectorAll('[data-navigation]').length, 1, page);
       assert.deepEqual([...d.querySelectorAll('.nav-category > summary')].map(el => el.textContent), ['진행·검색', '수집·육성', '어부', '영식 헬퍼']);
-      assert.equal(d.querySelectorAll('.site-nav a').length, 17);
+      assert.equal(d.querySelectorAll('.site-nav a').length, 18);
       assert.equal(d.querySelector('#nav-beastmaster'),null);
       assert.deepEqual([...d.querySelectorAll('#nav-collection a[href*="beastmaster"]')].map(a=>a.textContent.replace('현재','')),['마수도감','마수조련사 공략']);
       const guides=d.querySelectorAll('#nav-fishing ul[aria-labelledby="nav-fisher-guide-label"] > li > a');
@@ -47,7 +47,7 @@ test('home collection category and search expose beastmaster tools with consiste
     w.eval(fs.readFileSync(path.join(root,'hub.js'),'utf8'));
     assert.equal(d.querySelector('[data-category="beastmaster"]'),null);
     d.querySelector('[data-category="collection"]').click();
-    assert.deepEqual([...d.querySelectorAll('.tool-link:not([hidden])')].map(a=>new URL(a.href).pathname),['/ffxiv/triple-triad/','/ffxiv/minions/','/ffxiv/blue-mage/','/ffxiv/beastmaster/','/ffxiv/beastmaster/guide/','/ffxiv/weapons/']);
+    assert.deepEqual([...d.querySelectorAll('.tool-link:not([hidden])')].map(a=>new URL(a.href).pathname),['/ffxiv/triple-triad/','/ffxiv/minions/','/ffxiv/blue-mage/','/ffxiv/beastmaster/','/ffxiv/beastmaster/guide/','/ffxiv/weapons/','/ffxiv/collection-room/']);
     const input=d.getElementById('toolSearch');input.value='마수';input.dispatchEvent(new w.Event('input',{bubbles:true}));
     assert.deepEqual([...d.querySelectorAll('.tool-link:not([hidden])')].map(a=>new URL(a.href).pathname),['/ffxiv/beastmaster/','/ffxiv/beastmaster/guide/']);
     input.value='마수조련사 공략';input.dispatchEvent(new w.Event('input',{bubbles:true}));

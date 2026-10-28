@@ -27,6 +27,7 @@ const categories = [
     ['beastmaster/', '마수도감'],
     ['beastmaster/guide/', '마수조련사 공략'],
     ['weapons/', '무기 수첩'],
+    ['collection-room/', '부대 수집방'],
   ] },
   { id: 'fishing', label: '어부', groups: fishingGroups, tools: fishingGroups.flatMap(group => group.tools) },
   { id: 'raid', label: '영식 헬퍼', tools: [
@@ -43,7 +44,8 @@ const pages = ['', ...categories.flatMap(c => c.tools.map(([url]) => url)).filte
 const baseFor = page => page === 'fishing-log/catalog/' ? '../' : page ? '../'.repeat(page.split('/').filter(Boolean).length) : './';
 function assets(page) {
   const base = baseFor(page);
-  return `<script defer src="${base}visitor-counter.js?v=20260916-pages1"></script><script defer src="${base}selection-counter.js?v=20260916-pages1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
+  const sync = ['blue-mage/','weapons/','fishing-log/','fishing-log/catalog/','ocean-fishing/','ocean-fishing/checklist/','minions/','triple-triad/','beastmaster/'].includes(page) ? `<script type="module" src="${base}collection-sync.js?v=20261028-room1"></script>` : '';
+  return `${sync}<script defer src="${base}visitor-counter.js?v=20260916-pages1"></script><script defer src="${base}selection-counter.js?v=20260916-pages1"></script><link rel="stylesheet" href="${base}navigation.css?v=${version}"><script defer src="${base}navigation.js?v=${version}"></script><link rel="stylesheet" href="${base}select-options.css?v=20260910-radios4"><script defer src="${base}select-options.js?v=20260910-radios1"></script>`;
 }
 function header(page) {
   const base = baseFor(page);
@@ -72,7 +74,7 @@ function update() {
     if (!/<header class="site-header"/.test(html)) throw Error(`Missing header: ${file}`);
     html = html.replace(/<header class="site-header"[^>]*>[\s\S]*?<\/header>/, header(page));
     html = html.replace(/<link\b[^>]*href="[^"\s]*(?:navigation|select-options|visitor-counter)\.css[^"\s]*"[^>]*>\s*/g, '')
-      .replace(/<script\b[^>]*src="[^"\s]*(?:navigation|select-options|visitor-counter|selection-counter)\.js[^"\s]*"[^>]*><\/script>\s*/g, '');
+      .replace(/<script\b[^>]*src="[^"\s]*(?:navigation|select-options|visitor-counter|selection-counter|collection-sync)\.js[^"\s]*"[^>]*><\/script>\s*/g, '');
     html = html.replace('</head>', `${assets(page)}</head>`);
     fs.writeFileSync(file, html);
   }

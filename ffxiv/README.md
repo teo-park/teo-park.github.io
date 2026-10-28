@@ -13,6 +13,7 @@
 - [트리플 트라이어드 수첩](https://teo-park.github.io/ffxiv/triple-triad/) — 카드 수집 체크·획득처·규칙별 보유 카드 덱 추천 ([데이터와 추천 안내](./triple-triad/README.md))
 - [꼬마친구 수첩](https://teo-park.github.io/ffxiv/minions/) — 아이콘으로 빠른 보유 체크·초성 검색·획득처·확장팩 필터 ([데이터와 이용 안내](./minions/README.md))
 - [청마도사 스킬 수첩](https://teo-park.github.io/ffxiv/blue-mage/) — 청마법 습득 체크·번호와 초성 검색·장소별 습득처·우상 조건 ([데이터와 이용 안내](./blue-mage/README.md))
+- [부대 수집방](./collection-room/) — 비밀번호가 있는 방에서 수첩 현황 공유·겹치는 목표 찾기·기존 기록 불러오기와 양방향 동기화 ([이용 안내](./collection-room/README.md), [Firebase 연결·배포](../services/collection-rooms/README.md))
 
 - [세계를 누비는 어부](https://teo-park.github.io/ffxiv/fishing-log/) — 어류·작살도감 10×10 수집 체크·캡처 등록·Teamcraft 기록 호환·미끼와 장소별 보기·내 접속 시간의 낚시 예보·페이지 접속 중 알림 ([데이터와 이용 안내](./fishing-log/README.md))
 

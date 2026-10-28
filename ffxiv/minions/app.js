@@ -32,7 +32,7 @@
     try{
       const latest=read(),next=new Set(latest),before=[];
       for(const [id,checked]of changes){if(latest.has(id)===checked)continue;before.push([id,latest.has(id)]);if(checked)next.add(id);else next.delete(id);}
-      if(before.length){localStorage.setItem(storageKey,E.backup(next));if(remember){history.push(before);if(history.length>25)history.shift();}}
+      if(before.length){localStorage.setItem(storageKey,E.backup(next));window.dispatchEvent(new CustomEvent('ffxiv:collection-change'));if(remember){history.push(before);if(history.length>25)history.shift();}}
       owned=next;updateCounts();updateTiles();
       if($('status').value!=='all')$('refreshResults').hidden=false;
       $('fatal').hidden=true;notice(message);return true;

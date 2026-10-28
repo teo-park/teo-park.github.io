@@ -1,1 +1,3 @@
 .cache/
+firebase-debug.log
+database-debug.log

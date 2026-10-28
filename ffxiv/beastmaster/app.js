@@ -49,7 +49,7 @@ export function mount(win,data,locationData=null,captureData=null){
       const before=read(),after=new Set(before),changes=[];
       for(const id of ids)if(before.has(id)!==state){changes.push({id,before:before.has(id),after:state});state?after.add(id):after.delete(id);}
       if(!changes.length){owned=before;updateCounts();announce('이미 반영된 기록이에요.');return true;}
-      win.localStorage.setItem(KEY,backup(after));owned=after;undoChange=changes;storageError=false;changed(message);return true;
+      win.localStorage.setItem(KEY,backup(after));win.dispatchEvent(new win.CustomEvent('ffxiv:collection-change'));owned=after;undoChange=changes;storageError=false;changed(message);return true;
     }catch{announce('수집 기록을 저장하지 못했어요. 브라우저 저장 설정이나 기존 백업을 확인해 주세요.');return false;}
   }
   function undo(){
@@ -57,7 +57,7 @@ export function mount(win,data,locationData=null,captureData=null){
     try{
       const latest=read();let n=0;
       for(const c of undoChange)if(latest.has(c.id)===c.after){c.before?latest.add(c.id):latest.delete(c.id);n++;}
-      win.localStorage.setItem(KEY,backup(latest));owned=latest;undoChange=null;updateCounts();
+      win.localStorage.setItem(KEY,backup(latest));win.dispatchEvent(new win.CustomEvent('ffxiv:collection-change'));owned=latest;undoChange=null;updateCounts();
       if($('status').value!=='all')$('refreshResults').hidden=false;
       announce(`${n}종의 변경을 취소했어요.`);
     }catch{announce('실행 취소를 저장하지 못했어요. 기존 기록은 유지됩니다.',true);}

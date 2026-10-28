@@ -35,7 +35,7 @@
     try{
       const latest=read(),next=new Set(latest),before=[];
       for(const [id,checked] of changes){if(next.has(id)===checked)continue;before.push([id,next.has(id)]);if(checked)next.add(id);else next.delete(id);}
-      if(before.length){localStorage.setItem(KEY,E.backup(next));if(remember){history.push(before);if(history.length>25)history.shift();}}
+      if(before.length){localStorage.setItem(KEY,E.backup(next));window.dispatchEvent(new CustomEvent('ffxiv:collection-change'));if(remember){history.push(before);if(history.length>25)history.shift();}}
       learned=next;counts();updateChecks();$('fatal').hidden=true;
       if($('status').value!=='all')$('refreshResults').hidden=false;notify(message);return true;
     }catch{notify('저장하지 못했어요. 기존 기록은 그대로입니다. 브라우저 저장 공간·권한을 확인해 주세요.');return false;}

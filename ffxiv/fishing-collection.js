@@ -52,11 +52,12 @@
    const serialized=JSON.stringify(record),changed=(raw!==null||oldBookRaw!==null||oldOceanRaw!==null)&&serialized!==raw;
    return {record,serialized,changed};
   }
-  function current(storage){const snapshot=load(storage);if(snapshot.changed)storage.setItem(KEY,snapshot.serialized);return snapshot.record;}
+  const changed=()=>{if(root.dispatchEvent)root.dispatchEvent(new root.CustomEvent('ffxiv:collection-change'));};
+  function current(storage){const snapshot=load(storage);if(snapshot.changed){storage.setItem(KEY,snapshot.serialized);changed();}return snapshot.record;}
   function read(storage){return new Set(current(storage).caught);}
   function write(storage,ids){
    const values=sorted(ids);if(!validIds(values))throw Error('수집 아이템 ID가 올바르지 않습니다.');
-   const {record}=load(storage);record.caught=values;storage.setItem(KEY,JSON.stringify(record));return new Set(values);
+   const {record}=load(storage);record.caught=values;storage.setItem(KEY,JSON.stringify(record));changed();return new Set(values);
   }
   function readOcean(storage){
    const record=current(storage),state=ocean(record.sync.extras),ids=new Set(record.caught);
@@ -66,7 +67,7 @@
   function writeOcean(storage,value){
    const state=ocean(value),{record}=load(storage),ids=new Set(record.caught),next=oceanIds(state);
    for(const [id] of entries){if(next.has(id))ids.add(id);else ids.delete(id);}
-   record.caught=sorted(ids);record.sync.extras=extras(state);storage.setItem(KEY,JSON.stringify(record));return state;
+   record.caught=sorted(ids);record.sync.extras=extras(state);storage.setItem(KEY,JSON.stringify(record));changed();return state;
   }
   return {KEY,BOOK_KEY,OCEAN_KEY,read,write,readOcean,writeOcean,isStorageKey:value=>value===null||[KEY,BOOK_KEY,OCEAN_KEY].includes(value)};
  }

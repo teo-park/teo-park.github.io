@@ -61,6 +61,11 @@
       "label": "무기 수첩"
     },
     {
+      "key": "collection-room",
+      "path": "/ffxiv/collection-room/",
+      "label": "부대 수집방"
+    },
+    {
       "key": "fisher-skills",
       "path": "/ffxiv/fisher-skills/",
       "label": "어부 스킬 안내"

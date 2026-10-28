@@ -30,7 +30,7 @@ function latest(){
 }
 function persist(next,{replaceDamaged=false,message='기록을 저장했습니다.'}={}){
  let before;
- try{before=replaceDamaged?state:latest();localStorage.setItem(STORAGE_KEY,JSON.stringify(next));}
+ try{before=replaceDamaged?state:latest();localStorage.setItem(STORAGE_KEY,JSON.stringify(next));window.dispatchEvent(new CustomEvent('ffxiv:collection-change'));}
  catch(error){warn('자동 저장 실패: '+error.message);notify('기록을 저장하지 못했습니다. 기존 기록을 유지합니다.');return false;}
  undoState={before:structuredClone(before),after:structuredClone(next)};state=next;storageBlocked=false;rawStored=null;warn('');render();notify(message,true);return true;
 }
@@ -178,7 +178,7 @@ async function boot(){
    if(persist(next,{replaceDamaged:replace,message:'백업 기록을 가져왔습니다.'})){pendingImport=null;$('importPreview').hidden=true;$('recordMessage').textContent='가져오기를 완료했습니다.';$('exportRaw').hidden=true;$('exportRecords').disabled=false;}
   }catch(error){$('recordMessage').textContent=error.message;}
  });
- $('undo').addEventListener('click',()=>{if(!undoState)return;try{const current=latest();if(JSON.stringify(current)!==JSON.stringify(undoState.after))throw Error('다른 탭의 기록이 변경되어 실행 취소할 수 없습니다.');const before=undoState.before;localStorage.setItem(STORAGE_KEY,JSON.stringify(before));state=before;undoState=null;render();notify('이전 기록으로 되돌렸습니다.');}catch(error){notify(error.message);}});
+ $('undo').addEventListener('click',()=>{if(!undoState)return;try{const current=latest();if(JSON.stringify(current)!==JSON.stringify(undoState.after))throw Error('다른 탭의 기록이 변경되어 실행 취소할 수 없습니다.');const before=undoState.before;localStorage.setItem(STORAGE_KEY,JSON.stringify(before));window.dispatchEvent(new CustomEvent('ffxiv:collection-change'));state=before;undoState=null;render();notify('이전 기록으로 되돌렸습니다.');}catch(error){notify(error.message);}});
  $('closeNotice').addEventListener('click',()=>{$('notice').hidden=true;});
  window.addEventListener('storage',event=>{if(event.key===STORAGE_KEY||event.key===null){try{state=latest();undoState=null;render();notify('다른 탭의 수집 기록을 반영했습니다.');}catch(error){warn(error.message);}}});
 }

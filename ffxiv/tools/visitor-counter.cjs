@@ -17,6 +17,7 @@ function build(databaseUrl) {
   };
   const owner = "auth != null && auth.token.email === 'teo.ffxiv.kr@gmail.com' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com'";
   const rules = { rules: { '.read': false, '.write': false, counters: { '.read': owner }, visits: { '.read': owner }, selections: { '.read': owner } } };
+  rules.rules.collectionRooms = require('../../services/collection-rooms/rules.cjs').build();
   for (const [kind, group] of Object.entries(selectionCatalog.groups)) {
     // Keep each automaton small enough for Firebase's rule compiler.
     const ids=Object.keys(group.names).sort(),checks=[];

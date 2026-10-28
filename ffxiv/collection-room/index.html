@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>부대 수집방 · 파판14 도구함</title>
+  <meta name="description" content="비밀번호가 있는 부대 수집방. 내 수첩을 연결하고, 같은 수집 목표를 가진 부대원을 찾아보세요.">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="same-origin">
+  <meta name="theme-color" content="#0b1220">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../theme.css?v=20260909-line1">
+  <link rel="stylesheet" href="./styles.css?v=20261028-room1">
+  <script type="module" src="./app.js?v=20261028-room1"></script>
+<script defer src="../visitor-counter.js?v=20260916-pages1"></script><script defer src="../selection-counter.js?v=20260916-pages1"></script><link rel="stylesheet" href="../navigation.css?v=20260916-pages1"><script defer src="../navigation.js?v=20260916-pages1"></script><link rel="stylesheet" href="../select-options.css?v=20260910-radios4"><script defer src="../select-options.js?v=20260910-radios1"></script></head>
+<body>
+  <a class="skip-link" href="#roomApp">수집방으로 바로가기</a>
+  <header class="site-header" data-navigation><a class="brand" href="../"><img class="brand-emblem" src="../favicon.svg" alt="">파판14 도구함</a><nav class="site-nav" aria-label="도구 카테고리"><details class="nav-category"><summary aria-controls="nav-general">진행·검색<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-general"><ul><li><a href="../msq-tracker/">메인 퀘스트 진행률</a></li><li><a href="../pvp-series-calculator/">PvP 시리즈 계산기</a></li><li><a href="../duty-finder/">임무 초성 사전</a></li><li><a href="../mahjong-helper/">작패유희 역 사전</a></li></ul></div></details><details class="nav-category" data-current-category><summary aria-controls="nav-collection">수집·육성<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-collection"><ul><li><a href="../triple-triad/">트리플 트라이어드 수첩</a></li><li><a href="../minions/">꼬마친구 수첩</a></li><li><a href="../blue-mage/">청마도사 스킬 수첩</a></li><li><a href="../beastmaster/">마수도감</a></li><li><a href="../beastmaster/guide/">마수조련사 공략</a></li><li><a href="../weapons/">무기 수첩</a></li><li><a href="../collection-room/" aria-current="page">부대 수집방<span class="nav-current-label">현재</span></a></li></ul></div></details><details class="nav-category"><summary aria-controls="nav-fishing">어부<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-fishing"><ul><li class="nav-tool-group"><span class="nav-group-label" id="nav-fisher-guide-label">어부 가이드</span><ul aria-labelledby="nav-fisher-guide-label"><li><a href="../fisher-skills/">어부 스킬 안내</a></li><li><a href="../fisher-skills/big-fish/">터주 유형별 공략</a></li></ul></li><li class="nav-tool-group"><span class="nav-group-label" id="nav-fishing-log-label">낚시 도감</span><ul aria-labelledby="nav-fishing-log-label"><li><span class="nav-family-label">세계를 누비는 어부</span><ul class="nav-journal-pages" aria-label="세계를 누비는 어부 페이지"><li><a href="../fishing-log/" class="nav-subpage">낚시 예보</a></li><li><a href="../fishing-log/catalog/" class="nav-subpage">물고기 도감</a></li></ul></li><li><span class="nav-family-label">먼바다</span><ul class="nav-journal-pages" aria-label="먼바다 페이지"><li><a href="../ocean-fishing/" class="nav-subpage">항해 예보</a></li><li><a href="../ocean-fishing/checklist/" class="nav-subpage">물고기 도감</a></li></ul></li></ul></li></ul></div></details><details class="nav-category"><summary aria-controls="nav-raid">영식 헬퍼<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 6 4 4 4-4"/></svg></summary><div class="nav-dropdown" id="nav-raid"><ul><li><a href="../dream-helper/">헤비 영식 4층 드림 헬퍼</a></li></ul></div></details></nav><span class="header-note">FFXIV · KR</span></header>
+  <main id="roomApp" class="room-app">
+    <section class="room-hero">
+      <div><p class="eyebrow"><span class="lock-icon" aria-hidden="true">▣</span> 우리끼리 채우는 수집 기록</p><h1>부대 수집방<span class="beta">새 도구</span></h1><p class="hero-copy">같은 목표가 있다면, 함께 가요.<br>내 수첩을 연결하고 같이 모을 부대원을 찾아보세요.</p></div>
+      <div class="account"><span id="accountName">방에 참여한 사람만 볼 수 있어요.</span><button id="login" type="button" class="primary">Google로 시작하기 <span aria-hidden="true">↗</span></button><button id="logout" type="button" hidden>로그아웃</button></div>
+    </section>
+    <p id="message" class="message" role="status" aria-live="polite" hidden></p>
+    <p id="serviceNotice" class="message error" role="alert" hidden></p>
+    <section id="welcome" class="welcome panel">
+      <div><span class="step">01</span><h2>내 수첩 그대로</h2><p>이미 체크한 기록을 불러와요.<br> 수첩과 수집방 어디서 체크해도 동기화돼요.</p></div>
+      <div><span class="step">02</span><h2>비밀번호로 입장</h2><p>방 링크와 비밀번호로 모여요.<br> 수집 현황은 참여자끼리만 공유해요.</p></div>
+      <div><span class="step">03</span><h2>겹치는 목표 찾기</h2><p>아직 없는 것, 지금 모으고 싶은 것.<br> 목표가 겹치는 부대원을 한눈에 찾아요.</p></div>
+    </section>
+    <section id="connectionPanel" class="panel connection-panel" aria-labelledby="connectionTitle">
+      <div class="section-title"><div><p class="eyebrow">MY NOTEBOOKS</p><h2 id="connectionTitle">내 수첩 연결</h2></div><span id="syncStatus" class="status-pill">이 브라우저의 기록</span></div>
+      <p id="connectionHint" class="muted">기존 기록을 먼저 확인하세요. 로그인한 뒤 연결하면 서버 기록과 합쳐져요. 무기 메모는 이 브라우저에만 보관해요.</p>
+      <div id="localSummary" class="local-summary"></div>
+      <div class="connection-actions"><button id="linkNotebooks" class="primary" type="button" disabled>기존 기록 불러오고 연결</button><button id="unlinkNotebooks" type="button" hidden>이 브라우저 연결 해제</button><span class="muted small">개인 로그인은 내 기록을, 방 비밀번호는 입장 권한을 확인해요.</span></div>
+    </section>
+    <section id="signedIn" hidden>
+      <div class="room-layout">
+        <aside class="panel room-sidebar" aria-label="내 수집방">
+          <div class="section-title"><h2>내 수집방</h2><span id="roomCount" class="muted">0개</span></div>
+          <div id="roomList" class="room-list"></div>
+          <details id="createDetails"><summary>＋ 새 방 만들기</summary><form id="createForm"><label>방 이름<input name="name" required maxlength="60" placeholder="우리 부대 수집 원정대" autocomplete="off"></label><label>입장 비밀번호<input name="password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" placeholder="8자 이상"></label><label>방에서 쓸 이름<input name="nickname" required maxlength="30" autocomplete="nickname" placeholder="캐릭터 이름"></label><fieldset><legend>이 방에 공유할 수첩</legend><div id="createSharing" class="sharing-options"></div></fieldset><button class="primary" type="submit">방 만들기</button></form></details>
+          <details id="joinDetails"><summary>↗ 초대받은 방 참여</summary><form id="joinForm"><label>방 링크 또는 코드<input id="joinCode" name="room" required autocomplete="off" spellcheck="false" placeholder="전달받은 링크를 붙여넣으세요"></label><label>입장 비밀번호<input name="password" type="password" required minlength="8" maxlength="128" autocomplete="off"></label><label>방에서 쓸 이름<input id="joinName" name="name" required maxlength="30" autocomplete="nickname" placeholder="캐릭터 이름"></label><fieldset><legend>이 방에 공유할 수첩</legend><div id="joinSharing" class="sharing-options"></div></fieldset><button class="primary" type="submit">방 참여하기</button></form></details>
+        </aside>
+        <div class="room-workspace">
+          <section id="emptyRoom" class="panel empty-room"><span class="empty-symbol" aria-hidden="true">◇</span><h2>함께 채울 첫 수집방</h2><p>새 방을 만들거나 초대받은 방에 참여하세요.<br>방을 선택하면 부대원들의 수집 현황이 보여요.</p><button type="button" id="startCreate">새 방 만들기</button></section>
+          <section id="activeRoom" class="panel active-room" hidden>
+            <div class="room-heading"><div><p class="eyebrow">PRIVATE COLLECTION ROOM</p><h2 id="roomTitle"></h2><p id="roomSubtitle" class="muted"></p></div><div class="button-row"><button id="copyRoomLink" type="button">초대 링크 복사</button><button id="leaveRoom" type="button">방 나가기</button></div></div>
+            <details class="sharing-details"><summary>내 이름과 공유할 수첩 설정</summary><form id="profileForm"><label>방에서 쓸 이름<input id="profileName" name="name" maxlength="30" required autocomplete="nickname"></label><fieldset><legend>이 방에 공유할 수첩</legend><div id="sharingOptions" class="sharing-options"></div></fieldset><p class="muted small">선택하지 않은 수첩은 다른 참여자가 볼 수 없어요. 내 개인 기록은 계속 동기화돼요.</p><button type="submit">공유 설정 저장</button></form></details>
+            <details id="managePanel" class="sharing-details" hidden><summary>방장 설정</summary><form id="manageForm"><label>방 이름<input id="manageName" name="name" maxlength="60" required></label><label>새 입장 비밀번호<input name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="변경할 때만 입력"></label><label class="check-label"><input id="roomLocked" name="locked" type="checkbox">새로운 참여 잠그기</label><p class="muted small">비밀번호를 바꿔도 기존 참여자는 유지돼요. 참여자 내보내기는 부대원 현황에서 할 수 있어요.</p><button type="submit">방 설정 저장</button></form></details>
+            <div class="room-tabs" role="group" aria-label="수집방 보기"><button type="button" data-view="together" aria-pressed="true">같이할 목표</button><button type="button" data-view="members" aria-pressed="false">부대원 현황</button><button type="button" data-view="mine" aria-pressed="false">내 수첩</button></div>
+            <div id="catalogControls" class="catalog-controls"><label>수첩<select id="bookSelect"></select></label><label class="search-label">항목·획득처 검색<input id="search" type="search" autocomplete="off" placeholder="이름이나 초성으로 검색"></label><label>보기<select id="itemFilter"><option value="common">나와 미수집이 겹치는 항목</option><option value="wanted">같이하고 싶은 항목</option><option value="missing">내 미수집 항목</option><option value="all">전체 항목</option></select></label></div>
+            <p id="resultSummary" class="result-summary" role="status"></p>
+            <div id="results" class="results"></div>
+            <nav id="pagination" class="pagination" aria-label="수집 항목 페이지" hidden><button id="prevPage" type="button">← 이전</button><span id="pageLabel"></span><button id="nextPage" type="button">다음 →</button></nav>
+          </section>
+        </div>
+      </div>
+    </section>
+    <p class="room-footnote">현재 연결 가능한 수첩: 청마법·무기·어부·카드·꼬마친구·마수도감. 탈것 수첩은 아직 제공하지 않아요.</p>
+    <noscript><p class="message error">수집방은 JavaScript가 필요합니다.</p></noscript>
+  </main>
+  <footer class="site-footer"><p>무료·비영리 팬 도구 · 광고·후원·유료 기능 없음</p><p>SQUARE ENIX 및 액토즈소프트가 제작하거나 승인한 공식 서비스가 아닙니다.</p><p>© SQUARE ENIX Published in Korea by Actoz Soft CO., LTD.</p><a href="../">파판14 도구함으로</a></footer>
+</body>
+</html>
