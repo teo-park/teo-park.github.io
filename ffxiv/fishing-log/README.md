@@ -1,5 +1,13 @@
 # 세계를 누비는 어부
 
+## 2026-10-30 데이터 갱신
+
+입질 시간과 미끼별 어획 비중은 Teamcraft 공개 집계 API에서 전체 배치를 다시 조회했습니다.
+
+한국어 게임 데이터 패치 7.57과 Teamcraft `c022ca5` 기준으로 어종·낚시 조건, 미끼 구매처, 지도·날씨표, 확장팩 정보를 함께 갱신했습니다. 도감은 어류 1,517종·작살 289종으로 기존과 같으며, 기존 아이템 ID·게임 순서와 수집 저장 키를 유지합니다. 빼궁메기·번개비늘·유목메기·이지러진 잔받침·포테우카·네라도·채광 하트가오리·로네크 폴립테루스의 조건 메타데이터·공략 링크에 원본 변경을 반영했습니다. 포테우카는 원본에 경로가 추가되어 기존 보완 경로 대신 원본을 사용합니다.
+
+새 게임 CSV의 숫자 헤더·자료형 행을 처리하고 필수 열·빈 도감 검증을 추가했습니다. 확장팩 생성기도 도감의 Teamcraft 리비전을 함께 사용합니다. 배포 파일의 URL 버전을 갱신하여 기존 방문자에게도 새 데이터를 요청합니다.
+
 ## 예보와 도감 페이지
 
 `/ffxiv/fishing-log/`는 낚시 예보, `/ffxiv/fishing-log/catalog/`는 물고기 도감입니다. 예보에는 진행도·도감 그리드를 만들지 않고, 도감에서는 예보 목록·PIP·예약 알림을 시작하지 않습니다. 상세 정보의 출현 5회, 준비 어종·입질·지도와 도감 목록형 행은 공통 기능을 사용합니다. 예보에서 장소별·미끼별 미수집을 열면 지역·어종·검색 조건을 도감 URL로 전달합니다.
@@ -20,7 +28,7 @@
 
 터주·수첩작 모두 **신생 / 창천 / 홍련 / 칠흑 / 효월 / 황금** 체크박스로 확장팩을 여러 개 선택합니다. 기본은 모두 선택이며, ‘전체 선택 / 전체 해제’를 제공합니다. 선택한 확장팩들의 어종을 합쳐서 보여주며 모두 해제하면 조회 결과를 비우고 선택을 안내합니다. PIP에도 같은 선택을 반영합니다. 기준은 지역·낚시 레벨이 아니라 **아이템의 최초 추가 패치에 연결된 확장팩**입니다. `expansion-data.js`는 Teamcraft `item-patch.json` → `patch-names.json`의 `ex`와 한국어 확장팩 이름을 연결한 별도 스냅샷이며, 어종·낚시 조건·수집 ID는 변경하지 않습니다. 1,806종 모두 매핑하며, 기존 패치 자료에 없던 포테우카·세 날 범고래 등 11종도 황금에 포함됩니다.
 
-출처 커밋: [Teamcraft 8e62945](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/commit/8e62945d81bd9ae57da661fbf0baaa3a7f1fbac4). `node scripts/update-expansions.mjs`로 재생성하고, 도감 데이터 갱신 시 함께 실행합니다. 새 어종의 확장팩 자료가 없으면 임의로 분류하지 않고 생성을 중단합니다. 원본과 동일한 기존 Teamcraft MIT 라이선스를 적용합니다.
+출처 커밋: [Teamcraft c022ca5](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/commit/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf). `node scripts/update-expansions.mjs`로 재생성하고, 도감 데이터 갱신 시 함께 실행합니다. 새 어종의 확장팩 자료가 없으면 임의로 분류하지 않고 생성을 중단합니다. 원본과 동일한 기존 Teamcraft MIT 라이선스를 적용합니다.
 
 수집 상태·확장팩은 지역·검색처럼 **목록과 PIP에만 적용**됩니다. 알림은 기존 모드·어종·관심 설정을 사용하며, 수집한 어종은 계속 제외합니다. 필터 선택은 현재 페이지에서 유지되며 재접속 시 기본값으로 돌아갑니다.
 
@@ -112,7 +120,7 @@
 
 반대로 ‘Teamcraft용 기록 복사’ 결과를 Teamcraft의 **CarbunclePlushy에서 가져오기**에 넣으면 됩니다. 해당 입력 형식은 `{"completed":[아이템 ID들]}`입니다. 양방향 모두 **추가 방식**이며 한 사이트에서 체크를 해제해도 다른 사이트의 기록을 지우지 않습니다. 계정 인증을 통한 자동 동기화는 구현하지 않았습니다.
 
-호환 형식은 고정 Teamcraft 리비전의 [fishing-log-tracker.component.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/pages/log-tracker/fishing-log-tracker/fishing-log-tracker.component.ts)의 내보내기와 `importFromCP`에서 확인했습니다.
+호환 형식은 고정 Teamcraft 리비전의 [fishing-log-tracker.component.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/apps/client/src/app/pages/log-tracker/fishing-log-tracker/fishing-log-tracker.component.ts)의 내보내기와 `importFromCP`에서 확인했습니다.
 
 ## 도감 캡처로 등록
 
@@ -172,7 +180,7 @@ Service Worker는 모바일 알림 표시와 알림 클릭 후 해당 물고기�
 
 ### 입질 시간 관측 자료
 
-2026-09-09부터 수집한 Teamcraft 공개 집계 스냅샷입니다. 포테우카 등 3종 경로 보완에 해당하는 배치는 2026-09-10 다시 조회했습니다. 기본 경로 2,732개 중 2,703개에 입질 시간이 있고, 다른 미끼를 사용한 관측도 보존하여 전체 14,253개 어종·낚시터·미끼 조합을 비교에 사용합니다. 클라이언트는 정적 파일만 읽으며 개인 낚시 기록을 요청하거나 전송하지 않습니다.
+2026-10-30(한국 시간)에 전체 배치를 다시 수집한 Teamcraft 공개 집계 스냅샷입니다. 기본 경로 2,732개 중 2,704개에 입질 시간이 있고, 다른 미끼를 사용한 관측도 보존하여 전체 14,297개 어종·낚시터·미끼 조합을 비교에 사용합니다. 클라이언트는 정적 파일만 읽으며 개인 낚시 기록을 요청하거나 전송하지 않습니다.
 
 Teamcraft의 미끼별 입질 통계와 동일하게 1초 초과·600초 미만의 정수 초 구간 중 관측 3건 이상인 구간만 사용합니다. 원자료가 버림한 초이므로 최댓값에는 1초를 더해 전체 구간을 감쌉니다. 예를 들어 10초부터 14초 구간의 관측은 ‘약 10–15초’로 표시합니다. 이는 최소·최대 관측 범위이며 신뢰구간이나 보장된 입질 제한 시간이 아닙니다. 밑밥·루어·날씨·패치별 관측을 분리하지 않으며, 통계가 없는 조합은 다른 미끼나 낚시터의 값을 가져오지 않고 ‘시간 미확인’으로 둡니다.
 
@@ -194,19 +202,19 @@ Teamcraft의 미끼별 입질 통계와 동일하게 1초 초과·600초 미만�
 
 ## 데이터 범위와 한계
 
-2026-09-08에 아래 리비전으로 생성한 스냅샷입니다. 한국 게임 데이터의 `FishParameter.IsInLog`와 `SpearfishingItem.IsVisible`로 도감 범위를 정합니다. `IsHidden`인 희귀 어종도 어류도감에 포함하며, 게임 행 순서대로 배치합니다.
+2026-10-30에 아래 리비전으로 갱신한 스냅샷입니다. 한국어 게임 목록은 패치 7.57 원본을 기준으로 합니다. 한국 게임 데이터의 `FishParameter.IsInLog`와 `SpearfishingItem.IsVisible`로 도감 범위를 정합니다. `IsHidden`인 희귀 어종도 어류도감에 포함하며, 게임 행 순서대로 배치합니다.
 
-**원본에서 조건이 없던 39종 중 일반 필드 어종 3종을 공개 관측으로 보완했습니다. 나머지 36종은 모두 먼바다 어종이며 별도의 항해일지에 미끼 자료가 있습니다.** 이 수첩의 Teamcraft 경로 자료에는 조건이 없어 상세보기에서 항해일지로 안내하고, 일반 필드의 시간·날씨 예보에 넣지 않습니다. 낚시터만 확인된 경우 미끼·날씨 등을 추정하지 않습니다. 공개 자료의 한국/글로벌 업데이트 차이로 게임 표시와 차이가 날 수 있습니다.
+**현재 원본에서 조건이 없는 38종 중 일반 필드 어종 2종을 공개 관측으로 보완했습니다. 나머지 36종은 모두 먼바다 어종이며 별도의 항해일지에 미끼 자료가 있습니다.** 이 수첩의 Teamcraft 경로 자료에는 조건이 없어 상세보기에서 항해일지로 안내하고, 일반 필드의 시간·날씨 예보에 넣지 않습니다. 낚시터만 확인된 경우 미끼·날씨 등을 추정하지 않습니다. 공개 자료의 한국/글로벌 업데이트 차이로 게임 표시와 차이가 날 수 있습니다.
 
 표시된 미끼는 확인된 경로이며 가능한 모든 미끼의 목록이나 실제 입질 성공률 순위가 아닙니다. 일반 물고기의 추천은 아래 어획 비중 보정을 적용하며, 특수 조건 경로는 원자료를 유지합니다. 상세 조건의 시간은 에오르제아 시간(ET), 낚시 계획의 예보 날짜는 한국 시간(KST)입니다. 지역 날씨는 공개된 결정적 계산식으로 예측하며 게임 서버나 캐릭터의 능력치·직감 상태를 읽지 않습니다.
 
 ## 출처 및 권리
 
-- 낚시 조건·미끼·낚시터·어영·속도·조건 물고기: [FFXIV Teamcraft](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/tree/ceac70405b154d268bfc3bf6cda2776ac048a6d4/libs/data/src/lib/json). 리비전 `ceac70405b154d268bfc3bf6cda2776ac048a6d4`. [MIT 저작권·이용 허락 고지](./licenses/Teamcraft-MIT.txt)를 함께 배포합니다.
+- 낚시 조건·미끼·낚시터·어영·속도·조건 물고기: [FFXIV Teamcraft](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/tree/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/libs/data/src/lib/json). 리비전 `c022ca5385ae41ec0d747599ef16ce74e4fbfdcf`. [MIT 저작권·이용 허락 고지](./licenses/Teamcraft-MIT.txt)를 함께 배포합니다.
 - 지도 이미지: © SQUARE ENIX, 제공 [XIVAPI 지도 API](https://v2.xivapi.com/docs/guides/assets/#compose-maps). 지도 65개의 이미지 경로·배율은 같은 Teamcraft 리비전의 `maps.json`에서 가져옵니다. `node scripts/update-maps.mjs --refresh --check-images`로 메타데이터를 갱신하고 이미지 응답을 검증합니다. 인게임 좌표를 `(좌표 - 1) × 배율 / 41`로 지도 이미지의 백분율 좌표에 변환합니다. 좌표에는 이미 월드 오프셋이 반영되어 있으므로 다시 더하지 않습니다. 핀은 낚시터 대표 위치이며 어종별 정확한 캐스팅 지점이나 이동 경로를 뜻하지 않습니다.
-- 입질 관측 통계: [Teamcraft 미끼별 입질 쿼리](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/pages/db/service/fish-data.gql.ts)의 `BiteTimesPerFishPerSpotPerBaitQuery`, [공개 집계 API](https://gubal.ffxivteamcraft.com/graphql). 개인 기록이 아닌 어종·낚시터·미끼·초별 집계만 수집하며 수집 시각을 `bite-times.js`에 기록합니다. 같은 MIT 고지를 적용합니다.
-- 에오르제아 시간·날씨 계산 및 지역 날씨표: 같은 Teamcraft 리비전의 [weather.service.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/core/eorzea/weather.service.ts), [weather-index.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/core/data/sources/weather-index.ts), [map-ids.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/core/data/sources/map-ids.ts). ET 하루 = 실제 4,200초, ET 8시간마다 날씨 전환. `forecast.js`는 UTC 밀리초를 받아 독립적으로 구간 교집합을 계산합니다.
-- 한국어 명칭·게임 도감 목록과 정렬: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko/tree/9431b6ce34e0f5b79686f71b585769819f81ae2b/csv), 리비전 `9431b6ce34e0f5b79686f71b585769819f81ae2b`.
+- 입질 관측 통계: [Teamcraft 미끼별 입질 쿼리](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/apps/client/src/app/pages/db/service/fish-data.gql.ts)의 `BiteTimesPerFishPerSpotPerBaitQuery`, [공개 집계 API](https://gubal.ffxivteamcraft.com/graphql). 개인 기록이 아닌 어종·낚시터·미끼·초별 집계만 수집하며 수집 시각을 `bite-times.js`에 기록합니다. 같은 MIT 고지를 적용합니다.
+- 에오르제아 시간·날씨 계산 및 지역 날씨표: 같은 Teamcraft 리비전의 [weather.service.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/apps/client/src/app/core/eorzea/weather.service.ts), [weather-index.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/apps/client/src/app/core/data/sources/weather-index.ts), [map-ids.ts](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/apps/client/src/app/core/data/sources/map-ids.ts). ET 하루 = 실제 4,200초, ET 8시간마다 날씨 전환. `forecast.js`는 UTC 밀리초를 받아 독립적으로 구간 교집합을 계산합니다.
+- 한국어 명칭·게임 도감 목록과 정렬: [한국어 게임 데이터](https://github.com/Ra-Workspace/ffxiv-datamining-ko/tree/7a82b4b468a09a364b2c603447b2db0bed8a8a06/csv), 리비전 `7a82b4b468a09a364b2c603447b2db0bed8a8a06`.
 - 게임 아이콘: [XIVAPI](https://v2.xivapi.com/). 아이콘 요청에는 이미지 경로만 사용하며 수집 상태·캡처는 전송하지 않습니다.
 - 공식 안내: [한국 공식 어부 가이드](https://guide.ff14.co.kr/job/Fisher/31?type=L).
 - 글꼴: [네이버 나눔스퀘어라운드](https://hangeul.naver.com/font/nanum), [SIL Open Font License](../fonts/nanum-square-round/OFL.txt).
@@ -229,7 +237,7 @@ node scripts/update-data.mjs
 node scripts/update-weather.mjs
 ```
 
-갱신 스크립트는 명시된 고정 리비전에서 공개 자료를 가져와 `data.js`를 생성하고 캐시를 저장소의 `.cache/fishing-log/`에 둡니다. `--refresh`는 같은 리비전의 파일을 다시 받습니다. 실제 새 데이터로 갱신하려면 리비전을 검토·수정해야 합니다.
+갱신 스크립트는 명시된 고정 리비전에서 공개 자료를 가져와 `data.js`를 생성하고 캐시를 저장소의 `.cache/fishing-log/<Teamcraft 리비전>-<한국어 리비전>/`에 둡니다. 리비전별 캐시를 분리하여 과거 원본이 새 스냅샷에 섞이지 않게 합니다. `--refresh`는 같은 리비전의 파일을 다시 받습니다. 실제 새 데이터로 갱신하려면 리비전을 검토·수정해야 합니다.
 
 테스트는 도감 범위·정렬, 같은 장소의 생미끼 경로, 알 수 없는 조건, Teamcraft/백업 호환, 저장 실패·실행 취소·다른 탭의 변경, 10×10 렌더링, 캡처 검토·중복 페이지·마지막 빈 칸·붙여넣기·취소를 확인합니다. 개인 샘플은 저장소에 포함하지 않으며 `FISH_SCAN_FIXTURE` 환경 변수로 로컬 RGBA 픽셀과 정답 메타데이터가 있는 JSON 경로를 주면 별도 인식 검증도 실행합니다.
 
@@ -244,14 +252,14 @@ node scripts/update-weather.mjs
 
 `bait-catches.js`는 2026-09-10에 가져온 Teamcraft 공개 집계 스냅샷입니다. 낚시터 333곳, 낚시터·미끼 조합 3,777개의 전체 어획 수와 어종별 어획 수를 담습니다. 많이 사용한 미끼에 목표 어획 건수도 몰리는 편향을 줄이기 위해 **목표 어획 수 / 동일 낚시터·동일 미끼의 전체 어획 수**를 비교합니다. 도감에 없는 어종도 전체 어획 수에 포함합니다.
 
-- 자료: [Teamcraft 미끼별 어획 쿼리](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/ceac70405b154d268bfc3bf6cda2776ac048a6d4/apps/client/src/app/pages/db/service/fish-data.gql.ts)의 `baits_per_fish_per_spot`, [공개 집계 API](https://gubal.ffxivteamcraft.com/graphql). 기존 [MIT 고지](./licenses/Teamcraft-MIT.txt)를 함께 제공합니다. 개인 낚시 기록·계정 정보를 요청하지 않습니다.
+- 자료: [Teamcraft 미끼별 어획 쿼리](https://github.com/ffxiv-teamcraft/ffxiv-teamcraft/blob/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/apps/client/src/app/pages/db/service/fish-data.gql.ts)의 `baits_per_fish_per_spot`, [공개 집계 API](https://gubal.ffxivteamcraft.com/graphql). 기존 [MIT 고지](./licenses/Teamcraft-MIT.txt)를 함께 제공합니다. 개인 낚시 기록·계정 정보를 요청하지 않습니다.
 - 범위: `aLure=0`, `mLure=0`인 기록만 사용합니다. 루어 횟수 미확인·사용 기록, 음수 아이템 ID인 놓친 어획, 생미끼 물고기 ID는 제외합니다. 입질 시간 구간 필터는 적용하지 않으므로 **입질 표본 수와 어획 건수가 다릅니다**. 각 배치의 실제 수집 시각은 파일에 보존합니다.
 - 점수: 어획 비중의 [Wilson 구간](https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm) 하한(`z=1.96`)을 보수적인 비교 점수로 씁니다. 전체 100건·목표 10건 이상인 미끼를 우선합니다. 기존 미끼를 포함해 최소 두 미끼가 기준을 충족해야 자동 변경을 검토합니다.
 - 변경: 최고 점수 미끼의 하한이 기존 미끼의 상한보다 높고, 관측 비중 차이가 2%p 이상일 때만 추천을 변경합니다. 차이가 불명확하거나 표본이 적으면 기존 Teamcraft 미끼를 유지합니다. 이 문턱은 잦은 변경을 줄이기 위한 도구의 정책이며 게임의 공식 계산식이나 최적 효율 보장이 아닙니다.
 - 보호 범위: 터주·전설어·시간·날씨·직감·갈고리 낚시·루어 기술·먼바다 시간 조건·작살·검증되지 않은 경로는 자동 변경하지 않습니다. 생미끼 경로는 중간 어종을 그대로 유지하고, 조건 없는 첫 물고기의 시작 미끼만 보정할 수 있습니다. 같은 낚시터에서 직접 낚시와 생미끼 경로가 함께 있는 어종도 원자료를 유지합니다.
 - 반영 범위: 목록·미끼 필터·미끼별 묶음·준비 목록·첫 생미끼·입질 시간·비교 어종이 동일한 추천 경로를 사용합니다. 원자료 `data.js`는 변경하지 않으며 기존 미끼 ID도 보존합니다. 조건의 ‘미끼 추천 근거’에서 미끼별 분자·분모·관측 비중·보정 점수를 확인할 수 있습니다.
 
-**실제 입질 확률이나 시간당 효율은 아닙니다.** 전체 시도 수가 아닌 성공한 어획의 구성비입니다. 특정 입질을 취소한 기록, 교환 방생·한결같은 마음, 시간·날씨 선택, 능력치·패치 차이 등의 편향은 집계만으로 제거할 수 없습니다. Wilson 점수는 적은 표본을 과대평가하지 않기 위한 장치이며, 이 편향을 없애거나 실제 성공률의 신뢰구간을 보장하지 않습니다. 표범참바리의 경우 고등어 살 208/988(21.1%), 새우 떡밥 2,953/20,333(14.5%)으로 고등어 살을 유지합니다. 기존 178건·2,675건은 각각 별도 입질 시간 표본입니다.
+**실제 입질 확률이나 시간당 효율은 아닙니다.** 전체 시도 수가 아닌 성공한 어획의 구성비입니다. 특정 입질을 취소한 기록, 교환 방생·한결같은 마음, 시간·날씨 선택, 능력치·패치 차이 등의 편향은 집계만으로 제거할 수 없습니다. Wilson 점수는 적은 표본을 과대평가하지 않기 위한 장치이며, 이 편향을 없애거나 실제 성공률의 신뢰구간을 보장하지 않습니다. 표범참바리의 경우 고등어 살 209/1,000(20.9%), 새우 떡밥 2,963/20,436(14.5%)으로 고등어 살을 유지합니다. 입질 시간 표본은 별도 집계이므로 위 어획 건수와 다릅니다.
 
 갱신: 저장소 루트에서 `node ffxiv/fishing-log/scripts/update-bait-catches.mjs --refresh`. 캐시는 `.cache/fishing-log/bait-catches/`에 저장합니다. 모든 배치 수집에 성공한 뒤 배포 파일을 교체하며, 도감과 Teamcraft 리비전이 맞지 않거나 파일을 불러오지 못하면 보정을 적용하지 않습니다.
 

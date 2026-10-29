@@ -1,5 +1,14 @@
 const test=require('node:test'),assert=require('node:assert/strict'),E=require('../engine.js'),{D,KEY,memory,open}=require('./helpers.cjs');
 const known=new Set(D.fishes.map(f=>f.id));
+
+test('all bundled fishing snapshots use the catalog revision',()=>{
+ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),context={window:{}};
+ for(const file of ['bait-data.js','bait-catches.js','bite-times.js','map-data.js','expansion-data.js'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),context);
+ for(const name of ['FISHING_BAITS','FISHING_MAPS','FISHING_EXPANSIONS'])assert.equal(context.window[name].revision,D.revisions.teamcraft,name);
+ for(const name of ['FISHING_BAIT_CATCHES','FISHING_BITE_TIMES'])assert.equal(context.window[name].sourceRevision,D.revisions.teamcraft,name);
+ assert.equal(require('../weather-data.js').revision,D.revisions.teamcraft);
+ assert.deepEqual(Object.keys(context.window.FISHING_EXPANSIONS.byFish).map(Number).sort((a,b)=>a-b),[...known].sort((a,b)=>a-b));
+});
 test('layout icons keep fish IDs, checks, pagination and the spear book intact',()=>{
  const p=open();try{
   p.$('#paginationTop [aria-label="2페이지"]').click();p.$('#fishGrid [data-caught]').click();const before=p.storage.getItem(KEY),node=p.$('#fishGrid [data-caught]'),first=node.dataset.caught;

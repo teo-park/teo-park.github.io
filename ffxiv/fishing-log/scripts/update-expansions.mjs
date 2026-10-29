@@ -1,7 +1,9 @@
 // Expansion membership only; preserve the notebook's Korean fish list and routes.
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
-const root=new URL('../',import.meta.url),revision='8e62945d81bd9ae57da661fbf0baaa3a7f1fbac4';
+const root=new URL('../',import.meta.url);
+const context={window:{}};vm.runInNewContext(await fs.readFile(new URL('data.js',root),'utf8'),context);
+const revision=context.window.FISHING_DATA.revisions.teamcraft;
 const cache=new URL(`../../../.cache/fishing-expansions/${revision}/`,import.meta.url);
 const source=name=>`https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/${revision}/libs/data/src/lib/json/${name}`;
 async function read(name){
@@ -12,7 +14,6 @@ async function read(name){
   const text=await response.text();await fs.mkdir(cache,{recursive:true});await fs.writeFile(file,text);return JSON.parse(text);
 }
 const [items,patches,versions]=await Promise.all(['item-patch.json','patch-names.json','ko/ko-ex-versions.json'].map(read));
-const context={window:{}};vm.runInNewContext(await fs.readFile(new URL('data.js',root),'utf8'),context);
 const labels=Object.fromEntries(Object.entries(versions).map(([id,name])=>[id,name.ko]));
 const byFish={};
 for(const fish of context.window.FISHING_DATA.fishes){

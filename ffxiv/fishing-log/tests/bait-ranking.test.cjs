@@ -34,10 +34,10 @@ test('only unconstrained direct routes change; protect conditions and preserve s
 test('Pantherscale Grouper retains mackerel after comparing full catch shares',()=>{
  const fish=P.fishes.find(f=>f.id===36423),c=fish.routes[0].baitChoice;
  assert.equal(c.selected,36593);assert.equal(c.status,'supported');
- assert.equal(c.candidates[0].hits,208);assert.equal(c.candidates[0].total,988);
- assert.equal(c.candidates[1].id,36592);assert.equal(c.candidates[1].hits,2953);assert.equal(c.candidates[1].total,20333);
+ assert.equal(c.candidates[0].hits,209);assert.equal(c.candidates[0].total,1000);
+ assert.equal(c.candidates[1].id,36592);assert.equal(c.candidates[1].hits,2963);assert.equal(c.candidates[1].total,20436);
  assert.ok(c.candidates[0].rate>c.candidates[1].rate);
- assert.equal(ctx.window.FISHING_BITE_TIMES.ranges['36423|rod:261|36593'].samples,178);
+ assert.ok(ctx.window.FISHING_BITE_TIMES.ranges['36423|rod:261|36593'].samples>=178);
 });
 test('changed recommendation stays consistent in paths, filters, bite times and alternate ranking',()=>{
  const m=E.create(P,ctx.window.FISHING_BITE_TIMES),fish=m.byId.get(4776),r=fish.routes.find(r=>r.spotKey==='rod:35');
@@ -50,9 +50,9 @@ test('changed recommendation stays consistent in paths, filters, bite times and 
 test('planner shows normalized evidence and keeps it open when refreshed without changing collection',()=>{
  const p=open({plan:true});try{
   const before=p.storage.getItem(KEY);p.$('#showPlanner').click();p.$('#planCollectionMode').click();p.$('#planSearch').value='표범참바리';p.$('#planRefresh').click();
-  assert.equal(p.$('.plan-bait [data-bait-detail]').dataset.baitDetail,'36593');assert.match(p.$('.plan-bait').textContent,/입질 178건/);assert.equal(p.$('.bait-choice-badge').textContent,'관측 보정');
+  assert.equal(p.$('.plan-bait [data-bait-detail]').dataset.baitDetail,'36593');assert.ok(p.$('.plan-bait').textContent.includes('입질 '+ctx.window.FISHING_BITE_TIMES.ranges['36423|rod:261|36593'].samples.toLocaleString()+'건'));assert.equal(p.$('.bait-choice-badge').textContent,'관측 보정');
   p.$('[data-plan-detail]').click();const evidence=p.$('.bait-ranking');assert.ok(evidence);assert.equal(evidence.open,false);evidence.open=true;
-  assert.match(evidence.querySelector('.is-selected').textContent,/208 \/ 988.*21.1%.*18.6%/);assert.match(evidence.textContent,/2,953 \/ 20,333.*14.5%/);assert.match(evidence.textContent,/실제 성공률은 아닙니다/);
+  assert.match(evidence.querySelector('.is-selected').textContent,/209 \/ 1,000.*20.9%.*18.5%/);assert.match(evidence.textContent,/2,963 \/ 20,436.*14.5%/);assert.match(evidence.textContent,/실제 성공률은 아닙니다/);
   p.$('#planRefresh').click();assert.equal(p.$('.bait-ranking'),evidence);assert.equal(evidence.open,true);assert.equal(p.storage.getItem(KEY),before);
   p.$('#planSearch').value='폼폼폼';p.$('#planRefresh').click();p.$('.plan-card [data-plan-detail]').click();
   const r=P.fishes.find(f=>f.id===12758).routes[0];assert.equal(r.catalogBait,29717);assert.notEqual(r.bait,r.catalogBait);

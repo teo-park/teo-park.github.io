@@ -1,11 +1,11 @@
 /* Teamcraft item introduction patches → expansion IDs. See README.md. */
 window.FISHING_EXPANSIONS={
   "schemaVersion": 1,
-  "revision": "8e62945d81bd9ae57da661fbf0baaa3a7f1fbac4",
+  "revision": "c022ca5385ae41ec0d747599ef16ce74e4fbfdcf",
   "sources": [
-    "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/8e62945d81bd9ae57da661fbf0baaa3a7f1fbac4/libs/data/src/lib/json/item-patch.json",
-    "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/8e62945d81bd9ae57da661fbf0baaa3a7f1fbac4/libs/data/src/lib/json/patch-names.json",
-    "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/8e62945d81bd9ae57da661fbf0baaa3a7f1fbac4/libs/data/src/lib/json/ko/ko-ex-versions.json"
+    "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/libs/data/src/lib/json/item-patch.json",
+    "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/libs/data/src/lib/json/patch-names.json",
+    "https://raw.githubusercontent.com/ffxiv-teamcraft/ffxiv-teamcraft/c022ca5385ae41ec0d747599ef16ce74e4fbfdcf/libs/data/src/lib/json/ko/ko-ex-versions.json"
   ],
   "labels": {
     "0": "신생 에오르제아",
