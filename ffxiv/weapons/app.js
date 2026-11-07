@@ -79,11 +79,8 @@ function tableEntry(t){
   : `<label class="relic-stage" for="stage-${t.id}"><select id="stage-${t.id}" data-stage="${t.id}" aria-label="${esc(name)} 완료한 단계" title="${mixed?'검·방패의 기존 단계가 다릅니다. 선택하면 함께 변경합니다.':step?`${step}. ${esc(t.items[step-1].stage)}`:'미시작'}">${mixed?'<option value="mixed" selected disabled>단계 다름</option>':''}<option value="0"${!step?' selected':''}>미시작</option>${t.items.map((item,n)=>`<option value="${item.id}"${!mixed&&step===n+1?' selected':''}>${esc(item.stage)}${n===t.items.length-1?' ✓':''}</option>`).join('')}</select></label>`;
  let pairProgress='';
  if(paired&&!single&&!cycling){
-  const counts=mixed?tracks.map(track=>{
-   const slot=track.slot==='shield'?'방패':'검';
-   return `<span>${slot} ${stageIndex(track,getRecord(track.id))}/${track.items.length}</span>`;
-  }).join(' '):`${step}/${t.items.length}`;
-  pairProgress=`<span class="relic-pair-progress${mixed?' is-mixed':''}">${counts}</span>`;
+  const sharedStep=Math.min(...tracks.map(track=>stageIndex(track,getRecord(track.id))));
+  pairProgress=`<span class="relic-pair-progress">${sharedStep}/${t.items.length}</span>`;
  }
  const detail=paired?`<div class="relic-pair-icons">${icons}${pairProgress}</div>`:`<button class="relic-detail" data-detail="${t.id}" aria-label="${esc(name+' · '+current.name)} 단계·획득처" title="${esc(current.name)} · 단계·획득처"><img loading="lazy" src="${esc(current.icon)}" alt=""><span>${single||cycling?'획득처':step?`${step}/${t.items.length}`:'단계'}</span></button>`;
  return `<div class="relic-entry ${status}${paired?' relic-pair':''}" data-track="${t.id}">${control}<div class="relic-cell-actions">${detail}<button class="relic-target" data-target="${t.id}" aria-pressed="${target}" aria-label="${esc(name)} 관심 무기" title="관심 무기">${target?'★':'☆'}</button></div></div>`;

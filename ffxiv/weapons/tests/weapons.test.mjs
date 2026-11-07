@@ -193,7 +193,7 @@ test('enhanced cycle save failure keeps the current state and collection',()=>ha
 
 test('legacy unequal relic stages remain untouched until a shared edit, including edits from shield details',()=>harness(({d,click,change,saved})=>{
  const before=saved();assert.equal(d.querySelector('[data-stage="'+pld.id+'"]').value,'mixed');
- assert.equal(d.querySelector(`[data-track="${pld.id}"] .relic-pair-progress`).textContent,'검 8/8 방패 3/8');
+ assert.equal(d.querySelector(`[data-track="${pld.id}"] .relic-pair-progress`).textContent,'3/8');
  assert.equal(d.getElementById('completeCount').textContent,'1');
  click('[data-detail="'+shield.id+'"]');assert.match(d.getElementById('detailTitle').textContent,/방패/);assert.match(d.getElementById('detailBody').textContent,/검·방패에 함께 적용/);
  assert.equal(d.querySelector('[data-set-stage="'+shield.items[2].id+'"]').disabled,false);assert.deepEqual(saved(),before);

@@ -40,7 +40,6 @@
 .relic-pair-icons .relic-item-icon{display:grid;place-items:center;flex:none;width:32px;min-height:28px;padding:2px}
 .relic-pair-progress{color:var(--ff-muted);font-size:12px;white-space:nowrap}
 .relic-entry.complete .relic-pair-progress{color:#b6e9cc}
-.relic-pair-progress.is-mixed{display:flex;flex-wrap:wrap;gap:0 5px;flex-basis:100%}
 .relic-item-icon img{display:block;width:24px;height:24px;object-fit:contain}
 .relic-pair .collect-toggle[aria-pressed=mixed]{color:var(--ff-gold);border-color:#aa8b51;background:#332f23}
 .relic-pair .collect-toggle[aria-pressed=mixed] svg{opacity:.5}
