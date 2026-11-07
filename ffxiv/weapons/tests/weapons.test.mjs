@@ -63,9 +63,12 @@ async function harness(tester,stored=null,prefs=null){
  try{await tester({w,d,click,change,saved});}finally{dom.window.close();}
 }
 test('UI stage changes save sword and shield atomically and undo restores exactly',()=>harness(({d,change,click,saved})=>{
+ const progress=()=>d.querySelector(`[data-track="${pld.id}"] .relic-pair-progress`).textContent;
+ assert.equal(progress(),'0/8');
  change(d.querySelector(`[data-stage="${pld.id}"]`),pld.items[5].id);
  assert.equal(saved().records[pld.id].itemId,pld.items[5].id);assert.equal(saved().records[shield.id].itemId,shield.items[5].id);assert.equal(d.getElementById('progressCount').textContent,'2');
- click('#undo');assert.deepEqual(saved().records,{});
+ assert.equal(progress(),'6/8');
+ click('#undo');assert.deepEqual(saved().records,{});assert.equal(progress(),'0/8');
 }));
 test('UI existing records restore, stage detail shows previous steps, notes are escaped',()=>harness(({d,click,change,saved})=>{
  assert.equal(d.getElementById('completeCount').textContent,'1');click(`[data-detail="${pld.id}"]`);assert.equal(d.querySelectorAll('.stage-list li.done').length,8);
@@ -96,6 +99,7 @@ test('paired table changes preserve scroll/focus and keep other series independe
  const input=d.querySelector(`[data-stage="${pld.id}"]`);input.focus();change(input,pld.items.at(-1).id);
  assert.equal(d.activeElement.id,input.id);assert.equal(d.getElementById('relicTableScroll').scrollLeft,260);
  assert.ok(d.querySelector(`[data-track="${pld.id}"]`).classList.contains('complete'));
+ assert.equal(d.querySelector(`[data-track="${pld.id}"] .relic-pair-progress`).textContent,'8/8');
  assert.equal(d.querySelector(`[data-stage="${shield.id}"]`),null);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);assert.equal(saved().records[shield.id].itemId,shield.items.at(-1).id);
  const anima=t('anima.PLD.weapon');change(d.querySelector(`[data-stage="${anima.id}"]`),anima.items[1].id);assert.equal(saved().records[pld.id].itemId,pld.items.at(-1).id);click('#undo');assert.equal(saved().records[anima.id],undefined);
 }));
@@ -189,6 +193,7 @@ test('enhanced cycle save failure keeps the current state and collection',()=>ha
 
 test('legacy unequal relic stages remain untouched until a shared edit, including edits from shield details',()=>harness(({d,click,change,saved})=>{
  const before=saved();assert.equal(d.querySelector('[data-stage="'+pld.id+'"]').value,'mixed');
+ assert.equal(d.querySelector(`[data-track="${pld.id}"] .relic-pair-progress`).textContent,'검 8/8 방패 3/8');
  assert.equal(d.getElementById('completeCount').textContent,'1');
  click('[data-detail="'+shield.id+'"]');assert.match(d.getElementById('detailTitle').textContent,/방패/);assert.match(d.getElementById('detailBody').textContent,/검·방패에 함께 적용/);
  assert.equal(d.querySelector('[data-set-stage="'+shield.items[2].id+'"]').disabled,false);assert.deepEqual(saved(),before);
